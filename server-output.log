@@ -1,0 +1,260 @@
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/server/index.js
+
+AuthRouter carregado - rotas disponíveis:
+- POST /register
+- POST /login
+- POST /test
+- GET /user (verificação de autenticação)
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+Registrando authRouter em /api/auth
+Registrando userRouter em /api/users
+Registrando adminRoutes em /api/admin
+Registrando partnerRouter em /api/partners
+Registrando doctorRouter em /api/doctors
+Registrando notificationRouter em /api/notifications
+Registrando rotas públicas de médicos em /api/doctors
+Registrando rotas públicas de serviços em /api/services
+🔍 Tentando servir arquivos estáticos de: /Users/lucascanova/Documents/CN Vidas - Domingo 08-06/CNVidas-updated/client
+🔍 Ou de: /Users/lucascanova/Documents/CN Vidas - Domingo 08-06/CNVidas-updated/dist/client
+✅ Usando diretório public compilado
+7:25:04 PM [server] Servidor rodando na porta 3000
+Conexão com o banco de dados testada com sucesso: 2025-06-09 22:25:05.045787+00
+Session table checked/created successfully
+Configuração de email carregada. Serviço de email disponível.
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+=== ROTA /api/user INTERCEPTADA ===
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/services
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/partners
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+=== ROTA /api/user INTERCEPTADA ===
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/claims
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/pending-claims
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Notifications /unread-count - Buscando contagem para usuário ID: 1
+✅ Notifications /unread-count - Contagem: 2
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/partners
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/services
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/partners
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/partners
+🔍 Cookies: {
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+=== ROTA /api/user INTERCEPTADA ===
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/claims
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/pending-claims
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Notifications /unread-count - Buscando contagem para usuário ID: 1
+✅ Notifications /unread-count - Contagem: 2
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/partners
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/services
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/partners
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+=== ROTA /api/user INTERCEPTADA ===
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/claims
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/pending-claims
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Notifications /unread-count - Buscando contagem para usuário ID: 1
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+✅ Notifications /unread-count - Contagem: 2
+🔍 Middleware JWT Global - Processando: /api/admin/partners
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/services
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/partners
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/claims
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔍 Middleware JWT Global - Processando: /api/admin/pending-claims
+🔍 Cookies: {
+  __stripe_mid: 'df752e04-e874-4d02-9712-69e002bc286ba50745',
+  __stripe_sid: 'e37d4ad1-1925-487d-bad1-be67f7634bdce170e8',
+  auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoibHVjYXMuY2Fub3ZhQGljbG91ZC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk1MDMxOTQsImV4cCI6MTc1MDEwNzk5NH0.384clA7b_o-j2UUX1JMJtTNQEmItRm4e0mvwXBhAJP4'
+}
+🔍 Headers auth: undefined
+🔍 Header x-auth-token: undefined
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
+🔐 JWT: Usuário lucas.canova@icloud.com autenticado via cookie
