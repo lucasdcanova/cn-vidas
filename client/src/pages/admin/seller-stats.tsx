@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
@@ -6,7 +6,7 @@ import AdminLayout from '@/components/layouts/admin-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, UserCheck, TrendingUp } from 'lucide-react';
+import { Loader2, UserCheck, TrendingUp, CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -16,16 +16,39 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface PlanStat {
   plan: string;
   count: number;
 }
 
+interface UserDetail {
+  id: number;
+  name: string;
+  email: string;
+  plan: string;
+  status: string;
+  createdAt: string;
+}
+
 interface SellerStat {
   sellerName: string;
   totalPlans: number;
+  activePlans: number;
+  cancelledPlans: number;
+  inactivePlans: number;
   plansByType: PlanStat[];
+  users: UserDetail[];
 }
 
 const planLabels: Record<string, string> = {
@@ -49,10 +72,18 @@ const planColors: Record<string, string> = {
 };
 
 const SellerStats: React.FC = () => {
+  const [selectedSeller, setSelectedSeller] = useState<SellerStat | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   const { data: sellers, isLoading } = useQuery<SellerStat[]>({
     queryKey: ['/api/admin/sellers'],
     queryFn: () => apiRequest('GET', '/api/admin/sellers').then(res => res.json()),
   });
+
+  const handleSellerClick = (seller: SellerStat) => {
+    setSelectedSeller(seller);
+    setIsModalOpen(true);
+  };
 
   if (isLoading) {
     return (
@@ -140,37 +171,62 @@ const SellerStats: React.FC = () => {
             
             <TabsContent value="table">
               <Table>
-                <TableCaption>Lista de vendedores e número de planos vendidos</TableCaption>
+                <TableCaption>Lista de vendedores e número de planos vendidos (Clique no nome para ver detalhes)</TableCaption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Vendedor</TableHead>
-                    <TableHead>Total de Planos</TableHead>
-                    <TableHead>Básico</TableHead>
-                    <TableHead>Premium</TableHead>
-                    <TableHead>Ultra</TableHead>
-                    <TableHead>Básico Família</TableHead>
-                    <TableHead>Premium Família</TableHead>
-                    <TableHead>Ultra Família</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead className="text-center">Ativos</TableHead>
+                    <TableHead className="text-center">Cancelados</TableHead>
+                    <TableHead className="text-center">Inativos</TableHead>
+                    <TableHead>Distribuição por Plano</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {sellers?.map((seller) => {
-                    // Criar um objeto com as contagens para cada plano
-                    const planCounts: Record<string, number> = {};
-                    seller.plansByType.forEach(plan => {
-                      planCounts[plan.plan] = plan.count;
-                    });
-                    
                     return (
                       <TableRow key={seller.sellerName}>
-                        <TableCell className="font-medium">{seller.sellerName}</TableCell>
+                        <TableCell className="font-medium">
+                          <Button
+                            variant="link"
+                            className="p-0 h-auto font-medium text-left"
+                            onClick={() => handleSellerClick(seller)}
+                          >
+                            {seller.sellerName}
+                          </Button>
+                        </TableCell>
                         <TableCell className="font-bold">{seller.totalPlans}</TableCell>
-                        <TableCell>{planCounts['basic'] || 0}</TableCell>
-                        <TableCell>{planCounts['premium'] || 0}</TableCell>
-                        <TableCell>{planCounts['ultra'] || 0}</TableCell>
-                        <TableCell>{planCounts['basic_family'] || 0}</TableCell>
-                        <TableCell>{planCounts['premium_family'] || 0}</TableCell>
-                        <TableCell>{planCounts['ultra_family'] || 0}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span className="text-green-600 font-medium">{seller.activePlans}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <XCircle className="h-4 w-4 text-red-500" />
+                            <span className="text-red-600 font-medium">{seller.cancelledPlans}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <MinusCircle className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-600 font-medium">{seller.inactivePlans}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {seller.plansByType.map((plan) => (
+                              <Badge 
+                                key={plan.plan} 
+                                variant="outline"
+                                className={`text-xs ${planColors[plan.plan]}`}
+                              >
+                                {planLabels[plan.plan]}: {plan.count}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -181,7 +237,11 @@ const SellerStats: React.FC = () => {
             <TabsContent value="details">
               <div className="space-y-6">
                 {sellers?.map((seller) => (
-                  <Card key={seller.sellerName} className="border-l-4 border-l-primary">
+                  <Card 
+                    key={seller.sellerName} 
+                    className="border-l-4 border-l-primary cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => handleSellerClick(seller)}
+                  >
                     <CardHeader className="pb-2">
                       <CardTitle>{seller.sellerName}</CardTitle>
                       <CardDescription>
@@ -189,6 +249,20 @@ const SellerStats: React.FC = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="text-center">
+                          <p className="text-sm text-muted-foreground">Ativos</p>
+                          <p className="text-lg font-bold text-green-600">{seller.activePlans}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-muted-foreground">Cancelados</p>
+                          <p className="text-lg font-bold text-red-600">{seller.cancelledPlans}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-muted-foreground">Inativos</p>
+                          <p className="text-lg font-bold text-gray-600">{seller.inactivePlans}</p>
+                        </div>
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         {seller.plansByType.map((plan) => (
                           <Badge 
@@ -199,6 +273,9 @@ const SellerStats: React.FC = () => {
                           </Badge>
                         ))}
                       </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Clique para ver detalhes dos clientes
+                      </p>
                     </CardContent>
                   </Card>
                 ))}
@@ -213,6 +290,102 @@ const SellerStats: React.FC = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Modal para exibir usuários do vendedor */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Clientes de {selectedSeller?.sellerName}</DialogTitle>
+            <DialogDescription>
+              Lista completa de titulares dos planos vendidos
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedSeller && (
+            <div className="space-y-4">
+              {/* Resumo */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-green-600">{selectedSeller.activePlans}</p>
+                      <p className="text-sm text-muted-foreground">Ativos</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <XCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-red-600">{selectedSeller.cancelledPlans}</p>
+                      <p className="text-sm text-muted-foreground">Cancelados</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <MinusCircle className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-gray-600">{selectedSeller.inactivePlans}</p>
+                      <p className="text-sm text-muted-foreground">Inativos</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Tabela de usuários */}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>E-mail</TableHead>
+                    <TableHead>Plano</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Data de Cadastro</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedSeller.users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge className={planColors[user.plan]}>
+                          {planLabels[user.plan] || user.plan}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.status === 'active' && (
+                          <Badge className="bg-green-100 text-green-800">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Ativo
+                          </Badge>
+                        )}
+                        {user.status === 'cancelled' && (
+                          <Badge className="bg-red-100 text-red-800">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Cancelado
+                          </Badge>
+                        )}
+                        {user.status !== 'active' && user.status !== 'cancelled' && (
+                          <Badge className="bg-gray-100 text-gray-800">
+                            <MinusCircle className="h-3 w-3 mr-1" />
+                            Inativo
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: ptBR })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
