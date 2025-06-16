@@ -186,6 +186,8 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   getUserCount(): Promise<number>;
   getUserCountByRole(role: "patient" | "partner" | "admin" | "doctor"): Promise<number>;
+  countUsersBySeller(sellerName: string): Promise<number>;
+  getUsersBySeller(sellerName: string): Promise<User[]>;
   getAppointmentCount(): Promise<number>;
   getPendingClaimsCount(): Promise<number>;
   getRecentUsers(limit: number): Promise<User[]>;
@@ -1138,6 +1140,12 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .where(eq(users.sellerName, sellerName));
     return result[0].count;
+  }
+
+  async getUsersBySeller(sellerName: string): Promise<User[]> {
+    return this.db.select()
+      .from(users)
+      .where(eq(users.sellerName, sellerName));
   }
 
   async getAppointmentCount(): Promise<number> {
