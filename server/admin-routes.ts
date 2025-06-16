@@ -795,7 +795,7 @@ router.get('/sellers', async (req, res) => {
     const { getAllSellers } = await import('./seller-utils');
     const sellers = await getAllSellers();
     
-    // Contar quantos usuários cada vendedor tem por plano
+    // Contar quantos usuários cada vendedor tem por plano e status
     const { storage } = await import('./storage');
     const sellersWithStats = await Promise.all(
       sellers.map(async (sellerName) => {
@@ -804,9 +804,23 @@ router.get('/sellers', async (req, res) => {
         
         // Contar por tipo de plano
         const planCounts: Record<string, number> = {};
+        // Contar por status
+        let activeCount = 0;
+        let cancelledCount = 0;
+        let inactiveCount = 0;
+        
         users.forEach(user => {
           const plan = user.subscriptionPlan || 'free';
           planCounts[plan] = (planCounts[plan] || 0) + 1;
+          
+          // Contar por status
+          if (user.subscriptionStatus === 'active') {
+            activeCount++;
+          } else if (user.subscriptionStatus === 'cancelled') {
+            cancelledCount++;
+          } else {
+            inactiveCount++;
+          }
         });
         
         // Converter para o formato esperado
@@ -815,10 +829,24 @@ router.get('/sellers', async (req, res) => {
           count
         }));
         
+        // Buscar informações dos titulares
+        const userDetails = users.map(user => ({
+          id: user.id,
+          name: user.fullName,
+          email: user.email,
+          plan: user.subscriptionPlan || 'free',
+          status: user.subscriptionStatus || 'inactive',
+          createdAt: user.createdAt
+        }));
+        
         return {
           sellerName,
           totalPlans: users.length,
-          plansByType
+          activePlans: activeCount,
+          cancelledPlans: cancelledCount,
+          inactivePlans: inactiveCount,
+          plansByType,
+          users: userDetails
         };
       })
     );
