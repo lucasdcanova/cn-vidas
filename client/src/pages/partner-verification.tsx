@@ -5,16 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { QrCode, Camera, CheckCircle, XCircle, User } from 'lucide-react';
+import { QrCode, Camera, CheckCircle, XCircle, User, Sparkles, Shield } from 'lucide-react';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { PartnerOnboardingGuard } from '@/components/partner/partner-onboarding-guard';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
+import { motion, AnimatePresence } from 'framer-motion';
+import cnvidasLogo from '@/assets/cnvidas-logo-transparent.png';
 
 export default function PartnerVerification() {
   const [isScanning, setIsScanning] = useState(false);
   const [manualCode, setManualCode] = useState('');
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [verifiedUser, setVerifiedUser] = useState<any>(null);
   const { toast } = useToast();
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
@@ -114,6 +118,15 @@ export default function PartnerVerification() {
           expiresAt: null
         });
         
+        // Mostrar animação de sucesso
+        setVerifiedUser(data.user);
+        setShowSuccessAnimation(true);
+        
+        // Remover a animação após 3 segundos
+        setTimeout(() => {
+          setShowSuccessAnimation(false);
+        }, 3000);
+        
         toast({
           title: 'Verificação Bem-sucedida',
           description: `Usuário ${data.user.fullName} verificado com sucesso`
@@ -162,6 +175,155 @@ export default function PartnerVerification() {
   return (
     <PartnerOnboardingGuard>
       <DashboardLayout>
+      {/* Animação de Sucesso */}
+      <AnimatePresence>
+        {showSuccessAnimation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="relative z-10"
+            >
+              <Card className="p-8 md:p-12 max-w-md mx-auto backdrop-blur-sm bg-white/95 shadow-2xl border-0">
+                <div className="text-center space-y-6">
+                  {/* Logo animado */}
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.05, 1],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className="flex justify-center mb-8"
+                  >
+                    <img 
+                      src={cnvidasLogo} 
+                      alt="CN Vidas" 
+                      className="h-24 w-auto"
+                    />
+                  </motion.div>
+
+                  {/* Ícone de sucesso */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ 
+                      delay: 0.2, 
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 10
+                    }}
+                    className="flex justify-center"
+                  >
+                    <div className="bg-green-100 p-4 rounded-full">
+                      <CheckCircle className="h-16 w-16 text-green-600" />
+                    </div>
+                  </motion.div>
+
+                  {/* Mensagem de sucesso */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="space-y-2"
+                  >
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Verificação Concluída!
+                    </h2>
+                    <p className="text-gray-600">
+                      QR Code verificado com sucesso
+                    </p>
+                  </motion.div>
+
+                  {/* Informações do usuário verificado */}
+                  {verifiedUser && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="bg-gray-50 p-4 rounded-lg"
+                    >
+                      <div className="flex items-center justify-center gap-3 mb-2">
+                        <User className="h-5 w-5 text-gray-600" />
+                        <p className="font-semibold text-gray-900">
+                          {verifiedUser.fullName}
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Plano: <span className="font-medium capitalize">
+                          {verifiedUser.subscriptionPlan || 'Free'}
+                        </span>
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* Efeitos decorativos */}
+                  <motion.div
+                    animate={{
+                      rotate: 360,
+                    }}
+                    transition={{
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="absolute top-0 right-0 -mr-16 -mt-16 opacity-10"
+                  >
+                    <Sparkles className="h-32 w-32 text-green-500" />
+                  </motion.div>
+
+                  <motion.div
+                    animate={{
+                      rotate: -360,
+                    }}
+                    transition={{
+                      duration: 25,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="absolute bottom-0 left-0 -ml-16 -mb-16 opacity-10"
+                  >
+                    <Shield className="h-32 w-32 text-blue-500" />
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Background com partículas animadas */}
+            <div className="absolute inset-0 overflow-hidden">
+              {[...Array(20)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ 
+                    x: Math.random() * window.innerWidth,
+                    y: window.innerHeight + 100,
+                  }}
+                  animate={{ 
+                    y: -100,
+                  }}
+                  transition={{
+                    duration: Math.random() * 10 + 5,
+                    repeat: Infinity,
+                    delay: Math.random() * 5,
+                    ease: "linear",
+                  }}
+                  className="absolute w-2 h-2 bg-green-400 rounded-full opacity-20"
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="container mx-auto py-4 md:py-8 px-4 max-w-6xl">
         <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 flex items-center gap-2 md:gap-3">
           <QrCode className="h-6 w-6 md:h-8 md:w-8" />

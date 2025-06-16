@@ -1,6 +1,6 @@
 // Email Templates com design moderno e profissional
 
-const logoUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/assets/cnvidas-logo.png`;
+const logoUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/logo_cn_vidas_white_bg.svg`;
 
 // Template base para todos os emails
 export function baseEmailTemplate(content: string): string {
@@ -38,6 +38,7 @@ export function baseEmailTemplate(content: string): string {
           .mobile-center { text-align: center !important; }
           .container { padding: 0 !important; width: 100% !important; }
           .content { padding: 20px !important; }
+          .logo-container { padding: 20px 10px !important; }
         }
         
         /* Dark mode support */
@@ -47,21 +48,21 @@ export function baseEmailTemplate(content: string): string {
         }
       </style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7fa; line-height: 1.6;">
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; line-height: 1.6;">
       <!-- Preview Text -->
-      <div style="display: none; font-size: 1px; color: #f4f7fa; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+      <div style="display: none; font-size: 1px; color: #f8fafc; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
         CN Vidas - Sua saúde em primeiro lugar
       </div>
       
       <!-- Email Container -->
       <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
-          <td align="center" style="padding: 40px 0;">
-            <table class="container" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08); overflow: hidden;">
-              <!-- Header with Logo -->
+          <td align="center" style="padding: 30px 20px;">
+            <table class="container" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06); overflow: hidden; border: 1px solid #e5e7eb;">
+              <!-- Header with Logo - Minimalista -->
               <tr>
-                <td align="center" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); padding: 40px 20px;">
-                  <img src="${logoUrl}" alt="CN Vidas" width="200" height="auto" style="display: block; margin: 0 auto; max-width: 200px; height: auto;">
+                <td class="logo-container" align="center" style="background-color: #ffffff; padding: 30px 20px; border-bottom: 1px solid #f1f5f9;">
+                  <img src="${logoUrl}" alt="CN Vidas" width="180" height="120" style="display: block; margin: 0 auto; max-width: 180px; height: auto; border-radius: 8px;">
                 </td>
               </tr>
               

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Camera, Upload, X, Check, Loader2, User, AlertCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import ImageCropper from './ImageCropper';
+import ImageCropperSimple from './ImageCropperSimple';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface ProfilePhotoUploaderProps {
@@ -51,12 +53,24 @@ export default function ProfilePhotoUploader({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showCropper, setShowCropper] = useState(false);
-  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(currentImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Debug state changes
+  useEffect(() => {
+    console.log('[ProfilePhotoUploader] State changed:', {
+      showCropper,
+      hasSelectedFile: !!selectedFile,
+      selectedFileName: selectedFile?.name
+    });
+    if (showCropper && selectedFile) {
+      console.log('[ProfilePhotoUploader] Cropper should be visible with file:', selectedFile.name);
+    }
+  }, [showCropper, selectedFile]);
 
   // Função para obter as iniciais do nome
   const getInitials = (name: string) => {
@@ -120,8 +134,18 @@ export default function ProfilePhotoUploader({
 
   // Manipular seleção de arquivo
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('[ProfilePhotoUploader] handleFileSelect triggered');
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('[ProfilePhotoUploader] No file selected');
+      return;
+    }
+
+    console.log('[ProfilePhotoUploader] File selected:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
 
     setUploadError(null);
     setUploadSuccess(false);
@@ -129,6 +153,7 @@ export default function ProfilePhotoUploader({
     // Validação de tipo
     if (!file.type.startsWith('image/')) {
       const errorMsg = `Tipo de arquivo não suportado: ${file.type}. Use apenas imagens (JPG, PNG, GIF, WEBP).`;
+      console.error('[ProfilePhotoUploader] Invalid file type:', file.type);
       setUploadError(errorMsg);
       toast({
         title: 'Erro - Tipo de arquivo',
@@ -141,6 +166,7 @@ export default function ProfilePhotoUploader({
     // Validação de tamanho (50MB - será comprimido)
     if (file.size > 50 * 1024 * 1024) {
       const errorMsg = `Arquivo muito grande: ${(file.size / 1024 / 1024).toFixed(1)}MB. Máximo permitido: 50MB.`;
+      console.error('[ProfilePhotoUploader] File too large:', file.size);
       setUploadError(errorMsg);
       toast({
         title: 'Erro - Tamanho do arquivo',
@@ -150,12 +176,14 @@ export default function ProfilePhotoUploader({
       return;
     }
 
-    console.log(`Arquivo selecionado: ${file.name}, Tamanho: ${(file.size / 1024 / 1024).toFixed(2)}MB, Tipo: ${file.type}`);
+    console.log(`[ProfilePhotoUploader] File validation passed. Setting selectedFile and showCropper=true`);
 
-    // Criar URL para o cropper
-    const imageUrl = URL.createObjectURL(file);
-    setSelectedImageUrl(imageUrl);
+    // Guardar o arquivo selecionado
+    setSelectedFile(file);
     setShowCropper(true);
+    
+    // Log state after setting
+    console.log('[ProfilePhotoUploader] State set - showCropper should be true now');
   }, [toast]);
 
   // Função para fazer upload da imagem cropada
@@ -208,7 +236,7 @@ export default function ProfilePhotoUploader({
       }
 
       // Obter token de autenticação
-      const authToken = localStorage.getItem('auth_token') || '';
+      const authToken = localStorage.getItem('authToken') || '';
 
       console.log('=== INICIANDO UPLOAD ===');
       console.log('Endpoint:', endpoint);
@@ -347,6 +375,7 @@ export default function ProfilePhotoUploader({
 
         // Mostrar sucesso
         setUploadSuccess(true);
+        setSelectedFile(null); // Limpar arquivo selecionado
         setTimeout(() => {
           setUploadSuccess(false);
           setUploadProgress(0);
@@ -423,14 +452,11 @@ export default function ProfilePhotoUploader({
   // Cancelar cropper
   const handleCropCancel = useCallback(() => {
     setShowCropper(false);
-    if (selectedImageUrl) {
-      URL.revokeObjectURL(selectedImageUrl);
-      setSelectedImageUrl(null);
-    }
+    setSelectedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [selectedImageUrl]);
+  }, []);
 
   // Trigger file input
   const triggerFileInput = useCallback(() => {
@@ -578,15 +604,17 @@ export default function ProfilePhotoUploader({
         </CardContent>
       </Card>
 
-      {/* Cropper Modal */}
-      {showCropper && selectedImageUrl && (
+      {/* Cropper Modal - Render using portal to ensure it's on top */}
+      {showCropper && selectedFile && typeof window !== 'undefined' && createPortal(
         <ImageCropper
-          imageUrl={selectedImageUrl}
+          image={selectedFile}
           onCropComplete={handleCropComplete}
           onCancel={handleCropCancel}
           aspectRatio={1}
+          circularCrop={true}
           isOpen={showCropper}
-        />
+        />,
+        document.body
       )}
     </>
   );
