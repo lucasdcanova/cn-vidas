@@ -161,6 +161,10 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
     }
     if (biography !== undefined || bio !== undefined) {
       updateData.biography = biography || bio;
+      // If no fullBio is provided, use biography as fallback
+      if (fullBio === undefined && (biography || bio)) {
+        updateData.fullBio = biography || bio;
+      }
     }
     if (education !== undefined) {
       updateData.education = education;
@@ -205,10 +209,10 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
       updateData.biography = fullBio;
     }
     if (areasOfExpertise !== undefined) {
-      updateData.areasOfExpertise = areasOfExpertise;
+      updateData.areasOfExpertise = Array.isArray(areasOfExpertise) ? areasOfExpertise : [];
     }
     if (languagesSpoken !== undefined) {
-      updateData.languagesSpoken = languagesSpoken;
+      updateData.languagesSpoken = Array.isArray(languagesSpoken) ? languagesSpoken : [];
     }
     if (achievements !== undefined) {
       updateData.achievements = achievements;

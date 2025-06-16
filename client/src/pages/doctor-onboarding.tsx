@@ -153,6 +153,15 @@ export default function DoctorOnboardingPage() {
       await queryClient.invalidateQueries({ queryKey: ['/api/doctors/profile'] });
       await queryClient.refetchQueries({ queryKey: ['/api/doctors/profile'] });
       
+      // IMPORTANT: Also invalidate the /api/doctors/user/{userId} endpoint used by profile page
+      if (user?.id) {
+        await queryClient.invalidateQueries({ queryKey: ['/api/doctors/user', user.id] });
+        await queryClient.refetchQueries({ queryKey: ['/api/doctors/user', user.id] });
+      }
+      
+      // Invalidate user profile as well
+      await queryClient.invalidateQueries({ queryKey: ['/api/users/profile'] });
+      
       toast({
         title: 'Cadastro completado!',
         description: 'Bem-vindo ao CNVidas. Você já pode começar a atender pacientes.',
@@ -175,10 +184,10 @@ export default function DoctorOnboardingPage() {
   const handleNext = async () => {
     if (step === 1) {
       // Validate professional info
-      if (!formData.specialization || !formData.education) {
+      if (!formData.specialization || !formData.education || !formData.licenseNumber) {
         toast({
           title: 'Campos obrigatórios',
-          description: 'Por favor, preencha todos os campos profissionais.',
+          description: 'Por favor, preencha todos os campos profissionais obrigatórios.',
           variant: 'destructive'
         });
         return;
@@ -284,6 +293,15 @@ export default function DoctorOnboardingPage() {
                     />
                   </div>
 
+                  <div className="grid gap-2">
+                    <Label htmlFor="licenseNumber">Número do CRM *</Label>
+                    <Input
+                      id="licenseNumber"
+                      placeholder="Ex: CRM-SP 123456"
+                      value={formData.licenseNumber}
+                      onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                    />
+                  </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="education">Formação Acadêmica *</Label>
