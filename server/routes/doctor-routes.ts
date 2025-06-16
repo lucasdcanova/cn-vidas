@@ -92,6 +92,19 @@ doctorRouter.get('/user/:userId', requireAuth, async (req: AuthenticatedRequest,
     }
     
     console.log('✅ Doctor /user/:userId - Médico encontrado:', doctor.id);
+    console.log('📊 Doctor /user/:userId - Dados completos sendo retornados:', {
+      id: doctor.id,
+      userId: doctor.userId,
+      specialization: doctor.specialization,
+      licenseNumber: doctor.licenseNumber,
+      biography: doctor.biography,
+      education: doctor.education,
+      experienceYears: doctor.experienceYears,
+      consultationFee: doctor.consultationFee,
+      onboardingCompleted: doctor.onboardingCompleted,
+      pixKeyType: doctor.pixKeyType,
+      bankName: doctor.bankName
+    });
     res.json(doctor);
   } catch (error) {
     console.error('❌ Erro ao obter médico por user ID:', error);
@@ -227,6 +240,16 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
     
     console.log('✅ Doctor PUT /profile - Perfil atualizado:', updatedDoctor.id);
     console.log('✅ Doctor PUT /profile - onboardingCompleted após update:', updatedDoctor.onboardingCompleted);
+    console.log('✅ Doctor PUT /profile - Dados completos retornados:', {
+      id: updatedDoctor.id,
+      specialization: updatedDoctor.specialization,
+      licenseNumber: updatedDoctor.licenseNumber,
+      biography: updatedDoctor.biography,
+      education: updatedDoctor.education,
+      experienceYears: updatedDoctor.experienceYears,
+      consultationFee: updatedDoctor.consultationFee,
+      onboardingCompleted: updatedDoctor.onboardingCompleted
+    });
     res.json(updatedDoctor);
   } catch (error) {
     console.error('❌ Erro ao atualizar perfil do médico:', error);

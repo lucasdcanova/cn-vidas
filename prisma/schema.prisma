@@ -108,10 +108,16 @@ model doctors {
   created_at              DateTime             @default(now()) @db.Timestamptz(6)
   updated_at              DateTime             @default(now()) @db.Timestamptz(6)
   welcome_completed       Boolean              @default(false)
+  onboarding_completed    Boolean              @default(false)
   pix_key_type            String?
   pix_key                 String?
   bank_name               String?
   account_type            String?
+  consultation_price_description String?
+  full_bio                String?
+  areas_of_expertise      String[]
+  languages_spoken        String[]
+  achievements            String?
   appointments            appointments[]
   availability_slots      availability_slots[]
   doctor_payments         doctor_payments[]
