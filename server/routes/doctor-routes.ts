@@ -35,6 +35,26 @@ doctorRouter.get('/profile', requireAuth, requireDoctorRole, async (req: Authent
     console.log('✅ Doctor /profile - Perfil encontrado:', doctor.id);
     console.log('📋 Doctor /profile - onboardingCompleted:', doctor.onboardingCompleted);
     console.log('📋 Doctor /profile - welcomeCompleted:', doctor.welcomeCompleted);
+    console.log('📋 Doctor /profile - Dados completos:', {
+      id: doctor.id,
+      userId: doctor.userId,
+      fullName: doctor.name,
+      specialization: doctor.specialization,
+      licenseNumber: doctor.licenseNumber,
+      education: doctor.education,
+      experienceYears: doctor.experienceYears,
+      consultationFee: doctor.consultationFee,
+      biography: doctor.biography,
+      fullBio: doctor.fullBio,
+      areasOfExpertise: doctor.areasOfExpertise,
+      languagesSpoken: doctor.languagesSpoken,
+      achievements: doctor.achievements,
+      profileImage: doctor.profileImage,
+      pixKeyType: doctor.pixKeyType,
+      pixKey: doctor.pixKey,
+      bankName: doctor.bankName,
+      accountType: doctor.accountType
+    });
     res.json(doctor);
   } catch (error) {
     console.error('❌ Erro ao obter perfil do médico:', error);
