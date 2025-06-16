@@ -249,10 +249,11 @@ userRouter.post('/verify-qr', async (req: Request, res: Response) => {
     try {
       await storage.logQrAuthentication({
         token,
-        scannerUserId: null, // Pode ser preenchido se houver um usuário logado fazendo o scan
+        scannerUserId: user.id, // Usando o próprio usuário do token como scanner por enquanto
         tokenUserId: user.id,
         ipAddress: req.ip || req.connection.remoteAddress || null,
-        userAgent: req.get('User-Agent') || null
+        userAgent: req.get('User-Agent') || null,
+        success: true
       });
     } catch (logError) {
       console.error('Erro ao registrar log de autenticação QR:', logError);
