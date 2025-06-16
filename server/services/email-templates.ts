@@ -79,15 +79,15 @@ export function baseEmailTemplate(content: string): string {
                 <td style="background-color: #f8fafc; padding: 30px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
                   <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
                     Atenciosamente,<br>
-                    <strong style="color: #1e3a8a;">Equipe CN Vidas</strong>
+                    <strong style="color: #1e3a8a;">Equipe <span style="color: #1e3a8a;">CN</span> <span style="color: #16a34a;">Vidas</span></strong>
                   </p>
                   
                   <div style="margin: 20px 0; padding: 20px 0; border-top: 1px solid #e5e7eb;">
                     <p style="margin: 0 0 10px 0; color: #9ca3af; font-size: 12px;">
-                      Este email foi enviado por CN Vidas
+                      Este email foi enviado por <span style="color: #1e3a8a;">CN</span> <span style="color: #16a34a;">Vidas</span>
                     </p>
                     <p style="margin: 0 0 10px 0; color: #9ca3af; font-size: 12px;">
-                      © 2025 CN Vidas. Todos os direitos reservados.
+                      © 2025 <span style="color: #1e3a8a;">CN</span> <span style="color: #16a34a;">Vidas</span>. Todos os direitos reservados.
                     </p>
                     <p style="margin: 0; color: #9ca3af; font-size: 12px;">
                       <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/termos" style="color: #2563eb; text-decoration: none;">Termos de Uso</a> 
@@ -123,7 +123,7 @@ export function baseEmailTemplate(content: string): string {
 export function verificationEmailTemplate(verificationLink: string): string {
   const content = `
     <h1 style="color: #1e3a8a; font-size: 28px; font-weight: 600; margin: 0 0 10px 0; text-align: center;">
-      Bem-vindo à CN Vidas! 🎉
+      Bem-vindo à <span style="color: #1e3a8a;">CN</span> <span style="color: #16a34a;">Vidas</span>! 🎉
     </h1>
     
     <p style="color: #6b7280; font-size: 16px; text-align: center; margin: 0 0 30px 0;">
@@ -167,38 +167,9 @@ export function verificationEmailTemplate(verificationLink: string): string {
       </p>
     </div>
     
-    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-    
-    <h2 style="color: #1e3a8a; font-size: 20px; font-weight: 600; margin: 0 0 15px 0;">
-      O que você pode fazer na CN Vidas?
-    </h2>
-    
-    <div style="display: table; width: 100%; margin: 0 0 20px 0;">
-      <div style="display: table-row;">
-        <div style="display: table-cell; padding: 10px; vertical-align: top;">
-          <div style="background-color: #dbeafe; border-radius: 8px; padding: 15px; text-align: center;">
-            <div style="font-size: 24px; margin-bottom: 5px;">🏥</div>
-            <strong style="color: #1e3a8a;">Consultas Online</strong>
-            <p style="color: #374151; font-size: 13px; margin: 5px 0 0 0;">
-              Agende consultas com médicos qualificados
-            </p>
-          </div>
-        </div>
-        <div style="display: table-cell; padding: 10px; vertical-align: top;">
-          <div style="background-color: #dbeafe; border-radius: 8px; padding: 15px; text-align: center;">
-            <div style="font-size: 24px; margin-bottom: 5px;">💊</div>
-            <strong style="color: #1e3a8a;">Descontos em Farmácias</strong>
-            <p style="color: #374151; font-size: 13px; margin: 5px 0 0 0;">
-              Economize em medicamentos
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    
     <div style="text-align: center; margin-top: 30px;">
       <p style="color: #9ca3af; font-size: 13px; margin: 0;">
-        Se você não criou uma conta na CN Vidas, por favor ignore este email.
+        Se você não criou uma conta na <span style="color: #1e3a8a;">CN</span> <span style="color: #16a34a;">Vidas</span>, por favor ignore este email.
       </p>
     </div>
   `;
@@ -219,7 +190,7 @@ export function passwordResetEmailTemplate(resetLink: string): string {
     
     <div style="background-color: #eff6ff; border-radius: 12px; padding: 20px; margin: 0 0 30px 0;">
       <p style="color: #374151; font-size: 16px; margin: 0;">
-        Clique no botão abaixo para criar uma nova senha segura para sua conta CN Vidas.
+        Clique no botão abaixo para criar uma nova senha segura para sua conta <span style="color: #1e3a8a;">CN</span> <span style="color: #16a34a;">Vidas</span>.
       </p>
     </div>
     
@@ -293,7 +264,7 @@ export function welcomeEmailTemplate(userName: string): string {
     <div style="background-color: #dcfce7; border-radius: 12px; padding: 20px; margin: 0 0 30px 0; text-align: center;">
       <p style="color: #166534; font-size: 16px; margin: 0;">
         ✅ Email verificado com sucesso!<br>
-        Agora você tem acesso completo à plataforma CN Vidas.
+        Agora você tem acesso completo à plataforma <span style="color: #1e3a8a;">CN</span> <span style="color: #16a34a;">Vidas</span>.
       </p>
     </div>
     
