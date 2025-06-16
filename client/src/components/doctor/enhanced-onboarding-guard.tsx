@@ -38,7 +38,6 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
     if (doctorProfile && !doctorProfile.onboardingCompleted) {
       // Check if essential fields are filled
       const isProfileIncomplete = !doctorProfile.specialization || 
-                                 !doctorProfile.licenseNumber || 
                                  !doctorProfile.education ||
                                  !doctorProfile.consultationFee ||
                                  !doctorProfile.pixKey ||

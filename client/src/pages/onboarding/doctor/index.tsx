@@ -59,9 +59,9 @@ export default function DoctorOnboardingFlow() {
   // Update form when profile loads
   useEffect(() => {
     if (doctorProfile) {
-      // If onboarding is already complete, redirect to dashboard
+      // If onboarding is already complete, redirect to telemedicine
       if (doctorProfile.onboardingCompleted) {
-        navigate('/dashboard');
+        navigate('/doctor-telemedicine');
         return;
       }
 

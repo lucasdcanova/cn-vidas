@@ -102,10 +102,17 @@ export const doctors = pgTable("doctors", {
   profileImage: text("profile_image"),
   status: text("status").default('pending').notNull(),
   welcomeCompleted: boolean("welcome_completed").default(false).notNull(),
+  onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
   pixKeyType: text("pix_key_type"),
   pixKey: text("pix_key"),
   bankName: text("bank_name"),
   accountType: text("account_type"),
+  // Novos campos do onboarding
+  consultationPriceDescription: text("consultation_price_description"),
+  fullBio: text("full_bio"),
+  areasOfExpertise: text("areas_of_expertise").array(),
+  languagesSpoken: text("languages_spoken").array(),
+  achievements: text("achievements"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -78,6 +78,11 @@ export default function StepThree({ formData, updateFormData, onBack }: StepThre
   // Complete onboarding mutation
   const completeOnboardingMutation = useMutation({
     mutationFn: async () => {
+      console.log('🚀 Step Three - Enviando dados para completar onboarding:', {
+        ...formData,
+        onboardingCompleted: true
+      });
+      
       const response = await apiRequest('PUT', '/api/doctors/profile', {
         ...formData,
         onboardingCompleted: true
@@ -88,7 +93,10 @@ export default function StepThree({ formData, updateFormData, onBack }: StepThre
         throw new Error(error.message || 'Erro ao completar cadastro');
       }
       
-      return response.json();
+      const result = await response.json();
+      console.log('✅ Step Three - Resposta do servidor:', result);
+      console.log('✅ Step Three - onboardingCompleted no resultado:', result.onboardingCompleted);
+      return result;
     },
     onSuccess: () => {
       // Trigger confetti animation
@@ -103,9 +111,9 @@ export default function StepThree({ formData, updateFormData, onBack }: StepThre
       queryClient.invalidateQueries({ queryKey: ['/api/doctors/profile'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
 
-      // Redirect to dashboard after a short delay
+      // Redirect to doctor telemedicine after a short delay
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/doctor-telemedicine');
       }, 2000);
     },
     onError: (error: Error) => {

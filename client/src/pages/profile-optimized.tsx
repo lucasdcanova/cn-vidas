@@ -44,7 +44,7 @@ import {
   MapPin
 } from "lucide-react";
 import { AddressForm, AddressFormValues } from "@/components/forms/address-form";
-import { ImageCropper } from "@/components/shared/ImageCropper";
+import ImageCropper from "@/components/shared/ImageCropper";
 import PaymentMethods from "@/components/payment/payment-methods";
 
 // Esquema de perfil básico (paciente)
