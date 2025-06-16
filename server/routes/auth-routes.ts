@@ -216,8 +216,9 @@ authRouter.post('/register', async (req: Request, res: Response) => {
       try {
         await storage.createDoctor({
           userId: newUser.id,
+          name: newUser.fullName,
           specialization: '',
-          licenseNumber: '',
+          licenseNumber: newUser.username || '',
           biography: '',
           education: '',
           experienceYears: 0,
