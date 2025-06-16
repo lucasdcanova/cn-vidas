@@ -2,14 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Loader2, X } from 'lucide-react';
 
 interface ImageCropperProps {
-  image: File;
+  image?: File;
+  imageUrl?: string;
   onCropComplete: (croppedImageBlob: Blob) => void;
   onCancel: () => void;
   aspectRatio?: number;
   circularCrop?: boolean;
+  isOpen?: boolean;
 }
 
 function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number) {
@@ -30,18 +33,38 @@ function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: numbe
 
 export default function ImageCropper({
   image,
+  imageUrl: externalImageUrl,
   onCropComplete,
   onCancel,
   aspectRatio = 1,
-  circularCrop = false
+  circularCrop = false,
+  isOpen = true
 }: ImageCropperProps) {
+  console.log('[ImageCropper] Render called with props:', {
+    hasImage: !!image,
+    hasExternalImageUrl: !!externalImageUrl,
+    isOpen,
+    imageName: image?.name
+  });
+
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [imageUrl, setImageUrl] = useState<string>('');
   const imgRef = useRef<HTMLImageElement>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Converter arquivo para URL
+  // Debug logging
+  useEffect(() => {
+    console.log('[ImageCropper] Component mounted/updated:', {
+      hasImage: !!image,
+      hasExternalImageUrl: !!externalImageUrl,
+      isOpen,
+      imageName: image?.name,
+      imageUrl
+    });
+  }, [isOpen, image, externalImageUrl, imageUrl]);
+
+  // Converter arquivo para URL ou usar URL externa
   useEffect(() => {
     if (image) {
       const url = URL.createObjectURL(image);
@@ -50,8 +73,10 @@ export default function ImageCropper({
       return () => {
         URL.revokeObjectURL(url);
       };
+    } else if (externalImageUrl) {
+      setImageUrl(externalImageUrl);
     }
-  }, [image]);
+  }, [image, externalImageUrl]);
 
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const { width, height } = e.currentTarget;
@@ -102,53 +127,77 @@ export default function ImageCropper({
     }, 'image/jpeg', 0.95);
   };
 
-  if (!imageUrl) {
+  // Add explicit debug rendering
+  if (!isOpen) {
+    console.log('[ImageCropper] Not rendering - isOpen is false');
     return null;
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="max-h-[60vh] overflow-auto">
-        <ReactCrop
-          crop={crop}
-          onChange={(c) => setCrop(c)}
-          onComplete={(c) => setCompletedCrop(c)}
-          aspect={aspectRatio}
-          circularCrop={circularCrop}
-          keepSelection
-        >
-          <img
-            ref={imgRef}
-            alt="Imagem para recorte"
-            src={imageUrl}
-            onLoad={onImageLoad}
-            className="max-w-full max-h-[50vh] object-contain"
-          />
-        </ReactCrop>
-      </div>
+  if (!imageUrl) {
+    console.log('[ImageCropper] Not rendering - no imageUrl');
+    return null;
+  }
 
-      <div className="flex justify-end gap-2 pt-4">
-        <Button
-          variant="outline"
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          Cancelar
-        </Button>
-        <Button
-          onClick={generateCrop}
-          disabled={!completedCrop || isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processando...
-            </>
-          ) : (
-            'Aplicar Recorte'
-          )}
-        </Button>
-      </div>
-    </div>
+  console.log('[ImageCropper] Rendering dialog with imageUrl:', imageUrl);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden z-[9999]" style={{ zIndex: 9999 }}>
+        <DialogHeader>
+          <DialogTitle>Ajustar Foto de Perfil</DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4"
+            onClick={onCancel}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </DialogHeader>
+        <div className="space-y-4 overflow-auto max-h-[calc(90vh-8rem)]">
+          <div className="max-h-[60vh] overflow-auto">
+            <ReactCrop
+              crop={crop}
+              onChange={(c) => setCrop(c)}
+              onComplete={(c) => setCompletedCrop(c)}
+              aspect={aspectRatio}
+              circularCrop={circularCrop}
+              keepSelection
+            >
+              <img
+                ref={imgRef}
+                alt="Imagem para recorte"
+                src={imageUrl}
+                onLoad={onImageLoad}
+                className="max-w-full max-h-[50vh] object-contain"
+              />
+            </ReactCrop>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={generateCrop}
+              disabled={!completedCrop || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                'Aplicar Recorte'
+              )}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

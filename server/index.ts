@@ -238,11 +238,12 @@ import { setupCronJobs } from "./cron-setup";
   
   // Middleware específico para verificar se arquivos de upload existem
   app.use('/uploads', (req, res, next) => {
-    const filePath = path.join(publicPath, req.url);
+    // req.url já vem sem o /uploads, então precisamos adicionar
+    const filePath = path.join(publicPath, 'uploads', req.url);
     
     // Verificar se o arquivo existe
     if (!fs.existsSync(filePath)) {
-      console.log(`⚠️ Arquivo de upload não encontrado: ${req.url}`);
+      console.log(`⚠️ Arquivo de upload não encontrado: ${filePath} (req.url: ${req.url})`);
       
       // Se for uma imagem de perfil, retornar imagem padrão
       if (req.url.includes('profile-')) {
