@@ -42,7 +42,7 @@ export default function DoctorOnboardingFlow() {
   }, [user, navigate]);
 
   // Get current doctor profile
-  const { data: doctorProfile, isLoading } = useQuery({
+  const { data: doctorProfile, isLoading, error } = useQuery({
     queryKey: ['/api/doctors/profile'],
     queryFn: ({ signal }) => 
       fetch('/api/doctors/profile', { 
@@ -50,10 +50,16 @@ export default function DoctorOnboardingFlow() {
         credentials: 'include' 
       })
         .then(res => {
+          // Se o perfil não existe (404), retornar null ao invés de lançar erro
+          if (res.status === 404) {
+            console.log('Perfil de médico ainda não existe, continuando com onboarding');
+            return null;
+          }
           if (!res.ok) throw new Error('Falha ao buscar perfil');
           return res.json();
         }),
-    enabled: !!user && user.role === 'doctor'
+    enabled: !!user && user.role === 'doctor',
+    retry: false // Não tentar novamente se falhar
   });
 
   // Update form when profile loads

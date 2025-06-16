@@ -177,9 +177,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               window.location.href = "/onboarding/doctor";
               return;
             }
+          } else if (profileResponse.status === 404) {
+            // Se o perfil não existe, redirecionar para onboarding
+            console.log("Perfil de médico não encontrado, redirecionando para /onboarding/doctor");
+            window.location.href = "/onboarding/doctor";
+            return;
           }
         } catch (error) {
           console.error("Erro ao verificar perfil do médico:", error);
+          // Em caso de erro, redirecionar para onboarding por segurança
+          window.location.href = "/onboarding/doctor";
+          return;
         }
         
         console.log("Médico com onboarding completo, redirecionando para /doctor-telemedicine");
@@ -276,9 +284,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               window.location.href = "/onboarding/doctor";
               return;
             }
+          } else if (profileResponse.status === 404) {
+            // Se o perfil não existe, redirecionar para onboarding
+            console.log("Perfil de médico não encontrado, redirecionando para /onboarding/doctor");
+            window.location.href = "/onboarding/doctor";
+            return;
           }
         } catch (error) {
           console.error("Erro ao verificar perfil do médico:", error);
+          // Em caso de erro, redirecionar para onboarding por segurança
+          window.location.href = "/onboarding/doctor";
+          return;
         }
         
         console.log("Médico com onboarding completo, redirecionando para /doctor-telemedicine");
@@ -454,7 +470,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.href = "/admin/users";
       } else if (userData.role === "doctor") {
         console.log("Usuário é médico, redirecionando para /onboarding/doctor");
-        window.location.href = "/onboarding/doctor";
+        // Pequeno delay para garantir que o perfil do médico seja criado no backend
+        setTimeout(() => {
+          window.location.href = "/onboarding/doctor";
+        }, 1000);
       } else if (userData.role === "partner") {
         console.log("Usuário é parceiro, redirecionando para /partner-onboarding");
         window.location.href = "/partner-onboarding";
