@@ -284,7 +284,10 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     }
 
     // Fazer login automático após registro bem-sucedido
-    const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET não configurado');
+    }
     const token = jwt.sign(
       { 
         userId: newUser.id, 
@@ -409,7 +412,10 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
     // Login bem-sucedido - gerar JWT token
     console.log('Login bem-sucedido para:', user.email);
     
-    const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET não configurado');
+    }
     const token = jwt.sign(
       { 
         userId: user.id, 
@@ -491,7 +497,10 @@ authRouter.post('/login-qr', async (req: Request, res: Response) => {
     // Login bem-sucedido - gerar JWT token
     console.log('Login via QR Code bem-sucedido para:', user.email);
     
-    const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET não configurado');
+    }
     const jwtToken = jwt.sign(
       { 
         userId: user.id, 
@@ -907,7 +916,10 @@ authRouter.get('/user', async (req: Request, res: Response) => {
     }
     
     // Verificar e decodificar o token JWT
-    const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET não configurado');
+    }
     let decoded: any;
     
     try {

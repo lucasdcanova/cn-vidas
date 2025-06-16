@@ -8,8 +8,12 @@ interface DecodedToken {
 }
 
 export async function verifyToken(token: string): Promise<DecodedToken> {
+  if (!process.env.JWT_SECRET) {
+    throw new AppError('JWT_SECRET não configurado', 500);
+  }
+  
   try {
-    const decoded = verify(token, process.env.JWT_SECRET || 'default-secret') as DecodedToken;
+    const decoded = verify(token, process.env.JWT_SECRET) as DecodedToken;
     return {
       ...decoded,
       id: validateId(decoded.id)
