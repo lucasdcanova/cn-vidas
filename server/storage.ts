@@ -2,7 +2,7 @@ import { users, partners, doctors, partnerServices, appointments, claims, notifi
 import { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, Dependent, InsertDependent, MedicalRecord, InsertMedicalRecord, MedicalRecordEntry, InsertMedicalRecordEntry, MedicalRecordAccess, InsertMedicalRecordAccess } from '@shared/types';
 import { PartnerAddress, InsertPartnerAddress } from './interfaces/partner';
 import { db } from "./db";
-import { eq, and, gte, lte, desc, sql, count, or, gt, asc, inArray, ne, alias } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sql, count, or, gt, asc, inArray, ne } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -308,35 +308,38 @@ export class DatabaseStorage implements IStorage {
   async getQrAuthLogs(limit?: number, offset?: number): Promise<(QrAuthLog & { scannerName: string, tokenUserName: string })[]> {
     console.log('🔍 Buscando logs de autenticação QR no banco de dados...');
     
-    const scannerUser = alias(users, 'scannerUser');
-    const tokenUser = alias(users, 'tokenUser');
+    // Buscar logs primeiro sem joins complexos
+    const logs = await this.db.select()
+      .from(qrAuthLogs)
+      .orderBy(desc(qrAuthLogs.scannedAt))
+      .limit(limit || 50)
+      .offset(offset || 0);
     
-    const logs = await this.db.select({
-      id: qrAuthLogs.id,
-      qrTokenId: qrAuthLogs.qrTokenId,
-      scannerUserId: qrAuthLogs.scannerUserId,
-      tokenUserId: qrAuthLogs.tokenUserId,
-      scannedAt: qrAuthLogs.scannedAt,
-      ipAddress: qrAuthLogs.ipAddress,
-      userAgent: qrAuthLogs.userAgent,
-      success: qrAuthLogs.success,
-      scannerName: scannerUser.fullName,
-      tokenUserName: tokenUser.fullName
-    })
-    .from(qrAuthLogs)
-    .leftJoin(scannerUser, eq(qrAuthLogs.scannerUserId, scannerUser.id))
-    .leftJoin(tokenUser, eq(qrAuthLogs.tokenUserId, tokenUser.id))
-    .orderBy(desc(qrAuthLogs.scannedAt))
-    .limit(limit || 50)
-    .offset(offset || 0);
+    // Buscar nomes dos usuários separadamente
+    const logsWithNames = await Promise.all(logs.map(async (log) => {
+      let scannerName = 'Sistema';
+      let tokenUserName = 'Usuário Desconhecido';
+      
+      if (log.scannerUserId) {
+        const scanner = await this.getUser(log.scannerUserId);
+        if (scanner) scannerName = scanner.fullName || 'Sistema';
+      }
+      
+      if (log.tokenUserId) {
+        const tokenUser = await this.getUser(log.tokenUserId);
+        if (tokenUser) tokenUserName = tokenUser.fullName || 'Usuário Desconhecido';
+      }
+      
+      return {
+        ...log,
+        scannerName,
+        tokenUserName
+      };
+    }));
     
-    console.log(`📊 ${logs.length} logs encontrados no banco de dados`);
+    console.log(`📊 ${logsWithNames.length} logs encontrados no banco de dados`);
     
-    return logs.map(log => ({
-      ...log,
-      scannerName: log.scannerName ?? 'Sistema',
-      tokenUserName: log.tokenUserName ?? 'Usuário Desconhecido'
-    })) as (QrAuthLog & { scannerName: string, tokenUserName: string })[];
+    return logsWithNames;
   }
 
   // Availability slot methods
