@@ -795,14 +795,30 @@ router.get('/sellers', async (req, res) => {
     const { getAllSellers } = await import('./seller-utils');
     const sellers = await getAllSellers();
     
-    // Contar quantos usuários cada vendedor tem
+    // Contar quantos usuários cada vendedor tem por plano
     const { storage } = await import('./storage');
     const sellersWithStats = await Promise.all(
       sellers.map(async (sellerName) => {
-        const usersCount = await storage.countUsersBySeller(sellerName);
+        // Buscar usuários deste vendedor
+        const users = await storage.getUsersBySeller(sellerName);
+        
+        // Contar por tipo de plano
+        const planCounts: Record<string, number> = {};
+        users.forEach(user => {
+          const plan = user.subscriptionPlan || 'free';
+          planCounts[plan] = (planCounts[plan] || 0) + 1;
+        });
+        
+        // Converter para o formato esperado
+        const plansByType = Object.entries(planCounts).map(([plan, count]) => ({
+          plan,
+          count
+        }));
+        
         return {
-          name: sellerName,
-          usersCount
+          sellerName,
+          totalPlans: users.length,
+          plansByType
         };
       })
     );
