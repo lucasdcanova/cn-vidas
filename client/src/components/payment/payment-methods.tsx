@@ -43,8 +43,9 @@ function PaymentForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess:
       const { error } = await stripe.confirmSetup({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/profile?tab=billing`,
+          return_url: `${window.location.origin}/payments`,
         },
+        redirect: 'if_required'
       });
 
       if (error) {
