@@ -106,7 +106,7 @@ export default function DoctorOnboardingPage() {
       });
       
       // If profile is already complete, redirect to dashboard
-      if (doctorProfile.welcomeCompleted) {
+      if (doctorProfile.onboardingCompleted) {
         navigate('/doctor-telemedicine');
       }
     }
@@ -130,22 +130,38 @@ export default function DoctorOnboardingPage() {
   // Complete onboarding mutation
   const completeOnboardingMutation = useMutation({
     mutationFn: async () => {
+      console.log('🚀 Enviando dados para completar onboarding:', {
+        ...formData,
+        onboardingCompleted: true
+      });
+      
       const res = await apiRequest('PUT', '/api/doctors/profile', { 
         ...formData,
-        welcomeCompleted: true 
+        onboardingCompleted: true 
       });
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || 'Erro ao completar cadastro');
       }
-      return res.json();
+      const result = await res.json();
+      console.log('✅ Resposta do servidor:', result);
+      console.log('✅ onboardingCompleted no resultado:', result.onboardingCompleted);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      // Invalidar cache do perfil para forçar recarga
+      await queryClient.invalidateQueries({ queryKey: ['/api/doctors/profile'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/doctors/profile'] });
+      
       toast({
         title: 'Cadastro completado!',
         description: 'Bem-vindo ao CNVidas. Você já pode começar a atender pacientes.',
       });
-      navigate('/doctor-telemedicine');
+      
+      // Pequeno delay para garantir que o cache foi atualizado
+      setTimeout(() => {
+        navigate('/doctor-telemedicine');
+      }, 500);
     },
     onError: (error: Error) => {
       toast({
@@ -159,7 +175,7 @@ export default function DoctorOnboardingPage() {
   const handleNext = async () => {
     if (step === 1) {
       // Validate professional info
-      if (!formData.specialization || !formData.licenseNumber || !formData.education) {
+      if (!formData.specialization || !formData.education) {
         toast({
           title: 'Campos obrigatórios',
           description: 'Por favor, preencha todos os campos profissionais.',
@@ -268,15 +284,6 @@ export default function DoctorOnboardingPage() {
                     />
                   </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="licenseNumber">Número do CRM *</Label>
-                    <Input
-                      id="licenseNumber"
-                      placeholder="Ex: 123456/SP"
-                      value={formData.licenseNumber}
-                      onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                    />
-                  </div>
 
                   <div className="grid gap-2">
                     <Label htmlFor="education">Formação Acadêmica *</Label>
@@ -295,8 +302,8 @@ export default function DoctorOnboardingPage() {
                       type="number"
                       min="0"
                       placeholder="Ex: 10"
-                      value={formData.experienceYears}
-                      onChange={(e) => setFormData({ ...formData, experienceYears: parseInt(e.target.value) || 0 })}
+                      value={formData.experienceYears || ''}
+                      onChange={(e) => setFormData({ ...formData, experienceYears: e.target.value ? parseInt(e.target.value) : 0 })}
                     />
                   </div>
 
@@ -332,10 +339,11 @@ export default function DoctorOnboardingPage() {
                   <Info className="h-4 w-4" />
                   <AlertTitle>Como funciona o pagamento</AlertTitle>
                   <AlertDescription className="space-y-2 mt-2">
-                    <p>• Pacientes do <strong>Plano Individual</strong>: Pagam 100% do valor da consulta</p>
-                    <p>• Pacientes do <strong>Plano Familiar</strong>: Pagam 50% do valor da consulta</p>
-                    <p>• A CNVidas retém uma taxa de 20% sobre o valor recebido</p>
-                    <p>• Pagamentos são processados semanalmente via PIX</p>
+                    <p>• Você define livremente o valor de suas consultas</p>
+                    <p>• Pacientes do <strong>Plano Free</strong>: Pagam 100% do valor da consulta</p>
+                    <p>• Pacientes do <strong>Plano Basic</strong>: Têm 30% de desconto</p>
+                    <p>• Pacientes dos <strong>Planos Premium e Ultra</strong>: Têm 50% de desconto</p>
+                    <p>• Pagamentos são processados semanalmente via PIX direto na sua conta</p>
                   </AlertDescription>
                 </Alert>
 
@@ -353,8 +361,8 @@ export default function DoctorOnboardingPage() {
                         step="10"
                         placeholder="0,00"
                         className="pl-10"
-                        value={formData.consultationFee}
-                        onChange={(e) => setFormData({ ...formData, consultationFee: parseFloat(e.target.value) || 0 })}
+                        value={formData.consultationFee || ''}
+                        onChange={(e) => setFormData({ ...formData, consultationFee: e.target.value ? parseFloat(e.target.value) : 0 })}
                       />
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -364,14 +372,13 @@ export default function DoctorOnboardingPage() {
 
                   {formData.consultationFee > 0 && (
                     <div className="bg-muted rounded-lg p-4 space-y-2">
-                      <h4 className="font-medium">Simulação de recebimento:</h4>
+                      <h4 className="font-medium">Valores por tipo de plano:</h4>
                       <div className="space-y-1 text-sm">
-                        <p>• Plano Individual: Paciente paga R$ {formData.consultationFee.toFixed(2)}</p>
-                        <p>• Plano Familiar: Paciente paga R$ {(formData.consultationFee * 0.5).toFixed(2)}</p>
+                        <p>• <strong>Plano Free:</strong> Paciente paga R$ {formData.consultationFee.toFixed(2)}</p>
+                        <p>• <strong>Plano Basic:</strong> Paciente paga R$ {(formData.consultationFee * 0.7).toFixed(2)} (30% desconto)</p>
+                        <p>• <strong>Planos Premium/Ultra:</strong> Paciente paga R$ {(formData.consultationFee * 0.5).toFixed(2)} (50% desconto)</p>
                         <Separator className="my-2" />
-                        <p className="font-medium">Você recebe (após taxa de 20%):</p>
-                        <p>• Consulta Individual: R$ {(formData.consultationFee * 0.8).toFixed(2)}</p>
-                        <p>• Consulta Familiar: R$ {(formData.consultationFee * 0.5 * 0.8).toFixed(2)}</p>
+                        <p className="text-muted-foreground text-xs">Os valores são definidos por você e repassados integralmente.</p>
                       </div>
                     </div>
                   )}

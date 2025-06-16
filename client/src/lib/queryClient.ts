@@ -21,7 +21,7 @@ export async function apiRequest(
     
     // Adicionar token nos headers se disponível
     const headers: Record<string, string> = {
-      ...(data ? { "Content-Type": "application/json" } : {}),
+      ...(data && !(data instanceof FormData) ? { "Content-Type": "application/json" } : {}),
       "Cache-Control": "no-cache, no-store, must-revalidate",
       "Pragma": "no-cache",
       "Expires": "0"
@@ -57,7 +57,7 @@ export async function apiRequest(
     const res = await fetch(url, {
       method,
       headers,
-      body: data ? JSON.stringify(data) : undefined,
+      body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
       credentials: "include", // Importante para enviar cookies
       mode: 'cors',
       cache: 'no-cache',

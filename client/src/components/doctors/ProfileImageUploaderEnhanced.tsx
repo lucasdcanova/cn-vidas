@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
-import { ImageCropper } from "@/components/shared/ImageCropper";
+import ImageCropper from "@/components/shared/ImageCropper";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Upload, Loader2, CheckCircle } from "lucide-react";

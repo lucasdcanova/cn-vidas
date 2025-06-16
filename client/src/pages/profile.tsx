@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import { AddressFormOptimized as AddressForm, AddressFormValues } from "@/components/forms/address-form-optimized";
-import { ImageCropper } from "@/components/shared/ImageCropper";
+import ImageCropper from "@/components/shared/ImageCropper";
 import ProfilePhotoUploader from "@/components/shared/ProfilePhotoUploader";
 
 // Esquema de perfil básico (paciente)

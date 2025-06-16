@@ -211,6 +211,29 @@ authRouter.post('/register', async (req: Request, res: Response) => {
       }
     }
 
+    // Criar registro de médico automaticamente quando role = 'doctor'
+    if (role === 'doctor') {
+      try {
+        await storage.createDoctor({
+          userId: newUser.id,
+          specialization: '',
+          licenseNumber: '',
+          biography: '',
+          education: '',
+          experienceYears: 0,
+          availableForEmergency: false,
+          consultationFee: 0,
+          status: 'active',
+          welcomeCompleted: false,
+          onboardingCompleted: false
+        });
+        console.log(`Registro de médico criado para usuário ${newUser.id}`);
+      } catch (doctorError) {
+        console.error('Erro ao criar registro de médico:', doctorError);
+        // Não falhar o registro se a criação do perfil de médico falhar
+      }
+    }
+
     // Salvar configurações de privacidade do usuário (incluindo consentimento de gravação)
     // Criar configurações para todos os tipos de usuário
     try {
