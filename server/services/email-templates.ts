@@ -1,6 +1,5 @@
 // Email Templates com design moderno e profissional
-
-const logoUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/logo_cn_vidas_white_bg.svg`;
+const { LOGO_BASE64_PNG } = require('../utils/official-logo-base64.js');
 
 // Template base para todos os emails
 export function baseEmailTemplate(content: string): string {
@@ -59,10 +58,12 @@ export function baseEmailTemplate(content: string): string {
         <tr>
           <td align="center" style="padding: 30px 20px;">
             <table class="container" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06); overflow: hidden; border: 1px solid #e5e7eb;">
-              <!-- Header with Logo - Minimalista -->
+              <!-- Header com Logo Oficial CN Vidas - Fundo Branco -->
               <tr>
                 <td class="logo-container" align="center" style="background-color: #ffffff; padding: 30px 20px; border-bottom: 1px solid #f1f5f9;">
-                  <img src="${logoUrl}" alt="CN Vidas" width="180" height="120" style="display: block; margin: 0 auto; max-width: 180px; height: auto; border-radius: 8px;">
+                  <div style="background-color: #ffffff; padding: 15px; border-radius: 8px; display: inline-block;">
+                    <img src="${LOGO_BASE64_PNG}" alt="CN Vidas" width="180" style="display: block; margin: 0 auto; max-width: 180px; height: auto;">
+                  </div>
                 </td>
               </tr>
               

@@ -1400,7 +1400,10 @@ export class DatabaseStorage implements IStorage {
   async getUserByToken(token: string): Promise<ExpressUser | null> {
     try {
       const jwt = require('jsonwebtoken');
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as { id: number };
+      if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET não configurado');
+      }
+      const decoded = jwt.verify(token, process.env.JWT_SECRET) as { id: number };
       const [user] = await this.db.select().from(users).where(eq(users.id, decoded.id));
       return user || null;
     } catch (error) {
