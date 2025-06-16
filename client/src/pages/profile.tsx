@@ -76,6 +76,12 @@ const doctorProfileSchema = z.object({
   availableForEmergency: z.boolean().optional(),
   consultationFee: z.string().optional(), // Mantemos como string no form, mas convertemos na submissão
   profileImage: z.string().optional(),
+  // Novos campos do onboarding
+  fullBio: z.string().optional(),
+  areasOfExpertise: z.array(z.string()).optional(),
+  languagesSpoken: z.array(z.string()).optional(),
+  achievements: z.string().optional(),
+  consultationPriceDescription: z.string().optional(),
 });
 
 // Esquema de perfil do parceiro (empresa)
@@ -229,6 +235,12 @@ const Profile: React.FC = () => {
       availableForEmergency: doctorData?.availableForEmergency || false,
       consultationFee: doctorData?.consultationFee?.toString() || "",
       profileImage: doctorData?.profileImage || "",
+      // Novos campos do onboarding
+      fullBio: doctorData?.fullBio || "",
+      areasOfExpertise: doctorData?.areasOfExpertise || [],
+      languagesSpoken: doctorData?.languagesSpoken || [],
+      achievements: doctorData?.achievements || "",
+      consultationPriceDescription: doctorData?.consultationPriceDescription || "",
     },
   });
   
@@ -248,6 +260,12 @@ const Profile: React.FC = () => {
         availableForEmergency: doctorData.availableForEmergency || false,
         consultationFee: doctorData.consultationFee?.toString() || "",
         profileImage: doctorData.profileImage || "",
+        // Novos campos do onboarding
+        fullBio: doctorData.fullBio || "",
+        areasOfExpertise: doctorData.areasOfExpertise || [],
+        languagesSpoken: doctorData.languagesSpoken || [],
+        achievements: doctorData.achievements || "",
+        consultationPriceDescription: doctorData.consultationPriceDescription || "",
       });
       
       if (doctorData.profileImage && !profileImage) {
@@ -551,7 +569,13 @@ const Profile: React.FC = () => {
         experienceYears: formattedData.experienceYears,
         availableForEmergency: formattedData.availableForEmergency,
         consultationFee: formattedData.consultationFee,
-        profileImage: formattedData.profileImage
+        profileImage: formattedData.profileImage,
+        // Novos campos do onboarding
+        fullBio: formattedData.fullBio,
+        areasOfExpertise: formattedData.areasOfExpertise,
+        languagesSpoken: formattedData.languagesSpoken,
+        achievements: formattedData.achievements,
+        consultationPriceDescription: formattedData.consultationPriceDescription
       };
       await updateDoctorMutation.mutateAsync(doctorDataToSend);
       
@@ -1218,6 +1242,47 @@ const Profile: React.FC = () => {
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={doctorForm.control as Control<DoctorProfileFormValues>}
+                        name="fullBio"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Biografia Completa</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Biografia detalhada para exibição no perfil..." 
+                                disabled={isUpdatingProfile || !isEditMode}
+                                className="min-h-32"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Esta biografia será exibida em seu perfil público
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={doctorForm.control as Control<DoctorProfileFormValues>}
+                        name="achievements"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Conquistas e Certificações</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Descreva suas principais conquistas, prêmios e certificações..." 
+                                disabled={isUpdatingProfile || !isEditMode}
+                                className="min-h-24"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
@@ -1275,6 +1340,27 @@ const Profile: React.FC = () => {
                                 {...field} 
                               />
                             </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={doctorForm.control as Control<DoctorProfileFormValues>}
+                        name="consultationPriceDescription"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descrição do Valor</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Ex: Inclui retorno em até 30 dias" 
+                                disabled={isUpdatingProfile || !isEditMode}
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Informações adicionais sobre o valor da consulta
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
