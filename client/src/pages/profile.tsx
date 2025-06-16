@@ -164,9 +164,20 @@ const Profile: React.FC = () => {
   // Fetch doctor data if user is a doctor
   const { data: doctorData, isLoading: doctorLoading } = useQuery({
     queryKey: ["/api/doctors/user", user?.id],
-    queryFn: () => {
+    queryFn: async () => {
       console.log("Buscando perfil do médico para usuário ID:", user?.id);
-      return getDoctorByUserId(user?.id || 0);
+      const data = await getDoctorByUserId(user?.id || 0);
+      console.log("🩺 Dados do médico recebidos da API:", data);
+      console.log("🩺 Campos específicos:", {
+        specialization: data?.specialization,
+        licenseNumber: data?.licenseNumber,
+        biography: data?.biography,
+        education: data?.education,
+        experienceYears: data?.experienceYears,
+        consultationFee: data?.consultationFee,
+        onboardingCompleted: data?.onboardingCompleted
+      });
+      return data;
     },
     enabled: !!user?.id && user?.role === "doctor",
     staleTime: 1 * 60 * 1000, // 1 minute
