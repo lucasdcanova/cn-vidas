@@ -24,9 +24,35 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   title = "Dashboard",
 }) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState<any>(null);
   const [userWithProfileImage, setUserWithProfileImage] = useState(user);
+
+  // Auto-refresh após completar onboarding
+  React.useEffect(() => {
+    const justCompletedOnboarding = localStorage.getItem('justCompletedOnboarding');
+    
+    if (justCompletedOnboarding === 'true' && user?.role === 'doctor') {
+      // Remove a flag imediatamente para evitar múltiplos refreshes
+      localStorage.removeItem('justCompletedOnboarding');
+      
+      // Mostrar mensagem informativa
+      toast({
+        title: 'Atualizando informações...',
+        description: 'Seus dados estão sendo carregados. A página será atualizada em instantes.',
+        duration: 5000,
+      });
+      
+      // Aguardar 5 segundos e recarregar a página
+      const timeoutId = setTimeout(() => {
+        window.location.reload();
+      }, 5000);
+      
+      // Cleanup do timeout
+      return () => clearTimeout(timeoutId);
+    }
+  }, [toast, user?.role]);
   
   // Debug: Log user data
   React.useEffect(() => {
