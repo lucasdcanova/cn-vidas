@@ -10,7 +10,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-blue-50">
       {/* Centered form container */}
-      <div className="w-full max-w-md p-8 relative">
+      <div className="w-full max-w-xl p-8 relative">
         {/* Background gradient blobs */}
         <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-400 opacity-10 rounded-full filter blur-3xl"></div>
         <div className="absolute bottom-20 -right-20 w-80 h-80 bg-green-400 opacity-10 rounded-full filter blur-3xl"></div>
