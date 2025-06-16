@@ -273,7 +273,9 @@ userRouter.post('/verify-qr', async (req: Request, res: Response) => {
         email: user.email,
         username: user.username,
         fullName: user.fullName,
-        role: user.role
+        role: user.role,
+        subscriptionPlan: user.subscriptionPlan,
+        subscriptionStatus: user.subscriptionStatus
       },
       message: 'Token QR verificado com sucesso'
     });
