@@ -2,7 +2,7 @@ import { users, partners, doctors, partnerServices, appointments, claims, notifi
 import { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, Dependent, InsertDependent, MedicalRecord, InsertMedicalRecord, MedicalRecordEntry, InsertMedicalRecordEntry, MedicalRecordAccess, InsertMedicalRecordAccess } from '@shared/types';
 import { PartnerAddress, InsertPartnerAddress } from './interfaces/partner';
 import { db } from "./db";
-import { eq, and, gte, lte, desc, sql, count, or, gt, asc, inArray, ne } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sql, count, or, gt, asc, inArray, ne, alias } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -282,18 +282,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async logQrAuthentication(logData: Omit<InsertQrAuthLog, 'qrTokenId'> & { token: string }): Promise<QrAuthLog> {
-    const [qrToken] = await this.db.select().from(qrTokens).where(eq(qrTokens.token, logData.token));
+    const { token, ...logDataWithoutToken } = logData;
+    const [qrToken] = await this.db.select().from(qrTokens).where(eq(qrTokens.token, token));
     if (!qrToken) {
       throw new Error('QR token not found');
     }
+    
+    console.log('📝 Criando log de autenticação QR:', {
+      qrTokenId: qrToken.id,
+      scannerUserId: logDataWithoutToken.scannerUserId,
+      tokenUserId: logDataWithoutToken.tokenUserId,
+      ipAddress: logDataWithoutToken.ipAddress,
+      success: logDataWithoutToken.success
+    });
+    
     const [log] = await this.db.insert(qrAuthLogs).values({
-      ...logData,
+      ...logDataWithoutToken,
       qrTokenId: qrToken.id
     }).returning();
+    
+    console.log('✅ Log de autenticação QR criado:', log);
     return log;
   }
 
   async getQrAuthLogs(limit?: number, offset?: number): Promise<(QrAuthLog & { scannerName: string, tokenUserName: string })[]> {
+    console.log('🔍 Buscando logs de autenticação QR no banco de dados...');
+    
+    const scannerUser = alias(users, 'scannerUser');
+    const tokenUser = alias(users, 'tokenUser');
+    
     const logs = await this.db.select({
       id: qrAuthLogs.id,
       qrTokenId: qrAuthLogs.qrTokenId,
@@ -303,18 +320,22 @@ export class DatabaseStorage implements IStorage {
       ipAddress: qrAuthLogs.ipAddress,
       userAgent: qrAuthLogs.userAgent,
       success: qrAuthLogs.success,
-      scannerName: users.fullName,
-      tokenUserName: users.fullName
+      scannerName: scannerUser.fullName,
+      tokenUserName: tokenUser.fullName
     })
     .from(qrAuthLogs)
-    .leftJoin(qrTokens, eq(qrAuthLogs.qrTokenId, qrTokens.id))
-    .leftJoin(users, eq(qrTokens.userId, users.id))
+    .leftJoin(scannerUser, eq(qrAuthLogs.scannerUserId, scannerUser.id))
+    .leftJoin(tokenUser, eq(qrAuthLogs.tokenUserId, tokenUser.id))
+    .orderBy(desc(qrAuthLogs.scannedAt))
     .limit(limit || 50)
     .offset(offset || 0);
+    
+    console.log(`📊 ${logs.length} logs encontrados no banco de dados`);
+    
     return logs.map(log => ({
       ...log,
-      scannerName: log.scannerName ?? '',
-      tokenUserName: log.tokenUserName ?? ''
+      scannerName: log.scannerName ?? 'Sistema',
+      tokenUserName: log.tokenUserName ?? 'Usuário Desconhecido'
     })) as (QrAuthLog & { scannerName: string, tokenUserName: string })[];
   }
 
