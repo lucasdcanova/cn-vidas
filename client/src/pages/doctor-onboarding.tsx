@@ -167,6 +167,9 @@ export default function DoctorOnboardingPage() {
         description: 'Bem-vindo ao CNVidas. Você já pode começar a atender pacientes.',
       });
       
+      // Definir flag para indicar que acabou de completar o onboarding
+      localStorage.setItem('justCompletedOnboarding', 'true');
+      
       // Pequeno delay para garantir que o cache foi atualizado
       setTimeout(() => {
         navigate('/doctor-telemedicine');
