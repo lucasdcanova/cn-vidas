@@ -778,7 +778,11 @@ router.get('/recent-appointments', async (req, res) => {
 
 router.get('/qr-auth-logs', async (req, res) => {
   try {
-    res.json([]);
+    console.log('📋 Buscando logs de autenticação QR...');
+    const { storage } = await import('./storage');
+    const logs = await storage.getQrAuthLogs();
+    console.log(`✅ ${logs.length} logs encontrados`);
+    res.json(logs);
   } catch (error) {
     console.error('Error in admin QR auth logs route:', error);
     res.status(500).json({ error: 'Internal server error' });
