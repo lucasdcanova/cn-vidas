@@ -663,10 +663,17 @@ export class DatabaseStorage implements IStorage {
       profileImage: sql<string>`COALESCE(${doctors.profileImage}, ${users.profileImage})`.as('profileImage'),
       status: doctors.status,
       welcomeCompleted: doctors.welcomeCompleted,
+      onboardingCompleted: doctors.onboardingCompleted,
       pixKeyType: doctors.pixKeyType,
       pixKey: doctors.pixKey,
       bankName: doctors.bankName,
       accountType: doctors.accountType,
+      // Campos do novo onboarding
+      consultationPriceDescription: doctors.consultationPriceDescription,
+      fullBio: doctors.fullBio,
+      areasOfExpertise: doctors.areasOfExpertise,
+      languagesSpoken: doctors.languagesSpoken,
+      achievements: doctors.achievements,
       createdAt: doctors.createdAt,
       updatedAt: doctors.updatedAt,
       name: users.fullName

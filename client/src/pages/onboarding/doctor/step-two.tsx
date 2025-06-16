@@ -28,8 +28,8 @@ export default function StepTwo({ formData, onNext, onBack, user }: StepTwoProps
   const features = [
     {
       icon: Heart,
-      title: 'Sem Comissões Abusivas',
-      description: 'A CNVidas cobra apenas 20% do valor da consulta, uma das menores taxas do mercado.'
+      title: 'Liberdade Total de Preços',
+      description: 'Você define o valor das suas consultas. A CNVidas não interfere na sua estratégia de preços.'
     },
     {
       icon: Users,
@@ -186,10 +186,12 @@ export default function StepTwo({ formData, onNext, onBack, user }: StepTwoProps
               <AlertDescription className="text-indigo-800">
                 <strong>Como funciona o sistema de pagamentos:</strong>
                 <ul className="mt-2 space-y-1 list-disc list-inside">
-                  <li>Pacientes do Plano Individual pagam 100% do valor da consulta</li>
-                  <li>Pacientes do Plano Familiar pagam 50% do valor da consulta</li>
-                  <li>A CNVidas retém apenas 20% como taxa de serviço</li>
-                  <li>Pagamentos processados semanalmente via PIX</li>
+                  <li>Você define livremente o valor de suas consultas</li>
+                  <li>Pacientes do <strong>Plano Free</strong>: Pagam 100% do valor da consulta</li>
+                  <li>Pacientes do <strong>Plano Basic</strong>: Têm 30% de desconto</li>
+                  <li>Pacientes dos <strong>Planos Premium e Ultra</strong>: Têm 50% de desconto</li>
+                  <li>Pagamentos processados semanalmente via PIX direto na sua conta</li>
+                  <li>Total transparência nas transações</li>
                 </ul>
               </AlertDescription>
             </Alert>

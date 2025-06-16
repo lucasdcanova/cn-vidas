@@ -35,10 +35,9 @@ export function DoctorOnboardingGuard({ children }: DoctorOnboardingGuardProps) 
     if (location === '/doctor-onboarding') return;
     
     // Check if onboarding is complete
-    if (doctorProfile && !doctorProfile.welcomeCompleted) {
+    if (doctorProfile && !doctorProfile.onboardingCompleted) {
       // Check if essential fields are filled
       const isProfileIncomplete = !doctorProfile.specialization || 
-                                 !doctorProfile.licenseNumber || 
                                  !doctorProfile.education ||
                                  !doctorProfile.consultationFee ||
                                  !doctorProfile.pixKey ||

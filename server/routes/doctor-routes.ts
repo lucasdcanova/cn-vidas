@@ -33,6 +33,8 @@ doctorRouter.get('/profile', requireAuth, requireDoctorRole, async (req: Authent
     }
     
     console.log('✅ Doctor /profile - Perfil encontrado:', doctor.id);
+    console.log('📋 Doctor /profile - onboardingCompleted:', doctor.onboardingCompleted);
+    console.log('📋 Doctor /profile - welcomeCompleted:', doctor.welcomeCompleted);
     res.json(doctor);
   } catch (error) {
     console.error('❌ Erro ao obter perfil do médico:', error);
@@ -98,6 +100,7 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
       experienceYears,
       availableForEmergency,
       consultationFee,
+      consultationPrice, // Campo alternativo do frontend
       profileImage,
       welcomeCompleted,
       pixKeyType,
@@ -148,8 +151,8 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
     if (availableForEmergency !== undefined) {
       updateData.availableForEmergency = Boolean(availableForEmergency);
     }
-    if (consultationFee !== undefined) {
-      updateData.consultationFee = parseFloat(consultationFee) || 0;
+    if (consultationFee !== undefined || consultationPrice !== undefined) {
+      updateData.consultationFee = parseFloat(consultationFee || consultationPrice) || 0;
     }
     if (profileImage !== undefined) {
       updateData.profileImage = profileImage;
@@ -178,6 +181,8 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
     }
     if (fullBio !== undefined) {
       updateData.fullBio = fullBio;
+      // Também salvar no campo biography para compatibilidade
+      updateData.biography = fullBio;
     }
     if (areasOfExpertise !== undefined) {
       updateData.areasOfExpertise = areasOfExpertise;
@@ -190,10 +195,14 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
     }
     
     console.log('🔍 Doctor PUT /profile - Dados para atualização:', updateData);
+    console.log('🔍 Doctor PUT /profile - onboardingCompleted value:', updateData.onboardingCompleted);
+    console.log('🔍 Doctor PUT /profile - consultationFee value:', updateData.consultationFee);
+    console.log('🔍 Doctor PUT /profile - biography/fullBio value:', updateData.biography || updateData.fullBio);
     
     const updatedDoctor = await storage.updateDoctor(doctor.id, updateData);
     
     console.log('✅ Doctor PUT /profile - Perfil atualizado:', updatedDoctor.id);
+    console.log('✅ Doctor PUT /profile - onboardingCompleted após update:', updatedDoctor.onboardingCompleted);
     res.json(updatedDoctor);
   } catch (error) {
     console.error('❌ Erro ao atualizar perfil do médico:', error);

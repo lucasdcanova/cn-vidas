@@ -30,43 +30,14 @@ interface StepOneProps {
 
 export default function StepOne({ formData, updateFormData, onNext }: StepOneProps) {
   const { toast } = useToast();
-  const [newExpertise, setNewExpertise] = useState('');
-  const [newLanguage, setNewLanguage] = useState('');
 
-  const handleAddExpertise = () => {
-    if (newExpertise.trim()) {
-      updateFormData({
-        areasOfExpertise: [...formData.areasOfExpertise, newExpertise.trim()]
-      });
-      setNewExpertise('');
-    }
-  };
-
-  const handleRemoveExpertise = (index: number) => {
-    const updated = formData.areasOfExpertise.filter((_: any, i: number) => i !== index);
-    updateFormData({ areasOfExpertise: updated });
-  };
-
-  const handleAddLanguage = () => {
-    if (newLanguage.trim()) {
-      updateFormData({
-        languagesSpoken: [...formData.languagesSpoken, newLanguage.trim()]
-      });
-      setNewLanguage('');
-    }
-  };
-
-  const handleRemoveLanguage = (index: number) => {
-    const updated = formData.languagesSpoken.filter((_: any, i: number) => i !== index);
-    updateFormData({ languagesSpoken: updated });
-  };
 
   const handleProfileImageUpdate = (imageUrl: string) => {
     updateFormData({ profileImage: imageUrl });
   };
 
   const validateAndNext = () => {
-    if (!formData.specialization || !formData.licenseNumber || !formData.education) {
+    if (!formData.specialization || !formData.education) {
       toast({
         title: 'Campos obrigatórios',
         description: 'Por favor, preencha todos os campos obrigatórios.',
@@ -84,10 +55,10 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
       return;
     }
 
-    if (!formData.fullBio || formData.fullBio.length < 100) {
+    if (!formData.fullBio) {
       toast({
-        title: 'Biografia muito curta',
-        description: 'Por favor, escreva uma biografia mais detalhada (mínimo 100 caracteres).',
+        title: 'Biografia obrigatória',
+        description: 'Por favor, escreva uma biografia.',
         variant: 'destructive'
       });
       return;
@@ -161,19 +132,6 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="licenseNumber" className="flex items-center gap-2">
-                <Hash className="h-4 w-4" />
-                Número do CRM *
-              </Label>
-              <Input
-                id="licenseNumber"
-                placeholder="Ex: 123456/SP"
-                value={formData.licenseNumber}
-                onChange={(e) => updateFormData({ licenseNumber: e.target.value })}
-                className="border-gray-300 focus:border-blue-500"
-              />
-            </div>
 
             <div className="space-y-2">
               <Label htmlFor="education" className="flex items-center gap-2">
@@ -199,8 +157,8 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
                 type="number"
                 min="0"
                 placeholder="Ex: 10"
-                value={formData.experienceYears}
-                onChange={(e) => updateFormData({ experienceYears: parseInt(e.target.value) || 0 })}
+                value={formData.experienceYears || ''}
+                onChange={(e) => updateFormData({ experienceYears: e.target.value ? parseInt(e.target.value) : '' })}
                 className="border-gray-300 focus:border-blue-500"
               />
             </div>
@@ -227,8 +185,8 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
                   step="10"
                   placeholder="0,00"
                   className="pl-10 border-gray-300 focus:border-blue-500"
-                  value={formData.consultationPrice}
-                  onChange={(e) => updateFormData({ consultationPrice: parseFloat(e.target.value) || 0 })}
+                  value={formData.consultationPrice || ''}
+                  onChange={(e) => updateFormData({ consultationPrice: e.target.value ? parseFloat(e.target.value) : '' })}
                 />
               </div>
             </div>
@@ -250,7 +208,7 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
           >
             <Label htmlFor="fullBio" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Biografia Completa * (mínimo 100 caracteres)
+              Biografia Completa *
             </Label>
             <Textarea
               id="fullBio"
@@ -260,107 +218,10 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
               onChange={(e) => updateFormData({ fullBio: e.target.value })}
               className="border-gray-300 focus:border-blue-500"
             />
-            <p className="text-sm text-gray-600">
-              {formData.fullBio.length}/100 caracteres
-            </p>
           </motion.div>
 
-          {/* Areas of Expertise */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
-            className="space-y-2"
-          >
-            <Label className="flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Áreas de Especialização
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Ex: Cardiologia Intervencionista"
-                value={newExpertise}
-                onChange={(e) => setNewExpertise(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddExpertise()}
-                className="border-gray-300 focus:border-blue-500"
-              />
-              <Button onClick={handleAddExpertise} size="icon" variant="outline">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.areasOfExpertise.map((area: string, index: number) => (
-                <Badge key={index} variant="secondary" className="px-3 py-1">
-                  {area}
-                  <button
-                    onClick={() => handleRemoveExpertise(index)}
-                    className="ml-2 hover:text-red-500"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          </motion.div>
 
-          {/* Languages */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
-            className="space-y-2"
-          >
-            <Label className="flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              Idiomas
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Ex: Português, Inglês, Espanhol"
-                value={newLanguage}
-                onChange={(e) => setNewLanguage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddLanguage()}
-                className="border-gray-300 focus:border-blue-500"
-              />
-              <Button onClick={handleAddLanguage} size="icon" variant="outline">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.languagesSpoken.map((lang: string, index: number) => (
-                <Badge key={index} variant="secondary" className="px-3 py-1">
-                  {lang}
-                  <button
-                    onClick={() => handleRemoveLanguage(index)}
-                    className="ml-2 hover:text-red-500"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          </motion.div>
 
-          {/* Achievements */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.7 }}
-            className="space-y-2"
-          >
-            <Label htmlFor="achievements" className="flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Conquistas e Certificações (opcional)
-            </Label>
-            <Textarea
-              id="achievements"
-              placeholder="Prêmios, certificações, publicações, cursos de especialização..."
-              rows={3}
-              value={formData.achievements}
-              onChange={(e) => updateFormData({ achievements: e.target.value })}
-              className="border-gray-300 focus:border-blue-500"
-            />
-          </motion.div>
 
           {/* Navigation */}
           <motion.div

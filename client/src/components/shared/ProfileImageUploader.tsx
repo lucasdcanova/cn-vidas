@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { ImageCropper } from './ImageCropper';
+import ImageCropper from './ImageCropper';
 
 interface ProfileImageUploaderProps {
   currentImage?: string | null;
@@ -112,7 +112,7 @@ export default function ProfileImageUploader({
     setIsUploading(true);
 
     try {
-      await api.delete('/api/profile/upload-image');
+      await apiRequest('DELETE', '/api/profile/upload-image');
 
       queryClient.invalidateQueries({ queryKey: ['user'] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
@@ -251,7 +251,7 @@ export default function ProfileImageUploader({
                 }
               }}
               aspectRatio={1}
-              circularCrop
+              circularCrop={true}
             />
           )}
         </DialogContent>

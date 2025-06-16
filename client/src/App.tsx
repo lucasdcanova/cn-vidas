@@ -54,6 +54,7 @@ import DoctorDirectEmergency from "@/pages/doctor-direct-emergency";
 import DoctorWelcome from "@/pages/doctor/welcome";
 import DoctorFinanceiro from "@/pages/doctor/financeiro";
 import DoctorConsultationHistory from "@/pages/doctor/consultation-history";
+import DoctorSettings from "@/pages/doctor/settings";
 import PartnerDashboard from "@/pages/partner-dashboard";
 import PartnerOnboarding from "@/pages/partner-onboarding";
 import PartnerVerification from "@/pages/partner-verification";
@@ -163,6 +164,7 @@ function Router() {
       <ProtectedRoute path="/doctor/welcome" component={DoctorWelcome} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor/financeiro" component={DoctorFinanceiro} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor/consultation-history" component={DoctorConsultationHistory} allowedRoles={["doctor"]} />
+      <ProtectedRoute path="/doctor/settings" component={DoctorSettings} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor/medical-records" component={DoctorMedicalRecords} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor/medical-records/edit" component={DoctorMedicalRecordEdit} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-onboarding" component={DoctorOnboarding} allowedRoles={["doctor"]} />
