@@ -419,6 +419,31 @@ export default function DoctorTelemedicinePage() {
     setDeletedEmergencyAppointments(prev => [...prev, appointmentId]);
   };
 
+  // Auto-refresh após completar onboarding
+  useEffect(() => {
+    const justCompletedOnboarding = localStorage.getItem('justCompletedOnboarding');
+    
+    if (justCompletedOnboarding === 'true') {
+      // Remove a flag imediatamente para evitar múltiplos refreshes
+      localStorage.removeItem('justCompletedOnboarding');
+      
+      // Mostrar mensagem informativa
+      toast({
+        title: 'Atualizando informações...',
+        description: 'Seus dados estão sendo carregados. A página será atualizada em instantes.',
+        duration: 5000,
+      });
+      
+      // Aguardar 5 segundos e recarregar a página
+      const timeoutId = setTimeout(() => {
+        window.location.reload();
+      }, 5000);
+      
+      // Cleanup do timeout
+      return () => clearTimeout(timeoutId);
+    }
+  }, [toast]);
+
   // Get doctor profile to pass doctor ID to emergency notifications
   const { data: doctorProfile } = useQuery({
     queryKey: ["/api/doctors/profile"],
