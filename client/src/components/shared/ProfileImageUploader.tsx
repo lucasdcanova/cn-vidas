@@ -70,10 +70,13 @@ export default function ProfileImageUploader({
       const data = await response.json();
 
       if (data.imageUrl) {
-        // Atualizar cache do React Query
-        queryClient.invalidateQueries({ queryKey: ['user'] });
-        queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+        // Atualizar cache do React Query - IMPORTANTE: usar a mesma queryKey do useAuth
+        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/users/profile'] });
         queryClient.invalidateQueries({ queryKey: ['profile'] });
+        
+        // Forçar refetch imediato
+        queryClient.refetchQueries({ queryKey: ['/api/user'] });
         
         // Callback para atualizar imagem no componente pai
         if (onImageUpdate) {
@@ -114,9 +117,13 @@ export default function ProfileImageUploader({
     try {
       await apiRequest('DELETE', '/api/profile/upload-image');
 
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      // Invalidar as mesmas queries do upload
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/profile'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      
+      // Forçar refetch imediato
+      queryClient.refetchQueries({ queryKey: ['/api/user'] });
 
       if (onImageUpdate) {
         onImageUpdate('');
