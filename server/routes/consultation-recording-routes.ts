@@ -44,9 +44,18 @@ const upload = multer({
 // Upload de gravação
 router.post('/upload', requireAuth, upload.single('audio'), async (req: AuthRequest, res) => {
   try {
+    console.log('📥 [Recording Upload] Recebendo upload de gravação de consulta...');
     const { appointmentId } = req.body;
     const userId = req.user?.id;
     const file = req.file;
+    
+    console.log('📋 [Recording Upload] Dados recebidos:', {
+      userId,
+      appointmentId,
+      fileSize: file?.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'N/A',
+      mimeType: file?.mimetype,
+      filename: file?.filename
+    });
 
     if (!userId) {
       return res.status(401).json({ success: false, error: 'Usuário não autenticado' });
