@@ -101,10 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     retry: 1,
     // **CORREÇÃO: Configurações para garantir dados atualizados do usuário**
     staleTime: 0, // Sempre considera os dados como 'stale' (desatualizados)
-    cacheTime: 1000 * 60 * 2, // Cache por apenas 2 minutos (reduzido de 5)
+    cacheTime: 0, // Sem cache - sempre busca dados frescos do servidor
     refetchOnWindowFocus: true, // Recarregar quando a janela ganha foco
     refetchOnMount: true, // Sempre recarregar ao montar o componente
-    refetchInterval: 1000 * 60 * 2, // Recarregar a cada 2 minutos automaticamente
+    refetchOnReconnect: true, // Recarregar quando reconectar à internet
   });
 
   // Mutation para login

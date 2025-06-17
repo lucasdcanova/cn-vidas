@@ -130,10 +130,14 @@ export const ProfileImageUploaderEnhanced: React.FC<ProfileImageUploaderEnhanced
         }
       }, 2000);
       
-      // Atualizar os dados do usuário
+      // Atualizar os dados do usuário - IMPORTANTE: usar a mesma queryKey do useAuth
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
       queryClient.invalidateQueries({ queryKey: ['/api/doctors/profile'] });
       queryClient.invalidateQueries({ queryKey: ['/api/users/profile'] });
+      
+      // Forçar refetch imediato
+      queryClient.refetchQueries({ queryKey: ['/api/user'] });
       
     } catch (error) {
       console.error("Erro ao fazer upload:", error);
