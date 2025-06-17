@@ -61,7 +61,9 @@ export default function RecordingControls({
     if (autoStart && hasConsent && !hasStarted && !state.isRecording) {
       setHasStarted(true);
       // Aguardar 5 segundos para garantir que a chamada está estável
+      console.log('⏱️ [RecordingControls] Aguardando 5 segundos para iniciar gravação automática...');
       setTimeout(() => {
+        console.log('🎙️ [RecordingControls] Iniciando gravação automática após 5 segundos');
         handleStartRecording();
       }, 5000);
     }
@@ -69,15 +71,23 @@ export default function RecordingControls({
 
   // Iniciar gravação automaticamente
   const handleStartRecording = async () => {
-    await startRecording();
-    onRecordingStart?.();
+    console.log('🎙️ [RecordingControls] Iniciando gravação...');
+    try {
+      await startRecording();
+      console.log('✅ [RecordingControls] Gravação iniciada com sucesso');
+      onRecordingStart?.();
+    } catch (error) {
+      console.error('❌ [RecordingControls] Erro ao iniciar gravação:', error);
+    }
   };
 
   // Parar gravação e fazer upload
   const handleStopRecording = async () => {
+    console.log('🛑 [RecordingControls] Parando gravação...');
     const audioBlob = await stopRecording();
     
     if (!audioBlob) {
+      console.error('❌ [RecordingControls] Erro: Não foi possível obter o áudio gravado');
       toast({
         title: 'Erro na gravação',
         description: 'Não foi possível obter o áudio gravado.',
@@ -86,6 +96,8 @@ export default function RecordingControls({
       return;
     }
 
+    console.log('📤 [RecordingControls] Iniciando upload da gravação...');
+    console.log(`📊 [RecordingControls] Tamanho do arquivo: ${(audioBlob.size / 1024 / 1024).toFixed(2)} MB`);
     setIsUploading(true);
 
     try {
@@ -94,6 +106,9 @@ export default function RecordingControls({
       formData.append('audio', audioBlob, `consultation_${appointmentId}.webm`);
       formData.append('appointmentId', appointmentId.toString());
 
+      console.log('🚀 [RecordingControls] Enviando gravação para o servidor...');
+      console.log(`🆔 [RecordingControls] Appointment ID: ${appointmentId}`);
+      
       // Fazer upload
       const response = await axios.post(
         `/api/consultation-recordings/upload`,
@@ -106,20 +121,35 @@ export default function RecordingControls({
             const percentCompleted = Math.round(
               (progressEvent.loaded * 100) / (progressEvent.total || 1)
             );
-            console.log(`Upload: ${percentCompleted}%`);
+            console.log(`📈 [RecordingControls] Progresso do upload: ${percentCompleted}%`);
           }
         }
       );
 
+      console.log('📥 [RecordingControls] Resposta do servidor:', response.data);
+      
       if (response.data.success) {
+        console.log('✅ [RecordingControls] Upload concluído com sucesso!');
+        console.log(`🆔 [RecordingControls] Recording ID: ${response.data.recordingId}`);
+        console.log('📄 [RecordingControls] Prontuário será gerado automaticamente');
+        
         toast({
           title: 'Gravação salva',
           description: 'A gravação foi processada e o prontuário será gerado automaticamente.',
         });
         onRecordingStop?.(response.data.recordingId);
+      } else {
+        console.error('❌ [RecordingControls] Resposta do servidor indica falha:', response.data);
       }
     } catch (error: any) {
-      console.error('Erro ao fazer upload:', error);
+      console.error('❌ [RecordingControls] Erro ao fazer upload:', error);
+      console.error('📋 [RecordingControls] Detalhes do erro:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        stack: error.stack
+      });
+      
       toast({
         title: 'Erro no upload',
         description: error.response?.data?.error || 'Falha ao enviar gravação.',
@@ -127,6 +157,7 @@ export default function RecordingControls({
       });
     } finally {
       setIsUploading(false);
+      console.log('🔄 [RecordingControls] Upload finalizado');
     }
   };
 
