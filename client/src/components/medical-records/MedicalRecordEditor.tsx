@@ -109,14 +109,25 @@ export default function MedicalRecordEditor({
   const checkForExistingRecord = async () => {
     try {
       setLoading(true);
+      console.log('🔍 [MedicalRecordEditor] Verificando prontuário existente para consulta:', appointmentId);
+      
       const response = await axios.get(`/api/medical-records/by-appointment/${appointmentId}`);
+      
       if (response.data) {
+        console.log('✅ [MedicalRecordEditor] Prontuário encontrado:', response.data);
         setRecord(response.data);
         setEditedContent(response.data.content.data);
       }
     } catch (error: any) {
       // Se não existir, está ok
-      console.log('Nenhum prontuário existente para esta consulta');
+      console.log('ℹ️ [MedicalRecordEditor] Nenhum prontuário existente para esta consulta');
+      console.log('📝 [MedicalRecordEditor] Aguardando processamento da gravação...');
+      
+      // Tentar novamente após 5 segundos (tempo para processar a gravação)
+      setTimeout(() => {
+        console.log('🔄 [MedicalRecordEditor] Tentando carregar novamente...');
+        checkForExistingRecord();
+      }, 5000);
     } finally {
       setLoading(false);
     }
@@ -215,9 +226,19 @@ export default function MedicalRecordEditor({
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Carregando prontuário...</p>
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg">Processando prontuário...</h3>
+            <p className="text-muted-foreground max-w-md">
+              A gravação da consulta está sendo transcrita e o prontuário está sendo gerado pela IA. 
+              Isso pode levar alguns segundos.
+            </p>
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Bot className="h-4 w-4" />
+              <span>Gerando prontuário com IA</span>
+            </div>
+          </div>
         </div>
       </div>
     );

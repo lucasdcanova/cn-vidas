@@ -272,14 +272,16 @@ export default function MinimalistVideoCall({
       try {
         // Parar gravação se estiver gravando
         if (window.recordingControlsRef) {
-          window.recordingControlsRef.stopRecording();
+          console.log('⏹️ [MinimalistVideoCall] Parando gravação antes de sair...');
+          await window.recordingControlsRef.stopRecording();
+          console.log('✅ [MinimalistVideoCall] Gravação parada com sucesso');
         }
         
         await callRef.current.leave();
         await callRef.current.destroy();
         callRef.current = null;
       } catch (error) {
-        console.error('Erro ao sair da chamada:', error);
+        console.error('❌ [MinimalistVideoCall] Erro ao sair da chamada:', error);
       }
     }
     setHasJoinedCall(false);

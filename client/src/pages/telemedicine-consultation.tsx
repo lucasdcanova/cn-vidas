@@ -239,7 +239,14 @@ export default function TelemedicineConsultation() {
   const handleLeaveCall = () => {
     logEvent('Usuário encerrou a chamada');
     setShowVideoCall(false);
-    navigate('/');
+    
+    // Se for médico, redirecionar para o editor de prontuário
+    if (user?.role === 'doctor' && appointmentId) {
+      console.log('🩺 [TelemedConsultation] Médico encerrou consulta, redirecionando para prontuário...');
+      navigate(`/doctor/medical-records/edit?appointmentId=${appointmentId}`);
+    } else {
+      navigate('/');
+    }
   };
   
   const retryConnection = () => {
