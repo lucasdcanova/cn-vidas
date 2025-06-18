@@ -149,6 +149,27 @@ export default function MinimalistVideoCall({
     try {
       console.log('🎬 Iniciando videochamada headless...');
       
+      // Verificar permissões de microfone e câmera
+      console.log('🎤 [MinimalistVideoCall] Solicitando permissões de mídia...');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: true, 
+          video: true 
+        });
+        console.log('✅ [MinimalistVideoCall] Permissões concedidas:', {
+          audioTracks: stream.getAudioTracks().length,
+          videoTracks: stream.getVideoTracks().length
+        });
+        // Liberar a stream após verificar
+        stream.getTracks().forEach(track => track.stop());
+      } catch (permError) {
+        console.error('❌ [MinimalistVideoCall] Erro ao obter permissões:', permError);
+        alert('Por favor, permita o acesso ao microfone e câmera para iniciar a videochamada.');
+        setIsConnecting(false);
+        setHasJoinedCall(false);
+        return;
+      }
+      
       // Limpar qualquer instância global existente
       await cleanupGlobalDailyInstances();
       
@@ -195,6 +216,17 @@ export default function MinimalistVideoCall({
         .on('track-stopped', (event) => {
           handleTrackStopped(event);
         })
+        .on('participant-updated', (event) => {
+          console.log('🔄 [MinimalistVideoCall] Participante atualizado:', {
+            participantId: event?.participant?.session_id,
+            isLocal: event?.participant?.local,
+            audio: event?.participant?.audio,
+            video: event?.participant?.video
+          });
+        })
+        .on('active-speaker-change', (event) => {
+          console.log('🗣️ [MinimalistVideoCall] Mudança de speaker ativo:', event?.activeSpeaker);
+        })
         .on('error', (event) => {
           console.error('❌ Erro na videochamada:', event);
           setIsConnecting(false);
@@ -204,15 +236,36 @@ export default function MinimalistVideoCall({
       const joinOptions: any = {
         url: roomUrl,
         userName: userName || 'Usuário',
-        startVideoOff: !isVideoEnabled,
-        startAudioOff: !isAudioEnabled
+        startVideoOff: false, // Sempre iniciar com vídeo ligado
+        startAudioOff: false  // IMPORTANTE: Sempre iniciar com áudio ligado
       };
 
       if (token) {
         joinOptions.token = token;
       }
 
+      console.log('🎙️ [MinimalistVideoCall] Configurações de entrada:', {
+        audioEnabled: true,
+        videoEnabled: true,
+        userName: joinOptions.userName,
+        hasToken: !!token
+      });
+
       await callObject.join(joinOptions);
+      
+      // Garantir que o áudio está habilitado após entrar
+      console.log('🔊 [MinimalistVideoCall] Habilitando áudio após entrar...');
+      await callObject.setLocalAudio(true);
+      setIsAudioEnabled(true);
+      
+      // Verificar status do áudio
+      const localParticipant = callObject.participants().local;
+      console.log('🎤 [MinimalistVideoCall] Status do participante local:', {
+        audio: localParticipant?.audio,
+        video: localParticipant?.video,
+        audioTrack: localParticipant?.audioTrack,
+        videoTrack: localParticipant?.videoTrack
+      });
 
     } catch (error: any) {
       console.error('❌ Erro ao entrar na videochamada:', error);
@@ -235,18 +288,32 @@ export default function MinimalistVideoCall({
   const handleTrackStarted = (event: any) => {
     const { participant, track } = event;
     
+    console.log('🎵 [MinimalistVideoCall] Track iniciado:', {
+      participantId: participant?.session_id,
+      isLocal: participant?.local,
+      trackKind: track?.kind,
+      trackState: track?.readyState,
+      trackId: track?.id
+    });
+    
     if (track && track.readyState === 'live') {
       const stream = new MediaStream([track]);
       
       if (participant.local) {
         // Vídeo local
         if (track.kind === 'video' && localVideoRef.current) {
+          console.log('📹 [MinimalistVideoCall] Configurando vídeo local');
           localVideoRef.current.srcObject = stream;
+        } else if (track.kind === 'audio') {
+          console.log('🎤 [MinimalistVideoCall] Track de áudio local detectado');
         }
       } else {
         // Vídeo remoto
         if (track.kind === 'video' && remoteVideoRef.current) {
+          console.log('📹 [MinimalistVideoCall] Configurando vídeo remoto');
           remoteVideoRef.current.srcObject = stream;
+        } else if (track.kind === 'audio') {
+          console.log('🔊 [MinimalistVideoCall] Track de áudio remoto detectado - áudio deve estar funcionando');
         }
       }
     }
@@ -288,11 +355,25 @@ export default function MinimalistVideoCall({
   }, []);
 
   // Alternar áudio
-  const toggleAudio = useCallback(() => {
+  const toggleAudio = useCallback(async () => {
     if (callRef.current) {
       const newState = !isAudioEnabled;
-      callRef.current.setLocalAudio(newState);
-      setIsAudioEnabled(newState);
+      console.log(`🎤 [MinimalistVideoCall] Alternando áudio: ${isAudioEnabled} -> ${newState}`);
+      
+      try {
+        await callRef.current.setLocalAudio(newState);
+        setIsAudioEnabled(newState);
+        
+        // Verificar se mudou
+        const localParticipant = callRef.current.participants().local;
+        console.log('🔊 [MinimalistVideoCall] Status do áudio após toggle:', {
+          solicitado: newState,
+          atual: localParticipant?.audio,
+          audioTrack: !!localParticipant?.audioTrack
+        });
+      } catch (error) {
+        console.error('❌ [MinimalistVideoCall] Erro ao alternar áudio:', error);
+      }
     }
   }, [isAudioEnabled]);
 
@@ -327,6 +408,31 @@ export default function MinimalistVideoCall({
       setHasJoinedCall(false);
     };
   }, []);
+
+  // Timer para duração da chamada e verificação de áudio
+  useEffect(() => {
+    if (isCallActive && callStartTimeRef.current) {
+      const timer = setInterval(() => {
+        const duration = Math.floor((Date.now() - callStartTimeRef.current) / 1000);
+        setCallDuration(duration);
+        
+        // Verificar status do áudio a cada 10 segundos
+        if (duration % 10 === 0 && callRef.current) {
+          const participants = callRef.current.participants();
+          console.log('🔍 [MinimalistVideoCall] Verificação periódica de áudio:', {
+            duracao: `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`,
+            local: {
+              audio: participants.local?.audio,
+              video: participants.local?.video
+            },
+            remoteCount: Object.keys(participants).filter(id => id !== 'local').length
+          });
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [isCallActive]);
 
   return (
     <div className="fixed inset-0 w-full h-full bg-black overflow-hidden">
