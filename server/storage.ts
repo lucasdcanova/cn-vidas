@@ -1675,13 +1675,12 @@ export class DatabaseStorage implements IStorage {
   async addMedicalRecordEntry(data: InsertMedicalRecordEntry): Promise<MedicalRecordEntry> {
     const [entry] = await this.db.insert(medicalRecordEntries).values(data).returning();
     
-    // Atualizar último acesso
+    // Atualizar timestamp de atualização
     await this.db.update(medicalRecords)
       .set({
-        lastAccessedAt: new Date(),
-        lastAccessedBy: data.authorId
+        updatedAt: new Date()
       })
-      .where(eq(medicalRecords.id, data.recordId));
+      .where(eq(medicalRecords.id, data.record_id));
     
     return entry;
   }

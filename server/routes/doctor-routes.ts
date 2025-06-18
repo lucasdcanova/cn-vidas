@@ -401,9 +401,8 @@ doctorRouter.get('/appointments', requireAuth, requireDoctorRole, async (req: Au
           diagnosis: '', // Campo não existe no schema
           prescription: '', // Campo não existe no schema
           recordUrl: '', // Campo não existe no schema
-          patientAge: patient?.birthDate ? 
-            Math.floor((Date.now() - new Date(patient.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 
-            null
+          status: appointment.status,
+          date: appointment.date
         };
       })
     );
