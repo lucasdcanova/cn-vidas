@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Circle, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAudioRecording } from '@/hooks/useAudioRecording';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
@@ -28,6 +27,7 @@ export default function RecordingControls({
   const [isUploading, setIsUploading] = useState(false);
   const [hasConsent, setHasConsent] = useState(patientConsent);
   const [hasStarted, setHasStarted] = useState(false);
+  const [manualStart, setManualStart] = useState(false);
 
   // Expor métodos para controle externo
   useEffect(() => {
@@ -90,15 +90,21 @@ export default function RecordingControls({
     }
   }, [autoStart, hasConsent, hasStarted, state.isRecording]);
 
-  // Iniciar gravação automaticamente
+  // Iniciar gravação
   const handleStartRecording = async () => {
     console.log('🎙️ [RecordingControls] Iniciando gravação...');
     try {
       await startRecording();
       console.log('✅ [RecordingControls] Gravação iniciada com sucesso');
+      setManualStart(true);
       onRecordingStart?.();
     } catch (error) {
       console.error('❌ [RecordingControls] Erro ao iniciar gravação:', error);
+      toast({
+        title: 'Erro ao iniciar gravação',
+        description: 'Não foi possível iniciar a gravação. Verifique as permissões do microfone.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -183,28 +189,48 @@ export default function RecordingControls({
   };
 
   return (
-    <div className={cn('flex flex-col gap-4', className)}>
+    <div className={cn('flex items-center gap-2', className)}>
+      {/* Botão para iniciar/parar gravação manualmente */}
+      {!state.isRecording && !hasStarted && !autoStart && (
+        <button
+          onClick={handleStartRecording}
+          className="flex items-center gap-2 px-3 py-1 text-xs bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+          title="Iniciar gravação"
+        >
+          <Circle className="h-3 w-3" />
+          <span>Gravar</span>
+        </button>
+      )}
+
       {/* Indicador de gravação */}
       {state.isRecording && (
         <div className="flex items-center gap-2 text-xs text-red-400">
           <Circle className="h-3 w-3 text-red-500 fill-red-500 animate-pulse" />
           <span>{formatDuration(state.duration)}</span>
+          {manualStart && (
+            <button
+              onClick={handleStopRecording}
+              className="ml-2 px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors"
+              title="Parar gravação"
+            >
+              Parar
+            </button>
+          )}
         </div>
       )}
 
       {/* Erro */}
-      {state.error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
+      {state.error && !state.isRecording && (
+        <div className="text-xs text-red-400">
+          Erro na gravação
+        </div>
       )}
 
       {/* Indicador de upload */}
       {isUploading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Enviando gravação...
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          <span>Enviando...</span>
         </div>
       )}
     </div>

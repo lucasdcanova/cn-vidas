@@ -220,7 +220,7 @@ export default function DoctorEmergencyRoom() {
     return (
       <div className="fixed inset-0 z-50 bg-black">
         {/* Componente de vídeo FaceTime em tela cheia */}
-                      <MinimalistVideoCall
+        <MinimalistVideoCall
           roomUrl={consultation.roomUrl!}
           token={consultation.token || undefined}
           onJoinCall={() => {
