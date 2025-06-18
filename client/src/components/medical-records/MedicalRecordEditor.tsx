@@ -151,7 +151,7 @@ export default function MedicalRecordEditor({
       
       try {
         // Buscar gravação da consulta
-        const recordingResponse = await axios.get(`/api/appointments/${appointmentId}/recording`);
+        const recordingResponse = await axios.get(`/api/consultation-recordings/appointment/${appointmentId}`);
         
         if (recordingResponse.data?.recording) {
           const recording = recordingResponse.data.recording;

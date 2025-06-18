@@ -51,6 +51,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
   }, []);
 
   const startRecording = useCallback(async () => {
+    console.log('🎤 [useAudioRecording] Iniciando gravação de áudio...');
     try {
       // Resetar estado
       audioChunksRef.current = [];
@@ -63,6 +64,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       });
 
       // Solicitar permissão para o microfone
+      console.log('🎙️ [useAudioRecording] Solicitando permissões de microfone...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
@@ -70,11 +72,14 @@ export function useAudioRecording(): UseAudioRecordingReturn {
           sampleRate: 44100
         } 
       });
+      console.log('✅ [useAudioRecording] Permissão de microfone concedida');
 
       // Criar MediaRecorder
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
         ? 'audio/webm;codecs=opus' 
         : 'audio/webm';
+      
+      console.log('📼 [useAudioRecording] Criando MediaRecorder com mimeType:', mimeType);
 
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType,
@@ -82,18 +87,24 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       });
 
       mediaRecorderRef.current = mediaRecorder;
+      console.log('✅ [useAudioRecording] MediaRecorder criado com sucesso');
 
       // Configurar eventos
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
+          console.log(`📊 [useAudioRecording] Dados de áudio recebidos: ${event.data.size} bytes`);
           audioChunksRef.current.push(event.data);
         }
       };
 
       mediaRecorder.onstop = () => {
+        console.log('🛑 [useAudioRecording] MediaRecorder parado');
+        console.log(`📦 [useAudioRecording] Total de chunks de áudio: ${audioChunksRef.current.length}`);
+        
         // Criar blob final
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         audioBlobRef.current = audioBlob;
+        console.log(`💾 [useAudioRecording] Blob de áudio criado: ${audioBlob.size} bytes`);
 
         // Limpar stream
         stream.getTracks().forEach(track => track.stop());
@@ -112,6 +123,7 @@ export function useAudioRecording(): UseAudioRecordingReturn {
       };
 
       // Iniciar gravação
+      console.log('▶️ [useAudioRecording] Iniciando MediaRecorder...');
       mediaRecorder.start(1000); // Coletar dados a cada 1 segundo
       startTimeRef.current = Date.now();
       startDurationTimer();
@@ -122,6 +134,8 @@ export function useAudioRecording(): UseAudioRecordingReturn {
         duration: 0,
         error: null
       });
+      
+      console.log('✅ [useAudioRecording] Gravação iniciada com sucesso');
 
     } catch (error: any) {
       console.error('Erro ao iniciar gravação:', error);
