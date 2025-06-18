@@ -17,11 +17,13 @@ export default function MedicalRecordEditPage() {
 
   // Debug detalhado do location
   console.log('🔍 [MedicalRecordEditPage] Location completo:', location);
+  console.log('🔍 [MedicalRecordEditPage] window.location:', window.location.href);
+  console.log('🔍 [MedicalRecordEditPage] window.location.search:', window.location.search);
   console.log('🔍 [MedicalRecordEditPage] Parte antes do ?:', location.split('?')[0]);
   console.log('🔍 [MedicalRecordEditPage] Parte depois do ?:', location.split('?')[1]);
   
-  // Extrair appointmentId da query string
-  const searchParams = new URLSearchParams(location.split('?')[1] || '');
+  // Extrair appointmentId da query string - tentar múltiplas formas
+  const searchParams = new URLSearchParams(window.location.search || location.split('?')[1] || '');
   const appointmentId = searchParams.get('appointmentId');
   const recordId = searchParams.get('recordId');
   
