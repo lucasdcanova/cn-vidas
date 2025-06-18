@@ -47,12 +47,12 @@ medicalRecordsRouter.get('/patient/:patientId', requireAuth, requireDoctorOrAdmi
     if (!record) {
       // Criar prontuário se não existir
       record = await storage.createMedicalRecord(patientId);
-      console.log(`Prontuário criado para paciente ${patientId}: ${record.recordNumber}`);
+      console.log(`Prontuário criado para paciente ${patientId}: ID ${record.id}`);
     }
     
     // Registrar acesso
     await storage.logMedicalRecordAccess({
-      recordId: record.id,
+      record_id: record.id,
       userId: req.user!.id,
       accessType: 'view',
       accessReason: req.body.reason || 'Visualização de prontuário',
@@ -94,7 +94,7 @@ medicalRecordsRouter.get('/:recordId/entries', requireAuth, requireDoctorOrAdmin
     
     // Verificar permissões para médico
     if (req.user!.role === 'doctor') {
-      const canAccess = await storage.canDoctorAccessMedicalRecord(req.user!.id, record.patientId);
+      const canAccess = await storage.canDoctorAccessMedicalRecord(req.user!.id, record.patient_id);
       if (!canAccess) {
         return res.status(403).json({ message: 'Você não tem permissão para acessar este prontuário' });
       }
@@ -134,7 +134,7 @@ medicalRecordsRouter.post('/:recordId/entries', requireAuth, async (req: Authent
     }
     
     // Verificar permissões
-    const canAccess = await storage.canDoctorAccessMedicalRecord(req.user!.id, record.patientId);
+    const canAccess = await storage.canDoctorAccessMedicalRecord(req.user!.id, record.patient_id);
     if (!canAccess) {
       return res.status(403).json({ message: 'Você não tem permissão para adicionar entradas neste prontuário' });
     }
@@ -252,7 +252,7 @@ medicalRecordsRouter.get('/search', requireAuth, async (req: AuthenticatedReques
     // Registrar acesso para cada prontuário retornado
     for (const record of records) {
       await storage.logMedicalRecordAccess({
-        recordId: record.id,
+        record_id: record.id,
         userId: req.user!.id,
         accessType: 'view',
         accessReason: `Busca administrativa: ${q}`,

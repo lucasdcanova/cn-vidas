@@ -1635,39 +1635,15 @@ export class DatabaseStorage implements IStorage {
   
   // Criar prontuário para novo paciente
   async createMedicalRecord(patientId: number): Promise<MedicalRecord> {
-    // Gerar número único do prontuário
-    const recordNumber = await this.generateRecordNumber(patientId);
-    
+    // Criar prontuário vazio para o paciente
     const [record] = await this.db.insert(medicalRecords).values({
-      patientId,
-      recordNumber,
+      patientId: patientId,
+      doctorId: 1, // Será atualizado quando um médico criar conteúdo
+      content: {}, // Conteúdo vazio inicial
+      status: 'draft'
     }).returning();
     
     return record;
-  }
-  
-  // Gerar número único do prontuário
-  async generateRecordNumber(patientId: number): Promise<string> {
-    const year = new Date().getFullYear();
-    
-    // Buscar o último número sequencial do ano
-    const lastRecord = await this.db.select({
-      recordNumber: medicalRecords.recordNumber
-    })
-    .from(medicalRecords)
-    .where(sql`${medicalRecords.recordNumber} LIKE ${year + '-%'}`)
-    .orderBy(desc(medicalRecords.recordNumber))
-    .limit(1);
-    
-    let sequential = 1;
-    if (lastRecord.length > 0) {
-      const parts = lastRecord[0].recordNumber.split('-');
-      if (parts.length >= 2) {
-        sequential = parseInt(parts[1]) + 1;
-      }
-    }
-    
-    return `${year}-${sequential.toString().padStart(6, '0')}-${patientId.toString().padStart(6, '0')}`;
   }
   
   // Buscar prontuário por ID do paciente
@@ -1829,8 +1805,7 @@ export class DatabaseStorage implements IStorage {
     .where(
       or(
         sql`LOWER(${users.fullName}) LIKE LOWER(${searchPattern})`,
-        sql`LOWER(${users.username}) LIKE LOWER(${searchPattern})`,
-        sql`${medicalRecords.recordNumber} LIKE ${searchPattern}`
+        sql`LOWER(${users.username}) LIKE LOWER(${searchPattern})`
       )
     )
     .limit(50)
