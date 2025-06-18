@@ -83,13 +83,16 @@ export async function createRoom(roomName: string, expiryMinutes = 60, waitForPr
       const createData = {
         name: sanitizedRoomName,
         properties: {
-          start_audio_off: false,
-          start_video_off: false,
+          start_audio_off: false,  // IMPORTANTE: áudio deve iniciar ligado
+          start_video_off: false,  // vídeo também inicia ligado
           enable_chat: true,
           enable_screenshare: true,
-          enable_knocking: false, // Desabilitar "knocking" para acesso direto
+          enable_knocking: false,  // Desabilitar "knocking" para acesso direto
           enable_network_ui: true, // Habilitar UI de rede
           enable_prejoin_ui: false, // Desabilitar tela de pre-join
+          enable_recording: 'local', // Permitir gravação local
+          enable_advanced_chat: false,
+          max_participants: 2,      // Limitar a 2 participantes (médico e paciente)
           exp: Math.floor(Date.now() / 1000) + expiryMinutes * 60 // expiração em timestamp unix
         }
       };
