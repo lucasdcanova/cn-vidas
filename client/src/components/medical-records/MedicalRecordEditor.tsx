@@ -95,7 +95,7 @@ export default function MedicalRecordEditor({
         throw new Error('ID do prontuário não fornecido');
       }
       
-      const response = await axios.get(`/api/medical-records/${recordIdToLoad}`);
+      const response = await axios.get(`/api/medical-records-ai/${recordIdToLoad}`);
       const recordData = response.data;
       setRecord(recordData);
       setEditedContent(recordData.content.data);
@@ -116,7 +116,7 @@ export default function MedicalRecordEditor({
       setLoading(true);
       console.log('🔍 [MedicalRecordEditor] Verificando prontuário existente para consulta:', appointmentId);
       
-      const response = await axios.get(`/api/medical-records/by-appointment/${appointmentId}`);
+      const response = await axios.get(`/api/medical-records-ai/by-appointment/${appointmentId}`);
       
       if (response.data) {
         console.log('✅ [MedicalRecordEditor] Prontuário encontrado:', response.data);
@@ -227,10 +227,10 @@ export default function MedicalRecordEditor({
       let response;
       if (record) {
         // Atualizar existente
-        response = await axios.put(`/api/medical-records/${record.id}`, data);
+        response = await axios.put(`/api/medical-records-ai/${record.id}`, data);
       } else {
         // Criar novo
-        response = await axios.post('/api/medical-records', data);
+        response = await axios.post('/api/medical-records-ai', data);
       }
 
       setRecord(response.data);
@@ -269,7 +269,7 @@ export default function MedicalRecordEditor({
     try {
       setSigning(true);
 
-      const response = await axios.post(`/api/medical-records/${record.id}/sign`);
+      const response = await axios.post(`/api/medical-records-ai/${record.id}/sign`);
       
       setRecord(response.data);
       
