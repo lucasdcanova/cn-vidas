@@ -534,6 +534,73 @@ appointmentJoinRouter.delete('/:id', requireAuth, async (req: AuthenticatedReque
 });
 
 /**
+ * Endpoint para salvar notas da consulta
+ * POST /api/appointments/:id/notes
+ */
+appointmentJoinRouter.post('/:id/notes', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Não autorizado' });
+    }
+
+    const appointmentId = parseInt(req.params.id);
+    const { notes } = req.body;
+
+    if (isNaN(appointmentId)) {
+      return res.status(400).json({ message: 'ID de consulta inválido' });
+    }
+
+    console.log(`Salvando notas para consulta #${appointmentId}`);
+
+    // Buscar a consulta
+    const appointment = await storage.getAppointment(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ message: 'Consulta não encontrada' });
+    }
+
+    // Verificar se o usuário tem permissão (médico da consulta ou paciente)
+    const isDoctor = req.user.role === 'doctor';
+    let hasPermission = false;
+
+    if (isDoctor) {
+      // Se for médico, buscar o doctorId baseado no userId
+      const doctor = await storage.getDoctorByUserId(req.user.id);
+      hasPermission = doctor ? (appointment.doctorId === doctor.id) : false;
+    } else if (req.user.role === 'patient') {
+      // Se for paciente, verificar se é o dono da consulta
+      hasPermission = appointment.userId === req.user.id;
+    } else if (req.user.role === 'admin') {
+      // Admin tem permissão
+      hasPermission = true;
+    }
+
+    if (!hasPermission) {
+      return res.status(403).json({ message: 'Sem permissão para editar esta consulta' });
+    }
+
+    // Atualizar as notas da consulta
+    await storage.updateAppointment(appointmentId, {
+      notes: notes || '',
+      updatedAt: new Date()
+    });
+
+    console.log(`Notas da consulta #${appointmentId} atualizadas com sucesso`);
+
+    return res.json({
+      success: true,
+      message: 'Notas salvas com sucesso'
+    });
+
+  } catch (error) {
+    console.error('Erro ao salvar notas:', error);
+    return res.status(500).json({
+      message: 'Erro ao salvar notas',
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
+  }
+});
+
+/**
  * Endpoint para cancelar consultas
  * POST /api/appointments/:id/cancel
  */
