@@ -6,9 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Loader2, AlertCircle, Clock, User, ShieldAlert, FileText, Save } from 'lucide-react';
+import { Loader2, AlertCircle, Clock, User, ShieldAlert } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -22,7 +20,6 @@ interface ConsultationInfo {
   patientAge?: number;
   patientPhone?: string;
   patientEmail?: string;
-  notes: string;
 }
 
 export default function DoctorEmergencyRoom() {
@@ -39,10 +36,8 @@ export default function DoctorEmergencyRoom() {
     token: null,
     appointmentId: null,
     patientName: null,
-    notes: '',
   });
   const [showVideoCall, setShowVideoCall] = useState(false);
-  const [savingNotes, setSavingNotes] = useState(false);
 
   // Buscar informações da consulta
   useEffect(() => {
@@ -136,7 +131,6 @@ export default function DoctorEmergencyRoom() {
           patientAge: data.patientAge,
           patientPhone: data.patientPhone,
           patientEmail: data.patientEmail,
-          notes: data.notes || '',
         });
 
         // Auto-iniciar a chamada
@@ -158,51 +152,14 @@ export default function DoctorEmergencyRoom() {
     fetchConsultationInfo();
   }, [appointmentId, toast]);
 
-  // Salvar notas da consulta
-  const saveConsultationNotes = async () => {
-    if (!consultation.appointmentId) return;
-
-    setSavingNotes(true);
-    try {
-      const response = await apiRequest('POST', `/api/appointments/${consultation.appointmentId}/notes`, {
-        notes: consultation.notes,
-      });
-
-      if (response.ok) {
-        toast({
-          title: 'Notas salvas',
-          description: 'As anotações foram salvas com sucesso',
-        });
-      } else {
-        throw new Error('Erro ao salvar notas');
-      }
-    } catch (error) {
-      console.error('Erro ao salvar notas:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível salvar as anotações',
-        variant: 'destructive',
-      });
-    } finally {
-      setSavingNotes(false);
-    }
-  };
-
   // Callback quando sair da chamada
   const handleLeaveCall = async () => {
     console.log('📞 Encerrando consulta de emergência');
     
-    // Salvar notas finais se houver
-    if (consultation.notes.trim()) {
-      await saveConsultationNotes();
-    }
-    
     // Marcar consulta como concluída
     if (consultation.appointmentId) {
       try {
-        await apiRequest('POST', `/api/emergency/v2/complete/${consultation.appointmentId}`, {
-          notes: consultation.notes,
-        });
+        await apiRequest('POST', `/api/emergency/v2/complete/${consultation.appointmentId}`);
       } catch (error) {
         console.error('Erro ao marcar consulta como concluída:', error);
       }
@@ -302,41 +259,6 @@ export default function DoctorEmergencyRoom() {
                   <p className="text-sm text-white/70">{consultation.patientPhone}</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Área de notas */}
-        <div className="absolute bottom-20 right-4 z-40 w-80">
-          <Card className="bg-black/70 backdrop-blur-md border-white/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-white" />
-                  <CardTitle className="text-sm text-white">Anotações</CardTitle>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="text-white hover:bg-white/20"
-                  onClick={saveConsultationNotes}
-                  disabled={savingNotes}
-                >
-                  {savingNotes ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={consultation.notes}
-                onChange={(e) => setConsultation(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Adicione suas anotações aqui..."
-                className="min-h-[100px] bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
             </CardContent>
           </Card>
         </div>
