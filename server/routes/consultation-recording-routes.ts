@@ -240,16 +240,20 @@ async function processRecording(recordingId: number) {
     console.log(`📊 [ProcessRecording] Tamanho do arquivo: ${(audioFile.length / 1024 / 1024).toFixed(2)} MB`);
     console.log(`📁 [ProcessRecording] Caminho do arquivo: ${audioPath}`);
     
+    let transcription: string;
+    
     try {
       // Usar fs.createReadStream para o arquivo
       const audioStream = fsSync.createReadStream(audioPath);
       
-      const transcription = await openai.audio.transcriptions.create({
+      const transcriptionResult = await openai.audio.transcriptions.create({
         file: audioStream as any,
         model: 'whisper-1',
         language: 'pt',
         response_format: 'text'
       });
+      
+      transcription = transcriptionResult;
 
       console.log(`✅ [ProcessRecording] Transcrição concluída. Tamanho: ${transcription.length} caracteres`);
       console.log(`📝 [ProcessRecording] Primeiros 200 caracteres da transcrição:`, transcription.substring(0, 200) + '...');
