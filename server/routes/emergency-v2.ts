@@ -607,7 +607,7 @@ emergencyV2Router.post('/complete/:appointmentId', authenticateToken, async (req
     await storage.updateAppointment(appointmentId, {
       status: 'completed',
       notes: notes || appointment.notes,
-      completedAt: new Date()
+      updatedAt: new Date()
     });
     
     // Limpar notificações se existirem
