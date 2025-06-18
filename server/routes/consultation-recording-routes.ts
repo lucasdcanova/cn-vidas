@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
+import fsSync from 'fs';
 import OpenAI from 'openai';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth, AuthRequest } from '../middleware/auth-unified';
@@ -11,8 +12,15 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 // Configurar OpenAI
+const openaiApiKey = process.env.OPENAI_API_KEY || '';
+if (!openaiApiKey) {
+  console.error('⚠️ [ConsultationRecording] OPENAI_API_KEY não configurada!');
+} else {
+  console.log('✅ [ConsultationRecording] OpenAI API Key configurada');
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
+  apiKey: openaiApiKey,
 });
 
 // Configurar multer para upload temporário
@@ -169,7 +177,10 @@ router.post('/upload', requireAuth, upload.single('audio'), async (req: AuthRequ
 
 // Função assíncrona para processar a gravação
 async function processRecording(recordingId: number) {
-  console.log(`🎬 [ProcessRecording] Iniciando processamento da gravação ID: ${recordingId}`);
+  console.log(`\n🎯 [ProcessRecording] ===== INICIANDO PROCESSAMENTO =====`);
+  console.log(`📝 [ProcessRecording] Recording ID: ${recordingId}`);
+  console.log(`🕐 [ProcessRecording] Timestamp: ${new Date().toISOString()}`);
+  console.log(`🔑 [ProcessRecording] OpenAI API Key configurada: ${!!process.env.OPENAI_API_KEY}`);
   
   try {
     const recording = await prisma.consultation_recordings.findUnique({
@@ -226,15 +237,32 @@ async function processRecording(recordingId: number) {
     const audioFile = await fs.readFile(audioPath);
     
     console.log('📡 [ProcessRecording] Enviando para API do OpenAI...');
-    const transcription = await openai.audio.transcriptions.create({
-      file: audioFile,
-      model: 'whisper-1',
-      language: 'pt',
-      response_format: 'text'
-    });
+    console.log(`📊 [ProcessRecording] Tamanho do arquivo: ${(audioFile.length / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`📁 [ProcessRecording] Caminho do arquivo: ${audioPath}`);
+    
+    try {
+      // Usar fs.createReadStream para o arquivo
+      const audioStream = fsSync.createReadStream(audioPath);
+      
+      const transcription = await openai.audio.transcriptions.create({
+        file: audioStream as any,
+        model: 'whisper-1',
+        language: 'pt',
+        response_format: 'text'
+      });
 
-    console.log(`✅ [ProcessRecording] Transcrição concluída. Tamanho: ${transcription.length} caracteres`);
-    console.log(`📝 [ProcessRecording] Primeiros 200 caracteres da transcrição:`, transcription.substring(0, 200) + '...');
+      console.log(`✅ [ProcessRecording] Transcrição concluída. Tamanho: ${transcription.length} caracteres`);
+      console.log(`📝 [ProcessRecording] Primeiros 200 caracteres da transcrição:`, transcription.substring(0, 200) + '...');
+    } catch (transcriptionError: any) {
+      console.error(`❌ [ProcessRecording] Erro na transcrição:`, transcriptionError);
+      console.error(`📋 [ProcessRecording] Detalhes do erro:`, {
+        message: transcriptionError.message,
+        status: transcriptionError.response?.status,
+        data: transcriptionError.response?.data,
+        stack: transcriptionError.stack
+      });
+      throw new Error(`Erro na transcrição: ${transcriptionError.message}`);
+    }
 
     // Atualizar transcrição no banco
     await prisma.consultation_recordings.update({
