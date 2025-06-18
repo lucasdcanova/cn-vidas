@@ -328,31 +328,20 @@ export const partnerAddresses = pgTable("partner_addresses", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Tabela de prontuários médicos (seguindo normas brasileiras CFM)
+// Tabela de prontuários médicos - simplificada para corresponder ao banco real
 export const medicalRecords = pgTable("medical_records", {
   id: serial("id").primaryKey(),
   patientId: integer("patient_id").notNull().references(() => users.id),
-  // Dados básicos do prontuário
-  recordNumber: varchar("record_number", { length: 50 }).notNull().unique(), // Número único do prontuário
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  // Anamnese inicial
-  chiefComplaint: text("chief_complaint"), // Queixa principal
-  historyOfPresentIllness: text("history_of_present_illness"), // História da doença atual
-  pastMedicalHistory: text("past_medical_history"), // História médica pregressa
-  medications: text("medications"), // Medicações em uso
-  allergies: text("allergies"), // Alergias
-  familyHistory: text("family_history"), // História familiar
-  socialHistory: text("social_history"), // História social
-  // Exame físico inicial
-  vitalSigns: json("vital_signs"), // Sinais vitais (PA, FC, FR, Temp, etc)
-  physicalExamination: text("physical_examination"), // Exame físico
-  // Informações adicionais
-  bloodType: varchar("blood_type", { length: 5 }), // Tipo sanguíneo
-  emergencyContact: json("emergency_contact"), // Contato de emergência
-  // Campos de controle
-  isActive: boolean("is_active").default(true).notNull(),
-  lastAccessedAt: timestamp("last_accessed_at"),
-  lastAccessedBy: integer("last_accessed_by").references(() => users.id),
+  doctorId: integer("doctor_id").notNull().references(() => users.id),
+  appointmentId: integer("appointment_id").references(() => appointments.id),
+  recordingId: integer("recording_id"),
+  content: json("content").notNull(),
+  status: text("status").default("draft").notNull(),
+  aiGenerated: boolean("ai_generated").default(false).notNull(),
+  signedAt: timestamp("signed_at", { withTimezone: true }),
+  signatureHash: text("signature_hash"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Tabela de entradas no prontuário (evolução)
