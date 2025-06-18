@@ -494,6 +494,63 @@ router.get('/transcription/:recordingId', requireAuth, async (req: AuthRequest, 
   }
 });
 
+// Obter gravação por appointmentId
+router.get('/appointment/:appointmentId', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const appointmentId = parseInt(req.params.appointmentId);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Usuário não autenticado' });
+    }
+
+    console.log('🔍 [Recording] Buscando gravação para appointment:', appointmentId);
+
+    // Buscar gravação relacionada à consulta
+    const recording = await prisma.consultation_recordings.findUnique({
+      where: { appointment_id: appointmentId },
+      include: {
+        medical_records: {
+          orderBy: { created_at: 'desc' },
+          take: 1
+        }
+      }
+    });
+
+    if (!recording) {
+      console.log('❌ [Recording] Nenhuma gravação encontrada para appointment:', appointmentId);
+      return res.status(404).json({ success: false, error: 'Gravação não encontrada' });
+    }
+
+    console.log('✅ [Recording] Gravação encontrada:', {
+      id: recording.id,
+      status: recording.transcription_status,
+      medicalRecordId: recording.medical_records[0]?.id
+    });
+
+    res.json({
+      success: true,
+      recording: {
+        id: recording.id,
+        status: recording.transcription_status,
+        hasTranscription: !!recording.transcription,
+        hasAiNotes: !!recording.ai_generated_notes,
+        medicalRecordId: recording.medical_records[0]?.id,
+        error: recording.processing_error,
+        createdAt: recording.created_at,
+        completedAt: recording.processing_completed_at
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Erro ao obter gravação por appointmentId:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao obter gravação'
+    });
+  }
+});
+
 // Obter gravação
 router.get('/:recordingId', requireAuth, async (req: AuthRequest, res) => {
   try {

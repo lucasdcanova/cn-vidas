@@ -56,8 +56,29 @@ export default function RecordingControls({
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Logs para debug
+  useEffect(() => {
+    console.log('🔍 [RecordingControls] Estado do componente:', {
+      appointmentId,
+      autoStart,
+      patientConsent,
+      hasConsent,
+      hasStarted,
+      isRecording: state.isRecording,
+      isUploading
+    });
+  }, [appointmentId, autoStart, patientConsent, hasConsent, hasStarted, state.isRecording, isUploading]);
+
   // Iniciar gravação automaticamente se configurado
   useEffect(() => {
+    console.log('🔄 [RecordingControls] Verificando condições para auto-start:', {
+      autoStart,
+      hasConsent,
+      hasStarted,
+      isRecording: state.isRecording,
+      condicoesAtendidas: autoStart && hasConsent && !hasStarted && !state.isRecording
+    });
+    
     if (autoStart && hasConsent && !hasStarted && !state.isRecording) {
       setHasStarted(true);
       // Aguardar 5 segundos para garantir que a chamada está estável
