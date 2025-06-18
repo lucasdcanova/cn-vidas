@@ -148,7 +148,7 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
       amount: plan.price, // Preço em centavos
       currency: 'brl',
       customer: customerId,
-      setup_future_usage: 'on_session', // Salvar método de pagamento para uso futuro
+      setup_future_usage: 'on_session' as const, // Salvar método de pagamento para uso futuro
       metadata: {
         planId: plan.id.toString(),
         planName: plan.name,
@@ -251,7 +251,7 @@ router.post("/confirm-payment", isAuthenticated, async (req: Request, res: Respo
       // Atualizar o status da assinatura
       await db.update(users)
         .set({
-          subscriptionPlan: planName || 'basic', // Usar o plano do metadata ou 'basic' como padrão
+          subscriptionPlan: (planName || 'basic') as any, // Usar o plano do metadata ou 'basic' como padrão
           subscriptionStatus: 'active',
           emergencyConsultationsLeft: 3 // Número padrão de consultas de emergência
         })

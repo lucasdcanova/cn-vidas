@@ -223,7 +223,7 @@ notificationRouter.get("/recent-activities", requireAuth, async (req: Authentica
           type: 'qr_scan',
           title: 'QR Code Verificado',
           description: `Seu QR Code foi escaneado por ${log.scannerName || 'Parceiro'} para verificação de identidade`,
-          date: new Date(log.createdAt),
+          date: new Date(log.scannedAt),
           icon: 'qr_code_scanner',
           status: 'verified',
           link: '/qr-code'
