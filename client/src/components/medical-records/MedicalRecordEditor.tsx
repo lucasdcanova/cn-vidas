@@ -87,10 +87,15 @@ export default function MedicalRecordEditor({
     }
   }, [recordId, appointmentId]);
 
-  const loadRecord = async () => {
+  const loadRecord = async (id?: number) => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/medical-records/${recordId}`);
+      const recordIdToLoad = id || recordId;
+      if (!recordIdToLoad) {
+        throw new Error('ID do prontuário não fornecido');
+      }
+      
+      const response = await axios.get(`/api/medical-records/${recordIdToLoad}`);
       const recordData = response.data;
       setRecord(recordData);
       setEditedContent(recordData.content.data);
@@ -117,20 +122,83 @@ export default function MedicalRecordEditor({
         console.log('✅ [MedicalRecordEditor] Prontuário encontrado:', response.data);
         setRecord(response.data);
         setEditedContent(response.data.content.data);
+        setLoading(false);
       }
     } catch (error: any) {
-      // Se não existir, está ok
-      console.log('ℹ️ [MedicalRecordEditor] Nenhum prontuário existente para esta consulta');
-      console.log('📝 [MedicalRecordEditor] Aguardando processamento da gravação...');
-      
-      // Tentar novamente após 5 segundos (tempo para processar a gravação)
-      setTimeout(() => {
-        console.log('🔄 [MedicalRecordEditor] Tentando carregar novamente...');
-        checkForExistingRecord();
-      }, 5000);
-    } finally {
-      setLoading(false);
+      if (error.response?.status === 404) {
+        // Se não existir prontuário, verificar se há gravação sendo processada
+        console.log('ℹ️ [MedicalRecordEditor] Nenhum prontuário existente, verificando gravação...');
+        checkRecordingStatus();
+      } else {
+        console.error('❌ [MedicalRecordEditor] Erro ao buscar prontuário:', error);
+        setLoading(false);
+        toast({
+          title: 'Erro ao carregar prontuário',
+          description: 'Ocorreu um erro ao tentar carregar o prontuário.',
+          variant: 'destructive'
+        });
+      }
     }
+  };
+
+  const checkRecordingStatus = async () => {
+    let attempts = 0;
+    const maxAttempts = 24; // 2 minutos no total (24 * 5 segundos)
+    
+    const checkStatus = async () => {
+      attempts++;
+      console.log(`🔄 [MedicalRecordEditor] Verificando status da gravação (tentativa ${attempts}/${maxAttempts})...`);
+      
+      try {
+        // Buscar gravação da consulta
+        const recordingResponse = await axios.get(`/api/appointments/${appointmentId}/recording`);
+        
+        if (recordingResponse.data?.recording) {
+          const recording = recordingResponse.data.recording;
+          console.log('📼 [MedicalRecordEditor] Status da gravação:', recording.status);
+          
+          if (recording.status === 'completed' && recording.medicalRecordId) {
+            console.log('✅ [MedicalRecordEditor] Prontuário gerado pela IA!');
+            // Carregar o prontuário gerado
+            loadRecord(recording.medicalRecordId);
+            return;
+          } else if (recording.status === 'error') {
+            console.error('❌ [MedicalRecordEditor] Erro no processamento da gravação');
+            setLoading(false);
+            toast({
+              title: 'Erro no processamento',
+              description: 'Houve um erro ao processar a gravação. Você pode criar o prontuário manualmente.',
+              variant: 'destructive'
+            });
+            return;
+          } else if (recording.status === 'transcribed') {
+            console.log('📝 [MedicalRecordEditor] Transcrição concluída, aguardando geração do prontuário...');
+          }
+        }
+        
+        // Se ainda não concluiu e não excedeu tentativas, tentar novamente
+        if (attempts < maxAttempts) {
+          setTimeout(checkStatus, 5000);
+        } else {
+          console.log('⏱️ [MedicalRecordEditor] Tempo limite excedido, permitindo criação manual');
+          setLoading(false);
+          toast({
+            title: 'Processamento em andamento',
+            description: 'O processamento está demorando mais que o esperado. Você pode criar o prontuário manualmente.',
+            variant: 'default'
+          });
+        }
+      } catch (error) {
+        console.error('❌ [MedicalRecordEditor] Erro ao verificar status:', error);
+        if (attempts < maxAttempts) {
+          setTimeout(checkStatus, 5000);
+        } else {
+          setLoading(false);
+        }
+      }
+    };
+    
+    checkStatus();
   };
 
   // Detectar mudanças
