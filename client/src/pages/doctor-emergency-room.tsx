@@ -166,7 +166,10 @@ export default function DoctorEmergencyRoom() {
       
       // Redirecionar para a página de edição de prontuário
       console.log('🏥 Redirecionando para edição de prontuário');
-      navigate(`/doctor/medical-records/edit?appointmentId=${consultation.appointmentId}`);
+      console.log('🆔 AppointmentId para redirecionamento:', consultation.appointmentId);
+      const url = `/doctor/medical-records/edit?appointmentId=${consultation.appointmentId}`;
+      console.log('🔗 URL de redirecionamento:', url);
+      navigate(url);
     } else {
       // Se não houver appointmentId, volta para a tela anterior
       navigate('/doctor-telemedicine');
