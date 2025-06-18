@@ -1093,14 +1093,14 @@ export class DatabaseStorage implements IStorage {
       
       if (settings.notifications) {
         mergedSettings.notifications = {
-          ...(existingSettings.notifications || {}),
+          ...(existingSettings.notifications as any || {}),
           ...settings.notifications
         };
       }
       
       if (settings.privacy) {
         mergedSettings.privacy = {
-          ...(existingSettings.privacy || {}),
+          ...(existingSettings.privacy as any || {}),
           ...settings.privacy
         };
       }

@@ -33,7 +33,7 @@ const isDoctorMiddleware = async (req: any, res: any, next: any) => {
 // Listar prontuários do médico
 router.get('/', isAuthenticated, isDoctorMiddleware, async (req, res) => {
   try {
-    const doctorUserId = req.doctorUserId;
+    const doctorUserId = (req as any).doctorUserId;
     const { status, patientId, page = 1, limit = 10 } = req.query;
 
     const where: any = {
@@ -199,9 +199,9 @@ router.get('/by-appointment/:appointmentId', isAuthenticated, async (req, res) =
 });
 
 // Criar novo prontuário
-router.post('/', isAuthenticated, isDoctorMiddleware, async (req, res) => {
+router.post('/', isAuthenticated, isDoctorMiddleware, async (req: AuthRequest, res) => {
   try {
-    const doctorUserId = req.doctorUserId;
+    const doctorUserId = (req as any).doctorUserId;
     const { appointmentId, patientId, content } = req.body;
 
     if (!content || !content.data) {
@@ -278,7 +278,7 @@ router.post('/', isAuthenticated, isDoctorMiddleware, async (req, res) => {
 router.put('/:id', isAuthenticated, isDoctorMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const doctorUserId = req.doctorUserId;
+    const doctorUserId = (req as any).doctorUserId;
     const { content } = req.body;
 
     if (!content || !content.data) {
@@ -346,7 +346,7 @@ router.put('/:id', isAuthenticated, isDoctorMiddleware, async (req, res) => {
 router.post('/:id/sign', isAuthenticated, isDoctorMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const doctorUserId = req.doctorUserId;
+    const doctorUserId = (req as any).doctorUserId;
 
     // Verificar se o prontuário existe e pertence ao médico
     const record = await prisma.medical_records.findFirst({
