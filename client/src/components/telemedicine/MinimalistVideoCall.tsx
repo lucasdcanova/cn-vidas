@@ -192,7 +192,21 @@ export default function MinimalistVideoCall({
       const callObject = DailyIframe.createCallObject({
         subscribeToTracksAutomatically: true,
         audioSource: true,  // Garantir que o áudio está habilitado
-        videoSource: true   // Garantir que o vídeo está habilitado
+        videoSource: true,  // Garantir que o vídeo está habilitado
+        // Configurações adicionais para garantir áudio
+        avoidEchoCancellationType: false,
+        experimentalGetUserMediaConstraintsModify: (constraints: any) => {
+          // Garantir que o áudio está habilitado com configurações otimizadas
+          if (constraints.audio && typeof constraints.audio === 'object') {
+            constraints.audio = {
+              ...constraints.audio,
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            };
+          }
+          return constraints;
+        }
       });
 
       callRef.current = callObject;
@@ -238,8 +252,31 @@ export default function MinimalistVideoCall({
             participantId: event?.participant?.session_id,
             isLocal: event?.participant?.local,
             audio: event?.participant?.audio,
-            video: event?.participant?.video
+            video: event?.participant?.video,
+            audioTrack: !!event?.participant?.audioTrack,
+            videoTrack: !!event?.participant?.videoTrack
           });
+          
+          // Se for participante remoto, verificar se precisamos recriar a stream
+          if (!event?.participant?.local && remoteVideoRef.current) {
+            const participant = event.participant;
+            if (participant.audioTrack || participant.videoTrack) {
+              const currentStream = remoteVideoRef.current.srcObject as MediaStream;
+              if (!currentStream) {
+                console.log('🔧 [MinimalistVideoCall] Criando nova stream para participante remoto');
+                const newStream = new MediaStream();
+                if (participant.audioTrack) {
+                  newStream.addTrack(participant.audioTrack);
+                }
+                if (participant.videoTrack) {
+                  newStream.addTrack(participant.videoTrack);
+                }
+                remoteVideoRef.current.srcObject = newStream;
+                remoteVideoRef.current.muted = false;
+                remoteVideoRef.current.volume = 1.0;
+              }
+            }
+          }
         })
         .on('active-speaker-change', (event) => {
           console.log('🗣️ [MinimalistVideoCall] Mudança de speaker ativo:', event?.activeSpeaker);
@@ -254,7 +291,10 @@ export default function MinimalistVideoCall({
         url: roomUrl,
         userName: userName || 'Usuário',
         startVideoOff: false, // Sempre iniciar com vídeo ligado
-        startAudioOff: false  // IMPORTANTE: Sempre iniciar com áudio ligado
+        startAudioOff: false, // IMPORTANTE: Sempre iniciar com áudio ligado
+        // Configurações adicionais para garantir mídia
+        audioSource: true,
+        videoSource: true
       };
 
       if (token) {
@@ -274,6 +314,35 @@ export default function MinimalistVideoCall({
       console.log('🔊 [MinimalistVideoCall] Habilitando áudio após entrar...');
       await callObject.setLocalAudio(true);
       setIsAudioEnabled(true);
+      
+      // Forçar atualização de mídia local
+      setTimeout(async () => {
+        try {
+          console.log('🔄 [MinimalistVideoCall] Forçando atualização de mídia...');
+          const localParticipant = callObject.participants().local;
+          if (localParticipant) {
+            // Se o áudio não estiver ativo, tentar reativar
+            if (!localParticipant.audio) {
+              console.log('⚠️ [MinimalistVideoCall] Áudio local não detectado, reativando...');
+              await callObject.setLocalAudio(false);
+              await new Promise(resolve => setTimeout(resolve, 100));
+              await callObject.setLocalAudio(true);
+            }
+            // Verificar e logar estado final
+            const updatedParticipant = callObject.participants().local;
+            console.log('📊 [MinimalistVideoCall] Estado final da mídia local:', {
+              audio: updatedParticipant?.audio,
+              video: updatedParticipant?.video,
+              tracks: {
+                audio: !!updatedParticipant?.audioTrack,
+                video: !!updatedParticipant?.videoTrack
+              }
+            });
+          }
+        } catch (err) {
+          console.error('❌ [MinimalistVideoCall] Erro ao atualizar mídia:', err);
+        }
+      }, 1000);
       
       // Verificar status do áudio
       const localParticipant = callObject.participants().local;
@@ -333,7 +402,9 @@ export default function MinimalistVideoCall({
       isLocal: participant?.local,
       trackKind: track?.kind,
       trackState: track?.readyState,
-      trackId: track?.id
+      trackId: track?.id,
+      trackEnabled: track?.enabled,
+      trackMuted: track?.muted
     });
     
     if (track && track.readyState === 'live') {
@@ -345,6 +416,11 @@ export default function MinimalistVideoCall({
           localVideoRef.current.srcObject = stream;
         } else if (track.kind === 'audio') {
           console.log('🎤 [MinimalistVideoCall] Track de áudio local detectado');
+          // Verificar se o track está habilitado
+          if (!track.enabled) {
+            console.warn('⚠️ [MinimalistVideoCall] Track de áudio local está desabilitado!');
+            track.enabled = true;
+          }
         }
       } else {
         // Tracks remotos - IMPORTANTE: combinar áudio e vídeo na mesma stream
@@ -368,14 +444,29 @@ export default function MinimalistVideoCall({
             currentStream.getAudioTracks().forEach(t => currentStream.removeTrack(t));
             currentStream.addTrack(track);
             
+            // Verificar se o track está habilitado
+            if (!track.enabled) {
+              console.warn('⚠️ [MinimalistVideoCall] Track de áudio remoto está desabilitado!');
+              track.enabled = true;
+            }
+            
             // Garantir que o elemento de vídeo está configurado para reproduzir áudio
             remoteVideoRef.current.muted = false;
             remoteVideoRef.current.volume = 1.0;
+            
+            // Forçar reprodução se necessário
+            if (remoteVideoRef.current.paused) {
+              remoteVideoRef.current.play().catch(e => {
+                console.error('❌ [MinimalistVideoCall] Erro ao iniciar reprodução:', e);
+              });
+            }
           }
           
           console.log('📊 [MinimalistVideoCall] Stream remoto atualizado:', {
             videoTracks: currentStream.getVideoTracks().length,
-            audioTracks: currentStream.getAudioTracks().length
+            audioTracks: currentStream.getAudioTracks().length,
+            audioEnabled: currentStream.getAudioTracks().some(t => t.enabled),
+            videoEnabled: currentStream.getVideoTracks().some(t => t.enabled)
           });
         }
       }
@@ -521,6 +612,22 @@ export default function MinimalistVideoCall({
           // Garantir que o áudio está habilitado
           video.muted = false;
           video.volume = 1.0;
+          // Tentar reproduzir se estiver pausado
+          if (video.paused) {
+            video.play().catch(e => {
+              console.error('❌ [MinimalistVideoCall] Erro ao iniciar reprodução do vídeo:', e);
+            });
+          }
+        }}
+        onCanPlayThrough={(e) => {
+          const video = e.target as HTMLVideoElement;
+          console.log('🎬 [MinimalistVideoCall] Vídeo pronto para reproduzir');
+          // Garantir reprodução
+          if (video.paused) {
+            video.play().catch(e => {
+              console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo:', e);
+            });
+          }
         }}
       />
 
