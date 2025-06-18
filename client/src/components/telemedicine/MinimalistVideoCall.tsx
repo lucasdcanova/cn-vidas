@@ -407,9 +407,11 @@ export default function MinimalistVideoCall({
           console.log('✅ [MinimalistVideoCall] Gravação parada com sucesso');
         }
         
-        await callRef.current.leave();
-        await callRef.current.destroy();
-        callRef.current = null;
+        if (callRef.current) {
+          await callRef.current.leave();
+          await callRef.current.destroy();
+          callRef.current = null;
+        }
       } catch (error) {
         console.error('❌ [MinimalistVideoCall] Erro ao sair da chamada:', error);
       }
