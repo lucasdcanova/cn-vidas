@@ -159,7 +159,7 @@ appointmentJoinRouter.post('/:id/join', requireAuth, async (req: AuthenticatedRe
       isDoctorAssigned = doctor ? (appointment.doctorId === doctor.id || !appointment.doctorId) : false;
     }
     
-    const hasAccess = isPatientOwner || isDoctorAssigned || userRole === 'admin';
+    const hasAccess = isPatientOwner || isDoctorAssigned;
     
     if (!hasAccess) {
       console.error(`Usuário ${userId} não tem permissão para acessar consulta #${appointmentId}`);

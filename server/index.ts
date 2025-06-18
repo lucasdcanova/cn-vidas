@@ -324,7 +324,8 @@ import { setupCronJobs } from "./cron-setup";
 
   // Iniciar servidor
   const PORT = process.env.PORT || 8080;
-  server.listen(PORT, '0.0.0.0', () => {
+  const portNumber = typeof PORT === 'string' ? parseInt(PORT) : PORT;
+  server.listen(portNumber, '0.0.0.0', () => {
     log(`Servidor rodando na porta ${PORT}`, 'server');
     console.log(`Acesse: http://localhost:${PORT}`);
     console.log(`Ou: http://127.0.0.1:${PORT}`);
