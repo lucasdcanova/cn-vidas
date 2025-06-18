@@ -1,123 +1,45 @@
-import { Request } from 'express';
-import type {
-  User,
-  Partner,
-  Doctor,
-  PartnerService,
-  Appointment,
-  Claim,
-  Notification,
-  DoctorPayment,
-  AuditLog,
-  QrToken,
-  SubscriptionPlan,
-  UserSettings,
-  EmailVerification,
-  PasswordReset,
-  AvailabilitySlot,
-  QrAuthLog,
-  Dependent,
-  InsertUser,
-  InsertPartner,
-  InsertDoctor,
-  InsertPartnerService,
-  InsertAppointment,
-  InsertClaim,
-  InsertNotification,
-  InsertDoctorPayment,
-  InsertAuditLog,
-  InsertQrToken,
-  InsertSubscriptionPlan,
-  InsertUserSettings,
-  InsertEmailVerification,
-  InsertPasswordReset,
-  InsertAvailabilitySlot,
-  InsertQrAuthLog,
-  InsertDependent
-} from './schema';
+// Tipos compartilhados entre cliente e servidor
 
-export type {
-  User,
-  Partner,
-  Doctor,
-  PartnerService,
-  Appointment,
-  Claim,
-  Notification,
-  DoctorPayment,
-  AuditLog,
-  QrToken,
-  SubscriptionPlan,
-  UserSettings,
-  EmailVerification,
-  PasswordReset,
-  AvailabilitySlot,
-  QrAuthLog,
-  Dependent,
-  InsertUser,
-  InsertPartner,
-  InsertDoctor,
-  InsertPartnerService,
-  InsertAppointment,
-  InsertClaim,
-  InsertNotification,
-  InsertDoctorPayment,
-  InsertAuditLog,
-  InsertQrToken,
-  InsertSubscriptionPlan,
-  InsertUserSettings,
-  InsertEmailVerification,
-  InsertPasswordReset,
-  InsertAvailabilitySlot,
-  InsertQrAuthLog,
-  InsertDependent
-};
-
-export interface ExpressUser extends User {
+// Tipos para Medical Records
+export interface MedicalRecord {
   id: number;
-  role: 'admin' | 'doctor' | 'partner' | 'patient';
-}
-
-// Interfaces para autenticação
-export interface AuthConfig {
-  secret: string;
-  expiresIn: string;
-}
-
-// Interfaces para pagamento
-export interface PaymentConfig {
-  apiKey: string;
-  webhookSecret: string;
-}
-
-// Interfaces para notificações
-export interface NotificationConfig {
-  apiKey: string;
-  senderId: string;
-}
-
-// Interfaces para armazenamento
-export interface StorageConfig {
-  type: 'local' | 's3';
-  path?: string;
-  bucket?: string;
-  region?: string;
-  accessKeyId?: string;
-  secretAccessKey?: string;
-}
-
-// Interfaces para configuração geral
-export interface Config {
-  port: number;
-  database: {
-    host: string;
-    port: number;
-    user: string;
-    password: string;
-    database: string;
+  patient_id: number;
+  doctor_id: number;
+  appointment_id?: number;
+  recording_id?: number;
+  content: {
+    type: string;
+    data: string;
+    transcription?: string;
   };
-  auth: AuthConfig;
-  payment: PaymentConfig;
-  notification: NotificationConfig;
-  storage: StorageConfig;
-} 
+  status: 'draft' | 'signed' | 'amended';
+  ai_generated: boolean;
+  signed_at?: Date | null;
+  signature_hash?: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export type InsertMedicalRecord = Omit<MedicalRecord, 'id' | 'created_at' | 'updated_at'>;
+
+export interface MedicalRecordEntry {
+  id: number;
+  record_id: number;
+  entry_type: string;
+  content: any;
+  created_at: Date;
+  created_by: number;
+}
+
+export type InsertMedicalRecordEntry = Omit<MedicalRecordEntry, 'id' | 'created_at'>;
+
+export interface MedicalRecordAccess {
+  id: number;
+  record_id: number;
+  accessed_by: number;
+  accessed_at: Date;
+  action: string;
+  ip_address?: string;
+}
+
+export type InsertMedicalRecordAccess = Omit<MedicalRecordAccess, 'id' | 'accessed_at'>;
