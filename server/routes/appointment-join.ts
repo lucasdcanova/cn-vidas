@@ -711,6 +711,93 @@ appointmentJoinRouter.post('/:id/cancel', requireAuth, async (req: Authenticated
 });
 
 /**
+ * Endpoint para buscar gravação de uma consulta
+ * GET /api/appointments/:id/recording
+ */
+appointmentJoinRouter.get('/:id/recording', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Não autorizado' });
+    }
+
+    const appointmentId = parseInt(req.params.id);
+    if (isNaN(appointmentId)) {
+      return res.status(400).json({ message: 'ID de consulta inválido' });
+    }
+
+    console.log(`Buscando gravação da consulta #${appointmentId}`);
+
+    // Buscar a consulta
+    const appointment = await storage.getAppointment(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ message: 'Consulta não encontrada' });
+    }
+
+    // Verificar permissões
+    const isDoctor = req.user.role === 'doctor';
+    let hasPermission = false;
+
+    if (isDoctor) {
+      const doctor = await storage.getDoctorByUserId(req.user.id);
+      hasPermission = doctor ? (appointment.doctorId === doctor.id) : false;
+    } else if (req.user.role === 'patient') {
+      hasPermission = appointment.userId === req.user.id;
+    } else if (req.user.role === 'admin') {
+      hasPermission = true;
+    }
+
+    if (!hasPermission) {
+      return res.status(403).json({ message: 'Sem permissão para acessar esta gravação' });
+    }
+
+    // Buscar a gravação usando Prisma
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    try {
+      const recording = await prisma.consultation_recordings.findUnique({
+        where: { appointment_id: appointmentId },
+        include: {
+          medical_records: {
+            orderBy: { created_at: 'desc' },
+            take: 1
+          }
+        }
+      });
+
+      if (!recording) {
+        return res.json({ 
+          recording: null,
+          message: 'Nenhuma gravação encontrada para esta consulta' 
+        });
+      }
+
+      return res.json({
+        recording: {
+          id: recording.id,
+          status: recording.transcription_status,
+          hasTranscription: !!recording.transcription,
+          hasAiNotes: !!recording.ai_generated_notes,
+          medicalRecordId: recording.medical_records[0]?.id,
+          error: recording.processing_error,
+          createdAt: recording.created_at,
+          completedAt: recording.processing_completed_at
+        }
+      });
+    } finally {
+      await prisma.$disconnect();
+    }
+
+  } catch (error) {
+    console.error('Erro ao buscar gravação:', error);
+    return res.status(500).json({
+      message: 'Erro ao buscar gravação',
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
+  }
+});
+
+/**
  * ENDPOINT TEMPORÁRIO DE DEBUG
  * GET /api/appointments/debug/108
  * Busca diretamente a consulta #108 do banco de dados

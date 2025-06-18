@@ -15,16 +15,24 @@ export default function MedicalRecordEditPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
+  // Debug detalhado do location
+  console.log('🔍 [MedicalRecordEditPage] Location completo:', location);
+  console.log('🔍 [MedicalRecordEditPage] Parte antes do ?:', location.split('?')[0]);
+  console.log('🔍 [MedicalRecordEditPage] Parte depois do ?:', location.split('?')[1]);
+  
   // Extrair appointmentId da query string
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const appointmentId = searchParams.get('appointmentId');
   const recordId = searchParams.get('recordId');
+  
+  console.log('🔍 [MedicalRecordEditPage] SearchParams:', Array.from(searchParams.entries()));
 
   useEffect(() => {
     console.log('🏥 Página de edição de prontuário carregada');
-    console.log('AppointmentId:', appointmentId);
-    console.log('RecordId:', recordId);
-  }, [appointmentId, recordId]);
+    console.log('🆔 AppointmentId:', appointmentId);
+    console.log('🆔 RecordId:', recordId);
+    console.log('👤 User:', user);
+  }, [appointmentId, recordId, user]);
 
   const handleSave = (record: any) => {
     console.log('✅ Prontuário salvo:', record);

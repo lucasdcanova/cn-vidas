@@ -108,13 +108,16 @@ router.post('/upload', requireAuth, upload.single('audio'), async (req: AuthRequ
     try {
       audioUrl = await uploadToS3(file.path, `recordings/${appointmentId}/${file.filename}`);
     } catch (error) {
-      console.error('Erro no upload S3:', error);
+      console.error('⚠️ [Recording Upload] Erro no upload S3:', error);
       // Se não tiver S3 configurado, salvar localmente
       const localDir = path.join(process.cwd(), 'uploads', 'recordings', appointmentId.toString());
+      console.log(`📁 [Recording Upload] Criando diretório local: ${localDir}`);
       await fs.mkdir(localDir, { recursive: true });
       const localPath = path.join(localDir, file.filename);
+      console.log(`💾 [Recording Upload] Movendo arquivo para: ${localPath}`);
       await fs.rename(file.path, localPath);
-      audioUrl = `/uploads/recordings/${appointmentId}/${file.filename}`;
+      audioUrl = `uploads/recordings/${appointmentId}/${file.filename}`; // Sem barra inicial
+      console.log(`✅ [Recording Upload] Arquivo salvo localmente. URL: ${audioUrl}`);
     }
 
     // Criar registro no banco
@@ -166,6 +169,8 @@ router.post('/upload', requireAuth, upload.single('audio'), async (req: AuthRequ
 
 // Função assíncrona para processar a gravação
 async function processRecording(recordingId: number) {
+  console.log(`🎬 [ProcessRecording] Iniciando processamento da gravação ID: ${recordingId}`);
+  
   try {
     const recording = await prisma.consultation_recordings.findUnique({
       where: { id: recordingId },
@@ -187,6 +192,13 @@ async function processRecording(recordingId: number) {
       throw new Error('Gravação não encontrada');
     }
 
+    console.log(`📂 [ProcessRecording] Gravação encontrada:`, {
+      id: recording.id,
+      appointmentId: recording.appointment_id,
+      audioUrl: recording.audio_url,
+      status: recording.transcription_status
+    });
+
     // Baixar áudio se estiver em URL externa
     let audioPath = recording.audio_url;
     if (audioPath.startsWith('http')) {
@@ -197,14 +209,32 @@ async function processRecording(recordingId: number) {
       audioPath = path.join(process.cwd(), audioPath);
     }
 
+    console.log(`📤 [ProcessRecording] Verificando arquivo de áudio: ${audioPath}`);
+    
+    // Verificar se o arquivo existe
+    try {
+      await fs.access(audioPath);
+      const stats = await fs.stat(audioPath);
+      console.log(`✅ [ProcessRecording] Arquivo encontrado. Tamanho: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
+    } catch (error) {
+      console.error(`❌ [ProcessRecording] Arquivo não encontrado: ${audioPath}`);
+      throw new Error(`Arquivo de áudio não encontrado: ${audioPath}`);
+    }
+
     // Transcrever com Whisper
-    console.log('Iniciando transcrição com Whisper...');
+    console.log('🎤 [ProcessRecording] Iniciando transcrição com Whisper...');
+    const audioFile = await fs.readFile(audioPath);
+    
+    console.log('📡 [ProcessRecording] Enviando para API do OpenAI...');
     const transcription = await openai.audio.transcriptions.create({
-      file: await fs.readFile(audioPath),
+      file: audioFile,
       model: 'whisper-1',
       language: 'pt',
       response_format: 'text'
     });
+
+    console.log(`✅ [ProcessRecording] Transcrição concluída. Tamanho: ${transcription.length} caracteres`);
+    console.log(`📝 [ProcessRecording] Primeiros 200 caracteres da transcrição:`, transcription.substring(0, 200) + '...');
 
     // Atualizar transcrição no banco
     await prisma.consultation_recordings.update({
@@ -215,8 +245,10 @@ async function processRecording(recordingId: number) {
       }
     });
 
+    console.log(`💾 [ProcessRecording] Transcrição salva no banco de dados`);
+
     // Gerar prontuário com GPT-4
-    console.log('Gerando prontuário com IA...');
+    console.log('🤖 [ProcessRecording] Gerando prontuário com IA (GPT-4)...');
     const aiResponse = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
@@ -274,6 +306,8 @@ async function processRecording(recordingId: number) {
     });
 
     const aiGeneratedNotes = aiResponse.choices[0].message.content;
+    
+    console.log(`✅ [ProcessRecording] Prontuário gerado pela IA. Tamanho: ${aiGeneratedNotes?.length || 0} caracteres`);
 
     // Atualizar com prontuário gerado
     await prisma.consultation_recordings.update({
@@ -285,7 +319,10 @@ async function processRecording(recordingId: number) {
       }
     });
 
+    console.log(`💾 [ProcessRecording] Notas da IA salvas no banco de dados`);
+
     // Criar prontuário médico em rascunho
+    console.log(`📄 [ProcessRecording] Criando prontuário médico...`);
     const medicalRecord = await prisma.medical_records.create({
       data: {
         patient_id: recording.appointments!.user_id,
@@ -294,7 +331,7 @@ async function processRecording(recordingId: number) {
         recording_id: recording.id,
         content: {
           type: 'SOAP',
-          data: aiGeneratedNotes,
+          data: aiGeneratedNotes || '',
           transcription: transcription
         },
         status: 'draft',
@@ -302,10 +339,13 @@ async function processRecording(recordingId: number) {
       }
     });
 
-    console.log(`Processamento concluído para gravação ${recordingId}`);
+    console.log(`✅ [ProcessRecording] Prontuário criado com sucesso! ID: ${medicalRecord.id}`);
+    console.log(`🎉 [ProcessRecording] Processamento concluído para gravação ${recordingId}`);
+    console.log(`🔗 [ProcessRecording] Prontuário disponível em: /doctor/medical-records/edit?recordId=${medicalRecord.id}`);
 
   } catch (error: any) {
-    console.error('Erro no processamento:', error);
+    console.error(`❌ [ProcessRecording] Erro no processamento da gravação ${recordingId}:`, error);
+    console.error(`📝 [ProcessRecording] Stack trace:`, error.stack);
     
     // Atualizar status de erro
     await prisma.consultation_recordings.update({
@@ -316,6 +356,8 @@ async function processRecording(recordingId: number) {
         processing_completed_at: new Date()
       }
     });
+    
+    console.log(`🚨 [ProcessRecording] Status de erro salvo no banco de dados`);
   }
 }
 
