@@ -541,7 +541,8 @@ export const userSubscriptionsRelations = relations(userSubscriptions, ({ one })
 // Relações para prontuários médicos
 export const medicalRecordsRelations = relations(medicalRecords, ({ one, many }) => ({
   patient: one(users, { fields: [medicalRecords.patientId], references: [users.id] }),
-  lastAccessedByUser: one(users, { fields: [medicalRecords.lastAccessedBy], references: [users.id] }),
+  doctor: one(users, { fields: [medicalRecords.doctorId], references: [users.id] }),
+  appointment: one(appointments, { fields: [medicalRecords.appointmentId], references: [appointments.id] }),
   entries: many(medicalRecordEntries),
   accessLogs: many(medicalRecordAccess),
 }));
