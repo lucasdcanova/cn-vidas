@@ -823,14 +823,24 @@ export default function MinimalistVideoCall({
         // Parar gravação se estiver gravando
         if (window.recordingControlsRef && !window.recordingControlsStopping) {
           console.log('⏹️ [MinimalistVideoCall] Parando gravação antes de sair...');
-          window.recordingControlsStopping = true; // Flag para evitar dupla chamada
-          try {
-            await window.recordingControlsRef.stopRecording();
-            console.log('✅ [MinimalistVideoCall] Gravação parada com sucesso');
-          } catch (recordingError) {
-            console.error('❌ [MinimalistVideoCall] Erro ao parar gravação:', recordingError);
+          
+          // Verificar se realmente está gravando
+          const isRecording = window.recordingControlsRef.isRecording ? window.recordingControlsRef.isRecording() : false;
+          console.log('🎙️ [MinimalistVideoCall] Estado da gravação:', isRecording);
+          
+          if (isRecording || window.recordingControlsRef.stopRecording) {
+            window.recordingControlsStopping = true; // Flag para evitar dupla chamada
+            try {
+              await window.recordingControlsRef.stopRecording();
+              console.log('✅ [MinimalistVideoCall] Gravação parada com sucesso');
+              
+              // Aguardar um momento para garantir que o upload seja concluído
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (recordingError) {
+              console.error('❌ [MinimalistVideoCall] Erro ao parar gravação:', recordingError);
+            }
+            window.recordingControlsStopping = false;
           }
-          window.recordingControlsStopping = false;
         }
         
         if (callRef.current) {
