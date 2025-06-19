@@ -943,14 +943,7 @@ router.put('/doctors/:id/availability', async (req, res) => {
       return res.status(404).json({ error: 'Doctor not found' });
     }
     
-    // Clear existing availability slots
-    const existingSlots = await storage.getDoctorAvailabilitySlots(parseInt(id));
-    for (const slot of existingSlots) {
-      if (slot.id) {
-        await storage.deleteDoctorAvailabilitySlot(slot.id);
-      }
-    }
-    
+    // saveDoctorAvailabilitySlots handles clearing existing slots in a transaction
     // Add new slots
     const slotsToSave = slots.map((slot: any) => ({
       doctorId: parseInt(id),
