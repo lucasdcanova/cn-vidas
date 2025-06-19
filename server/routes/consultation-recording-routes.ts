@@ -175,6 +175,79 @@ router.post('/upload', requireAuth, upload.single('audio'), async (req: AuthRequ
   }
 });
 
+// Função auxiliar para formatar SOAP estruturado em texto
+function formatSoapToText(soap: any): string {
+  if (!soap) return '';
+  
+  let text = '';
+  
+  // Identificação
+  if (soap.identificacao) {
+    text += '=== IDENTIFICAÇÃO ===\n';
+    if (typeof soap.identificacao === 'string') {
+      text += soap.identificacao + '\n';
+    } else {
+      Object.entries(soap.identificacao).forEach(([key, value]) => {
+        text += `${key}: ${value}\n`;
+      });
+    }
+    text += '\n';
+  }
+  
+  // Subjetivo
+  if (soap.subjetivo) {
+    text += '=== SUBJETIVO (S) ===\n';
+    if (typeof soap.subjetivo === 'string') {
+      text += soap.subjetivo + '\n';
+    } else {
+      Object.entries(soap.subjetivo).forEach(([key, value]) => {
+        text += `${key}: ${value}\n`;
+      });
+    }
+    text += '\n';
+  }
+  
+  // Objetivo
+  if (soap.objetivo) {
+    text += '=== OBJETIVO (O) ===\n';
+    if (typeof soap.objetivo === 'string') {
+      text += soap.objetivo + '\n';
+    } else {
+      Object.entries(soap.objetivo).forEach(([key, value]) => {
+        text += `${key}: ${value}\n`;
+      });
+    }
+    text += '\n';
+  }
+  
+  // Avaliação
+  if (soap.avaliacao) {
+    text += '=== AVALIAÇÃO (A) ===\n';
+    if (typeof soap.avaliacao === 'string') {
+      text += soap.avaliacao + '\n';
+    } else {
+      Object.entries(soap.avaliacao).forEach(([key, value]) => {
+        text += `${key}: ${value}\n`;
+      });
+    }
+    text += '\n';
+  }
+  
+  // Plano
+  if (soap.plano) {
+    text += '=== PLANO (P) ===\n';
+    if (typeof soap.plano === 'string') {
+      text += soap.plano + '\n';
+    } else {
+      Object.entries(soap.plano).forEach(([key, value]) => {
+        text += `${key}: ${value}\n`;
+      });
+    }
+  }
+  
+  return text.trim();
+}
+
 // Função assíncrona para processar a gravação
 async function processRecording(recordingId: number) {
   console.log(`\n🎯 [ProcessRecording] ===== INICIANDO PROCESSAMENTO =====`);
@@ -279,18 +352,45 @@ async function processRecording(recordingId: number) {
 
     console.log(`💾 [ProcessRecording] Transcrição salva no banco de dados`);
 
-    // Gerar prontuário com GPT-4
+    // Gerar prontuário e prescrição com GPT-4
     console.log('🤖 [ProcessRecording] Gerando prontuário com IA (GPT-4)...');
     const aiResponse = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: `Você é um assistente médico especializado em criar prontuários médicos estruturados.
+          content: `Você é um assistente médico especializado em criar prontuários médicos estruturados e prescrições médicas.
           
-          Analise a transcrição da consulta e crie um prontuário no formato SOAP (Subjetivo, Objetivo, Avaliação, Plano).
+          Analise a transcrição da consulta e crie:
+          1. Um prontuário no formato SOAP (Subjetivo, Objetivo, Avaliação, Plano)
+          2. Uma prescrição médica detalhada (se medicamentos foram mencionados)
           
-          Estrutura do prontuário:
+          IMPORTANTE: Retorne a resposta em formato JSON com a seguinte estrutura:
+          {
+            "soap": {
+              "identificacao": {...},
+              "subjetivo": {...},
+              "objetivo": {...},
+              "avaliacao": {...},
+              "plano": {...}
+            },
+            "prescricao": {
+              "medicamentos": [
+                {
+                  "nome": "Nome do medicamento",
+                  "dosagem": "Ex: 500mg",
+                  "via": "Ex: Via oral",
+                  "frequencia": "Ex: 2x ao dia",
+                  "duracao": "Ex: 7 dias",
+                  "quantidade": "Ex: 14 comprimidos",
+                  "instrucoes": "Ex: Tomar após as refeições"
+                }
+              ],
+              "observacoes": "Observações gerais da prescrição"
+            }
+          }
+          
+          Estrutura do prontuário SOAP:
           
           1. IDENTIFICAÇÃO
           - Data e hora da consulta
@@ -319,12 +419,19 @@ async function processRecording(recordingId: number) {
           - Orientações
           - Retorno
           
+          Para a PRESCRIÇÃO:
+          - Extraia TODOS os medicamentos mencionados na consulta
+          - Inclua dosagem, via de administração, frequência e duração
+          - Se alguma informação não foi mencionada, indique como "Não especificado"
+          - Adicione instruções especiais quando mencionadas
+          - Se nenhum medicamento foi prescrito, retorne um array vazio
+          
           Seja conciso, objetivo e use terminologia médica apropriada.
           Destaque informações importantes como alergias, contraindicações ou alertas.`
         },
         {
           role: 'user',
-          content: `Por favor, crie um prontuário médico estruturado baseado nesta transcrição de consulta:
+          content: `Por favor, crie um prontuário médico estruturado e prescrição baseados nesta transcrição de consulta:
           
           Médico: Dr. ${recording.appointments?.doctors?.users?.full_name}
           Paciente: ${recording.appointments?.users?.full_name}
@@ -334,18 +441,37 @@ async function processRecording(recordingId: number) {
         }
       ],
       temperature: 0.3,
-      max_tokens: 2000
+      max_tokens: 3000,
+      response_format: { type: "json_object" }
     });
 
-    const aiGeneratedNotes = aiResponse.choices[0].message.content;
+    const aiGeneratedContent = aiResponse.choices[0].message.content;
     
-    console.log(`✅ [ProcessRecording] Prontuário gerado pela IA. Tamanho: ${aiGeneratedNotes?.length || 0} caracteres`);
+    console.log(`✅ [ProcessRecording] Prontuário gerado pela IA. Tamanho: ${aiGeneratedContent?.length || 0} caracteres`);
+
+    // Parse o JSON retornado pela IA
+    let parsedContent;
+    try {
+      parsedContent = JSON.parse(aiGeneratedContent || '{}');
+    } catch (error) {
+      console.error('❌ [ProcessRecording] Erro ao fazer parse do JSON da IA:', error);
+      // Fallback para formato antigo se falhar o parse
+      parsedContent = {
+        soap: aiGeneratedContent,
+        prescricao: { medicamentos: [], observacoes: '' }
+      };
+    }
+
+    // Formatar o conteúdo SOAP como texto para compatibilidade
+    const soapText = typeof parsedContent.soap === 'string' 
+      ? parsedContent.soap 
+      : formatSoapToText(parsedContent.soap);
 
     // Atualizar com prontuário gerado
     await prisma.consultation_recordings.update({
       where: { id: recordingId },
       data: {
-        ai_generated_notes: aiGeneratedNotes,
+        ai_generated_notes: soapText,
         transcription_status: 'completed',
         processing_completed_at: new Date()
       }
@@ -363,8 +489,8 @@ async function processRecording(recordingId: number) {
         recording_id: recording.id,
         content: {
           type: 'SOAP',
-          data: aiGeneratedNotes || '',
-          transcription: transcription
+          data: soapText,
+          prescription: parsedContent.prescricao || { medicamentos: [], observacoes: '' }
         },
         status: 'draft',
         ai_generated: true
