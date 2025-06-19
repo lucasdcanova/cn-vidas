@@ -11,7 +11,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useQuery } from '@tanstack/react-query';
-import DailyVideoCall from '@/components/telemedicine/DailyVideoCall';
+import MinimalistVideoCall from '@/components/telemedicine/MinimalistVideoCall';
 
 interface CallState {
   roomUrl: string | null;
@@ -512,7 +512,7 @@ export default function PatientEmergencyRoom() {
               {/* Mostrar vídeo em tela cheia quando ativo */}
               {showVideoCall && callState.roomUrl && (
                 <div className="fixed inset-0 z-50 bg-black">
-                  <DailyVideoCall
+                  <MinimalistVideoCall
                     roomUrl={callState.roomUrl}
                     token={callState.token || undefined}
                     onJoinCall={handleJoinCall}

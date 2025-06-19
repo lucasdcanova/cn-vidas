@@ -228,9 +228,9 @@ export default function UnifiedEmergencyRoom() {
           
           {!loading && !error && roomData && (
             <div className="fixed inset-0 z-50 bg-black">
-              <DailyVideoCall
+              <MinimalistVideoCall
                 roomUrl={roomData.roomUrl}
-                token={roomData.token}
+                token={roomData.token || undefined}
                 userName={user?.fullName || (isDoctor ? 'Médico' : 'Paciente')}
                 isDoctor={isDoctor}
                 onLeaveCall={handleLeaveCall}
