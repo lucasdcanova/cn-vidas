@@ -1,4 +1,4 @@
-import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, medicalRecords, medicalRecordEntries, medicalRecordAccess } from '../shared/schema';
+import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, medicalRecords, medicalRecordEntries } from '../shared/schema';
 import { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, Dependent, InsertDependent, MedicalRecord, InsertMedicalRecord, MedicalRecordEntry, InsertMedicalRecordEntry, MedicalRecordAccess, InsertMedicalRecordAccess } from '@shared/types';
 import { PartnerAddress, InsertPartnerAddress } from './interfaces/partner';
 import { db } from "./db";
@@ -1668,7 +1668,9 @@ export class DatabaseStorage implements IStorage {
   
   // Registrar acesso ao prontuário
   async logMedicalRecordAccess(data: InsertMedicalRecordAccess): Promise<void> {
-    await this.db.insert(medicalRecordAccess).values(data);
+    // Temporarily disabled - table doesn't exist
+    // await this.db.insert(medicalRecordAccess).values(data);
+    console.log('Medical record access log (disabled):', data);
   }
   
   // Adicionar entrada no prontuário
@@ -1816,19 +1818,24 @@ export class DatabaseStorage implements IStorage {
   
   // Buscar histórico de acesso
   async getMedicalRecordAccessHistory(recordId: number): Promise<MedicalRecordAccess[]> {
-    return await this.db.select({
-      access: medicalRecordAccess,
-      user: users
-    })
-    .from(medicalRecordAccess)
-    .leftJoin(users, eq(medicalRecordAccess.userId, users.id))
-    .where(eq(medicalRecordAccess.recordId, recordId))
-    .orderBy(desc(medicalRecordAccess.accessedAt))
-    .limit(100)
-    .then(results => results.map(r => ({
-      ...r.access,
-      user: r.user
-    })));
+    // Temporarily disabled - table doesn't exist
+    console.log('Medical record access history request (disabled) for record:', recordId);
+    return [];
+    
+    // Original code commented out:
+    // return await this.db.select({
+    //   access: medicalRecordAccess,
+    //   user: users
+    // })
+    // .from(medicalRecordAccess)
+    // .leftJoin(users, eq(medicalRecordAccess.userId, users.id))
+    // .where(eq(medicalRecordAccess.recordId, recordId))
+    // .orderBy(desc(medicalRecordAccess.accessedAt))
+    // .limit(100)
+    // .then(results => results.map(r => ({
+    //   ...r.access,
+    //   user: r.user
+    // })));
   }
 }
 
