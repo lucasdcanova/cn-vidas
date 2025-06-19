@@ -119,6 +119,12 @@ async function updateUserHandler(req: Request, res: Response) {
     const { id } = req.params;
     const updateData = req.body;
     
+    console.log('🔧 [Admin] Update user request:', {
+      userId: id,
+      fields: Object.keys(updateData),
+      data: updateData
+    });
+    
     const { storage } = await import('./storage');
     
     // Verificar se o usuário existe
@@ -127,10 +133,32 @@ async function updateUserHandler(req: Request, res: Response) {
       return res.status(404).json({ error: 'User not found' });
     }
     
+    // Log dos campos originais
+    console.log('📝 [Admin] Original fields received:', Object.keys(updateData));
+    
     // Remover campos que não devem ser atualizados diretamente
     delete updateData.id;
     delete updateData.createdAt;
     delete updateData.updatedAt;
+    
+    // Remover campos que não existem na tabela users
+    delete updateData.onboardingCompleted;
+    delete updateData.referralCode;
+    delete updateData.referredBy;
+    
+    // Remover campos de relações (não fazem parte da tabela users)
+    delete updateData.doctor;
+    delete updateData.partner;
+    delete updateData.permissions;
+    delete updateData.lastLogin;
+    delete updateData.isActive;
+    
+    // Remover campos calculados ou de outras tabelas
+    delete updateData.specialty;
+    delete updateData.licenseNumber;
+    delete updateData.consultationPrice;
+    delete updateData.availableForEmergency;
+    delete updateData.welcomeCompleted;
     
     // Se a senha estiver vazia, removê-la da atualização
     if (!updateData.password || updateData.password === '') {
@@ -141,17 +169,47 @@ async function updateUserHandler(req: Request, res: Response) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
     
+    console.log('🔄 [Admin] Updating user with data:', updateData);
+    
+    // Extrair campos específicos do médico antes de atualizar o usuário
+    const doctorFields: any = {};
+    if (req.body.specialty !== undefined) doctorFields.specialization = req.body.specialty;
+    if (req.body.licenseNumber !== undefined) doctorFields.licenseNumber = req.body.licenseNumber;
+    if (req.body.consultationPrice !== undefined) doctorFields.consultationFee = req.body.consultationPrice;
+    if (req.body.availableForEmergency !== undefined) doctorFields.availableForEmergency = req.body.availableForEmergency;
+    
     // Atualizar o usuário
     await storage.updateUser(parseInt(id), updateData);
+    
+    // Se for médico e tiver campos de médico para atualizar
+    if (user.role === 'doctor' && Object.keys(doctorFields).length > 0) {
+      console.log('🩺 [Admin] Updating doctor fields:', doctorFields);
+      try {
+        // Buscar o registro do médico
+        const doctor = await storage.getDoctorByUserId(parseInt(id));
+        if (doctor) {
+          // Atualizar os campos do médico
+          await storage.updateDoctor(doctor.id, doctorFields);
+        } else {
+          console.log('⚠️ [Admin] Doctor record not found for user:', id);
+        }
+      } catch (error) {
+        console.error('❌ [Admin] Error updating doctor fields:', error);
+      }
+    }
     
     // Buscar o usuário atualizado
     const updatedUser = await storage.getUserById(parseInt(id));
     const { password, ...userWithoutPassword } = updatedUser;
     
     res.json(userWithoutPassword);
-  } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (error: any) {
+    console.error('❌ [Admin] Error updating user:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message 
+    });
   }
 }
 
