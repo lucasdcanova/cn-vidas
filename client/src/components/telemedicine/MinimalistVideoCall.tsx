@@ -415,13 +415,7 @@ export default function MinimalistVideoCall({
         url: roomUrl,
         userName: userName || 'Usuário',
         startVideoOff: false, // Sempre iniciar com vídeo ligado
-        startAudioOff: false, // IMPORTANTE: Sempre iniciar com áudio ligado
-        // Configurações adicionais para garantir mídia
-        audioSource: true,
-        videoSource: true,
-        // Forçar dispositivos padrão
-        videoDeviceId: 'default',
-        audioDeviceId: 'default'
+        startAudioOff: false  // IMPORTANTE: Sempre iniciar com áudio ligado
       };
 
       if (token) {
