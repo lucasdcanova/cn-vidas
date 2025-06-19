@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShieldAlert } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
-import DailyVideoCall from '@/components/telemedicine/DailyVideoCall';
+import MinimalistVideoCall from '@/components/telemedicine/MinimalistVideoCall';
 
 /**
  * Sala de Emergência Unificada
