@@ -516,6 +516,25 @@ export default function MinimalistVideoCall({
       setIsAudioEnabled(true);
       setIsVideoEnabled(true);
       
+      // Forçar inicialização do vídeo local após entrar
+      setTimeout(async () => {
+        console.log('🎥 [MinimalistVideoCall] Forçando inicialização do vídeo local...');
+        const localParticipant = callObject.participants()?.local;
+        if (localParticipant && localParticipant.video && localVideoRef.current) {
+          const videoTrack = localParticipant.tracks?.video?.track || localParticipant.videoTrack;
+          if (videoTrack) {
+            console.log('📹 [MinimalistVideoCall] Track de vídeo local encontrado, aplicando ao elemento...');
+            const newStream = new MediaStream();
+            newStream.addTrack(videoTrack);
+            localVideoRef.current.srcObject = newStream;
+            localVideoRef.current.setAttribute('autoplay', 'true');
+            localVideoRef.current.setAttribute('playsinline', 'true');
+            localVideoRef.current.setAttribute('muted', 'true');
+            localVideoRef.current.play().catch(e => console.error('Erro ao reproduzir vídeo local:', e));
+          }
+        }
+      }, 1000);
+      
       // Verificar e logar todos os dispositivos disponíveis
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
