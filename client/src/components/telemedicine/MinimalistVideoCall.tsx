@@ -76,6 +76,7 @@ export default function MinimalistVideoCall({
   const [isCallActive, setIsCallActive] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+  const [userIntentionallyMuted, setUserIntentionallyMuted] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [remoteParticipant, setRemoteParticipant] = useState<any>(null);
@@ -428,7 +429,10 @@ export default function MinimalistVideoCall({
           
           // Se for local, atualizar estado dos controles
           if (event?.participant?.local) {
-            setIsAudioEnabled(event.participant.audio);
+            // Apenas atualizar áudio se não foi intencionalmente mutado pelo usuário
+            if (!userIntentionallyMuted || event.participant.audio) {
+              setIsAudioEnabled(event.participant.audio);
+            }
             setIsVideoEnabled(event.participant.video);
           }
           
@@ -509,12 +513,10 @@ export default function MinimalistVideoCall({
       // Aguardar um momento para a conexão estabilizar
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Garantir que o áudio está habilitado após entrar
-      console.log('🔊 [MinimalistVideoCall] Habilitando áudio após entrar...');
-      await callObject.setLocalAudio(true);
-      await callObject.setLocalVideo(true);
-      setIsAudioEnabled(true);
-      setIsVideoEnabled(true);
+      // Garantir que o áudio e vídeo estão configurados corretamente
+      console.log('🔊 [MinimalistVideoCall] Configurando mídia após entrar...');
+      await callObject.setLocalAudio(isAudioEnabled);
+      await callObject.setLocalVideo(isVideoEnabled);
       
       // Forçar inicialização do vídeo local após entrar
       setTimeout(async () => {
@@ -553,12 +555,9 @@ export default function MinimalistVideoCall({
           console.log('🔄 [MinimalistVideoCall] Forçando atualização de mídia...');
           const localParticipant = callObject.participants().local;
           if (localParticipant) {
-            // Se o áudio não estiver ativo, tentar reativar
+            // Apenas logar o estado do áudio, sem forçar reativação
             if (!localParticipant.audio) {
-              console.log('⚠️ [MinimalistVideoCall] Áudio local não detectado, reativando...');
-              await callObject.setLocalAudio(false);
-              await new Promise(resolve => setTimeout(resolve, 100));
-              await callObject.setLocalAudio(true);
+              console.log('🔇 [MinimalistVideoCall] Áudio local está desabilitado');
             }
             // Se o vídeo não estiver ativo, tentar reativar
             if (!localParticipant.video) {
@@ -853,13 +852,21 @@ export default function MinimalistVideoCall({
       console.log(`🎤 [MinimalistVideoCall] Alternando áudio: ${isAudioEnabled} -> ${newState}`);
       
       try {
-        // Aplicar mudança no Daily primeiro
+        // Marcar intenção do usuário
+        setUserIntentionallyMuted(!newState);
+        
+        // Atualizar estado local imediatamente
+        setIsAudioEnabled(newState);
+        
+        // Aplicar mudança no Daily
         await callRef.current.setLocalAudio(newState);
         
-        // Estado será atualizado pelo evento participant-updated
-        console.log('✅ [MinimalistVideoCall] Comando de toggle enviado');
+        console.log('✅ [MinimalistVideoCall] Áudio alternado com sucesso');
       } catch (error) {
         console.error('❌ [MinimalistVideoCall] Erro ao alternar áudio:', error);
+        // Reverter estado em caso de erro
+        setIsAudioEnabled(!newState);
+        setUserIntentionallyMuted(false);
       }
     }
   }, [isAudioEnabled]);
