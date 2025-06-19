@@ -441,10 +441,6 @@ const AuthPage: React.FC = () => {
                     </>
                   ) : "Entrar"}
                 </Button>
-                
-                <p className="text-center text-xs text-gray-500 mt-4">
-                  O sistema identificará automaticamente seu perfil com base no email cadastrado.
-                </p>
               </form>
             </Form>
           </div>
