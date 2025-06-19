@@ -68,6 +68,16 @@ export default function RecordingControls({
       isUploading
     });
   }, [appointmentId, autoStart, patientConsent, hasConsent, hasStarted, state.isRecording, isUploading]);
+  
+  // Log inicial quando o componente monta
+  useEffect(() => {
+    console.log('🚀 [RecordingControls] Componente montado com props:', {
+      appointmentId,
+      autoStart,
+      patientConsent,
+      className
+    });
+  }, []);
 
   // Iniciar gravação automaticamente se configurado
   useEffect(() => {
