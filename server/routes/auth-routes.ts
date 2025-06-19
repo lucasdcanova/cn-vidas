@@ -891,6 +891,90 @@ authRouter.post('/reset-password', async (req: Request, res: Response) => {
 });
 
 /**
+ * Força refresh dos dados do usuário
+ * POST /api/auth/refresh-user
+ */
+authRouter.post('/refresh-user', async (req: Request, res: Response) => {
+  try {
+    // Verificar token JWT do cookie ou header Authorization
+    let token = null;
+    
+    // Primeiro, tentar obter do cookie
+    if (req.cookies && req.cookies.auth_token) {
+      token = req.cookies.auth_token;
+    }
+    
+    // Se não tiver no cookie, tentar do header Authorization
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.replace('Bearer ', '');
+      }
+    }
+    
+    // Tentar do header X-Auth-Token
+    if (!token && req.headers['x-auth-token']) {
+      token = req.headers['x-auth-token'] as string;
+    }
+    
+    if (!token) {
+      return res.status(401).json({ error: 'Token de autenticação não encontrado' });
+    }
+    
+    // Verificar e decodificar o token JWT
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET não configurado');
+    }
+    let decoded: any;
+    
+    try {
+      decoded = jwt.verify(token, jwtSecret);
+    } catch (jwtError) {
+      console.error('Token JWT inválido:', jwtError);
+      return res.status(401).json({ error: 'Token de autenticação inválido' });
+    }
+    
+    // Buscar dados atualizados do usuário no banco - SEMPRE frescos
+    const result = await db.select()
+    .from(users)
+    .where(eq(users.id, decoded.userId));
+    
+    const user = result[0];
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Usuário não encontrado' });
+    }
+    
+    console.log(`✅ Refresh de dados do usuário ${user.email} - profileImage: ${user.profileImage}`);
+    
+    // Retornar dados do usuário autenticado
+    res.json({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      fullName: user.fullName,
+      role: user.role,
+      emailVerified: user.emailVerified,
+      subscriptionPlan: user.subscriptionPlan,
+      subscriptionStatus: user.subscriptionStatus,
+      emergencyConsultationsLeft: user.emergencyConsultationsLeft,
+      profileImage: user.profileImage,
+      phone: user.phone,
+      cpf: user.cpf,
+      city: user.city,
+      state: user.state,
+      address: user.address,
+      zipcode: user.zipcode
+    });
+    
+  } catch (error) {
+    console.error('Erro ao fazer refresh dos dados do usuário:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+/**
  * Obtém dados do usuário autenticado
  * GET /api/auth/user
  */

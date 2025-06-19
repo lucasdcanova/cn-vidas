@@ -77,12 +77,16 @@ router.post('/upload-image', requireAuth, upload.single('profileImage'), async (
       await removeOldImage(oldImage);
     }
 
+    // Buscar dados atualizados do usuário para retornar
+    const updatedUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    
     console.log('Upload de paciente concluído com sucesso');
     res.json({
       success: true,
       message: 'Foto de perfil atualizada com sucesso',
       imageUrl,
-      profileImage: imageUrl
+      profileImage: imageUrl,
+      user: updatedUser[0] // Retornar dados completos do usuário
     });
 
   } catch (error: any) {
