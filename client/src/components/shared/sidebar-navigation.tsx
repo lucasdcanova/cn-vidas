@@ -19,7 +19,8 @@ import {
   ShoppingCart,
   History,
   Activity,
-  FolderOpen
+  FolderOpen,
+  Receipt
 } from "lucide-react";
 
 interface SidebarNavigationProps {
@@ -109,16 +110,6 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
                   Dependentes
               </Link>
             )}
-            
-            <Link href="/subscription"
-              className={`${linkBaseClass} ${
-                isLinkActive("/subscription") 
-                  ? linkActiveClass 
-                  : linkInactiveClass
-              }`}>
-                <CreditCard className="w-5 h-5 mr-3" />
-                Planos
-            </Link>
             
             <Link href="/recent-activities"
               className={`${linkBaseClass} ${
@@ -306,6 +297,19 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
               Perfil
           </Link>
           
+          {/* Planos disponível apenas para pacientes */}
+          {userRole === "patient" && (
+            <Link href="/subscription"
+              className={`${linkBaseClass} ${
+                isLinkActive("/subscription") 
+                  ? linkActiveClass 
+                  : linkInactiveClass
+              }`}>
+                <CreditCard className="w-5 h-5 mr-3" />
+                Planos
+            </Link>
+          )}
+          
           {/* Pagamentos disponível apenas para pacientes */}
           {userRole === "patient" && (
             <Link href="/payments" 
@@ -314,7 +318,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
                   ? linkActiveClass 
                   : linkInactiveClass
               }`}>
-                <CreditCard className="w-5 h-5 mr-3" />
+                <Receipt className="w-5 h-5 mr-3" />
                 Pagamentos
             </Link>
           )}
