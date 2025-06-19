@@ -46,9 +46,6 @@ export default function PatientEmergencyRoom() {
   const statusCheckRef = useRef<NodeJS.Timeout | null>(null);
   const [showVideoCall, setShowVideoCall] = useState(false);
   
-  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-  const [showDoctorSelection, setShowDoctorSelection] = useState(true);
-  
   const [callState, setCallState] = useState<CallState>({
     roomUrl: null,
     token: null,
@@ -64,15 +61,6 @@ export default function PatientEmergencyRoom() {
     wasCharged: false,
   });
 
-  // Buscar médicos disponíveis
-  const { data: availableDoctors, isLoading: loadingDoctors } = useQuery({
-    queryKey: ['available-doctors'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/doctors/available');
-      if (!response.ok) throw new Error('Falha ao buscar médicos');
-      return response.json() as Promise<Doctor[]>;
-    },
-  });
 
   // Limpar timers ao desmontar
   useEffect(() => {
@@ -167,23 +155,11 @@ export default function PatientEmergencyRoom() {
 
   // Iniciar consulta de emergência
   const startEmergencyCall = async () => {
-    if (!selectedDoctor) {
-      toast({
-        title: 'Selecione um médico',
-        description: 'Por favor, escolha um médico antes de iniciar a consulta',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     try {
       setCallState(prev => ({ ...prev, isConnecting: true, error: null }));
-      setShowDoctorSelection(false);
 
-      // Criar consulta de emergência com médico específico
-      const response = await apiRequest('POST', '/api/emergency/v2/start', {
-        doctorId: selectedDoctor.id
-      });
+      // Criar consulta de emergência sem médico específico
+      const response = await apiRequest('POST', '/api/emergency/v2/start', {});
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Erro ao iniciar consulta');
@@ -349,96 +325,54 @@ export default function PatientEmergencyRoom() {
   // Renderização principal
   return (
     <div className="container max-w-6xl mx-auto p-4">
-      {/* Seleção de médico */}
-      {showDoctorSelection && !callState.isCallActive && (
+      {/* Botão de iniciar consulta de emergência */}
+      {!callState.isCallActive && (
         <Card className="mb-4">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShieldAlert className="h-5 w-5 text-red-600" />
-              Selecione um Médico para Atendimento de Emergência
+              Atendimento de Emergência
             </CardTitle>
             <CardDescription>
-              Escolha o médico disponível para sua consulta de emergência
+              Conecte-se imediatamente com um médico para situações urgentes
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loadingDoctors ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : availableDoctors && availableDoctors.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2">
-                {availableDoctors.map((doctor) => (
-                  <div
-                    key={doctor.id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                      selectedDoctor?.id === doctor.id
-                        ? 'border-primary bg-primary/5 ring-2 ring-primary'
-                        : 'hover:border-primary/50'
-                    }`}
-                    onClick={() => setSelectedDoctor(doctor)}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        {doctor.profileImage ? (
-                          <img
-                            src={doctor.profileImage}
-                            alt={doctor.fullName}
-                            className="h-12 w-12 rounded-full object-cover"
-                          />
-                        ) : (
-                          <User className="h-6 w-6 text-primary" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{doctor.fullName}</h3>
-                        <p className="text-sm text-muted-foreground">{doctor.specialization}</p>
-                      </div>
-                      {selectedDoctor?.id === doctor.id && (
-                        <CheckCircle className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Nenhum médico disponível</AlertTitle>
-                <AlertDescription>
-                  Não há médicos disponíveis para emergência no momento. Por favor, tente novamente em alguns minutos.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {selectedDoctor && (
-              <div className="mt-6 flex justify-end">
-                <Button
-                  size="lg"
-                  onClick={startEmergencyCall}
-                  className="bg-red-600 hover:bg-red-700"
-                  disabled={!selectedDoctor || callState.isConnecting}
-                >
-                  {callState.isConnecting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Iniciando...
-                    </>
-                  ) : (
-                    <>
-                      <Phone className="mr-2 h-4 w-4" />
-                      Iniciar Consulta com {selectedDoctor.fullName}
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+            <Alert className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Como funciona</AlertTitle>
+              <AlertDescription>
+                Ao iniciar a consulta de emergência, todos os médicos disponíveis serão notificados. 
+                O primeiro médico a responder será seu médico atendente.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="flex justify-center">
+              <Button
+                size="lg"
+                onClick={startEmergencyCall}
+                className="bg-red-600 hover:bg-red-700"
+                disabled={callState.isConnecting}
+              >
+                {callState.isConnecting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Iniciando...
+                  </>
+                ) : (
+                  <>
+                    <Phone className="mr-2 h-4 w-4" />
+                    INICIAR CONSULTA DE EMERGÊNCIA
+                  </>
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
 
       {/* Card da chamada */}
-      {(!showDoctorSelection || callState.isCallActive) && (
+      {callState.isCallActive && (
         <Card className="mb-4">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -448,7 +382,7 @@ export default function PatientEmergencyRoom() {
                   Atendimento de Emergência
                 </CardTitle>
                 <CardDescription>
-                  {selectedDoctor && `Dr. ${selectedDoctor.fullName} - ${selectedDoctor.specialization}`}
+                  Aguardando um médico entrar na consulta
                 </CardDescription>
               </div>
             {callState.isCallActive && (

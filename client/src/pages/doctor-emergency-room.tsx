@@ -51,6 +51,22 @@ export default function DoctorEmergencyRoom() {
       try {
         console.log(`🩺 Buscando informações da consulta de emergência: ${appointmentId}`);
         
+        // Primeiro, tentar entrar na consulta (isso marca o médico como atendente)
+        const joinResponse = await apiRequest('POST', `/api/emergency/v2/join/${appointmentId}`);
+        
+        if (!joinResponse.ok) {
+          const error = await joinResponse.json();
+          // Se já está sendo atendida por outro médico, mostrar erro específico
+          if (error.error?.includes('já está sendo atendida')) {
+            throw new Error('Esta consulta já está sendo atendida por outro médico');
+          }
+          // Outros erros podem ser ignorados se não críticos
+          console.warn('Aviso ao entrar na consulta:', error);
+        } else {
+          const joinData = await joinResponse.json();
+          console.log('✅ Médico entrou na consulta:', joinData);
+        }
+
         // Buscar informações da consulta
         const response = await apiRequest('GET', `/api/emergency/v2/consultation/${appointmentId}`);
         
