@@ -33,16 +33,16 @@ export default function RecordingControls({
   useEffect(() => {
     if (autoStart) {
       (window as any).recordingControlsRef = {
-        stopRecording: handleStopRecording
+        stopRecording: handleStopRecording,
+        isRecording: () => state.isRecording
       };
     }
     
     return () => {
-      if ((window as any).recordingControlsRef) {
-        delete (window as any).recordingControlsRef;
-      }
+      // Não deletar imediatamente, pois pode estar sendo usado
+      // Será limpo após o upload ser concluído
     };
-  }, [autoStart]);
+  }, [autoStart, handleStopRecording, state.isRecording]);
 
   // Formatador de duração
   const formatDuration = (seconds: number) => {
@@ -122,7 +122,7 @@ export default function RecordingControls({
   const handleStopRecording = async () => {
     console.log('🛑 [RecordingControls] Parando gravação...');
     
-    // Verificar se já está parando ou se não está gravando
+    // Verificar se já está parando
     if (!state.isRecording) {
       console.warn('⚠️ [RecordingControls] Tentativa de parar gravação quando não está gravando');
       return;
@@ -199,6 +199,11 @@ export default function RecordingControls({
     } finally {
       setIsUploading(false);
       console.log('🔄 [RecordingControls] Upload finalizado');
+      
+      // Limpar referência global após o upload
+      if ((window as any).recordingControlsRef) {
+        delete (window as any).recordingControlsRef;
+      }
     }
   };
 
@@ -221,11 +226,12 @@ export default function RecordingControls({
         <div className="flex items-center gap-2 text-xs text-red-400">
           <Circle className="h-3 w-3 text-red-500 fill-red-500 animate-pulse" />
           <span>{formatDuration(state.duration)}</span>
-          {manualStart && (
+          {(manualStart || autoStart) && (
             <button
               onClick={handleStopRecording}
               className="ml-2 px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors"
               title="Parar gravação"
+              disabled={isUploading}
             >
               Parar
             </button>
