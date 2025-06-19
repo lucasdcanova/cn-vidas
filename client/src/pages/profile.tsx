@@ -33,6 +33,7 @@ import {
 } from "@/lib/api";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
+import { useFreshUserData } from "@/hooks/use-fresh-user-data";
 import { 
   Loader2, 
   User, 
@@ -156,6 +157,9 @@ const Profile: React.FC = () => {
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Use o hook para garantir dados frescos do usuário
+  const { refreshUserData } = useFreshUserData();
   
   // Fetch user profile data with optimized cache settings
   const { data: profileData, isLoading: profileLoading } = useQuery({

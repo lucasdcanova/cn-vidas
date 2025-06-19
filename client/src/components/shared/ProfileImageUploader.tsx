@@ -70,13 +70,20 @@ export default function ProfileImageUploader({
       const data = await response.json();
 
       if (data.imageUrl) {
+        // Forçar refresh dos dados do usuário primeiro
+        try {
+          await apiRequest('POST', '/api/auth/refresh-user');
+        } catch (error) {
+          console.error('Erro ao fazer refresh dos dados:', error);
+        }
+        
         // Atualizar cache do React Query - IMPORTANTE: usar a mesma queryKey do useAuth
         queryClient.invalidateQueries({ queryKey: ['/api/user'] });
         queryClient.invalidateQueries({ queryKey: ['/api/users/profile'] });
         queryClient.invalidateQueries({ queryKey: ['profile'] });
         
         // Forçar refetch imediato
-        queryClient.refetchQueries({ queryKey: ['/api/user'] });
+        await queryClient.refetchQueries({ queryKey: ['/api/user'] });
         
         // Callback para atualizar imagem no componente pai
         if (onImageUpdate) {
@@ -117,13 +124,20 @@ export default function ProfileImageUploader({
     try {
       await apiRequest('DELETE', '/api/profile/upload-image');
 
+      // Forçar refresh dos dados do usuário primeiro
+      try {
+        await apiRequest('POST', '/api/auth/refresh-user');
+      } catch (error) {
+        console.error('Erro ao fazer refresh dos dados:', error);
+      }
+      
       // Invalidar as mesmas queries do upload
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       queryClient.invalidateQueries({ queryKey: ['/api/users/profile'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       
       // Forçar refetch imediato
-      queryClient.refetchQueries({ queryKey: ['/api/user'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/user'] });
 
       if (onImageUpdate) {
         onImageUpdate('');

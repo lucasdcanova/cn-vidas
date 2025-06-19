@@ -105,6 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: true, // Recarregar quando a janela ganha foco
     refetchOnMount: true, // Sempre recarregar ao montar o componente
     refetchOnReconnect: true, // Recarregar quando reconectar à internet
+    refetchInterval: false, // Não fazer polling automático
+    networkMode: 'always', // Sempre tentar buscar do servidor
   });
 
   // Mutation para login
