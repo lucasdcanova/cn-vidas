@@ -68,6 +68,7 @@ import RedefinirSenha from "@/pages/redefinir-senha";
 import ReenviarVerificacao from "@/pages/reenviar-verificacao";
 import EsqueciSenha from "@/pages/esqueci-senha";
 import AdminMedicalRecords from "@/pages/admin/medical-records";
+import AdminDoctors from "@/pages/admin/doctors";
 import DoctorMedicalRecords from "@/pages/doctor/medical-records";
 import DoctorMedicalRecordEdit from "@/pages/doctor/medical-record-edit";
 import TestHeadlessDaily from "@/pages/test-headless-daily";
@@ -212,6 +213,7 @@ function Router() {
       <ProtectedRoute path="/admin/seller-stats" component={SellerStats} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/checkout-tracking" component={CheckoutTrackingPage} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/medical-records" component={AdminMedicalRecords} allowedRoles={["admin"]} />
+      <ProtectedRoute path="/admin/doctors" component={AdminDoctors} allowedRoles={["admin"]} />
       
       {/* Test routes */}
       <ProtectedRoute path="/test-headless-daily" component={TestHeadlessDaily} />
