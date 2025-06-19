@@ -208,7 +208,7 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
           >
             <Label htmlFor="fullBio" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Biografia Completa *
+              Biografia profissional *
             </Label>
             <Textarea
               id="fullBio"

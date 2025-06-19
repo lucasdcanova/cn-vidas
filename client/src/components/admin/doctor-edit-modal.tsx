@@ -80,8 +80,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
     licenseNumber: doctor.licenseNumber || "",
     education: doctor.education || "",
     experienceYears: doctor.experienceYears || 0,
-    biography: doctor.biography || "",
-    fullBio: doctor.fullBio || "",
+    fullBio: doctor.fullBio || doctor.biography || "",
     
     // Areas and languages
     areasOfExpertise: doctor.areasOfExpertise || [],
@@ -156,7 +155,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
         licenseNumber: formData.licenseNumber,
         education: formData.education,
         experienceYears: parseInt(formData.experienceYears.toString()),
-        biography: formData.biography,
+        biography: formData.fullBio, // Usar fullBio para ambos campos
         fullBio: formData.fullBio,
         areasOfExpertise: formData.areasOfExpertise,
         languagesSpoken: formData.languagesSpoken,
@@ -382,18 +381,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="biography">Biografia Resumida</Label>
-                        <Textarea
-                          id="biography"
-                          value={formData.biography}
-                          onChange={(e) => handleInputChange("biography", e.target.value)}
-                          placeholder="Breve descrição profissional..."
-                          rows={3}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="fullBio">Biografia Completa</Label>
+                        <Label htmlFor="fullBio">Biografia profissional</Label>
                         <Textarea
                           id="fullBio"
                           value={formData.fullBio}
