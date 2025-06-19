@@ -288,7 +288,9 @@ export default function MinimalistVideoCall({
           // Forçar configurações de áudio
           micAudioMode: 'music',
           userMediaVideoConstraints: {
-            facingMode: 'user'
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
           },
           userMediaAudioConstraints: {
             echoCancellation: true,
@@ -424,34 +426,15 @@ export default function MinimalistVideoCall({
             tracks: event?.participant?.tracks
           });
           
-          // Verificar se o áudio está desabilitado e tentar habilitar
+          // Se for local, atualizar estado dos controles
+          if (event?.participant?.local) {
+            setIsAudioEnabled(event.participant.audio);
+            setIsVideoEnabled(event.participant.video);
+          }
+          
+          // Log de participante com áudio desabilitado (sem tentar reabilitar)
           if (event?.participant && !event.participant.audio) {
-            console.warn('⚠️ [MinimalistVideoCall] Participante com áudio desabilitado:', event.participant.session_id);
-            
-            // Se for local, tentar reabilitar
-            if (event.participant.local) {
-              console.log('🔧 [MinimalistVideoCall] Tentando reabilitar áudio local...');
-              try {
-                await callObject.setLocalAudio(true);
-              } catch (err) {
-                console.error('❌ [MinimalistVideoCall] Erro ao reabilitar áudio local:', err);
-              }
-            } else {
-              // Se for remoto, verificar se precisamos atualizar a stream
-              console.log('🔍 [MinimalistVideoCall] Verificando áudio do participante remoto...');
-              if (event.participant.audioTrack && remoteVideoRef.current) {
-                const currentStream = remoteVideoRef.current.srcObject as MediaStream;
-                if (currentStream) {
-                  // Verificar se o track de áudio já está na stream
-                  const audioTracks = currentStream.getAudioTracks();
-                  const hasAudioTrack = audioTracks.some(t => t.id === event.participant.audioTrack.id);
-                  if (!hasAudioTrack) {
-                    console.log('🔧 [MinimalistVideoCall] Adicionando track de áudio à stream remota');
-                    currentStream.addTrack(event.participant.audioTrack);
-                  }
-                }
-              }
-            }
+            console.log('🔇 [MinimalistVideoCall] Participante com áudio mutado:', event.participant.session_id);
           }
           
           // Se for participante remoto, atualizar estado e verificar se precisamos recriar a stream
@@ -657,38 +640,52 @@ export default function MinimalistVideoCall({
         // Tracks locais
         if (track.kind === 'video' && localVideoRef.current) {
           console.log('📹 [MinimalistVideoCall] Configurando vídeo local');
+          console.log('📹 [MinimalistVideoCall] Track de vídeo local:', {
+            id: track.id,
+            enabled: track.enabled,
+            readyState: track.readyState,
+            settings: track.getSettings()
+          });
           
-          // Sempre criar nova stream para o vídeo local
-          const newStream = new MediaStream();
-          newStream.addTrack(track);
-          
-          // Definir a stream no elemento de vídeo
-          localVideoRef.current.srcObject = newStream;
-          
-          // Garantir atributos necessários
-          localVideoRef.current.setAttribute('autoplay', 'true');
-          localVideoRef.current.setAttribute('playsinline', 'true');
-          localVideoRef.current.setAttribute('muted', 'true');
-          
-          // Aguardar metadata antes de reproduzir
-          localVideoRef.current.onloadedmetadata = () => {
-            console.log('📹 [MinimalistVideoCall] Metadata do vídeo local carregada');
-            localVideoRef.current.play()
-              .then(() => console.log('✅ [MinimalistVideoCall] Vídeo local reproduzindo'))
-              .catch(e => console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo local:', e));
-          };
+          try {
+            // Sempre criar nova stream para o vídeo local
+            const newStream = new MediaStream();
+            newStream.addTrack(track);
+            
+            // Definir a stream no elemento de vídeo
+            localVideoRef.current.srcObject = newStream;
+            
+            // Garantir atributos necessários
+            localVideoRef.current.setAttribute('autoplay', 'true');
+            localVideoRef.current.setAttribute('playsinline', 'true');
+            localVideoRef.current.setAttribute('muted', 'true');
+            
+            // Forçar reprodução imediata
+            const playPromise = localVideoRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  console.log('✅ [MinimalistVideoCall] Vídeo local reproduzindo');
+                  console.log('📹 [MinimalistVideoCall] Estado do vídeo local:', {
+                    srcObject: !!localVideoRef.current.srcObject,
+                    videoWidth: localVideoRef.current.videoWidth,
+                    videoHeight: localVideoRef.current.videoHeight,
+                    readyState: localVideoRef.current.readyState,
+                    paused: localVideoRef.current.paused
+                  });
+                })
+                .catch(e => {
+                  console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo local:', e);
+                });
+            }
+          } catch (err) {
+            console.error('❌ [MinimalistVideoCall] Erro ao configurar vídeo local:', err);
+          }
         } else if (track.kind === 'audio') {
           console.log('🎤 [MinimalistVideoCall] Track de áudio local detectado');
-          // Verificar se o track está habilitado
+          // Apenas logar se o track está desabilitado, sem tentar reabilitar
           if (!track.enabled) {
-            console.warn('⚠️ [MinimalistVideoCall] Track de áudio local está desabilitado!');
-            // Tentar habilitar através do Daily.js
-            setTimeout(() => {
-              if (callRef.current) {
-                console.log('🔧 [MinimalistVideoCall] Tentando reabilitar áudio local...');
-                callRef.current.setLocalAudio(true);
-              }
-            }, 1000);
+            console.log('🔇 [MinimalistVideoCall] Track de áudio local está mutado');
           }
         }
       } else {
@@ -740,15 +737,7 @@ export default function MinimalistVideoCall({
             
             // Verificar se o track está habilitado
             if (!track.enabled) {
-              console.warn('⚠️ [MinimalistVideoCall] Track de áudio remoto está desabilitado!');
-              // Verificar se o participante tem áudio mutado
-              const participants = callRef.current?.participants();
-              if (participants) {
-                const remoteParticipant = Object.values(participants).find(p => !p.local && p.session_id === participant.session_id);
-                if (remoteParticipant && !remoteParticipant.audio) {
-                  console.log('🔇 [MinimalistVideoCall] Participante remoto está com áudio mutado');
-                }
-              }
+              console.log('🔇 [MinimalistVideoCall] Track de áudio remoto está mutado');
             }
             
             // IMPORTANTE: Garantir que o elemento de vídeo está configurado corretamente
@@ -845,31 +834,13 @@ export default function MinimalistVideoCall({
       console.log(`🎤 [MinimalistVideoCall] Alternando áudio: ${isAudioEnabled} -> ${newState}`);
       
       try {
-        // Definir o estado primeiro para feedback imediato na UI
-        setIsAudioEnabled(newState);
-        
-        // Aplicar mudança no Daily
+        // Aplicar mudança no Daily primeiro
         await callRef.current.setLocalAudio(newState);
         
-        // Verificar se mudou depois de um pequeno delay
-        setTimeout(() => {
-          const localParticipant = callRef.current?.participants()?.local;
-          console.log('🔊 [MinimalistVideoCall] Status do áudio após toggle:', {
-            solicitado: newState,
-            atual: localParticipant?.audio,
-            audioTrack: !!localParticipant?.audioTrack
-          });
-          
-          // Se o estado não mudou como esperado, reverter
-          if (localParticipant && localParticipant.audio !== newState) {
-            console.warn('⚠️ [MinimalistVideoCall] Estado do áudio não mudou como esperado, revertendo UI');
-            setIsAudioEnabled(localParticipant.audio);
-          }
-        }, 100);
+        // Estado será atualizado pelo evento participant-updated
+        console.log('✅ [MinimalistVideoCall] Comando de toggle enviado');
       } catch (error) {
         console.error('❌ [MinimalistVideoCall] Erro ao alternar áudio:', error);
-        // Reverter estado em caso de erro
-        setIsAudioEnabled(!newState);
       }
     }
   }, [isAudioEnabled]);
