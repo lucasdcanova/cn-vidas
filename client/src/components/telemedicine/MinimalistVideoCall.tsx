@@ -179,6 +179,24 @@ export default function MinimalistVideoCall({
       return () => clearInterval(interval);
     }
   }, [isCallActive]);
+  
+  // Verificação periódica do participante remoto
+  useEffect(() => {
+    if (isCallActive && callRef.current) {
+      const checkInterval = setInterval(() => {
+        const participants = callRef.current?.participants();
+        if (participants) {
+          const remoteParticipants = Object.values(participants).filter(p => !p.local);
+          if (remoteParticipants.length > 0 && !remoteParticipant) {
+            console.log('🔍 [MinimalistVideoCall] Participante remoto detectado na verificação periódica');
+            setRemoteParticipant(remoteParticipants[0]);
+          }
+        }
+      }, 2000); // Verificar a cada 2 segundos
+      
+      return () => clearInterval(checkInterval);
+    }
+  }, [isCallActive, remoteParticipant]);
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -274,7 +292,7 @@ export default function MinimalistVideoCall({
             // Processar cada participante
             Object.entries(participants).forEach(([id, participant]) => {
               if (!participant.local) {
-                console.log('🔍 [MinimalistVideoCall] Processando participante remoto:', {
+                console.log('🔍 [MinimalistVideoCall] Processando participante remoto existente:', {
                   id,
                   userName: participant.userName,
                   audio: participant.audio,
@@ -285,9 +303,12 @@ export default function MinimalistVideoCall({
                   }
                 });
                 
-                // Se já existir participante remoto, configurar suas tracks
+                // Sempre atualizar o participante remoto
+                setRemoteParticipant(participant);
+                
+                // Se já existir participante remoto com tracks, configurar suas tracks
                 if (participant.audioTrack || participant.videoTrack) {
-                  setRemoteParticipant(participant);
+                  console.log('🎯 Participante existente tem tracks, processando...');
                   
                   // Criar evento simulado para processar as tracks
                   if (participant.videoTrack) {
@@ -302,6 +323,8 @@ export default function MinimalistVideoCall({
                       track: participant.audioTrack
                     });
                   }
+                } else {
+                  console.log('⏳ Participante existente ainda sem tracks');
                 }
               }
             });
@@ -315,8 +338,38 @@ export default function MinimalistVideoCall({
         })
         .on('participant-joined', (event) => {
           if (event?.participant && !event.participant.local) {
-            console.log('👥 Participante entrou:', event.participant);
+            console.log('👥 Participante entrou:', {
+              id: event.participant.session_id,
+              userName: event.participant.userName,
+              audio: event.participant.audio,
+              video: event.participant.video,
+              tracks: event.participant.tracks,
+              audioTrack: !!event.participant.audioTrack,
+              videoTrack: !!event.participant.videoTrack
+            });
+            
+            // Atualizar estado do participante remoto
             setRemoteParticipant(event.participant);
+            
+            // Se já tiver tracks, processar imediatamente
+            if (event.participant.audioTrack || event.participant.videoTrack) {
+              console.log('🎯 Participante já tem tracks, processando...');
+              if (event.participant.videoTrack) {
+                handleTrackStarted({
+                  participant: event.participant,
+                  track: event.participant.videoTrack
+                });
+              }
+              if (event.participant.audioTrack) {
+                handleTrackStarted({
+                  participant: event.participant,
+                  track: event.participant.audioTrack
+                });
+              }
+            } else {
+              console.log('⏳ Participante ainda sem tracks, aguardando track-started...');
+            }
+            
             onParticipantJoined?.(event.participant);
           }
         })
@@ -375,23 +428,28 @@ export default function MinimalistVideoCall({
             }
           }
           
-          // Se for participante remoto, verificar se precisamos recriar a stream
-          if (!event?.participant?.local && remoteVideoRef.current) {
-            const participant = event.participant;
-            if (participant.audioTrack || participant.videoTrack) {
-              const currentStream = remoteVideoRef.current.srcObject as MediaStream;
-              if (!currentStream) {
-                console.log('🔧 [MinimalistVideoCall] Criando nova stream para participante remoto');
-                const newStream = new MediaStream();
-                if (participant.audioTrack) {
-                  newStream.addTrack(participant.audioTrack);
+          // Se for participante remoto, atualizar estado e verificar se precisamos recriar a stream
+          if (!event?.participant?.local) {
+            // Atualizar estado do participante remoto
+            setRemoteParticipant(event.participant);
+            
+            if (remoteVideoRef.current) {
+              const participant = event.participant;
+              if (participant.audioTrack || participant.videoTrack) {
+                const currentStream = remoteVideoRef.current.srcObject as MediaStream;
+                if (!currentStream) {
+                  console.log('🔧 [MinimalistVideoCall] Criando nova stream para participante remoto');
+                  const newStream = new MediaStream();
+                  if (participant.audioTrack) {
+                    newStream.addTrack(participant.audioTrack);
+                  }
+                  if (participant.videoTrack) {
+                    newStream.addTrack(participant.videoTrack);
+                  }
+                  remoteVideoRef.current.srcObject = newStream;
+                  remoteVideoRef.current.muted = false;
+                  remoteVideoRef.current.volume = 1.0;
                 }
-                if (participant.videoTrack) {
-                  newStream.addTrack(participant.videoTrack);
-                }
-                remoteVideoRef.current.srcObject = newStream;
-                remoteVideoRef.current.muted = false;
-                remoteVideoRef.current.volume = 1.0;
               }
             }
           }
@@ -605,6 +663,12 @@ export default function MinimalistVideoCall({
         }
       } else {
         // Tracks remotos - IMPORTANTE: combinar áudio e vídeo na mesma stream
+        // Atualizar o participante remoto se ainda não tiver sido definido
+        if (!remoteParticipant || remoteParticipant.session_id !== participant.session_id) {
+          console.log('📝 [MinimalistVideoCall] Atualizando participante remoto via track-started');
+          setRemoteParticipant(participant);
+        }
+        
         if (remoteVideoRef.current) {
           let currentStream = remoteVideoRef.current.srcObject as MediaStream;
           
