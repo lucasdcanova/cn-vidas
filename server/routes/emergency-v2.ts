@@ -234,7 +234,7 @@ emergencyV2Router.post('/join/:appointmentId', authenticateToken, async (req: Re
 
     // Limpar notificações de TODOS os médicos quando um aceitar
     // Isso evita que outros médicos tentem entrar na mesma consulta
-    const allDoctors = await storage.getDoctors();
+    const allDoctors = await storage.getAllDoctors();
     for (const doc of allDoctors) {
       const notification = emergencyNotifications.get(doc.id);
       if (notification && notification.appointmentId === appointmentId) {
@@ -406,7 +406,7 @@ emergencyV2Router.post('/end/:appointmentId', authenticateToken, async (req: Req
     }
 
     // Limpar notificações de todos os médicos se ainda existirem
-    const allDoctors = await storage.getDoctors();
+    const allDoctors = await storage.getAllDoctors();
     for (const doc of allDoctors) {
       const notification = emergencyNotifications.get(doc.id);
       if (notification && notification.appointmentId === appointmentId) {
@@ -619,7 +619,7 @@ emergencyV2Router.post('/complete/:appointmentId', authenticateToken, async (req
     });
     
     // Limpar notificações de todos os médicos se existirem
-    const allDoctors = await storage.getDoctors();
+    const allDoctors = await storage.getAllDoctors();
     for (const doc of allDoctors) {
       const notification = emergencyNotifications.get(doc.id);
       if (notification && notification.appointmentId === appointmentId) {
