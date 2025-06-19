@@ -42,7 +42,7 @@ emergencyV2Router.post('/start', authenticateToken, async (req: Request, res: Re
     }
     
     // Buscar todos os médicos disponíveis para emergência
-    const availableDoctors = await storage.getDoctors();
+    const availableDoctors = await storage.getAllDoctors();
     const emergencyDoctors = availableDoctors.filter(d => d.availableForEmergency);
     
     if (emergencyDoctors.length === 0) {
