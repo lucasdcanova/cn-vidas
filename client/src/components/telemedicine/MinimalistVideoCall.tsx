@@ -834,6 +834,16 @@ export default function MinimalistVideoCall({
 
   return (
     <div className="fixed inset-0 w-full h-full bg-black overflow-hidden">
+      {/* Placeholder quando não há participante remoto */}
+      {!remoteParticipant && isCallActive && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4 mx-auto" />
+            <p className="text-white text-lg">Aguardando participante...</p>
+          </div>
+        </div>
+      )}
+      
       {/* Vídeo remoto em tela cheia */}
       <video
         ref={remoteVideoRef}
@@ -843,7 +853,11 @@ export default function MinimalistVideoCall({
         controls={false}
         volume={1.0}
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ transform: 'scaleX(-1)' }}
+        style={{ 
+          transform: 'scaleX(-1)',
+          display: remoteParticipant ? 'block' : 'none',
+          zIndex: 1
+        }}
         onLoadedMetadata={(e) => {
           const video = e.target as HTMLVideoElement;
           console.log('🎥 [MinimalistVideoCall] Vídeo remoto carregado:', {
@@ -879,7 +893,7 @@ export default function MinimalistVideoCall({
 
       {/* Vídeo local PIP */}
       {isCallActive && (
-        <div className="absolute bottom-24 right-4 w-32 h-48 bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="absolute bottom-24 right-4 w-32 h-48 bg-gray-900 rounded-2xl overflow-hidden shadow-2xl" style={{ zIndex: 10 }}>
           <video
             ref={localVideoRef}
             autoPlay
@@ -895,6 +909,16 @@ export default function MinimalistVideoCall({
           )}
         </div>
       )}
+      
+      {/* Debug info */}
+      {isCallActive && (
+        <div className="absolute top-20 left-4 bg-black/80 text-white p-2 rounded text-xs" style={{ zIndex: 100 }}>
+          <p>Local Video: {localVideoRef.current?.srcObject ? 'YES' : 'NO'}</p>
+          <p>Remote Video: {remoteVideoRef.current?.srcObject ? 'YES' : 'NO'}</p>
+          <p>Remote Participant: {remoteParticipant ? remoteParticipant.userName : 'NONE'}</p>
+          <p>Remote Tracks: A:{remoteParticipant?.audioTrack ? 'YES' : 'NO'} V:{remoteParticipant?.videoTrack ? 'YES' : 'NO'}</p>
+        </div>
+      )}
 
       {/* Overlay com informações */}
       {isCallActive && (
@@ -902,10 +926,18 @@ export default function MinimalistVideoCall({
           {/* Header minimalista */}
           <div className="absolute top-0 left-0 right-0 p-6" style={{ zIndex: 50 }}>
             <div className="flex justify-between items-center">
-              <div className="bg-black/40 backdrop-blur-xl rounded-full px-4 py-2">
+              <div className="bg-black/40 backdrop-blur-xl rounded-full px-4 py-2 flex items-center gap-2">
                 <p className="text-white text-sm font-medium">
                   {formatDuration(callDuration)}
                 </p>
+                {remoteParticipant && (
+                  <>
+                    <span className="text-white/60">•</span>
+                    <p className="text-white text-sm">
+                      {remoteParticipant.userName || 'Participante'}
+                    </p>
+                  </>
+                )}
               </div>
               
               {isDoctor && enableRecording && appointmentId && (
