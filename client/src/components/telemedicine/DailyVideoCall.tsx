@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import DailyIframe, { DailyCall, DailyEventObject, DailyParticipant } from '@daily-co/daily-js';
-import { Mic, MicOff, Video, VideoOff, Phone } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, Phone, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import RecordingControls from './RecordingControls';
 import { useQuery } from '@tanstack/react-query';
@@ -145,12 +145,22 @@ export default function DailyVideoCall({
   // Create and configure Daily call
   const createCall = useCallback(async () => {
     if (!roomUrl || !containerRef.current) {
-      console.error('❌ [DailyVideoCall] roomUrl or container not available');
+      console.error('❌ [DailyVideoCall] roomUrl or container not available', {
+        hasRoomUrl: !!roomUrl,
+        hasContainer: !!containerRef.current,
+        roomUrl: roomUrl
+      });
+      setIsConnecting(false);
       return;
     }
 
     try {
-      console.log('🎬 [DailyVideoCall] Creating Daily instance...');
+      console.log('🎬 [DailyVideoCall] Creating Daily instance...', {
+        roomUrl,
+        userName,
+        hasToken: !!token,
+        tokenPreview: token ? token.substring(0, 20) + '...' : 'no token'
+      });
       
       // Request media permissions first
       console.log('🎤 [DailyVideoCall] Requesting media permissions...');
@@ -215,13 +225,55 @@ export default function DailyVideoCall({
         joinConfig.token = token;
       }
 
-      console.log('🚀 [DailyVideoCall] Joining room...', joinConfig);
-      await callFrame.join(joinConfig);
+      console.log('🚀 [DailyVideoCall] Joining room...', {
+        url: joinConfig.url,
+        userName: joinConfig.userName,
+        hasToken: !!joinConfig.token,
+        startVideoOff: joinConfig.startVideoOff,
+        startAudioOff: joinConfig.startAudioOff
+      });
+      
+      try {
+        await callFrame.join(joinConfig);
+        console.log('✅ [DailyVideoCall] Successfully joined room');
+      } catch (joinError: any) {
+        console.error('❌ [DailyVideoCall] Failed to join room:', {
+          error: joinError,
+          message: joinError.message,
+          errorMsg: joinError.errorMsg
+        });
+        throw joinError;
+      }
 
-    } catch (error) {
-      console.error('❌ [DailyVideoCall] Error creating call:', error);
-      setError('Error connecting to video call');
+    } catch (error: any) {
+      console.error('❌ [DailyVideoCall] Error creating call:', {
+        error,
+        message: error?.message,
+        stack: error?.stack
+      });
+      
+      // More specific error messages
+      if (error?.message?.includes('token')) {
+        setError('Authentication error - invalid token');
+      } else if (error?.message?.includes('room')) {
+        setError('Room not found or expired');
+      } else if (error?.message?.includes('network')) {
+        setError('Network connection error');
+      } else {
+        setError(error?.message || 'Error connecting to video call');
+      }
+      
       setIsConnecting(false);
+      
+      // Clean up if needed
+      if (callRef.current) {
+        try {
+          await callRef.current.destroy();
+          callRef.current = null;
+        } catch (cleanupError) {
+          console.error('❌ [DailyVideoCall] Error cleaning up:', cleanupError);
+        }
+      }
     }
   }, [roomUrl, userName, token]);
 
@@ -576,16 +628,34 @@ export default function DailyVideoCall({
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4 mx-auto" />
             <p className="text-white text-lg">Connecting...</p>
+            <p className="text-white/60 text-sm mt-2">Setting up your video call...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Error state */}
+      {error && !isConnecting && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm" style={{ zIndex: 100 }}>
+          <div className="text-center max-w-md">
+            <div className="bg-red-500/20 rounded-full p-4 mb-4 mx-auto w-fit">
+              <AlertCircle className="w-12 h-12 text-red-500" />
+            </div>
+            <p className="text-white text-lg font-medium mb-2">Connection Error</p>
+            <p className="text-white/80 text-sm mb-4">{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                setIsConnecting(true);
+                createCall();
+              }}
+              className="px-6 py-2 bg-white text-black rounded-full font-medium hover:bg-white/90 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         </div>
       )}
 
-      {/* Error state */}
-      {error && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white px-4 py-2 rounded-lg" style={{ zIndex: 100 }}>
-          {error}
-        </div>
-      )}
     </div>
   );
 }

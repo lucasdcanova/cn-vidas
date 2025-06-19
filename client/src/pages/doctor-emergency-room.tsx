@@ -10,7 +10,7 @@ import { Loader2, AlertCircle, Clock, User, ShieldAlert } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import DailyVideoCall from '@/components/telemedicine/DailyVideoCall';
+import MinimalistVideoCall from '@/components/telemedicine/MinimalistVideoCall';
 
 interface ConsultationInfo {
   roomUrl: string | null;
@@ -219,8 +219,8 @@ export default function DoctorEmergencyRoom() {
   if (showVideoCall) {
     return (
       <div className="fixed inset-0 z-50 bg-black">
-        {/* Componente de vídeo FaceTime em tela cheia */}
-        <DailyVideoCall
+        {/* Componente de vídeo minimalista em tela cheia */}
+        <MinimalistVideoCall
           roomUrl={consultation.roomUrl!}
           token={consultation.token || undefined}
           onJoinCall={() => {
