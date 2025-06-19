@@ -868,6 +868,44 @@ router.get('/sellers/stats', async (req, res) => {
 });
 
 // Rotas para gerenciar perfis médicos
+router.get('/doctors', async (req, res) => {
+  try {
+    const { storage } = await import('./storage');
+    
+    // Get all users with doctor role
+    const allUsers = await storage.getAllUsers();
+    const doctorUsers = allUsers.filter(u => u.role === 'doctor');
+    
+    // Get doctor profiles for each doctor user
+    const doctorsWithProfiles = await Promise.all(
+      doctorUsers.map(async (user) => {
+        try {
+          const doctorProfile = await storage.getDoctorByUserId(user.id);
+          return {
+            ...doctorProfile,
+            user,
+            email: user.email,
+            phone: user.phone,
+            fullName: user.fullName,
+            profileImage: user.profileImage
+          };
+        } catch (error) {
+          console.error(`Error fetching doctor profile for user ${user.id}:`, error);
+          return null;
+        }
+      })
+    );
+    
+    // Filter out nulls
+    const doctors = doctorsWithProfiles.filter(d => d !== null);
+    
+    res.json(doctors);
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.patch('/doctors/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -887,6 +925,46 @@ router.patch('/doctors/:id', async (req, res) => {
     res.json(updatedDoctor);
   } catch (error) {
     console.error('Error updating doctor:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Manage doctor availability
+router.put('/doctors/:id/availability', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { slots } = req.body;
+    
+    const { storage } = await import('./storage');
+    
+    // Verificar se o médico existe
+    const doctor = await storage.getDoctor(parseInt(id));
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+    
+    // Clear existing availability slots
+    const existingSlots = await storage.getDoctorAvailabilitySlots(parseInt(id));
+    for (const slot of existingSlots) {
+      if (slot.id) {
+        await storage.deleteDoctorAvailabilitySlot(slot.id);
+      }
+    }
+    
+    // Add new slots
+    const slotsToSave = slots.map((slot: any) => ({
+      doctorId: parseInt(id),
+      dayOfWeek: slot.dayOfWeek,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      isAvailable: slot.isAvailable !== false
+    }));
+    
+    const savedSlots = await storage.saveDoctorAvailabilitySlots(slotsToSave);
+    
+    res.json({ availability: savedSlots });
+  } catch (error) {
+    console.error('Error updating doctor availability:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
