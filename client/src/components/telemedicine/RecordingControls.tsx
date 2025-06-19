@@ -111,15 +111,19 @@ export default function RecordingControls({
   // Parar gravação e fazer upload
   const handleStopRecording = async () => {
     console.log('🛑 [RecordingControls] Parando gravação...');
+    
+    // Verificar se já está parando ou se não está gravando
+    if (!state.isRecording) {
+      console.warn('⚠️ [RecordingControls] Tentativa de parar gravação quando não está gravando');
+      return;
+    }
+    
     const audioBlob = await stopRecording();
     
     if (!audioBlob) {
       console.error('❌ [RecordingControls] Erro: Não foi possível obter o áudio gravado');
-      toast({
-        title: 'Erro na gravação',
-        description: 'Não foi possível obter o áudio gravado.',
-        variant: 'destructive'
-      });
+      // Não mostrar toast de erro se a gravação já foi salva anteriormente
+      // Isso pode acontecer quando o método é chamado múltiplas vezes
       return;
     }
 
