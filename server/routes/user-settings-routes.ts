@@ -6,8 +6,15 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 // Obter configurações de um usuário específico (apenas médicos podem ver de pacientes)
-router.get('/:userId/settings', requireAuth, async (req: AuthRequest, res) => {
+router.get('/users/:userId/settings', requireAuth, async (req: AuthRequest, res) => {
   try {
+    console.log('🔍 [UserSettings] Requisição recebida:', {
+      path: req.path,
+      params: req.params,
+      userId: req.params.userId,
+      user: req.user
+    });
+    
     const requesterId = req.user?.id;
     const targetUserId = parseInt(req.params.userId);
 
@@ -58,6 +65,11 @@ router.get('/:userId/settings', requireAuth, async (req: AuthRequest, res) => {
     });
 
     if (!requester || requester.role !== 'doctor') {
+      console.log('⚠️ [UserSettings] Acesso negado: usuário não é médico', {
+        requesterId,
+        targetUserId,
+        requesterRole: requester?.role
+      });
       return res.status(403).json({ error: 'Apenas médicos podem acessar configurações de outros usuários' });
     }
 
@@ -70,6 +82,10 @@ router.get('/:userId/settings', requireAuth, async (req: AuthRequest, res) => {
     });
 
     if (!appointment) {
+      console.log('⚠️ [UserSettings] Acesso negado: sem consulta entre médico e paciente', {
+        doctorId: requester.doctors[0]?.id,
+        targetUserId
+      });
       return res.status(403).json({ error: 'Você não tem permissão para acessar as configurações deste usuário' });
     }
 

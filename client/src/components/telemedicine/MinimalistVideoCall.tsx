@@ -99,8 +99,17 @@ export default function MinimalistVideoCall({
         const patientId = appointmentResponse.data.user_id;
         const settingsResponse = await axios.get(`/api/users/${patientId}/settings`);
         return settingsResponse.data;
-      } catch (error) {
-        console.error('Erro ao buscar configurações do paciente:', error);
+      } catch (error: any) {
+        // Se erro 404, assumir configurações padrão
+        if (error.response?.status === 404) {
+          console.warn('⚠️ [MinimalistVideoCall] Configurações do paciente não encontradas, usando padrão');
+          return {
+            privacy: {
+              allowConsultationRecording: true
+            }
+          };
+        }
+        console.error('❌ [MinimalistVideoCall] Erro ao buscar configurações do paciente:', error);
         return null;
       }
     },
@@ -116,8 +125,17 @@ export default function MinimalistVideoCall({
       try {
         const response = await axios.get('/api/users/settings');
         return response.data;
-      } catch (error) {
-        console.error('Erro ao buscar configurações do médico:', error);
+      } catch (error: any) {
+        // Se erro 404, assumir configurações padrão
+        if (error.response?.status === 404) {
+          console.warn('⚠️ [MinimalistVideoCall] Configurações do médico não encontradas, usando padrão');
+          return {
+            privacy: {
+              allowConsultationRecording: true
+            }
+          };
+        }
+        console.error('❌ [MinimalistVideoCall] Erro ao buscar configurações do médico:', error);
         return null;
       }
     },

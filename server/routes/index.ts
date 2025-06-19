@@ -128,6 +128,16 @@ export default async function setupRoutes(app: express.Express) {
   console.log('Registrando userSettingsRouter em /api');
   app.use('/api', userSettingsRouter);
   
+  // Rota de debug temporária
+  app.get('/api/users/:userId/settings', (req, res, next) => {
+    console.log('🚨 [DEBUG] Rota /api/users/:userId/settings interceptada:', {
+      params: req.params,
+      headers: req.headers,
+      method: req.method
+    });
+    next();
+  });
+  
   // Rotas administrativas
   console.log('Registrando adminRoutes em /api/admin');
   app.use('/api/admin', adminRoutes);
