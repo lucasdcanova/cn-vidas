@@ -1288,7 +1288,7 @@ const Profile: React.FC = () => {
                         name="fullBio"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Biografia Completa</FormLabel>
+                            <FormLabel>Biografia profissional</FormLabel>
                             <FormControl>
                               <Textarea 
                                 placeholder="Biografia detalhada para exibição no perfil..." 
