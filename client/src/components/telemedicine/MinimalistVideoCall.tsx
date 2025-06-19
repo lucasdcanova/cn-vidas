@@ -669,6 +669,9 @@ export default function MinimalistVideoCall({
           currentStream.getVideoTracks().forEach(t => currentStream.removeTrack(t));
           currentStream.addTrack(track);
           
+          // Forçar atualização do vídeo local
+          localVideoRef.current.load();
+          
           // Garantir que o vídeo local seja exibido
           localVideoRef.current.play().catch(e => {
             console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo local:', e);
@@ -1054,19 +1057,26 @@ export default function MinimalistVideoCall({
               
               {isDoctor && enableRecording && appointmentId && (
                 <div className="bg-black/40 backdrop-blur-xl rounded-full">
-                  {console.log('🎙️ [MinimalistVideoCall] Renderizando RecordingControls:', {
-                    appointmentId,
-                    enableRecording,
-                    isDoctor,
-                    shouldAutoRecord: shouldAutoRecord(),
-                    patientConsent: true
-                  })}
-                  <RecordingControls
-                    appointmentId={appointmentId}
-                    className="px-4 py-2"
-                    autoStart={shouldAutoRecord()}
-                    patientConsent={true}
-                  />
+                  {(() => {
+                    const shouldRecord = shouldAutoRecord();
+                    console.log('🎙️ [MinimalistVideoCall] Renderizando RecordingControls:', {
+                      appointmentId,
+                      enableRecording,
+                      isDoctor,
+                      shouldAutoRecord: shouldRecord,
+                      patientConsent: true,
+                      patientSettings: patientSettings,
+                      doctorSettings: doctorSettings
+                    });
+                    return (
+                      <RecordingControls
+                        appointmentId={appointmentId}
+                        className="px-4 py-2"
+                        autoStart={shouldRecord}
+                        patientConsent={true}
+                      />
+                    );
+                  })()}
                 </div>
               )}
             </div>
