@@ -658,24 +658,25 @@ export default function MinimalistVideoCall({
         if (track.kind === 'video' && localVideoRef.current) {
           console.log('📹 [MinimalistVideoCall] Configurando vídeo local');
           
-          // Criar nova stream ou atualizar existente
-          let currentStream = localVideoRef.current.srcObject as MediaStream;
-          if (!currentStream) {
-            currentStream = new MediaStream();
-            localVideoRef.current.srcObject = currentStream;
-          }
+          // Sempre criar nova stream para o vídeo local
+          const newStream = new MediaStream();
+          newStream.addTrack(track);
           
-          // Remover tracks de vídeo antigos
-          currentStream.getVideoTracks().forEach(t => currentStream.removeTrack(t));
-          currentStream.addTrack(track);
+          // Definir a stream no elemento de vídeo
+          localVideoRef.current.srcObject = newStream;
           
-          // Forçar atualização do vídeo local
-          localVideoRef.current.load();
+          // Garantir atributos necessários
+          localVideoRef.current.setAttribute('autoplay', 'true');
+          localVideoRef.current.setAttribute('playsinline', 'true');
+          localVideoRef.current.setAttribute('muted', 'true');
           
-          // Garantir que o vídeo local seja exibido
-          localVideoRef.current.play().catch(e => {
-            console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo local:', e);
-          });
+          // Aguardar metadata antes de reproduzir
+          localVideoRef.current.onloadedmetadata = () => {
+            console.log('📹 [MinimalistVideoCall] Metadata do vídeo local carregada');
+            localVideoRef.current.play()
+              .then(() => console.log('✅ [MinimalistVideoCall] Vídeo local reproduzindo'))
+              .catch(e => console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo local:', e));
+          };
         } else if (track.kind === 'audio') {
           console.log('🎤 [MinimalistVideoCall] Track de áudio local detectado');
           // Verificar se o track está habilitado
@@ -844,18 +845,31 @@ export default function MinimalistVideoCall({
       console.log(`🎤 [MinimalistVideoCall] Alternando áudio: ${isAudioEnabled} -> ${newState}`);
       
       try {
-        await callRef.current.setLocalAudio(newState);
+        // Definir o estado primeiro para feedback imediato na UI
         setIsAudioEnabled(newState);
         
-        // Verificar se mudou
-        const localParticipant = callRef.current.participants().local;
-        console.log('🔊 [MinimalistVideoCall] Status do áudio após toggle:', {
-          solicitado: newState,
-          atual: localParticipant?.audio,
-          audioTrack: !!localParticipant?.audioTrack
-        });
+        // Aplicar mudança no Daily
+        await callRef.current.setLocalAudio(newState);
+        
+        // Verificar se mudou depois de um pequeno delay
+        setTimeout(() => {
+          const localParticipant = callRef.current?.participants()?.local;
+          console.log('🔊 [MinimalistVideoCall] Status do áudio após toggle:', {
+            solicitado: newState,
+            atual: localParticipant?.audio,
+            audioTrack: !!localParticipant?.audioTrack
+          });
+          
+          // Se o estado não mudou como esperado, reverter
+          if (localParticipant && localParticipant.audio !== newState) {
+            console.warn('⚠️ [MinimalistVideoCall] Estado do áudio não mudou como esperado, revertendo UI');
+            setIsAudioEnabled(localParticipant.audio);
+          }
+        }, 100);
       } catch (error) {
         console.error('❌ [MinimalistVideoCall] Erro ao alternar áudio:', error);
+        // Reverter estado em caso de erro
+        setIsAudioEnabled(!newState);
       }
     }
   }, [isAudioEnabled]);
@@ -1003,11 +1017,26 @@ export default function MinimalistVideoCall({
         <div className="absolute bottom-24 right-4 w-32 h-48 bg-gray-900 rounded-2xl overflow-hidden shadow-2xl" style={{ zIndex: 10 }}>
           <video
             ref={localVideoRef}
-            autoPlay
-            playsInline
-            muted
+            autoPlay={true}
+            playsInline={true}
+            muted={true}
             className="w-full h-full object-cover"
             style={{ transform: 'scaleX(-1)' }}
+            onLoadedMetadata={(e) => {
+              const video = e.target as HTMLVideoElement;
+              console.log('🎥 [MinimalistVideoCall] Vídeo local metadata carregada:', {
+                srcObject: !!video.srcObject,
+                videoWidth: video.videoWidth,
+                videoHeight: video.videoHeight,
+                readyState: video.readyState
+              });
+            }}
+            onPlay={() => {
+              console.log('▶️ [MinimalistVideoCall] Vídeo local iniciou reprodução');
+            }}
+            onError={(e) => {
+              console.error('❌ [MinimalistVideoCall] Erro no vídeo local:', e);
+            }}
           />
           {!isVideoEnabled && (
             <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
@@ -1020,18 +1049,27 @@ export default function MinimalistVideoCall({
       {/* Debug info */}
       {isCallActive && (
         <div className="absolute top-20 left-4 bg-black/80 text-white p-2 rounded text-xs" style={{ zIndex: 100 }}>
-          <p>Local Video: {localVideoRef.current?.srcObject ? 'YES' : 'NO'}</p>
+          <p>Local Video Element: {localVideoRef.current?.srcObject ? 'YES' : 'NO'}</p>
+          {localVideoRef.current?.srcObject && (
+            <>
+              <p>Local Stream Tracks: V:{(localVideoRef.current.srcObject as MediaStream).getVideoTracks().length} A:{(localVideoRef.current.srcObject as MediaStream).getAudioTracks().length}</p>
+              <p>Local Video Track: {(localVideoRef.current.srcObject as MediaStream).getVideoTracks()[0]?.enabled ? 'ENABLED' : 'DISABLED'}</p>
+              <p>Local Video Dims: {localVideoRef.current.videoWidth}x{localVideoRef.current.videoHeight}</p>
+            </>
+          )}
+          <p>---</p>
           <p>Remote Video Element: {remoteVideoRef.current?.srcObject ? 'YES' : 'NO'}</p>
           {remoteVideoRef.current?.srcObject && (
             <>
               <p>Remote Stream Tracks: V:{(remoteVideoRef.current.srcObject as MediaStream).getVideoTracks().length} A:{(remoteVideoRef.current.srcObject as MediaStream).getAudioTracks().length}</p>
-              <p>Video Track Active: {(remoteVideoRef.current.srcObject as MediaStream).getVideoTracks()[0]?.enabled ? 'YES' : 'NO'}</p>
+              <p>Remote Video Track: {(remoteVideoRef.current.srcObject as MediaStream).getVideoTracks()[0]?.enabled ? 'ENABLED' : 'DISABLED'}</p>
             </>
           )}
           <p>Remote Participant: {remoteParticipant ? `${remoteParticipant.userName || remoteParticipant.session_id}` : 'NONE'}</p>
-          <p>Participant Tracks: A:{remoteParticipant?.audioTrack ? 'YES' : 'NO'} V:{remoteParticipant?.videoTrack ? 'YES' : 'NO'}</p>
           <p>Participant State: A:{remoteParticipant?.audio ? 'ON' : 'OFF'} V:{remoteParticipant?.video ? 'ON' : 'OFF'}</p>
-          <p>Video Element Display: {remoteVideoRef.current ? window.getComputedStyle(remoteVideoRef.current).display : 'N/A'}</p>
+          <p>---</p>
+          <p>Audio Enabled: {isAudioEnabled ? 'YES' : 'NO'}</p>
+          <p>Video Enabled: {isVideoEnabled ? 'YES' : 'NO'}</p>
         </div>
       )}
 
