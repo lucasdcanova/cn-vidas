@@ -1682,7 +1682,7 @@ export class DatabaseStorage implements IStorage {
       .set({
         updatedAt: new Date()
       })
-      .where(eq(medicalRecords.id, data.record_id));
+      .where(eq(medicalRecords.id, data.recordId));
     
     return entry;
   }
