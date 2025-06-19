@@ -10,6 +10,10 @@ import axios from 'axios';
 declare global {
   interface Window {
     dailyCallInstance?: DailyCall | null;
+    recordingControlsRef?: {
+      stopRecording: () => Promise<void>;
+    };
+    recordingControlsStopping?: boolean;
   }
 }
 
@@ -255,15 +259,32 @@ export default function MinimalistVideoCall({
         .on('track-stopped', (event) => {
           handleTrackStopped(event);
         })
-        .on('participant-updated', (event) => {
+        .on('participant-updated', async (event) => {
           console.log('🔄 [MinimalistVideoCall] Participante atualizado:', {
             participantId: event?.participant?.session_id,
             isLocal: event?.participant?.local,
             audio: event?.participant?.audio,
             video: event?.participant?.video,
             audioTrack: !!event?.participant?.audioTrack,
-            videoTrack: !!event?.participant?.videoTrack
+            videoTrack: !!event?.participant?.videoTrack,
+            subscribed: event?.participant?.subscribed,
+            tracks: event?.participant?.tracks
           });
+          
+          // Verificar se o áudio está desabilitado e tentar habilitar
+          if (event?.participant && !event.participant.audio) {
+            console.warn('⚠️ [MinimalistVideoCall] Participante com áudio desabilitado:', event.participant.session_id);
+            
+            // Se for local, tentar reabilitar
+            if (event.participant.local) {
+              console.log('🔧 [MinimalistVideoCall] Tentando reabilitar áudio local...');
+              try {
+                await callObject.setLocalAudio(true);
+              } catch (err) {
+                console.error('❌ [MinimalistVideoCall] Erro ao reabilitar áudio local:', err);
+              }
+            }
+          }
           
           // Se for participante remoto, verificar se precisamos recriar a stream
           if (!event?.participant?.local && remoteVideoRef.current) {
@@ -317,6 +338,14 @@ export default function MinimalistVideoCall({
       });
 
       await callObject.join(joinOptions);
+      
+      // Verificar configurações da sala após entrar
+      const roomInfo = callObject.room();
+      console.log('🏠 [MinimalistVideoCall] Informações da sala:', {
+        name: roomInfo?.name,
+        config: roomInfo?.config,
+        signaling_impl: roomInfo?.signaling_impl
+      });
       
       // Garantir que o áudio está habilitado após entrar
       console.log('🔊 [MinimalistVideoCall] Habilitando áudio após entrar...');
@@ -427,7 +456,8 @@ export default function MinimalistVideoCall({
           // Verificar se o track está habilitado
           if (!track.enabled) {
             console.warn('⚠️ [MinimalistVideoCall] Track de áudio local está desabilitado!');
-            track.enabled = true;
+            // Não podemos modificar track.enabled diretamente - é read-only
+            // O track deve ser habilitado através do Daily.js
           }
         }
       } else {
@@ -455,7 +485,8 @@ export default function MinimalistVideoCall({
             // Verificar se o track está habilitado
             if (!track.enabled) {
               console.warn('⚠️ [MinimalistVideoCall] Track de áudio remoto está desabilitado!');
-              track.enabled = true;
+              // Não podemos modificar track.enabled diretamente - é read-only
+              // Precisamos verificar as configurações do participante no Daily.js
             }
             
             // Garantir que o elemento de vídeo está configurado para reproduzir áudio
@@ -500,10 +531,16 @@ export default function MinimalistVideoCall({
     if (callRef.current) {
       try {
         // Parar gravação se estiver gravando
-        if (window.recordingControlsRef) {
+        if (window.recordingControlsRef && !window.recordingControlsStopping) {
           console.log('⏹️ [MinimalistVideoCall] Parando gravação antes de sair...');
-          await window.recordingControlsRef.stopRecording();
-          console.log('✅ [MinimalistVideoCall] Gravação parada com sucesso');
+          window.recordingControlsStopping = true; // Flag para evitar dupla chamada
+          try {
+            await window.recordingControlsRef.stopRecording();
+            console.log('✅ [MinimalistVideoCall] Gravação parada com sucesso');
+          } catch (recordingError) {
+            console.error('❌ [MinimalistVideoCall] Erro ao parar gravação:', recordingError);
+          }
+          window.recordingControlsStopping = false;
         }
         
         if (callRef.current) {
