@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import ProfileImageUploader from "@/components/doctors/ProfileImageUploader";
+import ProfileImageUploader from "@/components/shared/ProfileImageUploader";
 import DoctorAvailabilityManager from "@/components/admin/doctor-availability-manager";
 import {
   User,
