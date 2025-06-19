@@ -956,15 +956,17 @@ export default function TelemedicinePage() {
                       </p>
                       <p>
                         Consultas de emergência disponíveis: <span className="font-semibold text-green-600">
-                          {user?.emergencyConsultationsLeft !== undefined && user?.emergencyConsultationsLeft !== null 
-                            ? user.emergencyConsultationsLeft 
-                            : 0}
+                          {user?.emergencyConsultationsLeft === null 
+                            ? 'Ilimitadas'
+                            : (user?.emergencyConsultationsLeft !== undefined 
+                                ? user.emergencyConsultationsLeft 
+                                : 0)}
                         </span>
                       </p>
-                      <p className={user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0 
+                      <p className={(user?.emergencyConsultationsLeft === null || (user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0))
                         ? "text-green-600 font-medium" 
                         : "text-amber-600 font-medium"}>
-                        {user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0 
+                        {(user?.emergencyConsultationsLeft === null || (user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0))
                           ? '✓ Esta consulta será gratuita (inclusa no plano)' 
                           : '⚠️ Consulta será cobrada separadamente'}
                       </p>
