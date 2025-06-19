@@ -81,6 +81,7 @@ export default function MinimalistVideoCall({
   const [remoteParticipant, setRemoteParticipant] = useState<any>(null);
   const callStartTimeRef = useRef<number>(0);
   const [hasJoinedCall, setHasJoinedCall] = useState(false);
+  const [audioPermissionGranted, setAudioPermissionGranted] = useState(false);
   
   // Limpar instâncias ao montar
   useEffect(() => {
@@ -218,7 +219,11 @@ export default function MinimalistVideoCall({
       const callObject = DailyIframe.createCallObject({
         subscribeToTracksAutomatically: true,
         audioSource: true,  // Garantir que o áudio está habilitado
-        videoSource: true   // Garantir que o vídeo está habilitado
+        videoSource: true,  // Garantir que o vídeo está habilitado
+        dailyConfig: {
+          // Configurações adicionais para melhorar compatibilidade
+          experimentalChromeVideoMuteLess: true
+        }
       });
 
       callRef.current = callObject;
@@ -324,6 +329,12 @@ export default function MinimalistVideoCall({
         })
         .on('active-speaker-change', (event) => {
           console.log('🗣️ [MinimalistVideoCall] Mudança de speaker ativo:', event?.activeSpeaker);
+        })
+        .on('camera-error', (event) => {
+          console.error('📹 [MinimalistVideoCall] Erro de câmera:', event);
+        })
+        .on('microphone-error', (event) => {
+          console.error('🎤 [MinimalistVideoCall] Erro de microfone:', event);
         })
         .on('error', (event) => {
           console.error('❌ Erro na videochamada:', event);
