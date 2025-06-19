@@ -23,11 +23,6 @@ const emergencyNotifications = new Map<number, {
 emergencyV2Router.post('/start', authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    const { doctorId } = req.body;
-    
-    if (!doctorId) {
-      return res.status(400).json({ error: 'É necessário selecionar um médico' });
-    }
     
     const user = await storage.getUser(userId);
     
@@ -46,22 +41,15 @@ emergencyV2Router.post('/start', authenticateToken, async (req: Request, res: Re
       });
     }
     
-    // Verificar se o médico existe e está disponível
-    const doctor = await storage.getDoctor(doctorId);
-    if (!doctor || !doctor.availableForEmergency) {
-      return res.status(404).json({ error: 'Médico não disponível para emergência' });
+    // Buscar todos os médicos disponíveis para emergência
+    const availableDoctors = await storage.getDoctors();
+    const emergencyDoctors = availableDoctors.filter(d => d.availableForEmergency);
+    
+    if (emergencyDoctors.length === 0) {
+      return res.status(404).json({ error: 'Não há médicos disponíveis para emergência no momento' });
     }
     
-    // Get doctor's user info
-    const doctorUser = doctor.userId ? await storage.getUser(doctor.userId) : null;
-    const doctorFullName = doctorUser?.fullName || doctor.name || 'Médico';
-    
-    console.log(`🔍 Médico selecionado para emergência:`, {
-      doctorId: doctor.id,
-      doctorUserId: doctor.userId,
-      doctorName: doctorFullName,
-      availableForEmergency: doctor.availableForEmergency
-    });
+    console.log(`🔍 Médicos disponíveis para emergência: ${emergencyDoctors.length}`);
 
     // Criar sala Daily.co com nome único
     const roomName = `emergency-${userId}-${Date.now()}`;
@@ -83,23 +71,22 @@ emergencyV2Router.post('/start', authenticateToken, async (req: Request, res: Re
     // Extrair o token da resposta
     const patientToken = tokenResponse.token;
 
-    // Criar registro de consulta com médico específico
+    // Criar registro de consulta sem médico específico inicialmente
     const appointment = await storage.createAppointment({
       userId: userId,
-      doctorId: doctorId,
+      doctorId: null, // Sem médico atribuído inicialmente
       date: new Date(),
       duration: 30,
       type: 'telemedicine',
       status: 'waiting',
       isEmergency: true,
-      specialization: doctor.specialization || 'Emergência',
+      specialization: 'Emergência',
       telemedRoomName: roomName,
-      notes: `Consulta de emergência com Dr. ${doctorFullName}`
+      notes: `Consulta de emergência - aguardando médico`
     });
     
     console.log(`✅ Consulta de emergência criada:`, {
       appointmentId: appointment.id,
-      doctorId: appointment.doctorId,
       userId: appointment.userId,
       status: appointment.status,
       isEmergency: appointment.isEmergency,
@@ -109,18 +96,22 @@ emergencyV2Router.post('/start', authenticateToken, async (req: Request, res: Re
     // NÃO decrementar consultas aqui - será feito após 5 minutos de chamada
     // quando médico e paciente estiverem juntos
 
-    // Adicionar notificação apenas para o médico selecionado
-    emergencyNotifications.set(doctorId, {
-      patientId: userId,
-      patientName: user.fullName || user.username || 'Paciente',
-      roomName,
-      roomUrl: roomData.url,
-      appointmentId: appointment.id!,
-      timestamp: new Date(),
-      doctorId: doctorId
-    });
+    // Adicionar notificação para TODOS os médicos disponíveis
+    for (const doctor of emergencyDoctors) {
+      emergencyNotifications.set(doctor.id, {
+        patientId: userId,
+        patientName: user.fullName || user.username || 'Paciente',
+        roomName,
+        roomUrl: roomData.url,
+        appointmentId: appointment.id!,
+        timestamp: new Date(),
+        doctorId: doctor.id
+      });
+      
+      console.log(`📢 Notificação enviada para Dr. ${doctor.fullName || doctor.name} (ID: ${doctor.id})`);
+    }
 
-    console.log(`Consulta de emergência iniciada: Paciente ${user.fullName} (ID: ${userId}) com Dr. ${doctorFullName} (ID: ${doctorId}), Sala: ${roomName}`);
+    console.log(`Consulta de emergência iniciada: Paciente ${user.fullName} (ID: ${userId}), ${emergencyDoctors.length} médicos notificados, Sala: ${roomName}`);
 
     return res.json({
       success: true,
@@ -209,9 +200,14 @@ emergencyV2Router.post('/join/:appointmentId', authenticateToken, async (req: Re
       return res.status(404).json({ error: 'Consulta de emergência não encontrada' });
     }
 
-    // Verificar se a consulta já tem um médico
+    // Verificar se a consulta já tem um médico (primeiro médico a aceitar)
     if (appointment.doctorId && appointment.doctorId !== doctor.id) {
       return res.status(400).json({ error: 'Esta consulta já está sendo atendida por outro médico' });
+    }
+
+    // Se ainda não tem médico, este é o primeiro a aceitar
+    if (!appointment.doctorId) {
+      console.log(`🏥 Primeiro médico a aceitar: Dr. ${doctor.fullName || doctor.name} (ID: ${doctor.id})`);
     }
 
     // Atualizar consulta com o médico e marcar início do atendimento
@@ -219,7 +215,7 @@ emergencyV2Router.post('/join/:appointmentId', authenticateToken, async (req: Re
       doctorId: doctor.id,
       status: 'in_progress',
       // Use notes field to track when doctor joined
-      notes: `Médico entrou na consulta em: ${new Date().toISOString()}`
+      notes: `${appointment.notes}\nMédico ${doctor.fullName || doctor.name} entrou na consulta em: ${new Date().toISOString()}`
     });
 
     // Obter nome do médico
@@ -236,8 +232,16 @@ emergencyV2Router.post('/join/:appointmentId', authenticateToken, async (req: Re
     // Extrair o token da resposta
     const doctorToken = tokenResponse.token;
 
-    // Limpar notificação do médico (consulta foi aceita)
-    emergencyNotifications.delete(doctor.id);
+    // Limpar notificações de TODOS os médicos quando um aceitar
+    // Isso evita que outros médicos tentem entrar na mesma consulta
+    const allDoctors = await storage.getDoctors();
+    for (const doc of allDoctors) {
+      const notification = emergencyNotifications.get(doc.id);
+      if (notification && notification.appointmentId === appointmentId) {
+        emergencyNotifications.delete(doc.id);
+        console.log(`🔕 Notificação removida para Dr. ${doc.fullName || doc.name} (ID: ${doc.id})`);
+      }
+    }
 
     // Registrar início do atendimento
     console.log(`Médico ${doctorName} (ID: ${doctor.id}) entrou na consulta de emergência ${appointmentId}`);
@@ -401,9 +405,13 @@ emergencyV2Router.post('/end/:appointmentId', authenticateToken, async (req: Req
       }
     }
 
-    // Limpar notificações se ainda existirem
-    if (appointment.doctorId) {
-      emergencyNotifications.delete(appointment.doctorId);
+    // Limpar notificações de todos os médicos se ainda existirem
+    const allDoctors = await storage.getDoctors();
+    for (const doc of allDoctors) {
+      const notification = emergencyNotifications.get(doc.id);
+      if (notification && notification.appointmentId === appointmentId) {
+        emergencyNotifications.delete(doc.id);
+      }
     }
 
     console.log(`Consulta de emergência ${appointmentId} finalizada. Duração: ${actualDuration} minutos. Consultação cobrada: ${shouldDecrementConsultation ? 'Sim' : 'Não'}`);
@@ -610,8 +618,14 @@ emergencyV2Router.post('/complete/:appointmentId', authenticateToken, async (req
       updatedAt: new Date()
     });
     
-    // Limpar notificações se existirem
-    emergencyNotifications.delete(doctor.id);
+    // Limpar notificações de todos os médicos se existirem
+    const allDoctors = await storage.getDoctors();
+    for (const doc of allDoctors) {
+      const notification = emergencyNotifications.get(doc.id);
+      if (notification && notification.appointmentId === appointmentId) {
+        emergencyNotifications.delete(doc.id);
+      }
+    }
     
     console.log(`✅ Consulta de emergência ${appointmentId} marcada como concluída pelo médico ${doctor.id}`);
     
