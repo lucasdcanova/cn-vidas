@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
-import MinimalistVideoCall from '@/components/telemedicine/MinimalistVideoCall';
+import DailyVideoCall from '@/components/telemedicine/DailyVideoCall';
 import { TelemedicineDebugger } from '@/components/telemedicine/TelemedicineDebugger';
 import {
   Video,
@@ -317,7 +317,7 @@ export default function TelemedicineConsultation() {
       
       {showVideoCall ? (
         <div className="fixed inset-0 z-50">
-          <MinimalistVideoCall
+          <DailyVideoCall
             roomUrl={roomInfo?.url}
             token={roomInfo?.token}
             onJoinCall={handleJoinCall}
