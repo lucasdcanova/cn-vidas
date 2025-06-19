@@ -169,14 +169,56 @@ async function updateUserHandler(req: Request, res: Response) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
     
+    // Converter campos vazios para null onde necessário
+    if (updateData.birthDate === '') {
+      updateData.birthDate = null;
+    }
+    
+    // Converter outros campos vazios para null se necessário
+    if (updateData.phone === '') {
+      updateData.phone = null;
+    }
+    
+    if (updateData.cpf === '') {
+      updateData.cpf = null;
+    }
+    
+    if (updateData.profileImage === '') {
+      updateData.profileImage = null;
+    }
+    
+    if (updateData.address === '') {
+      updateData.address = null;
+    }
+    
+    if (updateData.city === '') {
+      updateData.city = null;
+    }
+    
+    if (updateData.state === '') {
+      updateData.state = null;
+    }
+    
+    if (updateData.zipcode === '') {
+      updateData.zipcode = null;
+    }
+    
     console.log('🔄 [Admin] Updating user with data:', updateData);
     
     // Extrair campos específicos do médico antes de atualizar o usuário
     const doctorFields: any = {};
-    if (req.body.specialty !== undefined) doctorFields.specialization = req.body.specialty;
-    if (req.body.licenseNumber !== undefined) doctorFields.licenseNumber = req.body.licenseNumber;
-    if (req.body.consultationPrice !== undefined) doctorFields.consultationFee = req.body.consultationPrice;
-    if (req.body.availableForEmergency !== undefined) doctorFields.availableForEmergency = req.body.availableForEmergency;
+    if (req.body.specialty !== undefined) {
+      doctorFields.specialization = req.body.specialty === '' ? null : req.body.specialty;
+    }
+    if (req.body.licenseNumber !== undefined) {
+      doctorFields.licenseNumber = req.body.licenseNumber === '' ? null : req.body.licenseNumber;
+    }
+    if (req.body.consultationPrice !== undefined) {
+      doctorFields.consultationFee = req.body.consultationPrice === '' ? null : req.body.consultationPrice;
+    }
+    if (req.body.availableForEmergency !== undefined) {
+      doctorFields.availableForEmergency = req.body.availableForEmergency;
+    }
     
     // Atualizar o usuário
     await storage.updateUser(parseInt(id), updateData);
