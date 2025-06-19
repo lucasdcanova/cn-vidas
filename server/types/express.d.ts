@@ -32,7 +32,7 @@ declare global {
       birthDate: string | null;
       stripeCustomerId: string | null;
       stripeSubscriptionId: string | null;
-      password: string;
+      password?: string;
       subscriptionPlanId: number | null;
       subscriptionStartDate: Date | null;
       subscriptionEndDate: Date | null;
@@ -40,6 +40,17 @@ declare global {
       sellerId: string | null;
       sellerName: string | null;
       subscriptionChangedAt: Date | null;
+      onboardingCompleted?: boolean;
+      referralCode?: string | null;
+      referredBy?: string | null;
+      neighborhood?: string | null;
+      gender?: string | null;
+      status?: string | null;
+      welcomeCompleted?: boolean;
+      pixKeyType?: string | null;
+      pixKey?: string | null;
+      bankName?: string | null;
+      accountType?: string | null;
     }
   }
 

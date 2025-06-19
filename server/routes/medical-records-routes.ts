@@ -52,7 +52,7 @@ medicalRecordsRouter.get('/patient/:patientId', requireAuth, requireDoctorOrAdmi
     
     // Registrar acesso
     await storage.logMedicalRecordAccess({
-      recordId: record.id,
+      record_id: record.id,
       user_id: req.user!.id,
       accessType: 'view',
       accessReason: req.body.reason || 'Visualização de prontuário',
@@ -161,7 +161,7 @@ medicalRecordsRouter.post('/:recordId/entries', requireAuth, async (req: Authent
     
     // Adicionar entrada
     const entry = await storage.addMedicalRecordEntry({
-      recordId: recordId,
+      record_id: recordId,
       appointmentId: appointmentId || null,
       author_id: req.user!.id,
       entryType,
@@ -181,7 +181,7 @@ medicalRecordsRouter.post('/:recordId/entries', requireAuth, async (req: Authent
     
     // Registrar acesso
     await storage.logMedicalRecordAccess({
-      recordId: recordId,
+      record_id: recordId,
       user_id: req.user!.id,
       accessType: 'create_entry',
       accessReason: `Adicionada entrada tipo: ${entryType}`,
@@ -252,7 +252,7 @@ medicalRecordsRouter.get('/search', requireAuth, async (req: AuthenticatedReques
     // Registrar acesso para cada prontuário retornado
     for (const record of records) {
       await storage.logMedicalRecordAccess({
-        recordId: record.id,
+        record_id: record.id,
         user_id: req.user!.id,
         accessType: 'view',
         accessReason: `Busca administrativa: ${q}`,
