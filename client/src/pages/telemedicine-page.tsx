@@ -201,9 +201,9 @@ export default function TelemedicinePage() {
   });
   
   // Mutation para iniciar consulta de emergência
-  const startEmergencyConsultationMutation = useMutation<unknown, Error, number>({
-    mutationFn: async (doctorId: number): Promise<unknown> => {
-      const response = await apiRequest('POST', '/api/emergency/v2/start', { doctorId });
+  const startEmergencyConsultationMutation = useMutation<unknown, Error>({
+    mutationFn: async (): Promise<unknown> => {
+      const response = await apiRequest('POST', '/api/emergency/v2/start', {});
       return await response.json();
     },
     onSuccess: (data: any) => {
@@ -254,11 +254,12 @@ export default function TelemedicinePage() {
     setIsPaymentDialogOpen(false);
   };
   
-  // Handler para iniciar consulta de emergência
-  const handleStartEmergencyConsultation = (doctor: Doctor): void => {
+  // Handler para iniciar consulta de emergência (nova lógica sem escolher médico)
+  const handleStartEmergencyConsultation = (): void => {
     if (isStartingEmergency) return;
     setIsStartingEmergency(true);
-    startEmergencyConsultationMutation.mutate(doctor.id);
+    // Não passa mais doctorId - o backend notificará todos os médicos disponíveis
+    startEmergencyConsultationMutation.mutate(); // Não precisa mais de parâmetro
   };
   
   // Handler para abrir diálogo de agendamento
@@ -884,79 +885,74 @@ export default function TelemedicinePage() {
           </TabsContent>
           
           <TabsContent value="emergencies" className="space-y-4">
-            {emergencyDoctors.length > 0 ? (
-              <div className="space-y-4">
-                {emergencyDoctors?.map((doctor: Doctor) => {
-                  const priceInfo = getEmergencyConsultationPriceInfo(doctor);
-                  return (
-                    <Card key={doctor.id} className="doctor-card overflow-hidden shadow-doctor-card hover:shadow-doctor-card-hover border-l-4 border-l-green-500 hover:border-l-green-600 bg-gradient-to-r from-green-50/30 to-white slide-up">
-                      <CardContent className="p-0">
-                        <div className="flex items-start p-6">
-                          <div className="mr-5 relative flex-shrink-0">
-                            <Avatar className="doctor-avatar h-16 w-16 border-2 border-white shadow-lg ring-2 ring-green-100">
-                              <AvatarImage 
-                                src={doctor.profileImage || doctor.avatarUrl} 
-                                alt={doctor.name}
-                                className="object-cover w-full h-full"
-                              />
-                              <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white text-lg font-semibold">
-                                {doctor.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'MD'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="min-w-0 flex-1">
-                                <h3 className="font-semibold text-lg text-gray-900 leading-tight">
-                                  {formatDoctorName(doctor.name)}
-                                </h3>
-                                <p className="text-sm text-primary font-medium mt-0.5">{doctor.specialization}</p>
-                              </div>
-                              <div className="ml-3 flex-shrink-0">
-                                {priceInfo.badge}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center mb-4">
-                              <Badge className="mr-3 bg-green-100 text-green-800 border-green-200 px-3 py-1">
-                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                                Online Agora
-                              </Badge>
-                              <span className={`text-xs ${priceInfo.color} font-medium`}>{priceInfo.text}</span>
-                            </div>
-                            
-                            <div className="w-full">
-                              <Button 
-                                onClick={() => handleStartEmergencyConsultation(doctor)}
-                                disabled={isStartingEmergency}
-                                className="w-full justify-center bg-green-600 hover:bg-green-700 text-white btn-hover-effect"
-                              >
-                                {isStartingEmergency ? (
-                                  <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                                ) : (
-                                  <Heart className="h-4 w-4 mr-1" />
-                                )}
-                                Iniciar Consulta de Emergência
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <p className="text-gray-500">Nenhum médico disponível para emergências no momento.</p>
-                  <p className="text-gray-400 text-sm mt-1">Tente novamente mais tarde ou agende uma consulta regular.</p>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="border-l-4 border-l-red-500 bg-gradient-to-r from-red-50/30 to-white">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-gray-900">Consulta de Emergência</CardTitle>
+                <CardDescription>
+                  Para situações urgentes que necessitam de atendimento médico imediato
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 mr-2 flex-shrink-0" />
+                    <div className="text-sm text-amber-800">
+                      <p className="font-semibold mb-1">Como funciona:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        <li>Ao clicar em "Iniciar Consulta de Emergência", todos os médicos disponíveis serão notificados</li>
+                        <li>O primeiro médico que responder atenderá sua consulta</li>
+                        <li>Você será direcionado para a sala de espera virtual</li>
+                        <li>O tempo médio de espera é de 2 a 5 minutos</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {emergencyDoctors.length > 0 ? (
+                  <div className="text-center space-y-4">
+                    <div className="flex items-center justify-center text-green-600 mb-2">
+                      <CheckCircle className="h-5 w-5 mr-2" />
+                      <span className="font-medium">{emergencyDoctors.length} médicos disponíveis agora</span>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleStartEmergencyConsultation}
+                      disabled={isStartingEmergency}
+                      size="lg"
+                      className="w-full max-w-md mx-auto bg-red-600 hover:bg-red-700 text-white font-semibold py-6 text-lg"
+                    >
+                      {isStartingEmergency ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                          Conectando com médicos...
+                        </>
+                      ) : (
+                        <>
+                          <Heart className="h-5 w-5 mr-2" />
+                          Iniciar Consulta de Emergência
+                        </>
+                      )}
+                    </Button>
+
+                    <p className="text-sm text-gray-600">
+                      Valor da consulta: Conforme seu plano de assinatura
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="flex items-center justify-center text-gray-400 mb-4">
+                      <X className="h-12 w-12" />
+                    </div>
+                    <p className="text-gray-600 font-medium mb-2">
+                      Nenhum médico disponível no momento
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Por favor, tente novamente em alguns minutos ou agende uma consulta regular.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
