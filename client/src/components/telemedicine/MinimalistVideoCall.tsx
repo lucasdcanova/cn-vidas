@@ -187,9 +187,35 @@ export default function MinimalistVideoCall({
         const participants = callRef.current?.participants();
         if (participants) {
           const remoteParticipants = Object.values(participants).filter(p => !p.local);
-          if (remoteParticipants.length > 0 && !remoteParticipant) {
-            console.log('🔍 [MinimalistVideoCall] Participante remoto detectado na verificação periódica');
-            setRemoteParticipant(remoteParticipants[0]);
+          if (remoteParticipants.length > 0) {
+            if (!remoteParticipant) {
+              console.log('🔍 [MinimalistVideoCall] Participante remoto detectado na verificação periódica');
+              setRemoteParticipant(remoteParticipants[0]);
+            }
+            
+            // Verificar estado do vídeo remoto
+            if (remoteVideoRef.current) {
+              const stream = remoteVideoRef.current.srcObject as MediaStream;
+              if (stream) {
+                const videoTracks = stream.getVideoTracks();
+                const audioTracks = stream.getAudioTracks();
+                console.log('📊 [MinimalistVideoCall] Estado do vídeo remoto:', {
+                  hasStream: true,
+                  videoTracks: videoTracks.length,
+                  audioTracks: audioTracks.length,
+                  videoEnabled: videoTracks.some(t => t.enabled),
+                  videoReadyState: videoTracks[0]?.readyState,
+                  videoElement: {
+                    width: remoteVideoRef.current.videoWidth,
+                    height: remoteVideoRef.current.videoHeight,
+                    readyState: remoteVideoRef.current.readyState,
+                    paused: remoteVideoRef.current.paused,
+                    display: window.getComputedStyle(remoteVideoRef.current).display,
+                    visibility: window.getComputedStyle(remoteVideoRef.current).visibility
+                  }
+                });
+              }
+            }
           }
         }
       }, 2000); // Verificar a cada 2 segundos
@@ -684,6 +710,20 @@ export default function MinimalistVideoCall({
             currentStream.getVideoTracks().forEach(t => currentStream.removeTrack(t));
             currentStream.addTrack(track);
             
+            // Log detalhado do estado do vídeo
+            console.log('🎬 [MinimalistVideoCall] Estado do elemento de vídeo remoto:', {
+              element: !!remoteVideoRef.current,
+              srcObject: !!remoteVideoRef.current.srcObject,
+              videoTracks: currentStream.getVideoTracks().length,
+              display: remoteVideoRef.current.style.display,
+              computedDisplay: window.getComputedStyle(remoteVideoRef.current).display,
+              width: remoteVideoRef.current.offsetWidth,
+              height: remoteVideoRef.current.offsetHeight,
+              readyState: remoteVideoRef.current.readyState,
+              videoWidth: remoteVideoRef.current.videoWidth,
+              videoHeight: remoteVideoRef.current.videoHeight
+            });
+            
             // Garantir reprodução do vídeo
             remoteVideoRef.current.play().catch(e => {
               console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo remoto:', e);
@@ -978,9 +1018,17 @@ export default function MinimalistVideoCall({
       {isCallActive && (
         <div className="absolute top-20 left-4 bg-black/80 text-white p-2 rounded text-xs" style={{ zIndex: 100 }}>
           <p>Local Video: {localVideoRef.current?.srcObject ? 'YES' : 'NO'}</p>
-          <p>Remote Video: {remoteVideoRef.current?.srcObject ? 'YES' : 'NO'}</p>
-          <p>Remote Participant: {remoteParticipant ? remoteParticipant.userName : 'NONE'}</p>
-          <p>Remote Tracks: A:{remoteParticipant?.audioTrack ? 'YES' : 'NO'} V:{remoteParticipant?.videoTrack ? 'YES' : 'NO'}</p>
+          <p>Remote Video Element: {remoteVideoRef.current?.srcObject ? 'YES' : 'NO'}</p>
+          {remoteVideoRef.current?.srcObject && (
+            <>
+              <p>Remote Stream Tracks: V:{(remoteVideoRef.current.srcObject as MediaStream).getVideoTracks().length} A:{(remoteVideoRef.current.srcObject as MediaStream).getAudioTracks().length}</p>
+              <p>Video Track Active: {(remoteVideoRef.current.srcObject as MediaStream).getVideoTracks()[0]?.enabled ? 'YES' : 'NO'}</p>
+            </>
+          )}
+          <p>Remote Participant: {remoteParticipant ? `${remoteParticipant.userName || remoteParticipant.session_id}` : 'NONE'}</p>
+          <p>Participant Tracks: A:{remoteParticipant?.audioTrack ? 'YES' : 'NO'} V:{remoteParticipant?.videoTrack ? 'YES' : 'NO'}</p>
+          <p>Participant State: A:{remoteParticipant?.audio ? 'ON' : 'OFF'} V:{remoteParticipant?.video ? 'ON' : 'OFF'}</p>
+          <p>Video Element Display: {remoteVideoRef.current ? window.getComputedStyle(remoteVideoRef.current).display : 'N/A'}</p>
         </div>
       )}
 
