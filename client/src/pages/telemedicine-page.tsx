@@ -471,6 +471,20 @@ export default function TelemedicinePage() {
     return prefix + formattedName;
   };
 
+  // Helper para formatar nome do plano
+  const formatPlanName = (plan: string): string => {
+    const planNames: Record<string, string> = {
+      'free': 'Gratuito',
+      'basic': 'Básico',
+      'premium': 'Premium',
+      'ultra': 'Ultra',
+      'basic_family': 'Básico Familiar',
+      'premium_family': 'Premium Familiar',
+      'ultra_family': 'Ultra Familiar'
+    };
+    return planNames[plan] || plan;
+  };
+
   // Função para calcular tempo restante até a consulta
   const getTimeUntilAppointment = (appointmentDate: string) => {
     const now = new Date();
@@ -934,9 +948,27 @@ export default function TelemedicinePage() {
                       )}
                     </Button>
 
-                    <p className="text-sm text-gray-600">
-                      Valor da consulta: Conforme seu plano de assinatura
-                    </p>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p className="font-medium">
+                        Seu plano: <span className="text-primary capitalize">
+                          {formatPlanName(user?.subscriptionPlan || 'free')}
+                        </span>
+                      </p>
+                      <p>
+                        Consultas de emergência disponíveis: <span className="font-semibold text-green-600">
+                          {user?.emergencyConsultationsLeft !== undefined && user?.emergencyConsultationsLeft !== null 
+                            ? user.emergencyConsultationsLeft 
+                            : 0}
+                        </span>
+                      </p>
+                      <p className={user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0 
+                        ? "text-green-600 font-medium" 
+                        : "text-amber-600 font-medium"}>
+                        {user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0 
+                          ? '✓ Esta consulta será gratuita (inclusa no plano)' 
+                          : '⚠️ Consulta será cobrada separadamente'}
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">
