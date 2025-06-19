@@ -53,7 +53,7 @@ medicalRecordsRouter.get('/patient/:patientId', requireAuth, requireDoctorOrAdmi
     // Registrar acesso
     await storage.logMedicalRecordAccess({
       record_id: record.id,
-      user_id: req.user!.id,
+      userId: req.user!.id,
       accessType: 'view',
       accessReason: req.body.reason || 'Visualização de prontuário',
       ipAddress: req.ip,
@@ -162,7 +162,7 @@ medicalRecordsRouter.post('/:recordId/entries', requireAuth, async (req: Authent
     // Adicionar entrada
     const entry = await storage.addMedicalRecordEntry({
       record_id: recordId,
-      appointmentId: appointmentId || null,
+      appointment_id: appointmentId || null,
       authorId: req.user!.id,
       entryType,
       content,
@@ -182,7 +182,7 @@ medicalRecordsRouter.post('/:recordId/entries', requireAuth, async (req: Authent
     // Registrar acesso
     await storage.logMedicalRecordAccess({
       record_id: recordId,
-      user_id: req.user!.id,
+      userId: req.user!.id,
       accessType: 'create_entry',
       accessReason: `Adicionada entrada tipo: ${entryType}`,
       ipAddress: req.ip,
@@ -253,7 +253,7 @@ medicalRecordsRouter.get('/search', requireAuth, async (req: AuthenticatedReques
     for (const record of records) {
       await storage.logMedicalRecordAccess({
         record_id: record.id,
-        user_id: req.user!.id,
+        userId: req.user!.id,
         accessType: 'view',
         accessReason: `Busca administrativa: ${q}`,
         ipAddress: req.ip,

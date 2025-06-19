@@ -10,7 +10,7 @@ export interface AuthUser {
   email: string;
   role: string;
   fullName: string;
-  username?: string;
+  username: string;
   emailVerified?: boolean;
   subscriptionPlan?: string | null;
   subscriptionStatus?: string | null;
