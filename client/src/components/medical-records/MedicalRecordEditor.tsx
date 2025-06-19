@@ -23,6 +23,22 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
+import PrescriptionDisplay from './PrescriptionDisplay';
+
+interface Medication {
+  nome: string;
+  dosagem: string;
+  via: string;
+  frequencia: string;
+  duracao: string;
+  quantidade: string;
+  instrucoes?: string;
+}
+
+interface Prescription {
+  medicamentos: Medication[];
+  observacoes?: string;
+}
 
 interface MedicalRecord {
   id: number;
@@ -34,6 +50,7 @@ interface MedicalRecord {
     type: string;
     data: string;
     transcription?: string;
+    prescription?: Prescription;
   };
   status: 'draft' | 'signed' | 'amended';
   ai_generated: boolean;
@@ -53,6 +70,15 @@ interface MedicalRecord {
   consultation_recording?: {
     transcription?: string;
     ai_generated_notes?: string;
+  };
+  doctor?: {
+    id: number;
+    full_name: string;
+    email?: string;
+    doctors?: Array<{
+      specialization?: string;
+      license_number?: string;
+    }>;
   };
 }
 
@@ -220,7 +246,7 @@ export default function MedicalRecordEditor({
         content: {
           type: 'SOAP',
           data: editedContent,
-          transcription: record?.content.transcription
+          prescription: record?.content.prescription
         }
       };
 
@@ -359,15 +385,12 @@ export default function MedicalRecordEditor({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="editor" disabled={record?.status === 'signed'}>
             Editor
           </TabsTrigger>
-          <TabsTrigger value="transcription">
-            Transcrição
-          </TabsTrigger>
-          <TabsTrigger value="history">
-            Histórico
+          <TabsTrigger value="prescription">
+            Prescrição
           </TabsTrigger>
         </TabsList>
 
@@ -453,81 +476,36 @@ export default function MedicalRecordEditor({
           )}
         </TabsContent>
 
-        {/* Transcrição */}
-        <TabsContent value="transcription" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Mic className="h-4 w-4" />
-                Transcrição da Consulta
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {record?.content.transcription || record?.consultation_recording?.transcription ? (
-                <ScrollArea className="h-[500px] w-full pr-4">
-                  <p className="whitespace-pre-wrap text-sm">
-                    {record.content.transcription || record.consultation_recording?.transcription}
+        {/* Prescrição */}
+        <TabsContent value="prescription" className="space-y-4">
+          {record?.content.prescription && record.content.prescription.medicamentos.length > 0 ? (
+            <PrescriptionDisplay
+              prescription={record.content.prescription}
+              patientName={record.patient?.full_name}
+              patientCpf={record.patient?.cpf}
+              doctorName={record.doctor?.full_name}
+              doctorCrm={record.doctor?.doctors?.[0]?.license_number}
+              consultationDate={record.appointment?.date}
+              isSigned={record.status === 'signed'}
+              signedAt={record.signed_at}
+            />
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Nenhuma prescrição disponível para esta consulta
                   </p>
-                </ScrollArea>
-              ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  Nenhuma transcrição disponível
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Histórico */}
-        <TabsContent value="history" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <History className="h-4 w-4" />
-                Histórico de Versões
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {record && (
-                  <>
-                    {/* Versão atual */}
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            {record.status === 'signed' ? 'Assinado' : 'Rascunho atual'}
-                          </p>
-                          {record.ai_generated && (
-                            <Badge variant="outline" className="text-xs">
-                              IA
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(record.updated_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Criação */}
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-muted rounded-full mt-2" />
-                      <div className="flex-1">
-                        <p className="font-medium">Criado</p>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(record.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                        </p>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  {record?.ai_generated && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      A IA não identificou medicamentos nesta consulta
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>
