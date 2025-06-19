@@ -283,6 +283,21 @@ export default function MinimalistVideoCall({
               } catch (err) {
                 console.error('❌ [MinimalistVideoCall] Erro ao reabilitar áudio local:', err);
               }
+            } else {
+              // Se for remoto, verificar se precisamos atualizar a stream
+              console.log('🔍 [MinimalistVideoCall] Verificando áudio do participante remoto...');
+              if (event.participant.audioTrack && remoteVideoRef.current) {
+                const currentStream = remoteVideoRef.current.srcObject as MediaStream;
+                if (currentStream) {
+                  // Verificar se o track de áudio já está na stream
+                  const audioTracks = currentStream.getAudioTracks();
+                  const hasAudioTrack = audioTracks.some(t => t.id === event.participant.audioTrack.id);
+                  if (!hasAudioTrack) {
+                    console.log('🔧 [MinimalistVideoCall] Adicionando track de áudio à stream remota');
+                    currentStream.addTrack(event.participant.audioTrack);
+                  }
+                }
+              }
             }
           }
           
@@ -387,7 +402,15 @@ export default function MinimalistVideoCall({
         audio: localParticipant?.audio,
         video: localParticipant?.video,
         audioTrack: localParticipant?.audioTrack,
-        videoTrack: localParticipant?.videoTrack
+        videoTrack: localParticipant?.videoTrack,
+        tracks: localParticipant?.tracks
+      });
+      
+      // Verificar configurações de áudio/vídeo
+      const inputSettings = callObject.getInputSettings();
+      console.log('🎛️ [MinimalistVideoCall] Configurações de entrada:', {
+        audio: inputSettings?.audio,
+        video: inputSettings?.video
       });
       
       // Verificar todos os participantes periodicamente
@@ -451,13 +474,22 @@ export default function MinimalistVideoCall({
           console.log('📹 [MinimalistVideoCall] Configurando vídeo local');
           const stream = new MediaStream([track]);
           localVideoRef.current.srcObject = stream;
+          // Garantir que o vídeo local seja exibido
+          localVideoRef.current.play().catch(e => {
+            console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo local:', e);
+          });
         } else if (track.kind === 'audio') {
           console.log('🎤 [MinimalistVideoCall] Track de áudio local detectado');
           // Verificar se o track está habilitado
           if (!track.enabled) {
             console.warn('⚠️ [MinimalistVideoCall] Track de áudio local está desabilitado!');
-            // Não podemos modificar track.enabled diretamente - é read-only
-            // O track deve ser habilitado através do Daily.js
+            // Tentar habilitar através do Daily.js
+            setTimeout(() => {
+              if (callRef.current) {
+                console.log('🔧 [MinimalistVideoCall] Tentando reabilitar áudio local...');
+                callRef.current.setLocalAudio(true);
+              }
+            }, 1000);
           }
         }
       } else {
@@ -476,6 +508,11 @@ export default function MinimalistVideoCall({
             // Remover tracks de vídeo antigos
             currentStream.getVideoTracks().forEach(t => currentStream.removeTrack(t));
             currentStream.addTrack(track);
+            
+            // Garantir reprodução do vídeo
+            remoteVideoRef.current.play().catch(e => {
+              console.error('❌ [MinimalistVideoCall] Erro ao reproduzir vídeo remoto:', e);
+            });
           } else if (track.kind === 'audio') {
             console.log('🔊 [MinimalistVideoCall] Adicionando áudio remoto à stream');
             // Remover tracks de áudio antigos
@@ -485,13 +522,23 @@ export default function MinimalistVideoCall({
             // Verificar se o track está habilitado
             if (!track.enabled) {
               console.warn('⚠️ [MinimalistVideoCall] Track de áudio remoto está desabilitado!');
-              // Não podemos modificar track.enabled diretamente - é read-only
-              // Precisamos verificar as configurações do participante no Daily.js
+              // Verificar se o participante tem áudio mutado
+              const participants = callRef.current?.participants();
+              if (participants) {
+                const remoteParticipant = Object.values(participants).find(p => !p.local && p.session_id === participant.session_id);
+                if (remoteParticipant && !remoteParticipant.audio) {
+                  console.log('🔇 [MinimalistVideoCall] Participante remoto está com áudio mutado');
+                }
+              }
             }
             
             // Garantir que o elemento de vídeo está configurado para reproduzir áudio
             remoteVideoRef.current.muted = false;
             remoteVideoRef.current.volume = 1.0;
+            
+            // Adicionar atributos para garantir reprodução
+            remoteVideoRef.current.setAttribute('playsinline', 'true');
+            remoteVideoRef.current.setAttribute('webkit-playsinline', 'true');
             
             // Forçar reprodução se necessário
             if (remoteVideoRef.current.paused) {
@@ -665,7 +712,7 @@ export default function MinimalistVideoCall({
         autoPlay
         playsInline
         muted={false}  // Garantir que o áudio NÃO está mutado
-        volume={1}     // Volume máximo
+        controls={false}
         className="absolute inset-0 w-full h-full object-cover"
         style={{ transform: 'scaleX(-1)' }}
         onLoadedMetadata={(e) => {
@@ -679,6 +726,9 @@ export default function MinimalistVideoCall({
           // Garantir que o áudio está habilitado
           video.muted = false;
           video.volume = 1.0;
+          // Adicionar atributos necessários
+          video.setAttribute('playsinline', 'true');
+          video.setAttribute('webkit-playsinline', 'true');
           // Tentar reproduzir se estiver pausado
           if (video.paused) {
             video.play().catch(e => {
