@@ -31,12 +31,26 @@ const cleanupGlobalDailyInstances = async () => {
   if (typeof window !== 'undefined' && window.dailyCallInstance) {
     try {
       console.log('🧹 Limpando instância Daily global existente...');
-      await window.dailyCallInstance.destroy();
-      window.dailyCallInstance = null;
+      const instance = window.dailyCallInstance;
+      window.dailyCallInstance = null; // Limpar referência primeiro
+      
+      // Verificar se a instância ainda está ativa antes de destruir
+      if (instance && typeof instance.destroy === 'function') {
+        try {
+          await instance.leave();
+        } catch (e) {
+          // Ignorar erro se já saiu
+        }
+        await instance.destroy();
+      }
     } catch (e) {
       console.error('Erro ao limpar instância global:', e);
+      window.dailyCallInstance = null; // Garantir que a referência seja limpa mesmo com erro
     }
   }
+  
+  // Adicionar um pequeno delay para garantir limpeza completa
+  await new Promise(resolve => setTimeout(resolve, 100));
 };
 
 export default function MinimalistVideoCall({
@@ -188,25 +202,19 @@ export default function MinimalistVideoCall({
       // Limpar qualquer instância global existente
       await cleanupGlobalDailyInstances();
       
+      // Verificar se já não existe uma instância
+      if (window.dailyCallInstance) {
+        console.error('❌ [MinimalistVideoCall] Instância Daily já existe!');
+        setIsConnecting(false);
+        setHasJoinedCall(false);
+        return;
+      }
+      
       // Criar call object (sem iframe)
       const callObject = DailyIframe.createCallObject({
         subscribeToTracksAutomatically: true,
         audioSource: true,  // Garantir que o áudio está habilitado
-        videoSource: true,  // Garantir que o vídeo está habilitado
-        // Configurações adicionais para garantir áudio
-        avoidEchoCancellationType: false,
-        experimentalGetUserMediaConstraintsModify: (constraints: any) => {
-          // Garantir que o áudio está habilitado com configurações otimizadas
-          if (constraints.audio && typeof constraints.audio === 'object') {
-            constraints.audio = {
-              ...constraints.audio,
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true
-            };
-          }
-          return constraints;
-        }
+        videoSource: true   // Garantir que o vídeo está habilitado
       });
 
       callRef.current = callObject;
@@ -556,12 +564,34 @@ export default function MinimalistVideoCall({
   // Limpar ao desmontar
   useEffect(() => {
     return () => {
-      if (callRef.current) {
-        callRef.current.leave().catch(console.error);
-        callRef.current.destroy().catch(console.error);
-        callRef.current = null;
-      }
-      setHasJoinedCall(false);
+      const cleanup = async () => {
+        console.log('🧹 [MinimalistVideoCall] Limpando ao desmontar componente...');
+        
+        if (callRef.current) {
+          try {
+            await callRef.current.leave();
+          } catch (e) {
+            // Ignorar erro se já saiu
+          }
+          
+          try {
+            await callRef.current.destroy();
+          } catch (e) {
+            console.error('Erro ao destruir instância:', e);
+          }
+          
+          callRef.current = null;
+        }
+        
+        // Limpar instância global também
+        if (window.dailyCallInstance) {
+          window.dailyCallInstance = null;
+        }
+        
+        setHasJoinedCall(false);
+      };
+      
+      cleanup();
     };
   }, []);
 
