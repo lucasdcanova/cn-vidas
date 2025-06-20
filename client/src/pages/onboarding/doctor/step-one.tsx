@@ -37,7 +37,7 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
   };
 
   const validateAndNext = () => {
-    if (!formData.specialization || !formData.education) {
+    if (!formData.specialization || !formData.education || !formData.licenseNumber) {
       toast({
         title: 'Campos obrigatórios',
         description: 'Por favor, preencha todos os campos obrigatórios.',
@@ -132,6 +132,36 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="licenseNumber" className="flex items-center gap-2">
+                <Hash className="h-4 w-4" />
+                Número de Registro (CRM/CRO etc) *
+              </Label>
+              <Input
+                id="licenseNumber"
+                placeholder="Ex: CRM-SP 123456"
+                value={formData.licenseNumber}
+                onChange={(e) => updateFormData({ licenseNumber: e.target.value })}
+                className="border-gray-300 focus:border-blue-500"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rqe" className="flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                RQE - Registro de Qualificação de Especialista
+              </Label>
+              <Input
+                id="rqe"
+                placeholder="Ex: RQE 12345 (Opcional)"
+                value={formData.rqe}
+                onChange={(e) => updateFormData({ rqe: e.target.value })}
+                className="border-gray-300 focus:border-blue-500"
+              />
+              <p className="text-xs text-gray-500">
+                Informe seu RQE se você possui título de especialista
+              </p>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="education" className="flex items-center gap-2">
