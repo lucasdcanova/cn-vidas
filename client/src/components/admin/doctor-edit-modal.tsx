@@ -78,6 +78,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
     // Professional info
     specialization: doctor.specialization || "",
     licenseNumber: doctor.licenseNumber || "",
+    rqe: doctor.rqe || "",
     education: doctor.education || "",
     experienceYears: doctor.experienceYears || 0,
     fullBio: doctor.fullBio || doctor.biography || "",
@@ -153,6 +154,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
       await updateDoctorMutation.mutateAsync({
         specialization: formData.specialization,
         licenseNumber: formData.licenseNumber,
+        rqe: formData.rqe,
         education: formData.education,
         experienceYears: parseInt(formData.experienceYears.toString()),
         biography: formData.fullBio, // Usar fullBio para ambos campos
@@ -355,6 +357,16 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
                             onChange={(e) => handleInputChange("licenseNumber", e.target.value)}
                             placeholder="Ex: CRM/SP 123456"
                             required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="rqe">RQE - Registro de Qualificação de Especialista</Label>
+                          <Input
+                            id="rqe"
+                            value={formData.rqe}
+                            onChange={(e) => handleInputChange("rqe", e.target.value)}
+                            placeholder="Ex: RQE 12345 (Opcional)"
                           />
                         </div>
 

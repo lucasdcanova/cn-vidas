@@ -289,6 +289,12 @@ export default function StepThree({ formData, updateFormData, onBack }: StepThre
                 <p className="text-gray-600">CRM:</p>
                 <p className="font-medium text-gray-800">{formData.licenseNumber}</p>
               </div>
+              {formData.rqe && (
+                <div>
+                  <p className="text-gray-600">RQE:</p>
+                  <p className="font-medium text-gray-800">{formData.rqe}</p>
+                </div>
+              )}
               <div>
                 <p className="text-gray-600">Valor da Consulta:</p>
                 <p className="font-medium text-gray-800">R$ {formData.consultationPrice?.toFixed(2)}</p>

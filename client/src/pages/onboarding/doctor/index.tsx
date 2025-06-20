@@ -24,6 +24,7 @@ export default function DoctorOnboardingFlow() {
     achievements: '',
     specialization: '',
     licenseNumber: '',
+    rqe: '',
     education: '',
     experienceYears: 0,
     
@@ -76,6 +77,7 @@ export default function DoctorOnboardingFlow() {
         ...prev,
         specialization: doctorProfile.specialization || '',
         licenseNumber: doctorProfile.licenseNumber || '',
+        rqe: doctorProfile.rqe || '',
         education: doctorProfile.education || '',
         experienceYears: doctorProfile.experienceYears || 0,
         consultationPrice: doctorProfile.consultationFee || 0,
