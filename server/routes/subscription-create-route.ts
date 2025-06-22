@@ -162,42 +162,44 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
     
     if (paymentMethod === 'pix') {
       try {
-        // Verificar primeiro se o método PIX está disponível
-        // Alternativa: usar cartão como fallback
+        // Criar Payment Intent com PIX
         paymentIntent = await stripe.paymentIntents.create({
           ...baseOptions,
-          payment_method_types: ['card'], // Usar 'card' como método base que todos os países aceitam
-          description: `Assinatura plano ${plan.name} (tentativa PIX)`
+          payment_method_types: ['pix'],
+          payment_method_options: {
+            pix: {
+              expires_after_seconds: 3600 // 60 minutos
+            }
+          },
+          description: `Assinatura plano ${plan.name}`
         });
-        
-        // NÃO atualizar o status aqui - apenas após o pagamento ser confirmado
-        // Isso evita que o usuário seja redirecionado prematuramente
-        
-        console.log("Usando cartão como método alternativo ao PIX devido a limitações do Stripe");
-        
-        // Informar o cliente que está sendo usado cartão em vez de PIX
-        return res.json({
-          clientSecret: paymentIntent.client_secret,
-          paymentMethod: 'card',
-          message: "O método PIX não está disponível no momento. Por favor, use cartão de crédito."
-        });
-      } catch (pixError) {
-        console.error("Erro ao criar pagamento PIX, tentando alternativa:", pixError);
-        
-        // Tentar com cartão como método alternativo
-        paymentIntent = await stripe.paymentIntents.create({
-          ...baseOptions,
-          payment_method_types: ['card'],
-          description: `Assinatura plano ${plan.name} (fallback de PIX)`
-        });
-        
-        // NÃO atualizar o status aqui - apenas após o pagamento ser confirmado
         
         return res.json({
           clientSecret: paymentIntent.client_secret,
-          paymentMethod: 'card',
-          message: "O método PIX não está disponível. Foi selecionado cartão de crédito como alternativa."
+          paymentMethod: 'pix',
+          expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
+          message: "Pagamento PIX criado com sucesso"
         });
+      } catch (pixError: any) {
+        console.error("Erro ao criar pagamento PIX:", pixError);
+        
+        // Se PIX não estiver disponível, usar cartão como fallback
+        if (pixError.message?.includes('payment method type "pix" is invalid')) {
+          paymentIntent = await stripe.paymentIntents.create({
+            ...baseOptions,
+            payment_method_types: ['card'],
+            description: `Assinatura plano ${plan.name} (fallback de PIX)`
+          });
+          
+          return res.json({
+            clientSecret: paymentIntent.client_secret,
+            paymentMethod: 'card',
+            message: "PIX não está disponível. Use cartão de crédito.",
+            fallback: true
+          });
+        }
+        
+        throw pixError;
       }
     } else {
       // Para cartão e boleto
