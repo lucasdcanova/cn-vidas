@@ -1,6 +1,7 @@
 import 'dotenv/config'; // Garantir que as variáveis de ambiente sejam carregadas primeiro
 import express, { type Request, Response, NextFunction } from "express";
 import { createServer } from 'http';
+import * as http from 'http';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import setupRoutes from './routes/index';
@@ -325,10 +326,35 @@ import { setupCronJobs } from "./cron-setup";
   // Iniciar servidor
   const PORT = process.env.PORT || 8080;
   const portNumber = typeof PORT === 'string' ? parseInt(PORT) : PORT;
+  
+  server.on('error', (error: any) => {
+    console.error('❌ Erro ao iniciar servidor:', error);
+    if (error.code === 'EADDRINUSE') {
+      console.error(`❌ Porta ${PORT} já está em uso`);
+    }
+    process.exit(1);
+  });
+  
   server.listen(portNumber, '0.0.0.0', () => {
     log(`Servidor rodando na porta ${PORT}`, 'server');
     console.log(`Acesse: http://localhost:${PORT}`);
     console.log(`Ou: http://127.0.0.1:${PORT}`);
+    
+    // Testar se o servidor está realmente escutando
+    const testReq = http.request({
+      hostname: 'localhost',
+      port: portNumber,
+      path: '/api/health',
+      method: 'GET'
+    }, (res) => {
+      console.log(`✅ Servidor respondendo corretamente! Status: ${res.statusCode}`);
+    });
+    
+    testReq.on('error', (e) => {
+      console.error('❌ Erro ao testar servidor:', e.message);
+    });
+    
+    testReq.end();
     
     // Configurar jobs agendados após o servidor iniciar
     setupCronJobs();
