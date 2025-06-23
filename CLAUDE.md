@@ -107,6 +107,208 @@ O projeto está configurado para deploy automático no Render:
 - **Deploy automático**: Após cada `git push` para a branch `main`
 - **Configuração**: Definida no arquivo `render.yaml`
 
+## Variáveis de Ambiente
+
+```env
+# Autenticação e Segurança
+SESSION_SECRET=              # Segredo para sessões Express
+JWT_SECRET=                  # Segredo para tokens JWT
+
+# Stripe (Pagamentos)
+STRIPE_PUBLISHABLE_KEY=      # Chave pública do Stripe
+STRIPE_SECRET_KEY=           # Chave secreta do Stripe  
+STRIPE_WEBHOOK_SECRET=       # Segredo para webhooks
+
+# Banco de Dados
+DATABASE_URL=                # URL PostgreSQL
+
+# Email (Nodemailer)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USERNAME=              # Email do remetente
+EMAIL_PASSWORD=              # Senha de aplicativo
+EMAIL_FROM="CN Vidas <noreply@cnvidas.com.br>"
+
+# Daily.co (Videochamadas)
+DAILY_API_KEY=               # Chave da API Daily.co
+
+# OpenAI
+OPENAI_API_KEY=              # Chave da API OpenAI
+
+# URLs da Aplicação
+FRONTEND_URL=http://localhost:5173
+BACKEND_URL=http://localhost:8080
+```
+
+## Endpoints Principais da API
+
+### Autenticação (`/api/auth`)
+- `POST /register` - Registro com aceitação de termos legais
+- `POST /login` - Login com email/senha
+- `POST /login-qr` - Login via QR Code
+- `POST /logout` - Logout e limpeza de cookies
+- `GET /user` - Dados do usuário autenticado
+- `POST /refresh-user` - Atualizar dados do usuário
+- `POST /verify-email` - Verificar email
+- `POST /forgot-password` - Solicitar reset de senha
+- `POST /reset-password` - Resetar senha
+
+### Consultas (`/api/appointments`)
+- `GET /` - Listar consultas do usuário
+- `POST /` - Criar nova consulta
+- `PUT /:id` - Atualizar consulta
+- `DELETE /:id` - Cancelar consulta
+- `GET /doctor/:doctorId` - Consultas de um médico
+- `POST /join/:roomName` - Entrar em videochamada
+
+### Emergência (`/api/emergency`)
+- `POST /v2/start` - Iniciar consulta de emergência
+- `GET /v2/available-doctors` - Médicos disponíveis
+- `POST /v2/accept` - Médico aceita emergência
+- `POST /v2/join/:roomName` - Entrar na sala
+- `GET /v2/notifications/:doctorId` - Notificações
+
+### Pagamentos (`/api/payments`)
+- `POST /preauthorize` - Pré-autorizar pagamento
+- `POST /capture/:paymentIntentId` - Capturar pagamento
+- `POST /cancel/:paymentIntentId` - Cancelar pré-autorização
+- `GET /status/:paymentIntentId` - Status do pagamento
+
+### Assinaturas (`/api/subscription`)
+- `POST /create-session` - Criar sessão de checkout
+- `GET /current` - Assinatura atual
+- `POST /cancel` - Cancelar assinatura
+- `GET /plans` - Listar planos disponíveis
+
+## Fluxos Críticos
+
+### Login/Autenticação
+1. Login com email/senha ou QR Code
+2. JWT armazenado em cookie httpOnly
+3. Middleware global processa JWT
+4. Verificação de email obrigatória
+
+### Agendamento de Consultas
+1. Seleção de médico e especialidade
+2. Escolha de data/hora disponível
+3. Pré-autorização de pagamento
+4. Criação da sala Daily.co
+5. Envio de notificações
+6. Captura do pagamento após consulta
+
+### Consulta de Emergência
+1. Verificação de consultas disponíveis
+2. Criação de sala com nome único
+3. Notificação para médicos disponíveis
+4. Médico aceita e entra na sala
+5. Cobrança após 5 minutos
+6. Decremento de consultas
+
+## Limites e Configurações
+
+### Uploads
+- Imagens: 50MB máximo
+- Timeout: 2 minutos
+- Formatos: JPG, PNG, GIF, WebP
+
+### Timeouts
+- Sessões de vídeo: 60 minutos
+- PIX: 60 minutos para pagamento
+- Boleto: 3 dias para pagamento
+- Tokens de email: 24 horas
+- Tokens de reset: 1 hora
+
+### Pagamentos
+- Pré-autorização sem captura imediata
+- Captura após consulta realizada
+- Cancelamento automático em 6 horas
+- Taxa de consulta: configurável por médico
+
+## Padrões de Nomenclatura
+
+### Rotas da API
+- Kebab-case: `/api/emergency-consultation`
+- Versionamento: `/api/emergency/v2/start`
+- RESTful: GET, POST, PUT, DELETE
+
+### Arquivos TypeScript
+- Kebab-case: `auth-routes.ts`
+- Sufixos: `-routes`, `-utils`, `-service`
+
+### Componentes React
+- PascalCase: `EmergencyConsultation.tsx`
+- Hooks: prefixo `use`: `useAuth.ts`
+
+### Banco de Dados
+- Snake_case para tabelas: `email_verifications`
+- Snake_case para colunas: `created_at`
+
+## Estrutura de Dados
+
+### Usuários (users)
+- Roles: patient, partner, admin, doctor
+- Planos: free, basic, premium, ultra, *_family
+- Consultas de emergência limitadas por plano
+
+### Consultas (appointments)
+- Status: scheduled, completed, cancelled, waiting
+- Tipos: telemedicine, in_person
+- Integração com Daily.co e Stripe
+
+### Médicos (doctors)
+- CRM e RQE obrigatórios
+- Disponibilidade para emergência
+- Taxa de consulta configurável
+- Status de onboarding
+
+## Funcionalidades Especiais
+
+### QR Code Authentication
+- Login rápido via câmera
+- Tokens únicos por usuário
+- Logs de autenticação
+
+### Sistema de Notificações
+- Tipos: info, success, warning, error, emergency
+- Notificações de emergência prioritárias
+- Armazenamento em banco
+
+### Upload de Imagens
+- Crop antes do upload
+- Compressão automática
+- Cache otimizado (1 dia)
+
+### Jobs Agendados (Cron)
+- Processamento de pagamentos (hourly)
+- Cancelamento de pré-autorizações (6h)
+- Limpeza de dados temporários
+
+## Segurança
+
+- HTTPS obrigatório em produção
+- Sanitização de inputs
+- Rate limiting configurado
+- CORS para domínios específicos
+- Cookies httpOnly + Secure + SameSite
+
+## Scripts de Desenvolvimento
+
+```bash
+# Criar usuário admin
+node create-admin.js
+
+# Verificar dados
+node check-users.mjs
+node check-doctors-table.js
+
+# Migrations
+yarn migrate
+node run-migration.js
+```
+
 ## Lembretes de Desenvolvimento
 
 - SEMPRE QUE FIZER ALTERACOES SOBRE A CHAMADA DE VIDEO USE GIT COMMIT E GIT PUSH NA SEQUENCIA
+- Verificar tipos e lint antes de commitar
+- Testar funcionalidades em desenvolvimento antes do push
+- Logs detalhados para debugging em desenvolvimento
