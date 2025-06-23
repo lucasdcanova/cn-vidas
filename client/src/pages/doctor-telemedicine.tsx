@@ -47,6 +47,7 @@ import { EmergencyBannerSimple } from '@/components/doctor/EmergencyBannerSimple
 import { EmergencyNotification } from '@/components/doctor/EmergencyNotification';
 import { EmergencyAppointmentsListOptimized } from '@/components/doctor/EmergencyAppointmentsListOptimized';
 import { AutoRefreshIndicator } from '@/components/doctor/AutoRefreshIndicator';
+import { EmergencyAwareAppointmentsList } from '@/components/doctor/EmergencyAwareAppointmentsList';
 
 // Definimos uma versão simplificada do EmergencyBanner que não causa erros de hooks
 const EmergencyBanner = () => {
@@ -497,7 +498,7 @@ export default function DoctorTelemedicinePage() {
 
   // Filter telemedicine appointments (includes emergency consultations)
   const telemedicineAppointments = appointments.filter(
-    (app: any) => app.type === "telemedicine"
+    (app: any) => app.type === "telemedicine" || app.isEmergency
   );
 
   console.log('📊 Doctor Telemedicine - Total appointments:', appointments.length);
@@ -511,13 +512,18 @@ export default function DoctorTelemedicinePage() {
   // Upcoming and past appointments
   const upcomingAppointments = allAppointments.filter(
     (app: any) => {
+      // Emergency appointments might not have a proper date, so handle them separately
+      if (app.isEmergency) {
+        // Show all emergency appointments that are not completed or cancelled
+        return app.status === 'waiting' || app.status === 'scheduled' || 
+               app.status === 'confirmed' || app.status === 'in_progress';
+      }
+      
+      // Regular appointments - check date
       const appointmentDate = new Date(app.date);
       const isUpcoming = !isPast(appointmentDate) || isToday(appointmentDate);
-      const isWaitingEmergency = app.isEmergency && app.status === 'waiting';
-      const isInProgressEmergency = app.isEmergency && app.status === 'in_progress';
       
-      // Include: future appointments, today's appointments, and active emergency consultations
-      return isUpcoming || isWaitingEmergency || isInProgressEmergency;
+      return isUpcoming;
     }
   );
   
@@ -547,13 +553,10 @@ export default function DoctorTelemedicinePage() {
         
         <EmergencyBanner />
         
-        {/* Emergency Appointments List - Componente otimizado */}
-        <EmergencyAppointmentsListOptimized />
-        
         {/* Auto Refresh Indicator */}
         <AutoRefreshIndicator 
-          isRefreshing={loadingAppointments}
-          interval={3000}
+          isRefreshing={false}
+          interval={5000}
         />
         
         {/* Emergency Notifications Component - Para notificações popup */}
@@ -562,30 +565,12 @@ export default function DoctorTelemedicinePage() {
         )}
         
         <div className="space-y-4 mt-8">
-          <h2 className="text-xl font-semibold">Próximas Consultas</h2>
+          <h2 className="text-xl font-semibold">Consultas</h2>
           
-          {loadingAppointments && (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          )}
-          
-          {!loadingAppointments && upcomingAppointments.length === 0 && (
-            <Card>
-              <CardContent className="p-6 flex flex-col items-center justify-center h-32">
-                <Video className="h-12 w-12 text-muted-foreground mb-2" />
-                <p className="text-muted-foreground">Você não tem consultas agendadas</p>
-              </CardContent>
-            </Card>
-          )}
-          
-          {!loadingAppointments && upcomingAppointments.map((appointment: any) => (
-            <AppointmentItem 
-              key={appointment.id} 
-              appointment={appointment} 
-              onDeleteEmergencyAppointment={handleDeleteEmergencyAppointment}
-            />
-          ))}
+          {/* Use the new integrated component that shows both emergencies and regular appointments */}
+          <EmergencyAwareAppointmentsList 
+            onDeleteEmergencyAppointment={handleDeleteEmergencyAppointment}
+          />
         </div>
         
         {!loadingAppointments && pastAppointments.length > 0 && (
