@@ -396,6 +396,42 @@ const user = {
 - `bio` vs `biography` (migrar para `biography`)
 - Campos snake_case no TypeScript (migrar para camelCase)
 
+## Arquivos de Nomenclatura e Mapeamento
+
+### Arquivo de Mapeamento Central
+- **Localização**: `/shared/nomenclature-mapping.ts`
+- **Função**: Centraliza todas as transformações de nomenclatura
+- **Conteúdo**:
+  - Mapeamento snake_case ↔ camelCase
+  - Funções helper `dbToTs()` e `tsToDb()`
+  - Constantes para status, roles e planos
+  - Validador de nomenclatura
+
+### Status das Correções
+- **Documentação**: `NOMENCLATURE_FIXES_STATUS.md`
+- **Progresso**: ~8% concluído (23/06/2025)
+- **Correções realizadas**:
+  - ✅ 10 arquivos .backup removidos
+  - ✅ 4 versões antigas de páginas removidas
+  - ✅ Hook useAudioRecording padronizado
+  - ✅ Arquivo de mapeamento criado
+
+## Correções Pendentes de Alta Prioridade
+
+### 1. Campos "seller" → "referrer"
+- `sellerId` e `sellerName` devem migrar para `referrerId` e `referrerName`
+- Usar camada de compatibilidade durante transição
+
+### 2. Rotas API (manter por enquanto)
+- `/api/user` (singular) - autenticação crítica
+- `/api/users` (plural) - outros endpoints
+- NÃO MUDAR sem plano de migração completo
+
+### 3. Campos múltiplos para mesma coisa
+- `name` → `fullName` (sempre)
+- `bio` → `biography` (padrão)
+- `crm` → `licenseNumber` (oficial)
+
 ## Lembretes de Desenvolvimento
 
 - SEMPRE QUE FIZER ALTERACOES SOBRE A CHAMADA DE VIDEO USE GIT COMMIT E GIT PUSH NA SEQUENCIA
@@ -404,3 +440,5 @@ const user = {
 - Logs detalhados para debugging em desenvolvimento
 - SEMPRE seguir os padrões de nomenclatura acima para novo código
 - Ao encontrar inconsistências, seguir o padrão documentado acima
+- Usar `/shared/nomenclature-mapping.ts` para conversões
+- NÃO criar novas inconsistências de nomenclatura
