@@ -813,10 +813,7 @@ doctorRouter.post('/toggle-availability', requireAuth, requireDoctorRole, async 
     }
     
     // Atualizar disponibilidade para emergência
-    const updatedDoctor = await storage.updateDoctor(doctor.id, {
-      availableForEmergency: available,
-      updatedAt: new Date()
-    });
+    const updatedDoctor = await storage.toggleDoctorAvailability(doctor.id, available);
     
     console.log(`✅ Doctor POST /toggle-availability - Disponibilidade alterada para: ${available}`);
     console.log('📋 Updated doctor:', updatedDoctor.availableForEmergency);
