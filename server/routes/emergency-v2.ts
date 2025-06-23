@@ -146,29 +146,39 @@ emergencyV2Router.get('/notifications/:doctorId', authenticateToken, async (req:
       return res.status(403).json({ error: 'Acesso não autorizado' });
     }
 
-    // Obter notificação para este médico
-    const notification = emergencyNotifications.get(doctorId);
+    // Buscar notificações do banco de dados
+    const notifications = await storage.getUserNotifications(userId);
     
-    if (!notification) {
-      return res.json([]);
+    // Filtrar apenas notificações de emergência não lidas
+    const emergencyNotifications = notifications.filter(n => 
+      n.type === 'emergency' && !n.isRead
+    );
+    
+    // Para cada notificação de emergência, buscar a consulta correspondente
+    const formattedNotifications = [];
+    
+    for (const notification of emergencyNotifications) {
+      if (notification.data && notification.data.appointmentId) {
+        const appointment = await storage.getAppointmentById(notification.data.appointmentId);
+        
+        // Verificar se a consulta ainda está aguardando atendimento
+        if (appointment && appointment.status === 'waiting' && !appointment.doctorId) {
+          // Buscar informações do paciente
+          const patient = await storage.getUser(appointment.userId);
+          
+          formattedNotifications.push({
+            id: `emergency-${appointment.id}`,
+            patientId: appointment.userId,
+            patientName: patient?.fullName || notification.data.patientName || 'Paciente',
+            timestamp: notification.createdAt,
+            roomUrl: appointment.telemedRoomUrl || '',
+            appointmentId: appointment.id
+          });
+        }
+      }
     }
-
-    // Verificar se a notificação não expirou (30 minutos)
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-    if (notification.timestamp < thirtyMinutesAgo) {
-      emergencyNotifications.delete(doctorId);
-      return res.json([]);
-    }
-
-    // Retornar notificação formatada
-    return res.json([{
-      id: `emergency-${notification.appointmentId}`,
-      patientId: notification.patientId,
-      patientName: notification.patientName,
-      timestamp: notification.timestamp,
-      roomUrl: notification.roomUrl,
-      appointmentId: notification.appointmentId
-    }]);
+    
+    return res.json(formattedNotifications);
 
   } catch (error) {
     console.error('Erro ao buscar notificações:', error);
@@ -236,10 +246,25 @@ emergencyV2Router.post('/join/:appointmentId', authenticateToken, async (req: Re
     // Isso evita que outros médicos tentem entrar na mesma consulta
     const allDoctors = await storage.getAllDoctors();
     for (const doc of allDoctors) {
+      // Limpar notificações em memória (legacy)
       const notification = emergencyNotifications.get(doc.id);
       if (notification && notification.appointmentId === appointmentId) {
         emergencyNotifications.delete(doc.id);
         console.log(`🔕 Notificação removida para Dr. ${doc.fullName || doc.name} (ID: ${doc.id})`);
+      }
+      
+      // Marcar notificações no banco de dados como lidas
+      const doctorUser = await storage.getUserByDoctorId(doc.id);
+      if (doctorUser) {
+        const notifications = await storage.getUserNotifications(doctorUser.id);
+        for (const notif of notifications) {
+          if (notif.type === 'emergency' && 
+              notif.data?.appointmentId === appointmentId && 
+              !notif.isRead) {
+            await storage.markNotificationAsRead(notif.id);
+            console.log(`📧 Notificação marcada como lida para Dr. ${doc.fullName || doc.name}`);
+          }
+        }
       }
     }
 

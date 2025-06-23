@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { storage } from '../storage';
 import { createRoom, createToken } from '../utils/daily';
+import { NotificationService } from '../utils/notification-service';
 
 const emergencyPatientRouter = Router();
 
@@ -106,7 +107,12 @@ emergencyPatientRouter.post('/start', async (req: Request, res: Response) => {
     console.log(`Consultas de emergência restantes para usuário ${req.user!.id}: ${user.emergencyConsultationsLeft - 1}`);
     
     // Enviar notificação para médicos disponíveis
-    // TODO: Implementar notificação em tempo real para médicos
+    const notificationsSent = await NotificationService.createEmergencyNotificationForDoctors(
+      req.user!.fullName,
+      appointment.id
+    );
+    
+    console.log(`📱 Notificações enviadas para ${notificationsSent} médicos disponíveis`);
     
     // Enviar os dados da sala para o cliente
     return res.json({
