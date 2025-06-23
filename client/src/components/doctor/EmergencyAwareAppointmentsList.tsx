@@ -31,6 +31,8 @@ export function EmergencyAwareAppointmentsList({
       if (!response.ok) throw new Error('Failed to fetch appointments');
       
       const data = await response.json();
+      console.log('🔍 EmergencyAwareAppointmentsList - API Response:', data);
+      console.log('🔍 EmergencyAwareAppointmentsList - Appointments:', data.appointments);
       return data.appointments || [];
     },
     refetchInterval: 5000, // Update every 5 seconds
@@ -38,6 +40,8 @@ export function EmergencyAwareAppointmentsList({
   });
 
   const appointments = appointmentsData || [];
+  console.log('📊 EmergencyAwareAppointmentsList - Total appointments:', appointments.length);
+  console.log('📊 EmergencyAwareAppointmentsList - Emergency appointments:', appointments.filter((a: any) => a.isEmergency).length);
 
   // Filter upcoming appointments (including emergencies)
   const upcomingAppointments = appointments.filter((app: any) => {
