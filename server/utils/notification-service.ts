@@ -69,6 +69,39 @@ export class NotificationService {
   }
 
   /**
+   * Criar notificação de emergência para médicos disponíveis
+   */
+  static async createEmergencyNotificationForDoctors(patientName: string, appointmentId: number) {
+    try {
+      // Buscar todos os médicos disponíveis
+      const availableDoctors = await storage.getAvailableDoctors();
+      
+      console.log(`📢 Enviando notificação de emergência para ${availableDoctors.length} médicos disponíveis`);
+      
+      // Criar notificação para cada médico disponível
+      const notifications = availableDoctors.map(doctor => ({
+        userId: doctor.id,
+        type: 'emergency' as const,
+        title: '🚨 Consulta de Emergência',
+        message: `Paciente ${patientName} está aguardando atendimento de emergência.`,
+        isRead: false,
+        data: { appointmentId, patientName }
+      }));
+      
+      // Criar todas as notificações em batch
+      for (const notification of notifications) {
+        await storage.createNotification(notification);
+      }
+      
+      console.log(`✅ ${notifications.length} notificações de emergência criadas para médicos`);
+      return notifications.length;
+    } catch (error) {
+      console.error('❌ Erro ao criar notificações de emergência:', error);
+      return 0;
+    }
+  }
+
+  /**
    * Criar notificação de atualização de sinistro
    */
   static async createClaimStatusUpdateNotification(userId: number, claimId: number, status: string) {
