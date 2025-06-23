@@ -18,6 +18,7 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import fs from 'fs';
 import { setupCronJobs } from "./cron-setup";
+import { startEmergencyCleanupJob } from "./utils/emergency-cleanup";
 
 (async () => {
   const app = express();
@@ -358,5 +359,8 @@ import { setupCronJobs } from "./cron-setup";
     
     // Configurar jobs agendados após o servidor iniciar
     setupCronJobs();
+    
+    // Iniciar job de limpeza de emergências antigas
+    startEmergencyCleanupJob();
   });
 })();

@@ -153,10 +153,22 @@ function AppointmentCard({
   
   const getWaitTime = () => {
     if (!isEmergency || !appointment.createdAt) return null;
-    const minutes = Math.floor((Date.now() - new Date(appointment.createdAt).getTime()) / 60000);
-    if (minutes < 1) return 'Agora mesmo';
-    if (minutes === 1) return '1 minuto';
-    return `${minutes} minutos`;
+    const totalMinutes = Math.floor((Date.now() - new Date(appointment.createdAt).getTime()) / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    if (totalMinutes < 1) return { text: 'Agora mesmo', isUrgent: false };
+    if (totalMinutes === 1) return { text: '1 minuto', isUrgent: false };
+    if (hours === 0) return { text: `${minutes} minutos`, isUrgent: false };
+    if (hours === 1) return { text: `1 hora e ${minutes} min`, isUrgent: true };
+    
+    // Alertar se está próximo de 12 horas
+    const isCritical = hours >= 11;
+    return { 
+      text: `${hours} horas e ${minutes} min`, 
+      isUrgent: true,
+      isCritical
+    };
   };
 
   const waitTime = getWaitTime();
@@ -207,9 +219,18 @@ function AppointmentCard({
               
               <div className="flex flex-col mt-2 gap-1 text-sm text-muted-foreground">
                 {isEmergency && waitTime ? (
-                  <div className="flex items-center text-red-600 font-medium">
+                  <div className={cn(
+                    "flex items-center font-medium",
+                    waitTime.isCritical ? "text-red-800 animate-pulse" : 
+                    waitTime.isUrgent ? "text-orange-600" : "text-red-600"
+                  )}>
                     <Clock className="h-4 w-4 mr-2" />
-                    <span>Aguardando há {waitTime}</span>
+                    <span>Aguardando há {waitTime.text}</span>
+                    {waitTime.isCritical && (
+                      <span className="ml-2 text-xs bg-red-600 text-white px-2 py-0.5 rounded">
+                        CRÍTICO - Expira em breve
+                      </span>
+                    )}
                   </div>
                 ) : appointment.date ? (
                   <>
