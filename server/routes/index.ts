@@ -37,6 +37,7 @@ import userSettingsRouter from './user-settings-routes';
 import settingsRouter from '../settings-routes';
 import paymentHistoryRouter from './payment-history-routes';
 import emergencyAvailabilityRouter from './emergency-availability';
+import cleanupRouter from './cleanup-notifications';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -271,6 +272,9 @@ export default async function setupRoutes(app: express.Express) {
   // Rotas de gravação de consultas
   console.log('Registrando consultationRecordingRouter em /api/consultation-recordings');
   app.use('/api/consultation-recordings', consultationRecordingRouter);
+  
+  // Rotas de manutenção
+  app.use('/api/admin', cleanupRouter);
   
   return app;
 } 

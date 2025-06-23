@@ -90,7 +90,7 @@ export class NotificationService {
           title: '🚨 Consulta de Emergência',
           message: `Paciente ${patientName} está aguardando atendimento de emergência.`,
           isRead: false,
-          data: { appointmentId, patientName }
+          relatedId: appointmentId // Usar relatedId para armazenar o appointmentId
         };
         
         console.log(`📢 Criando notificação para médico userId: ${doctor.userId}, doctorId: ${doctor.id}`);
