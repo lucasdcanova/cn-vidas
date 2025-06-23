@@ -5,6 +5,8 @@ export interface Notification {
   title: string;
   message: string;
   isRead: boolean;
+  relatedId?: number;
+  link?: string;
   data?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;

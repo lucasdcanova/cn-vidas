@@ -176,8 +176,11 @@ emergencyV2Router.get('/notifications/:doctorId', authenticateToken, async (req:
     for (const notification of emergencyNotifications) {
       console.log(`🔍 Processando notificação:`, notification);
       
-      if (notification.data && notification.data.appointmentId) {
-        const appointment = await storage.getAppointmentById(notification.data.appointmentId);
+      // Usar relatedId para obter o appointmentId
+      const appointmentId = notification.relatedId;
+      
+      if (appointmentId) {
+        const appointment = await storage.getAppointmentById(appointmentId);
         
         console.log(`📋 Consulta encontrada:`, appointment ? {
           id: appointment.id,
@@ -286,8 +289,10 @@ emergencyV2Router.post('/join/:appointmentId', authenticateToken, async (req: Re
       if (doctorUserId) {
         const notifications = await storage.getNotifications(doctorUserId);
         for (const notif of notifications) {
+          // Verificar usando relatedId
+          const notifAppointmentId = notif.relatedId;
           if (notif.type === 'emergency' && 
-              notif.data?.appointmentId === appointmentId && 
+              notifAppointmentId === appointmentId && 
               !notif.isRead) {
             await storage.markNotificationAsRead(notif.id);
             console.log(`📧 Notificação marcada como lida para Dr. ${doc.fullName || doc.name}`);
