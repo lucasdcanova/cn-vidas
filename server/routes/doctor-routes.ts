@@ -377,13 +377,26 @@ doctorRouter.get('/appointments', requireAuth, requireDoctorRole, async (req: Au
     // Buscar todas as consultas do médico
     const allAppointments = await storage.getAllAppointments();
     
-    // Filtrar apenas as consultas deste médico
-    const doctorAppointments = allAppointments.filter(app => app.doctorId === doctor.id);
+    // Filtrar consultas deste médico OU emergências aguardando (se médico disponível para emergências)
+    const doctorAppointments = allAppointments.filter(app => {
+      // Sempre incluir consultas atribuídas a este médico
+      if (app.doctorId === doctor.id) return true;
+      
+      // Incluir emergências aguardando apenas se o médico estiver disponível
+      if (app.isEmergency && doctor.availableForEmergency && 
+          (app.status === 'waiting' || app.status === 'scheduled')) {
+        return true;
+      }
+      
+      return false;
+    });
     
     console.log('🔍 Doctor /appointments - Total de consultas:', allAppointments.length);
     console.log('🔍 Doctor /appointments - Consultas do médico (ID ' + doctor.id + '):', doctorAppointments.length);
     console.log('🔍 Doctor /appointments - Consultas de emergência:', doctorAppointments.filter(app => app.isEmergency).length);
     console.log('🔍 Doctor /appointments - Consultas com status waiting:', doctorAppointments.filter(app => app.status === 'waiting').length);
+    console.log('🔍 Doctor /appointments - Emergências waiting sem doctorId:', 
+      allAppointments.filter(app => app.isEmergency && app.status === 'waiting' && !app.doctorId).length);
     
     // Adicionar informações do paciente para cada consulta
     const appointmentsWithPatientInfo = await Promise.all(
