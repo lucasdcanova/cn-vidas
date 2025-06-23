@@ -99,3 +99,14 @@ yarn lint
 - Sessões de vídeo expiram após 1 hora
 - PIX tem timeout de 60 minutos
 - Boleto tem prazo de 3 dias
+
+## Deploy
+
+O projeto está configurado para deploy automático no Render:
+- **URL de produção**: https://cnvidas.onrender.com
+- **Deploy automático**: Após cada `git push` para a branch `main`
+- **Configuração**: Definida no arquivo `render.yaml`
+
+## Lembretes de Desenvolvimento
+
+- SEMPRE QUE FIZER ALTERACOES SOBRE A CHAMADA DE VIDEO USE GIT COMMIT E GIT PUSH NA SEQUENCIA
