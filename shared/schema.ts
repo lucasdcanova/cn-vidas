@@ -372,6 +372,34 @@ export const medicalRecordEntries = pgTable("medical_record_entries", {
   prescriptions: json("prescriptions"), // Prescrições
 });
 
+// Tabela de gravações de consultas
+export const consultationRecordings = pgTable("consultation_recordings", {
+  id: serial("id").primaryKey(),
+  appointmentId: integer("appointment_id").notNull().references(() => appointments.id, { onDelete: "cascade" }),
+  doctorId: integer("doctor_id").notNull().references(() => doctors.id),
+  audioUrl: text("audio_url").notNull(),
+  duration: integer("duration"), // duração em segundos
+  fileSize: integer("file_size"), // tamanho em bytes
+  
+  // Status do processamento
+  transcriptionStatus: varchar("transcription_status", { length: 50 }).default('pending'),
+  transcription: text("transcription"),
+  transcriptionError: text("transcription_error"),
+  
+  // Dados gerados pela IA
+  soapNote: json("soap_note"),
+  prescription: json("prescription"),
+  summary: text("summary"),
+  aiProcessingStatus: varchar("ai_processing_status", { length: 50 }).default('pending'),
+  aiProcessingError: text("ai_processing_error"),
+  
+  // Timestamps
+  processingStartedAt: timestamp("processing_started_at"),
+  processingCompletedAt: timestamp("processing_completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Tabela de acesso aos prontuários (auditoria)
 export const medicalRecordAccess = pgTable("medical_record_access", {
   id: serial("id").primaryKey(),
