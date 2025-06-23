@@ -208,10 +208,25 @@ async function processRecording(recordingId: number) {
           content: `Você é um assistente médico especializado em criar prontuários médicos profissionais a partir de transcrições de consultas. 
           Analise a transcrição e gere:
           1. Nota SOAP completa (Subjetivo, Objetivo, Avaliação, Plano)
-          2. Prescrições detalhadas (se mencionadas)
+          2. Prescrições médicas detalhadas com:
+             - Nome do medicamento (genérico e comercial se mencionado)
+             - Dosagem e concentração
+             - Posologia (quantas vezes ao dia)
+             - Duração do tratamento
+             - Orientações especiais
           3. Resumo executivo da consulta
           
-          Retorne em formato JSON com as chaves: soap_note (com subjetivo, objetivo, avaliacao, plano), prescricoes (array), resumo.`
+          Para as prescrições, formate cada item como objeto com as chaves:
+          - medicamento: nome do medicamento
+          - dosagem: dosagem e concentração
+          - posologia: como tomar
+          - duracao: tempo de tratamento
+          - orientacoes: orientações especiais
+          
+          Retorne em formato JSON com as chaves: 
+          - soap_note (com subjetivo, objetivo, avaliacao, plano)
+          - prescricoes (array de objetos com medicamento, dosagem, posologia, duracao, orientacoes)
+          - resumo (texto resumindo a consulta)`
         },
         {
           role: 'user',
