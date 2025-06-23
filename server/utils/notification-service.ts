@@ -77,23 +77,33 @@ export class NotificationService {
       const availableDoctors = await storage.getAvailableDoctors();
       
       console.log(`📢 Enviando notificação de emergência para ${availableDoctors.length} médicos disponíveis`);
+      console.log('📢 Médicos disponíveis:', availableDoctors.map(d => ({ id: d.id, name: d.fullName || d.name, userId: d.userId })));
       
       // Criar notificação para cada médico disponível
-      const notifications = availableDoctors.map(doctor => ({
-        userId: doctor.id,
-        type: 'emergency' as const,
-        title: '🚨 Consulta de Emergência',
-        message: `Paciente ${patientName} está aguardando atendimento de emergência.`,
-        isRead: false,
-        data: { appointmentId, patientName }
-      }));
+      const notifications = [];
       
-      // Criar todas as notificações em batch
-      for (const notification of notifications) {
-        await storage.createNotification(notification);
+      for (const doctor of availableDoctors) {
+        // Notificação precisa ser criada para o userId do médico, não o doctorId
+        const notification = {
+          userId: doctor.userId, // IMPORTANTE: usar userId, não doctor.id
+          type: 'emergency' as const,
+          title: '🚨 Consulta de Emergência',
+          message: `Paciente ${patientName} está aguardando atendimento de emergência.`,
+          isRead: false,
+          data: { appointmentId, patientName }
+        };
+        
+        console.log(`📢 Criando notificação para médico userId: ${doctor.userId}, doctorId: ${doctor.id}`);
+        
+        try {
+          await storage.createNotification(notification);
+          notifications.push(notification);
+        } catch (err) {
+          console.error(`❌ Erro ao criar notificação para médico ${doctor.id}:`, err);
+        }
       }
       
-      console.log(`✅ ${notifications.length} notificações de emergência criadas para médicos`);
+      console.log(`✅ ${notifications.length} notificações de emergência criadas no banco de dados`);
       return notifications.length;
     } catch (error) {
       console.error('❌ Erro ao criar notificações de emergência:', error);
