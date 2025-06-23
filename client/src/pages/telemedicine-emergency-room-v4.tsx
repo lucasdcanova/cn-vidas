@@ -47,7 +47,7 @@ const TelemedicineEmergencyRoomV4 = () => {
             <div className="flex items-center p-4 bg-amber-50 text-amber-800 rounded-md mb-6">
               <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
               <p className="text-sm">
-                A integração com Agora.io foi descontinuada temporariamente. 
+                Esta versão da plataforma de emergência foi descontinuada. 
                 Por favor, utilize a plataforma principal de telemedicina.
               </p>
             </div>
@@ -120,7 +120,7 @@ const TelemedicineEmergencyRoomV4 = () => {
                     <div>
                       <h4 className="font-medium">Nova Tecnologia</h4>
                       <p className="text-sm text-muted-foreground">
-                        Estamos utilizando o Agora.io para videochamadas, com melhor qualidade e estabilidade.
+                        Utilizamos a tecnologia Daily.co para videochamadas, com melhor qualidade e estabilidade.
                       </p>
                     </div>
                   </div>
