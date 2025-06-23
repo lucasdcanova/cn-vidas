@@ -53,8 +53,8 @@ export default function DoctorAvailabilityPage() {
   // Mutation para atualizar disponibilidade de emergência
   const toggleEmergencyMutation = useMutation({
     mutationFn: async (available: boolean) => {
-      const response = await apiRequest('POST', '/api/doctors/toggle-availability', {
-        availableForEmergency: available
+      const response = await apiRequest('POST', '/api/emergency-availability/toggle', {
+        available: available
       });
       return response.json();
     },

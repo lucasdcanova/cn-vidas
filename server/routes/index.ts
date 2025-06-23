@@ -36,6 +36,7 @@ import consultationRecordingRouter from './consultation-recording-routes';
 import userSettingsRouter from './user-settings-routes';
 import settingsRouter from '../settings-routes';
 import paymentHistoryRouter from './payment-history-routes';
+import emergencyAvailabilityRouter from './emergency-availability';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -85,6 +86,7 @@ export default async function setupRoutes(app: express.Express) {
   app.use('/api/emergency/patient', emergencyPatientRouter);
   app.use('/api/emergency/daily', dailyEmergencyRouter);
   app.use('/api/emergency/v2', emergencyV2Router);
+  app.use('/api/emergency-availability', emergencyAvailabilityRouter);
   
   // Rotas de pagamento
   app.use('/api/payments', paymentRouter);
