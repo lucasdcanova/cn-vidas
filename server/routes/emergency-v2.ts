@@ -147,7 +147,7 @@ emergencyV2Router.get('/notifications/:doctorId', authenticateToken, async (req:
     }
 
     // Buscar notificações do banco de dados
-    const notifications = await storage.getUserNotifications(userId);
+    const notifications = await storage.getNotifications(userId);
     
     // Filtrar apenas notificações de emergência não lidas
     const emergencyNotifications = notifications.filter(n => 
@@ -254,9 +254,9 @@ emergencyV2Router.post('/join/:appointmentId', authenticateToken, async (req: Re
       }
       
       // Marcar notificações no banco de dados como lidas
-      const doctorUser = await storage.getUserByDoctorId(doc.id);
-      if (doctorUser) {
-        const notifications = await storage.getUserNotifications(doctorUser.id);
+      const doctorUserId = await storage.getUserIdByDoctorId(doc.id);
+      if (doctorUserId) {
+        const notifications = await storage.getNotifications(doctorUserId);
         for (const notif of notifications) {
           if (notif.type === 'emergency' && 
               notif.data?.appointmentId === appointmentId && 
