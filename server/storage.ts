@@ -773,6 +773,11 @@ export class DatabaseStorage implements IStorage {
     .leftJoin(users, eq(doctors.userId, users.id))
     .where(eq(doctors.availableForEmergency, true));
     
+    console.log(`🔍 getAvailableDoctors: Encontrados ${result.length} médicos disponíveis para emergência`);
+    result.forEach(doc => {
+      console.log(`  - Dr. ${doc.name} (ID: ${doc.id}, userId: ${doc.userId}) - availableForEmergency: ${doc.availableForEmergency}`);
+    });
+    
     return result as Doctor[];
   }
 
