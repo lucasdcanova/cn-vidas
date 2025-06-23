@@ -11,6 +11,7 @@ import { format, isPast, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { PatientInfoSection } from '@/components/doctor/PatientInfoSection';
 
 interface EmergencyAwareAppointmentsListProps {
   onJoinAppointment?: (appointment: any) => void;
@@ -245,6 +246,15 @@ function AppointmentCard({
                   </>
                 ) : null}
               </div>
+              
+              {/* Informações do paciente organizadas */}
+              <PatientInfoSection
+                patientEmail={appointment.patientEmail}
+                patientPhone={appointment.patientPhone}
+                patientBirthDate={appointment.patientBirthDate}
+                patientCpf={appointment.patientCpf}
+                patientAge={appointment.patientAge}
+              />
             </div>
           </div>
           

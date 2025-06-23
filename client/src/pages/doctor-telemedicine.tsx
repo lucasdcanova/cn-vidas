@@ -19,6 +19,7 @@ import { ptBR } from 'date-fns/locale';
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { WaitingPatientIndicator } from '@/components/doctor/WaitingPatientIndicator';
 import { EnhancedDoctorOnboardingGuard } from '@/components/doctor/enhanced-onboarding-guard';
+import { PatientInfoSection } from '@/components/doctor/PatientInfoSection';
 import {
   Dialog,
   DialogContent,
@@ -230,11 +231,6 @@ const AppointmentItem = ({ appointment, onDeleteEmergencyAppointment }: { appoin
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold">
                     {appointment.patientName || "Paciente"}
-                    {appointment.patientAge && (
-                      <span className="ml-2 text-sm text-muted-foreground font-normal">
-                        ({appointment.patientAge} anos)
-                      </span>
-                    )}
                     {isEmergency && <span className="ml-2 text-red-500 text-sm font-normal">Consulta de Emergência</span>}
                   </h3>
                   {getStatusBadge()}
@@ -252,30 +248,24 @@ const AppointmentItem = ({ appointment, onDeleteEmergencyAppointment }: { appoin
                     <User className="h-4 w-4 mr-2" />
                     <span>{appointment.type === "telemedicine" ? "Telemedicina" : "Presencial"}</span>
                   </div>
-                  {appointment.patientEmail && (
-                    <div className="flex items-center mt-1">
-                      <span className="text-xs text-muted-foreground">Email: {appointment.patientEmail}</span>
-                    </div>
-                  )}
-                  {appointment.patientPhone && (
-                    <div className="flex items-center">
-                      <span className="text-xs text-muted-foreground">Telefone: {appointment.patientPhone}</span>
-                    </div>
-                  )}
-                  {appointment.patientBirthDate && (
-                    <div className="flex items-center">
-                      <span className="text-xs text-muted-foreground">
-                        Data de nascimento: {format(new Date(appointment.patientBirthDate), "dd/MM/yyyy", { locale: ptBR })}
-                      </span>
-                    </div>
-                  )}
-                  {isCanceled && appointment.notes && (
-                    <div className="flex items-center mt-2">
-                      <AlertCircle className="h-4 w-4 mr-2 text-destructive" />
-                      <span className="text-xs text-destructive">{appointment.notes}</span>
-                    </div>
-                  )}
                 </div>
+                
+                {/* Informações do paciente organizadas */}
+                <PatientInfoSection
+                  patientEmail={appointment.patientEmail}
+                  patientPhone={appointment.patientPhone}
+                  patientBirthDate={appointment.patientBirthDate}
+                  patientCpf={appointment.patientCpf}
+                  patientAge={appointment.patientAge}
+                  className="mt-3"
+                />
+                
+                {isCanceled && appointment.notes && (
+                  <div className="flex items-center mt-2">
+                    <AlertCircle className="h-4 w-4 mr-2 text-destructive" />
+                    <span className="text-xs text-destructive">{appointment.notes}</span>
+                  </div>
+                )}
               </div>
             </div>
             
