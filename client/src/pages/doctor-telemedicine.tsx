@@ -45,7 +45,8 @@ import { Textarea } from "@/components/ui/textarea";
 // Importamos o componente simplificado
 import { EmergencyBannerSimple } from '@/components/doctor/EmergencyBannerSimple';
 import { EmergencyNotification } from '@/components/doctor/EmergencyNotification';
-import { EmergencyAppointmentsList } from '@/components/doctor/EmergencyAppointmentsList';
+import { EmergencyAppointmentsListOptimized } from '@/components/doctor/EmergencyAppointmentsListOptimized';
+import { AutoRefreshIndicator } from '@/components/doctor/AutoRefreshIndicator';
 
 // Definimos uma versão simplificada do EmergencyBanner que não causa erros de hooks
 const EmergencyBanner = () => {
@@ -471,7 +472,7 @@ export default function DoctorTelemedicinePage() {
           if (!res.ok) throw new Error("Falha ao buscar consultas");
           return res.json();
         }),
-    refetchInterval: 5000, // Poll every 5 seconds to get new emergency consultations
+    refetchInterval: 10000, // Poll every 10 seconds for regular appointments
   });
   
   // Extrair array de appointments da resposta
@@ -546,10 +547,16 @@ export default function DoctorTelemedicinePage() {
         
         <EmergencyBanner />
         
-        {/* Emergency Appointments List - Novo componente melhorado */}
-        <EmergencyAppointmentsList />
+        {/* Emergency Appointments List - Componente otimizado */}
+        <EmergencyAppointmentsListOptimized />
         
-        {/* Emergency Notifications Component - Mantemos por compatibilidade */}
+        {/* Auto Refresh Indicator */}
+        <AutoRefreshIndicator 
+          isRefreshing={loadingAppointments}
+          interval={3000}
+        />
+        
+        {/* Emergency Notifications Component - Para notificações popup */}
         {doctorProfile && (
           <EmergencyNotification doctorId={doctorProfile.id} />
         )}
