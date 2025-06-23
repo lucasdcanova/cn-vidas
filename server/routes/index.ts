@@ -32,7 +32,7 @@ import profileUploadRouter from './profile-upload';
 import chatRouter from '../chat-routes';
 import medicalRecordsRouter from './medical-records-routes';
 import medicalRecordsAIRouter from './medical-records-ai-routes';
-import consultationRecordingRouter from './consultation-recording-routes';
+import consultationRecordingRouter from './consultation-recording-routes-drizzle';
 import userSettingsRouter from './user-settings-routes';
 import settingsRouter from '../settings-routes';
 import paymentHistoryRouter from './payment-history-routes';

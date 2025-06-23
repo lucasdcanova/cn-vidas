@@ -416,12 +416,26 @@ doctorRouter.get('/appointments', requireAuth, requireDoctorRole, async (req: Au
     const appointmentsWithPatientInfo = await Promise.all(
       doctorAppointments.map(async (appointment) => {
         const patient = appointment.userId ? await storage.getUser(appointment.userId) : null;
+        
+        // Calcular idade se houver data de nascimento
+        let patientAge = null;
+        if (patient?.birthDate) {
+          const birthDate = new Date(patient.birthDate);
+          const today = new Date();
+          patientAge = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            patientAge--;
+          }
+        }
+        
         return {
           ...appointment,
           patientName: patient?.fullName || 'Paciente',
-          patientAge: null, // Calcular idade se necessário
+          patientAge: patientAge,
           patientEmail: patient?.email || '',
           patientPhone: patient?.phone || '',
+          patientCpf: patient?.cpf || '',
           patientProfileImage: patient?.profileImage,
           patientBirthDate: patient?.birthDate,
           consultationFee: appointment.paymentAmount || 0,
