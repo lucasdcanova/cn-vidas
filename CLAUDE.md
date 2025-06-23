@@ -306,9 +306,101 @@ yarn migrate
 node run-migration.js
 ```
 
+## IMPORTANTE: Guia de Nomenclaturas e Padrões
+
+### ⚠️ ATENÇÃO: O projeto tem inconsistências de nomenclatura que estão sendo corrigidas gradualmente
+
+### Rotas da API (usar sempre PLURAL)
+- ✅ CORRETO: `/api/users`, `/api/doctors`, `/api/appointments`
+- ❌ EVITAR: `/api/user`, `/api/doctor`, `/api/appointment`
+
+### IDs e Referências
+- **ID primário**: `id`
+- **Referência de usuário**: `userId` (referencia users.id)
+- **Referência de médico**: `doctorId` (referencia doctors.id, NÃO users.id)
+- **Referência de paciente**: `patientId` (referencia users.id quando role='patient')
+- **Referência de parceiro**: `partnerId` (referencia partners.id)
+
+### Campos de Nome
+- **Nome completo**: usar `fullName` (não `name` ou `full_name`)
+- **Nome em appointments**: `patientName`, `doctorName` (para display)
+
+### Campos de Médico
+- **Número de licença**: `licenseNumber` (não `crm` ou `license_number`)
+- **Biografia**: `biography` (campo principal), `fullBio` (extendida)
+- **RQE**: `rqeNumber` (Registro de Qualificação de Especialista)
+
+### Imagem de Perfil
+- **No código**: `profileImage`
+- **No banco**: `profile_image`
+- **URLs**: `profileImageUrl`
+
+### Campos de Data/Hora
+- **No código TypeScript**: camelCase (`createdAt`, `updatedAt`, `startTime`)
+- **No banco de dados**: snake_case (`created_at`, `updated_at`, `start_time`)
+
+### Campos Booleanos
+- **Prefixo `is`**: `isActive`, `isRead`, `isFeatured`
+- **Sufixo `ed`**: `emailVerified`, `onboardingCompleted`
+- **Para disponibilidade**: `availableForEmergency`
+
+### Status de Appointments
+- `scheduled` - Agendada
+- `completed` - Concluída
+- `cancelled` - Cancelada
+- `no-show` - Paciente não compareceu
+- `waiting` - Aguardando (emergência)
+
+### Roles de Usuário
+- `patient` - Paciente
+- `doctor` - Médico
+- `partner` - Parceiro
+- `admin` - Administrador
+
+### Campos de Pagamento
+- **Intent ID**: `paymentIntentId`
+- **Taxa de consulta**: `consultationFee`
+- **Status**: `paymentStatus`
+- **Valor**: `paymentAmount`
+- **IDs Stripe**: `stripeCustomerId`, `stripeSubscriptionId`
+
+### Endereço (campos separados)
+- `street` - Rua
+- `number` - Número
+- `complement` - Complemento
+- `neighborhood` - Bairro
+- `city` - Cidade
+- `state` - Estado (UF)
+- `zipcode` - CEP (não usar `cep` ou `postalCode`)
+
+### Convenções de Arquivos
+- **Rotas**: kebab-case (`auth-routes.ts`, `doctor-routes.ts`)
+- **Componentes**: PascalCase (`DoctorProfile.tsx`)
+- **Hooks**: camelCase com prefixo use (`useAuth.ts`)
+- **Utilitários**: kebab-case (`date-utils.ts`)
+
+### Mapeamento Banco <-> Código
+```typescript
+// Exemplo de transformação
+const user = {
+  fullName: row.full_name,        // snake_case -> camelCase
+  createdAt: row.created_at,
+  profileImage: row.profile_image,
+  emailVerified: row.email_verified
+}
+```
+
+### Inconsistências Conhecidas (NÃO CRIAR NOVAS)
+- `/api/user` e `/api/users` (ambos existem)
+- `name` vs `fullName` (migrar para `fullName`)
+- `bio` vs `biography` (migrar para `biography`)
+- Campos snake_case no TypeScript (migrar para camelCase)
+
 ## Lembretes de Desenvolvimento
 
 - SEMPRE QUE FIZER ALTERACOES SOBRE A CHAMADA DE VIDEO USE GIT COMMIT E GIT PUSH NA SEQUENCIA
 - Verificar tipos e lint antes de commitar
 - Testar funcionalidades em desenvolvimento antes do push
 - Logs detalhados para debugging em desenvolvimento
+- SEMPRE seguir os padrões de nomenclatura acima para novo código
+- Ao encontrar inconsistências, seguir o padrão documentado acima
