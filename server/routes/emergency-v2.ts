@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { storage } from '../storage.js';
 import { createRoom, createToken, getRoomDetails } from '../utils/daily.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { NotificationService } from '../utils/notification-service.js';
 
 const emergencyV2Router = Router();
 
@@ -110,6 +111,12 @@ emergencyV2Router.post('/start', authenticateToken, async (req: Request, res: Re
       
       console.log(`📢 Notificação enviada para Dr. ${doctor.fullName || doctor.name} (ID: ${doctor.id})`);
     }
+    
+    // Criar notificações no banco de dados também
+    const notificationsSent = await NotificationService.createEmergencyNotificationForDoctors(
+      user.fullName || user.username || 'Paciente',
+      appointment.id!
+    );
 
     console.log(`Consulta de emergência iniciada: Paciente ${user.fullName} (ID: ${userId}), ${emergencyDoctors.length} médicos notificados, Sala: ${roomName}`);
 
@@ -140,26 +147,39 @@ emergencyV2Router.get('/notifications/:doctorId', authenticateToken, async (req:
     const doctorId = parseInt(req.params.doctorId);
     const userId = req.user!.id;
     
+    console.log(`🔍 Buscando notificações de emergência - doctorId: ${doctorId}, userId: ${userId}`);
+    
     // Verificar se o usuário é médico e se o ID corresponde
     const doctor = await storage.getDoctorByUserId(userId);
     if (!doctor || doctor.id !== doctorId) {
+      console.log(`❌ Acesso negado - doctor: ${doctor?.id}, doctorId: ${doctorId}`);
       return res.status(403).json({ error: 'Acesso não autorizado' });
     }
 
+    console.log(`✅ Médico verificado: ${doctor.fullName || doctor.name} (doctorId: ${doctor.id}, userId: ${userId})`);
+
     // Buscar notificações do banco de dados
     const notifications = await storage.getNotifications(userId);
+    
+    console.log(`📋 Total de notificações do usuário: ${notifications.length}`);
     
     // Filtrar apenas notificações de emergência não lidas
     const emergencyNotifications = notifications.filter(n => 
       n.type === 'emergency' && !n.isRead
     );
     
+    console.log(`🚨 Notificações de emergência não lidas: ${emergencyNotifications.length}`);
+    
     // Para cada notificação de emergência, buscar a consulta correspondente
     const formattedNotifications = [];
     
     for (const notification of emergencyNotifications) {
+      console.log(`🔍 Processando notificação:`, notification);
+      
       if (notification.data && notification.data.appointmentId) {
         const appointment = await storage.getAppointmentById(notification.data.appointmentId);
+        
+        console.log(`📋 Consulta encontrada:`, appointment ? `ID ${appointment.id}, Status: ${appointment.status}` : 'Não encontrada');
         
         // Verificar se a consulta ainda está aguardando atendimento
         if (appointment && appointment.status === 'waiting' && !appointment.doctorId) {
@@ -178,6 +198,7 @@ emergencyV2Router.get('/notifications/:doctorId', authenticateToken, async (req:
       }
     }
     
+    console.log(`📢 Retornando ${formattedNotifications.length} notificações formatadas`);
     return res.json(formattedNotifications);
 
   } catch (error) {
