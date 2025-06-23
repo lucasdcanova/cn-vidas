@@ -34,7 +34,12 @@ export function EmergencyAppointmentsList() {
       // Buscar todas as consultas do médico
       const response = await apiRequest('GET', '/api/doctors/appointments');
       if (response.ok) {
-        const appointments = await response.json();
+        const data = await response.json();
+        console.log('🚨 EmergencyAppointmentsList - Resposta da API:', data);
+        
+        // A API retorna { appointments: [], total: number }
+        const appointments = data.appointments || [];
+        console.log('🚨 EmergencyAppointmentsList - Appointments:', appointments);
         
         // Filtrar apenas emergências aguardando
         const emergencies = appointments.filter((apt: any) => 

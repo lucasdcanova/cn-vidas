@@ -797,4 +797,39 @@ emergencyV2Router.get('/debug/:doctorId', authenticateToken, async (req: Request
   }
 });
 
+/**
+ * GET /api/emergency/v2/test-create
+ * Criar consulta de emergência de teste
+ */
+emergencyV2Router.get('/test-create', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    
+    // Criar consulta de teste
+    const appointment = await storage.createAppointment({
+      userId: 2, // ID de um paciente teste
+      doctorId: null,
+      date: new Date(),
+      duration: 30,
+      type: 'telemedicine',
+      status: 'waiting',
+      isEmergency: true,
+      specialization: 'Emergência',
+      telemedRoomName: 'test-emergency-room',
+      telemedRoomUrl: 'https://cnvidas.daily.co/test-emergency-room',
+      notes: 'Consulta de emergência de teste'
+    });
+    
+    console.log('✅ Consulta de emergência de teste criada:', appointment);
+    
+    return res.json({
+      success: true,
+      appointment
+    });
+  } catch (error) {
+    console.error('Erro ao criar consulta de teste:', error);
+    return res.status(500).json({ error: 'Erro ao criar consulta de teste' });
+  }
+});
+
 export default emergencyV2Router;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Circle, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAudioRecording } from '@/hooks/useAudioRecording';
+import { useAudioRecording } from '@/hooks/use-audio-recording';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 
