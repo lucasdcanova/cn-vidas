@@ -33,6 +33,8 @@ export default function DoctorAvailabilityPage() {
   // Atualizar estado local quando os dados do perfil mudarem
   useEffect(() => {
     if (doctorProfile) {
+      console.log('🚨 DoctorAvailability - Perfil do médico:', doctorProfile);
+      console.log('🚨 DoctorAvailability - availableForEmergency:', doctorProfile.availableForEmergency);
       setEmergencyAvailable(doctorProfile.availableForEmergency || false);
     }
   }, [doctorProfile]);
