@@ -382,10 +382,24 @@ doctorRouter.get('/appointments', requireAuth, requireDoctorRole, async (req: Au
       // Sempre incluir consultas atribuídas a este médico
       if (app.doctorId === doctor.id) return true;
       
-      // Incluir emergências aguardando apenas se o médico estiver disponível
-      if (app.isEmergency && doctor.availableForEmergency && 
-          (app.status === 'waiting' || app.status === 'scheduled')) {
-        return true;
+      // Para emergências, aplicar filtros adicionais
+      if (app.isEmergency && doctor.availableForEmergency) {
+        // Excluir se já foi iniciada por outro médico (tem doctorId mas não é este médico)
+        if (app.doctorId && app.doctorId !== doctor.id) {
+          return false;
+        }
+        
+        // Excluir se está esperando há mais de 12 horas
+        if (app.status === 'waiting' && app.createdAt) {
+          const hoursWaiting = (Date.now() - new Date(app.createdAt).getTime()) / (1000 * 60 * 60);
+          if (hoursWaiting > 12) {
+            console.log(`⏰ Excluindo emergência antiga - ID: ${app.id}, esperando há ${hoursWaiting.toFixed(1)} horas`);
+            return false;
+          }
+        }
+        
+        // Incluir apenas se está aguardando ou agendada
+        return app.status === 'waiting' || app.status === 'scheduled';
       }
       
       return false;
