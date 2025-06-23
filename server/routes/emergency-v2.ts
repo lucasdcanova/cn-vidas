@@ -179,7 +179,14 @@ emergencyV2Router.get('/notifications/:doctorId', authenticateToken, async (req:
       if (notification.data && notification.data.appointmentId) {
         const appointment = await storage.getAppointmentById(notification.data.appointmentId);
         
-        console.log(`📋 Consulta encontrada:`, appointment ? `ID ${appointment.id}, Status: ${appointment.status}` : 'Não encontrada');
+        console.log(`📋 Consulta encontrada:`, appointment ? {
+          id: appointment.id,
+          status: appointment.status,
+          doctorId: appointment.doctorId,
+          isEmergency: appointment.isEmergency,
+          userId: appointment.userId,
+          telemedRoomUrl: appointment.telemedRoomUrl
+        } : 'Não encontrada');
         
         // Verificar se a consulta ainda está aguardando atendimento
         if (appointment && appointment.status === 'waiting' && !appointment.doctorId) {
@@ -731,6 +738,62 @@ emergencyV2Router.get('/verify-room/:roomName', authenticateToken, async (req: R
       error: 'Erro ao verificar sala',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     });
+  }
+});
+
+/**
+ * GET /api/emergency/v2/debug/:doctorId
+ * Debug de notificações de emergência
+ */
+emergencyV2Router.get('/debug/:doctorId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const doctorId = parseInt(req.params.doctorId);
+    const userId = req.user!.id;
+    
+    // Buscar médico
+    const doctor = await storage.getDoctorByUserId(userId);
+    
+    // Buscar notificações
+    const notifications = await storage.getNotifications(userId);
+    const emergencyNotifications = notifications.filter(n => n.type === 'emergency' && !n.isRead);
+    
+    // Buscar consultas de emergência
+    const allAppointments = await storage.getDoctorAppointments(doctorId, new Date('2000-01-01'), new Date('2100-01-01'));
+    const emergencyAppointments = allAppointments.filter(a => a.isEmergency && (a.status === 'waiting' || a.status === 'scheduled'));
+    
+    // Buscar médicos disponíveis
+    const availableDoctors = await storage.getAvailableDoctors();
+    
+    return res.json({
+      doctor: {
+        id: doctor?.id,
+        userId: doctor?.userId,
+        name: doctor?.name,
+        availableForEmergency: doctor?.availableForEmergency
+      },
+      notifications: {
+        total: notifications.length,
+        emergency: emergencyNotifications.length,
+        details: emergencyNotifications
+      },
+      appointments: {
+        total: allAppointments.length,
+        emergency: emergencyAppointments.length,
+        details: emergencyAppointments
+      },
+      availableDoctors: {
+        total: availableDoctors.length,
+        list: availableDoctors.map(d => ({
+          id: d.id,
+          userId: d.userId,
+          name: d.name,
+          availableForEmergency: d.availableForEmergency
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Erro no debug:', error);
+    return res.status(500).json({ error: 'Erro no debug' });
   }
 });
 

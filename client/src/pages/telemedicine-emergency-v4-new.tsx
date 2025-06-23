@@ -1,1 +1,0 @@
-// REMOVIDO: integração com Agora descontinuada
