@@ -45,6 +45,7 @@ import { Textarea } from "@/components/ui/textarea";
 // Importamos o componente simplificado
 import { EmergencyBannerSimple } from '@/components/doctor/EmergencyBannerSimple';
 import { EmergencyNotification } from '@/components/doctor/EmergencyNotification';
+import { EmergencyAppointmentsList } from '@/components/doctor/EmergencyAppointmentsList';
 
 // Definimos uma versão simplificada do EmergencyBanner que não causa erros de hooks
 const EmergencyBanner = () => {
@@ -545,7 +546,10 @@ export default function DoctorTelemedicinePage() {
         
         <EmergencyBanner />
         
-        {/* Emergency Notifications Component */}
+        {/* Emergency Appointments List - Novo componente melhorado */}
+        <EmergencyAppointmentsList />
+        
+        {/* Emergency Notifications Component - Mantemos por compatibilidade */}
         {doctorProfile && (
           <EmergencyNotification doctorId={doctorProfile.id} />
         )}
