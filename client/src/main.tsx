@@ -1,6 +1,11 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { registerServiceWorker, initPWAInstall } from "./pwa";
+
+// Inicializar PWA
+registerServiceWorker();
+initPWAInstall();
 
 // Set up meta tags for SEO
 document.title = "CN Vidas - Plataforma de Saúde Digital";
