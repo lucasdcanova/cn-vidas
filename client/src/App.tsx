@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { InstallPWA } from "@/components/InstallPWA";
+import { PushNotificationService } from "@/services/push-notifications";
+import { isNativeApp } from "@/utils/platform";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
@@ -226,6 +228,15 @@ function Router() {
 }
 
 function App() {
+  // Inicializar push notifications em apps nativos
+  React.useEffect(() => {
+    if (isNativeApp()) {
+      PushNotificationService.initialize().catch(error => {
+        console.error('Erro ao inicializar push notifications:', error);
+      });
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

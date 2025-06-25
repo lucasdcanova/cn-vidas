@@ -18,9 +18,16 @@
     "test": "jest",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "cap:build": "yarn build && npx cap sync",
+    "cap:ios": "npx cap open ios",
+    "cap:sync": "npx cap sync",
+    "cap:copy": "npx cap copy"
   },
   "dependencies": {
+    "@capacitor/core": "^7.4.0",
+    "@capacitor/ios": "^7.4.0",
+    "@capacitor/push-notifications": "^7.0.1",
     "@daily-co/daily-js": "^0.60.0",
     "@hookform/resolvers": "^3.3.4",
     "@neondatabase/serverless": "^1.0.1",
@@ -114,6 +121,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.4.0",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.21",
