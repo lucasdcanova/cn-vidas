@@ -5,6 +5,7 @@ import {
   UseMutationResult,
 } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { httpRequest } from "@/lib/http-client";
 import { useToast } from "@/hooks/use-toast";
 import { User, UserData, LoginCredentials, RegisterCredentials } from "@/shared/types";
 
@@ -70,12 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       // Fazer a requisição com todas as configurações necessárias
-      const res = await fetch('/api/user', {
+      const res = await httpRequest({
+        url: '/api/user',
         method: 'GET',
-        credentials: "include", // Importante: inclui cookies na requisição
         headers,
-        mode: 'cors',
-        cache: 'no-cache'
       });
       
       if (!res.ok) {
