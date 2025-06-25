@@ -24,19 +24,20 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
       {/* Header com logo - ajusta tamanho e posição com animação */}
       <div 
         className={`flex items-center justify-center transition-all ease-out ${
-          isKeyboardVisible ? 'h-16 duration-150' : 'h-32 duration-200'
+          isKeyboardVisible ? 'h-12 duration-150' : 'h-32 duration-200'
         }`}
         style={{ 
-          marginTop: isKeyboardVisible ? '20px' : '0',
+          marginTop: isKeyboardVisible ? '10px' : '0',
           transform: `translateY(${isKeyboardVisible ? '0' : '-20px'})`,
-          willChange: 'transform, height'
+          willChange: 'transform, height',
+          opacity: isKeyboardVisible ? 0.7 : 1
         }}
       >
         <img 
           src={cnvidasLogo} 
           alt="CN Vidas" 
           className={`w-auto transition-all ease-out ${
-            isKeyboardVisible ? 'h-12 duration-150' : 'h-24 duration-200'
+            isKeyboardVisible ? 'h-10 duration-150' : 'h-24 duration-200'
           }`}
           style={{ willChange: 'height' }}
         />
@@ -47,11 +48,12 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out"
         style={{ 
           height: isKeyboardVisible 
-            ? `calc(100vh - ${keyboardHeight}px - 80px - env(safe-area-inset-top))` 
+            ? `calc(100vh - ${keyboardHeight}px - 120px)` 
             : '55vh',
-          marginBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
+          marginBottom: '0',
+          transform: isKeyboardVisible ? `translateY(-${Math.min(keyboardHeight * 0.3, 100)}px)` : 'translateY(0)',
           transitionDuration: isKeyboardVisible ? '150ms' : '200ms',
-          willChange: 'height, margin-bottom'
+          willChange: 'height, transform'
         }}
       >
         {/* Background gradient blobs */}
