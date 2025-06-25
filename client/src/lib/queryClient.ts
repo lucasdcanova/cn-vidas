@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction, useQuery, useMutation } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/config/api";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -54,7 +55,7 @@ export async function apiRequest(
       }
     }
     
-    const res = await fetch(url, {
+    const res = await fetch(API_BASE_URL + url, {
       method,
       headers,
       body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
@@ -118,7 +119,7 @@ export const getQueryFn: <T>(options: {
         headers["Authorization"] = `Bearer ${authToken}`;
       }
       
-      const res = await fetch(endpoint, {
+      const res = await fetch(API_BASE_URL + endpoint, {
         method: 'GET',
         credentials: "include",
         headers,
