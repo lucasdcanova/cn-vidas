@@ -200,7 +200,8 @@
   
   /* iOS safe area handling - apply to root element instead of body */
   #root {
-    padding-top: env(safe-area-inset-top);
+    min-height: 100%;
+    background-color: #eff6ff;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
     min-height: 100vh;
