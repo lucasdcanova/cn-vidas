@@ -28,6 +28,8 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Service } from "@/shared/types";
 import { appointmentSchema } from '@shared/schema';
+import { useLocalNotifications } from "@/hooks/use-local-notifications";
+import { Capacitor } from '@capacitor/core';
 
 // Schema do formulário de agendamento
 const appointmentFormSchema = appointmentSchema.extend({
@@ -51,6 +53,8 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { scheduleAppointmentReminders } = useLocalNotifications();
+  const isNative = Capacitor.isNativePlatform();
   
   const { data: services = [] } = useQuery({
     queryKey: ["/api/services", initialPartnerId],
@@ -108,11 +112,22 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
       };
       
       // Submit the appointment
-      await createAppointment(appointmentData);
+      const appointment = await createAppointment(appointmentData);
+      
+      // Agendar notificações locais se estiver no app nativo
+      if (isNative && appointment?.id) {
+        await scheduleAppointmentReminders({
+          appointmentId: appointment.id,
+          patientName: user.fullName || user.username || 'Paciente',
+          doctorName: data.doctorName || 'Médico',
+          appointmentDate: new Date(dateTime),
+          userType: 'patient'
+        });
+      }
       
       toast({
         title: "Consulta agendada com sucesso",
-        description: "Sua consulta foi agendada. Você receberá uma confirmação em breve.",
+        description: "Sua consulta foi agendada. Você receberá lembretes antes da consulta.",
       });
       
       // Redirect to telemedicine page

@@ -8,6 +8,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { httpRequest } from "@/lib/http-client";
 import { useToast } from "@/hooks/use-toast";
 import { User, UserData, LoginCredentials, RegisterCredentials } from "@/shared/types";
+import { secureStorage } from "@/services/secure-storage";
 
 type AuthContextType = {
   user: UserData | null;
@@ -34,8 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Verificar cookies disponíveis - deve mostrar o cookie da sessão
       console.log("Cookies disponíveis ANTES da requisição:", document.cookie);
       
-      // Obter token de autenticação do localStorage se disponível
-      const authToken = localStorage.getItem("authToken");
+      // Obter token de autenticação do armazenamento seguro se disponível
+      const authTokenResult = await secureStorage.get<string>('auth_token');
+      const authToken = authTokenResult.success ? authTokenResult.data : localStorage.getItem("authToken");
       
       // Criar headers com token de autenticação se disponível
       const headers: Record<string, string> = {
@@ -125,24 +127,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Armazenar token de autenticação se disponível
       if (responseData.authToken) {
         console.log("Token de autenticação recebido:", responseData.authToken);
+        // Salvar no armazenamento seguro e localStorage como fallback
+        await secureStorage.save('auth_token', responseData.authToken);
         localStorage.setItem("authToken", responseData.authToken);
       }
       
       // Armazenar ID da sessão se disponível
       if (responseData.sessionId) {
         console.log("ID da sessão recebido:", responseData.sessionId);
+        // Salvar no armazenamento seguro e localStorage como fallback
+        await secureStorage.save('session_id', responseData.sessionId);
         localStorage.setItem("sessionID", responseData.sessionId);
       }
       
       // Armazenar dados do usuário localmente para autenticação alternativa em chamadas de emergência
       try {
-        localStorage.setItem("userData", JSON.stringify({
+        const userData = {
           id: responseData.id,
           email: responseData.email,
           role: responseData.role,
           username: responseData.username,
           fullName: responseData.fullName
-        }));
+        };
+        // Salvar no armazenamento seguro e localStorage como fallback
+        await secureStorage.save('user_data', userData);
+        localStorage.setItem("userData", JSON.stringify(userData));
         console.log("Dados do usuário armazenados para autenticação alternativa");
       } catch (e) {
         console.warn("Erro ao armazenar dados do usuário:", e);
@@ -356,6 +365,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       // Limpar dados locais imediatamente, independente da resposta do servidor
+      // Limpar armazenamento seguro
+      await secureStorage.clear();
+      // Limpar localStorage e sessionStorage
       localStorage.clear();
       sessionStorage.clear();
       

@@ -333,6 +333,9 @@ const AuthPage: React.FC = () => {
       if (enableBiometric && isBiometricAvailable) {
         await saveBiometricCredentials(data.email, data.password);
       }
+      
+      // Haptic feedback de sucesso
+      await haptic.success();
     } catch (error) {
       // Additional error logging
       console.error("Login error:", error);
@@ -341,6 +344,9 @@ const AuthPage: React.FC = () => {
         description: "Verifique suas credenciais e tente novamente.",
         variant: "destructive",
       });
+      
+      // Haptic feedback de erro
+      await haptic.error();
     } finally {
       setIsLoggingIn(false);
     }

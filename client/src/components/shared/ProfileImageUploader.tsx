@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Camera, Upload, X, Check, Loader2 } from 'lucide-react';
+import { Camera, Upload, X, Check, Loader2, Smartphone } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
@@ -8,6 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import ImageCropper from './ImageCropper';
+import { useCamera } from '@/hooks/use-camera';
+import { Capacitor } from '@capacitor/core';
 
 interface ProfileImageUploaderProps {
   currentImage?: string | null;
@@ -29,6 +31,8 @@ export default function ProfileImageUploader({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { takePicture, checkAndRequestPermissions } = useCamera();
+  const isNative = Capacitor.isNativePlatform();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,6 +57,28 @@ export default function ProfileImageUploader({
         return;
       }
 
+      setSelectedFile(file);
+      setShowCropper(true);
+    }
+  };
+
+  const handleCameraCapture = async () => {
+    // Verificar e solicitar permissões
+    const hasPermissions = await checkAndRequestPermissions();
+    if (!hasPermissions) {
+      return;
+    }
+
+    // Capturar imagem
+    const result = await takePicture({ source: 'prompt', quality: 85 });
+    
+    if (result.success && result.data) {
+      // Converter dataUrl para File
+      const response = await fetch(result.data.dataUrl);
+      const blob = await response.blob();
+      const filename = `photo_${Date.now()}.${result.data.format || 'jpg'}`;
+      const file = new File([blob], filename, { type: blob.type });
+      
       setSelectedFile(file);
       setShowCropper(true);
     }
@@ -218,25 +244,47 @@ export default function ProfileImageUploader({
                   disabled={isUploading}
                 />
                 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="w-full sm:w-auto"
-                >
-                  {currentImage ? (
-                    <>
-                      <Camera className="h-4 w-4 mr-2" />
-                      Alterar Foto
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Adicionar Foto
-                    </>
-                  )}
-                </Button>
+                {isNative ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCameraCapture}
+                    disabled={isUploading}
+                    className="w-full sm:w-auto"
+                  >
+                    {currentImage ? (
+                      <>
+                        <Camera className="h-4 w-4 mr-2" />
+                        Alterar Foto
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="h-4 w-4 mr-2" />
+                        Tirar Foto
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="w-full sm:w-auto"
+                  >
+                    {currentImage ? (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Alterar Foto
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Adicionar Foto
+                      </>
+                    )}
+                  </Button>
+                )}
 
                 {currentImage && (
                   <Button
