@@ -1,0 +1,8 @@
+Este é um placeholder para a splash screen do app.
+
+Para adicionar a splash screen real:
+1. Substitua este arquivo por uma imagem PNG de 2732x2732px
+2. Conteúdo centralizado
+3. Fundo que combine com a identidade visual do app
+
+A imagem será redimensionada automaticamente para todos os dispositivos iOS.
