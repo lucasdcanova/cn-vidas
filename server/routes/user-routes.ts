@@ -8,6 +8,7 @@ import { NotificationService } from '../utils/notification-service';
 import { db } from '../db';
 import { users } from '../../shared/schema';
 import { eq } from 'drizzle-orm';
+import { generateQRCode } from '../utils/qr-code';
 
 const userRouter = express.Router();
 
@@ -224,6 +225,34 @@ userRouter.post('/generate-qr', requireAuth, async (req: AuthenticatedRequest, r
   } catch (error) {
     console.error('Erro ao gerar QR Code:', error);
     return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+/**
+ * Obter QR code do usuário
+ * GET /api/users/qr-code
+ */
+userRouter.get('/qr-code', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+
+    // Gerar dados únicos para o QR code do usuário
+    // Formato: CNV-{userId}-{timestamp}
+    const qrData = `CNV-${req.user.id}-${Date.now()}`;
+    
+    // Gerar QR code como data URL
+    const qrCode = await generateQRCode(qrData);
+    
+    res.json({ 
+      qrCode,
+      userId: req.user.id,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Erro ao gerar QR code:', error);
+    res.status(500).json({ error: 'Erro ao gerar QR code' });
   }
 });
 
