@@ -4,7 +4,11 @@ import { isNativeApp } from '@/utils/platform';
 export const getApiBaseUrl = (): string => {
   // For native apps, we need to use the full URL
   if (isNativeApp()) {
-    return 'https://cnvidas.onrender.com';
+    // PRODUÇÃO: URL correta do Render
+    return 'https://cnvidas-updated.onrender.com';
+    
+    // DESENVOLVIMENTO: Use seu IP local
+    // return 'http://192.168.15.20:8080'; // IP LOCAL DO MAC
   }
   
   // For web, we can use relative URLs
