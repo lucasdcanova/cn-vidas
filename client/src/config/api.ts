@@ -4,8 +4,7 @@ import { isNativeApp } from '@/utils/platform';
 export const getApiBaseUrl = (): string => {
   // For native apps, we need to use the full URL
   if (isNativeApp()) {
-    // Always use relative URLs since Capacitor will handle the routing
-    return '';
+    return 'https://cnvidas.onrender.com';
   }
   
   // For web, we can use relative URLs
