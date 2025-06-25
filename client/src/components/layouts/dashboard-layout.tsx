@@ -139,7 +139,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden relative z-10">
         {/* Top navbar */}
-        <header className="glass-nav sticky top-0 z-10 shadow-sm">
+        <header className="bg-white sticky top-0 z-10 shadow-sm border-b border-gray-100">
           <div className="md:hidden flex items-center justify-between p-4">
             <div className="flex items-center">
               <button 
@@ -157,7 +157,31 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 />
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center space-x-2">
+              {/* Ícones de configurações e ajuda apenas para pacientes */}
+              {user?.role === "patient" && (
+                <>
+                  <Link to="/settings">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                    >
+                      <Settings className="h-5 w-5 text-gray-600" />
+                    </Button>
+                  </Link>
+                  <Link to="/help">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                    >
+                      <HelpCircle className="h-5 w-5 text-gray-600" />
+                    </Button>
+                  </Link>
+                  <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                </>
+              )}
               <UserProfile user={user} compact />
             </div>
           </div>

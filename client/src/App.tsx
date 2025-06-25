@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import { InstallPWA } from "@/components/InstallPWA";
 import { PushNotificationService } from "@/services/push-notifications";
 import { isNativeApp } from "@/utils/platform";
+import { useThemeColor } from "@/hooks/use-theme-color";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
@@ -228,6 +229,9 @@ function Router() {
 }
 
 function App() {
+  // Usar hook para atualizar a cor do tema dinamicamente
+  useThemeColor();
+  
   // Inicializar push notifications em apps nativos
   React.useEffect(() => {
     if (isNativeApp()) {
