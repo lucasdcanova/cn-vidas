@@ -307,6 +307,19 @@
   .safe-area-inset-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  
+  /* Otimização para animações em 120Hz no iOS */
+  @media (prefers-reduced-motion: no-preference) {
+    * {
+      -webkit-transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      -webkit-perspective: 1000;
+    }
+    
+    .transition-all {
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
 }
 
 @layer components {

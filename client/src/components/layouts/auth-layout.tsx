@@ -18,30 +18,40 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   
   return (
     <div className="min-h-screen flex flex-col bg-blue-50 relative">
+      {/* Spacer para empurrar conteúdo para baixo quando teclado não está ativo */}
+      {!isKeyboardVisible && <div className="flex-1" />}
+      
       {/* Header com logo - ajusta tamanho e posição com animação */}
       <div 
-        className={`flex items-center justify-center transition-all duration-300 ease-out ${
-          isKeyboardVisible ? 'h-16' : 'h-32'
+        className={`flex items-center justify-center transition-all ease-out ${
+          isKeyboardVisible ? 'h-16 duration-150' : 'h-32 duration-200'
         }`}
-        style={{ marginTop: isKeyboardVisible ? '20px' : '0' }}
+        style={{ 
+          marginTop: isKeyboardVisible ? '20px' : '0',
+          transform: `translateY(${isKeyboardVisible ? '0' : '-20px'})`,
+          willChange: 'transform, height'
+        }}
       >
         <img 
           src={cnvidasLogo} 
           alt="CN Vidas" 
-          className={`w-auto transition-all duration-300 ease-out ${
-            isKeyboardVisible ? 'h-12' : 'h-24'
+          className={`w-auto transition-all ease-out ${
+            isKeyboardVisible ? 'h-12 duration-150' : 'h-24 duration-200'
           }`}
+          style={{ willChange: 'height' }}
         />
       </div>
       
       {/* Container principal com altura dinâmica */}
       <div 
-        className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all duration-300 ease-out"
+        className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out"
         style={{ 
           height: isKeyboardVisible 
             ? `calc(100vh - ${keyboardHeight}px - 80px - env(safe-area-inset-top))` 
-            : '65vh',
-          marginBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0'
+            : '55vh',
+          marginBottom: isKeyboardVisible ? `${keyboardHeight}px` : '0',
+          transitionDuration: isKeyboardVisible ? '150ms' : '200ms',
+          willChange: 'height, margin-bottom'
         }}
       >
         {/* Background gradient blobs */}
