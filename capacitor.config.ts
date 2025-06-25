@@ -18,7 +18,8 @@ const config: CapacitorConfig = {
   },
   ios: {
     // Configurações específicas do iOS
-    contentInset: 'automatic'
+    contentInset: 'never',
+    backgroundColor: '#eff6ff'
   }
 };
 
