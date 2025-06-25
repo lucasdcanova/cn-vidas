@@ -291,7 +291,8 @@ export const integrateTelemedAppointment = async (appointmentId: number, provide
 
 // QR Code API
 export const generateQrToken = async () => {
-  const res = await apiRequest("POST", "/api/users/generate-qr");
+  // Mudança: agora busca o QR code existente ao invés de gerar um novo
+  const res = await apiRequest("GET", "/api/users/qr-code");
   return await res.json();
 };
 

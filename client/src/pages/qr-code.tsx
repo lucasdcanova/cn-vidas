@@ -114,7 +114,9 @@ const QRCodePage: React.FC = () => {
                 {user?.role === 'doctor' 
                   ? "Use este QR Code para comprovar sua identidade como médico durante consultas e procedimentos." 
                   : "Você pode usar este QR Code para identificação rápida em consultas e procedimentos."}
-                Este é seu QR Code permanente e único para identificação no sistema.
+                <div className="mt-2 text-sm font-medium text-green-700">
+                  Este é seu QR Code permanente e único, gerado no momento do seu cadastro.
+                </div>
               </CardDescription>
             </CardHeader>
             <CardContent>
