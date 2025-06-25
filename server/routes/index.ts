@@ -40,7 +40,7 @@ import emergencyAvailabilityRouter from './emergency-availability';
 import cleanupRouter from './cleanup-notifications';
 import prescriptionRouter from './prescription-routes';
 import pushNotificationsRouter from './push-notifications-routes';
-import walletRouter from './wallet-routes';
+import walletRouter from './wallet-routes-simplified';
 import uploadDiagnosticsRouter from './upload-diagnostics';
 
 export default async function setupRoutes(app: express.Express) {
