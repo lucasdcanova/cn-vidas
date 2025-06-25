@@ -18,9 +18,10 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   
   return (
     <div className="fixed inset-0 bg-blue-50 overflow-hidden">
-      <div className="min-h-screen flex flex-col relative">
+      <div className="absolute inset-0 bg-blue-50" />
+      <div className="min-h-screen flex flex-col relative safe-area-inset-top">
         {/* Spacer para empurrar conteúdo para baixo quando teclado não está ativo */}
-        {!isKeyboardVisible && <div className="flex-1" style={{ minHeight: '15vh' }} />}
+        {!isKeyboardVisible && <div className="flex-1" style={{ minHeight: '10vh' }} />}
         
         {/* Header com logo - ajusta tamanho e posição com animação */}
         <div 
@@ -28,7 +29,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
             isKeyboardVisible ? 'h-12 duration-150' : 'h-20 duration-200'
           }`}
           style={{ 
-            marginTop: isKeyboardVisible ? '10px' : '40px',
+            marginTop: isKeyboardVisible ? '10px' : '20px',
             willChange: 'height',
             opacity: isKeyboardVisible ? 0.7 : 1
           }}
@@ -45,11 +46,11 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         
         {/* Container principal com altura dinâmica */}
         <div 
-          className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out mt-8"
+          className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out mt-6"
           style={{ 
             height: isKeyboardVisible 
               ? `calc(100vh - ${keyboardHeight}px - 120px)` 
-              : '58vh',
+              : '60vh',
             marginBottom: '0',
             transform: isKeyboardVisible ? `translateY(-${Math.min(keyboardHeight * 0.25, 80)}px)` : 'translateY(0)',
             transitionDuration: isKeyboardVisible ? '150ms' : '200ms',
