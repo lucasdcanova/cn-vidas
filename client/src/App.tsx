@@ -10,6 +10,7 @@ import { InstallPWA } from "@/components/InstallPWA";
 import { PushNotificationService } from "@/services/push-notifications";
 import { isNativeApp } from "@/utils/platform";
 import { useThemeColor } from "@/hooks/use-theme-color";
+import { initializeIOSConfig } from "@/utils/ios-config";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
@@ -232,9 +233,15 @@ function App() {
   // Usar hook para atualizar a cor do tema dinamicamente
   useThemeColor();
   
-  // Inicializar push notifications em apps nativos
+  // Inicializar push notifications e configurações iOS em apps nativos
   React.useEffect(() => {
     if (isNativeApp()) {
+      // Inicializar configurações iOS
+      initializeIOSConfig().catch(error => {
+        console.error('Erro ao inicializar configurações iOS:', error);
+      });
+      
+      // Inicializar push notifications
       PushNotificationService.initialize().catch(error => {
         console.error('Erro ao inicializar push notifications:', error);
       });
