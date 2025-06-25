@@ -9,12 +9,12 @@ interface AuthLayoutProps {
 export const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-blue-50">
-      {/* Header com logo */}
-      <div className="flex justify-center py-8">
+      {/* Header com logo - movido mais para baixo */}
+      <div className="flex justify-center pt-20 pb-8">
         <img 
           src={cnvidasLogo} 
           alt="CN Vidas" 
-          className="h-16 w-auto" 
+          className="h-14 w-auto" 
         />
       </div>
       
