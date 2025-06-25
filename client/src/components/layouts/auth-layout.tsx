@@ -17,19 +17,15 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   }, []);
   
   return (
-    <div className="fixed inset-0 bg-blue-50 overflow-hidden">
-      <div className="absolute inset-0 bg-blue-50" />
-      <div className="min-h-screen flex flex-col relative safe-area-inset-top">
-        {/* Spacer para empurrar conteúdo para baixo quando teclado não está ativo */}
-        {!isKeyboardVisible && <div className="flex-1" style={{ minHeight: '10vh' }} />}
-        
-        {/* Header com logo - ajusta tamanho e posição com animação */}
+    <div className="fixed inset-0 bg-blue-50" style={{ backgroundColor: '#eff6ff' }}>
+      <div className="min-h-screen flex flex-col relative" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        {/* Logo sempre próxima ao topo */}
         <div 
           className={`flex items-center justify-center transition-all ease-out ${
             isKeyboardVisible ? 'h-12 duration-150' : 'h-20 duration-200'
           }`}
           style={{ 
-            marginTop: isKeyboardVisible ? '10px' : '20px',
+            marginTop: isKeyboardVisible ? '20px' : '60px',
             willChange: 'height',
             opacity: isKeyboardVisible ? 0.7 : 1
           }}
@@ -44,15 +40,18 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
           />
         </div>
         
+        {/* Spacer flexível */}
+        <div className="flex-1" />
+        
         {/* Container principal com altura dinâmica */}
         <div 
-          className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out mt-6"
+          className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out"
           style={{ 
             height: isKeyboardVisible 
-              ? `calc(100vh - ${keyboardHeight}px - 120px)` 
-              : '60vh',
+              ? `calc(100vh - ${keyboardHeight}px - 140px - env(safe-area-inset-top))` 
+              : '65vh',
             marginBottom: '0',
-            transform: isKeyboardVisible ? `translateY(-${Math.min(keyboardHeight * 0.25, 80)}px)` : 'translateY(0)',
+            transform: isKeyboardVisible ? `translateY(-${Math.min(keyboardHeight * 0.2, 60)}px)` : 'translateY(0)',
             transitionDuration: isKeyboardVisible ? '150ms' : '200ms',
             willChange: 'height, transform'
           }}
