@@ -340,7 +340,7 @@
   }
   
   /* Glassmorphism enhancements */
-  .glass-card, .glass-nav, .glass-sidebar {
+  .glass-card, .glass-nav, .glass-sidebar, .glass-morphism {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.85);
@@ -352,6 +352,12 @@
   .glass-card:hover, .glass-nav:hover, .glass-sidebar:hover {
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Auth page specific glassmorphism */
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.6);
   }
   
   /* iOS-style tap highlight */
