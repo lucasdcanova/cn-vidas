@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import cnvidasLogo from "@/assets/cnvidas-logo-transparent.png";
-import { useIOSKeyboard } from "@/hooks/use-ios-keyboard";
 import { configureIOSStatusBar } from "@/utils/ios-config";
 
 interface AuthLayoutProps {
@@ -9,36 +8,30 @@ interface AuthLayoutProps {
 }
 
 export const AuthLayout = ({ children }: AuthLayoutProps) => {
-  const { keyboardHeight, isKeyboardVisible } = useIOSKeyboard();
-  
   // Configurar status bar do iOS
   useEffect(() => {
     configureIOSStatusBar('#eff6ff');
   }, []);
   
   return (
-    <div className="h-screen bg-blue-50" style={{ backgroundColor: '#eff6ff' }}>
-      <div className="h-full flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="min-h-screen bg-blue-50" style={{ backgroundColor: '#eff6ff' }}>
+      <div className="min-h-screen flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Logo com posição ajustada */}
-        {!isKeyboardVisible && (
-          <div 
-            className="flex items-center justify-center h-20"
-            style={{ 
-              marginTop: '100px'
-            }}
-          >
-            <img 
-              src={cnvidasLogo} 
-              alt="CN Vidas" 
-              className="w-auto h-16"
-            />
-          </div>
-        )}
+        <div 
+          className="flex items-center justify-center h-20"
+          style={{ 
+            marginTop: '100px'
+          }}
+        >
+          <img 
+            src={cnvidasLogo} 
+            alt="CN Vidas" 
+            className="w-auto h-16"
+          />
+        </div>
         
         {/* Spacer menor */}
-        {!isKeyboardVisible && (
-          <div style={{ height: '40px' }} />
-        )}
+        <div style={{ height: '40px' }} />
         
         {/* Container principal */}
         <div 
@@ -55,12 +48,10 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
           {children}
         </div>
         
-        {/* Copyright dentro da caixa - esconde quando teclado está visível */}
-        {!isKeyboardVisible && (
-          <div className="text-center py-4 text-gray-500 text-xs border-t border-gray-100/30">
-            &copy; {new Date().getFullYear()} CN Vidas. Todos os direitos reservados.
-          </div>
-        )}
+        {/* Copyright dentro da caixa */}
+        <div className="text-center py-4 text-gray-500 text-xs border-t border-gray-100/30">
+          &copy; {new Date().getFullYear()} CN Vidas. Todos os direitos reservados.
+        </div>
       </div>
     </div>
     </div>
