@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useIOSKeyboard } from "@/hooks/use-ios-keyboard";
+import { Keyboard } from '@capacitor/keyboard';
+import { Capacitor } from '@capacitor/core';
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -207,6 +209,14 @@ const AuthPage: React.FC = () => {
   const emailLoginRef = useRef<HTMLInputElement>(null);
   const passwordLoginRef = useRef<HTMLInputElement>(null);
   
+  // Configurar o teclado do iOS
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      // Configurar comportamento do teclado
+      Keyboard.setAccessoryBarVisible({ isVisible: true });
+    }
+  }, []);
+  
   // Redirect if already authenticated with role-based routing
   useEffect(() => {
     if (user) {
@@ -383,7 +393,17 @@ const AuthPage: React.FC = () => {
             </div>
             
             <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+              <form 
+                onSubmit={loginForm.handleSubmit(onLoginSubmit)} 
+                className="space-y-4"
+                onKeyDown={(e) => {
+                  // Navegar entre campos com Tab ou tecla de próximo do iOS
+                  if (e.key === 'Tab' && !e.shiftKey && document.activeElement === emailLoginRef.current) {
+                    e.preventDefault();
+                    passwordLoginRef.current?.focus();
+                  }
+                }}
+              >
                 <FormField
                   control={loginForm.control}
                   name="email"
@@ -400,18 +420,9 @@ const AuthPage: React.FC = () => {
                           autoComplete="email"
                           autoCapitalize="off"
                           autoCorrect="off"
+                          spellCheck="false"
                           inputMode="email"
                           enterKeyHint="next"
-                          tabIndex={1}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === 'Return') {
-                              e.preventDefault();
-                              setTimeout(() => {
-                                passwordLoginRef.current?.focus();
-                                passwordLoginRef.current?.click();
-                              }, 100);
-                            }
-                          }}
                           {...field} 
                         />
                       </FormControl>
@@ -439,10 +450,9 @@ const AuthPage: React.FC = () => {
                           disabled={isLoggingIn}
                           className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-blue-500 flex w-full px-3 py-2 focus:outline-none focus:ring-2"
                           autoComplete="current-password"
-                          enterKeyHint="done"
-                          tabIndex={2}
+                          enterKeyHint="go"
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === 'Return') {
+                            if (e.key === 'Enter') {
                               e.preventDefault();
                               loginForm.handleSubmit(onLoginSubmit)();
                             }
