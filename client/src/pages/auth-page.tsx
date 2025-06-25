@@ -6,6 +6,8 @@ import { useIOSKeyboard } from "@/hooks/use-ios-keyboard";
 import { Keyboard } from '@capacitor/keyboard';
 import { Capacitor } from '@capacitor/core';
 import { Button } from "@/components/ui/button";
+import { useBiometricAuth } from "@/hooks/use-biometric-auth";
+import { Fingerprint, Smartphone } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -204,6 +206,15 @@ const AuthPage: React.FC = () => {
   const [estadoSelecionado, setEstadoSelecionado] = useState("SP");
   const [, navigate] = useLocation();
   const { isKeyboardVisible } = useIOSKeyboard();
+  const { 
+    isAvailable: isBiometricAvailable, 
+    biometryTypeName, 
+    authenticate: authenticateBiometric,
+    saveCredentials: saveBiometricCredentials,
+    getStoredCredentials,
+    isAuthenticating 
+  } = useBiometricAuth();
+  const [enableBiometric, setEnableBiometric] = useState(false);
   
   // Refs para os campos de input
   const emailLoginRef = useRef<HTMLInputElement>(null);
@@ -216,6 +227,45 @@ const AuthPage: React.FC = () => {
       Keyboard.setAccessoryBarVisible({ isVisible: true });
     }
   }, []);
+  
+  // Verificar se há credenciais biométricas salvas ao carregar
+  useEffect(() => {
+    const checkBiometricCredentials = async () => {
+      if (isBiometricAvailable && !user) {
+        const credentials = await getStoredCredentials();
+        if (credentials?.username) {
+          // Se há credenciais salvas, tentar login biométrico automaticamente
+          handleBiometricLogin();
+        }
+      }
+    };
+    
+    checkBiometricCredentials();
+  }, [isBiometricAvailable]);
+  
+  // Função para login biométrico
+  const handleBiometricLogin = async () => {
+    try {
+      const isAuthenticated = await authenticateBiometric('Faça login no CN Vidas');
+      
+      if (isAuthenticated) {
+        const credentials = await getStoredCredentials();
+        if (credentials?.username && credentials?.password) {
+          // Fazer login com as credenciais salvas
+          setIsLoggingIn(true);
+          const user = await loginMutation.mutateAsync({
+            email: credentials.username,
+            password: credentials.password
+          });
+          console.log('Login biométrico bem-sucedido');
+        }
+      }
+    } catch (error) {
+      console.error('Erro no login biométrico:', error);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
   
   // Redirect if already authenticated with role-based routing
   useEffect(() => {
@@ -278,6 +328,11 @@ const AuthPage: React.FC = () => {
       
       // O redirecionamento será feito automaticamente pelo useAuth hook
       console.log("Login processado, aguardando redirecionamento automático...");
+      
+      // Salvar credenciais biométricas se habilitado
+      if (enableBiometric && isBiometricAvailable) {
+        await saveBiometricCredentials(data.email, data.password);
+      }
     } catch (error) {
       // Additional error logging
       console.error("Login error:", error);
@@ -465,30 +520,75 @@ const AuthPage: React.FC = () => {
                   )}
                 />
                 
-                <div className="flex items-center">
-                  <input 
-                    id="remember-me" 
-                    name="remember-me" 
-                    type="checkbox" 
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-xs text-gray-700">
-                    Lembrar-me
-                  </label>
+                <div className="space-y-3">
+                  <div className="flex items-center">
+                    <input 
+                      id="remember-me" 
+                      name="remember-me" 
+                      type="checkbox" 
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
+                    />
+                    <label htmlFor="remember-me" className="ml-2 block text-xs text-gray-700">
+                      Lembrar-me
+                    </label>
+                  </div>
+                  
+                  {isBiometricAvailable && (
+                    <div className="flex items-center">
+                      <input 
+                        id="enable-biometric" 
+                        name="enable-biometric" 
+                        type="checkbox"
+                        checked={enableBiometric}
+                        onChange={(e) => setEnableBiometric(e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
+                      />
+                      <label htmlFor="enable-biometric" className="ml-2 block text-xs text-gray-700">
+                        Habilitar login com {biometryTypeName}
+                      </label>
+                    </div>
+                  )}
                 </div>
                 
-                <Button 
-                  type="submit" 
-                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
-                  disabled={isLoggingIn}
-                >
-                  {isLoggingIn ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Entrando...
-                    </>
-                  ) : "Entrar"}
-                </Button>
+                <div className="space-y-3">
+                  <Button 
+                    type="submit" 
+                    className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
+                    disabled={isLoggingIn || isAuthenticating}
+                  >
+                    {isLoggingIn ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Entrando...
+                      </>
+                    ) : "Entrar"}
+                  </Button>
+                  
+                  {isBiometricAvailable && (
+                    <Button
+                      type="button"
+                      onClick={handleBiometricLogin}
+                      className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
+                      disabled={isLoggingIn || isAuthenticating}
+                    >
+                      {isAuthenticating ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Autenticando...
+                        </>
+                      ) : (
+                        <>
+                          {biometryTypeName === 'Touch ID' || biometryTypeName === 'Impressão Digital' ? (
+                            <Fingerprint className="mr-2 h-5 w-5" />
+                          ) : (
+                            <Smartphone className="mr-2 h-5 w-5" />
+                          )}
+                          Entrar com {biometryTypeName}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </form>
             </Form>
           </div>

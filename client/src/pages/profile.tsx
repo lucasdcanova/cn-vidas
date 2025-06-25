@@ -42,12 +42,27 @@ import {
   Upload,
   Building,
   Stethoscope,
-  MapPin
+  MapPin,
+  Users,
+  UserPlus,
+  AlertCircle
 } from "lucide-react";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import { AddressFormOptimized as AddressForm, AddressFormValues } from "@/components/forms/address-form-optimized";
 import ImageCropper from "@/components/shared/ImageCropper";
 import ProfilePhotoUploader from "@/components/shared/ProfilePhotoUploader";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Esquema de perfil básico (paciente)
 const patientProfileSchema = z.object({
@@ -115,10 +130,27 @@ const passwordFormSchema = z.object({
   path: ["confirmPassword"],
 });
 
+// Schema de validação para dependentes
+const dependentSchema = z.object({
+  fullName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+  cpf: z.string().regex(/^\d{11}$/, 'CPF deve ter exatamente 11 dígitos'),
+  relationship: z.string().optional(),
+  birthDate: z.string().optional(),
+});
+
 type PatientProfileFormValues = z.infer<typeof patientProfileSchema>;
 type DoctorProfileFormValues = z.infer<typeof doctorProfileSchema>;
 type PartnerProfileFormValues = z.infer<typeof partnerProfileSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
+type DependentFormValues = z.infer<typeof dependentSchema>;
+
+interface Dependent {
+  id: number;
+  fullName: string;
+  cpf: string;
+  relationship?: string;
+  birthDate?: string;
+}
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -157,9 +189,21 @@ const Profile: React.FC = () => {
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Use o hook para garantir dados frescos do usuário
   const { refreshUserData } = useFreshUserData();
+  
+  // Form para dependentes
+  const dependentForm = useForm<DependentFormValues>({
+    resolver: zodResolver(dependentSchema),
+    defaultValues: {
+      fullName: '',
+      cpf: '',
+      relationship: '',
+      birthDate: '',
+    },
+  });
   
   // Fetch user profile data with optimized cache settings
   const { data: profileData, isLoading: profileLoading } = useQuery({
@@ -212,6 +256,16 @@ const Profile: React.FC = () => {
     cacheTime: 3 * 60 * 1000, // 3 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+  });
+  
+  // Query para buscar dependentes
+  const { data: dependents = [], isLoading: dependentsLoading } = useQuery<Dependent[]>({
+    queryKey: ['/api/dependents'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/dependents');
+      return response.json();
+    },
+    enabled: !!user?.id && user?.role === "patient" && user?.subscriptionPlan?.includes('_family'),
   });
   
   // Patient profile form
@@ -498,6 +552,33 @@ const Profile: React.FC = () => {
       setIsChangingPassword(false);
     },
   });
+  
+  // Mutation para criar dependente
+  const createDependentMutation = useMutation({
+    mutationFn: (data: DependentFormValues) => {
+      const cleanData = {
+        ...data,
+        cpf: data.cpf.replace(/\D/g, ''),
+      };
+      return apiRequest('POST', '/api/dependents', cleanData).then(res => res.json());
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Sucesso!',
+        description: 'Dependente adicionado com sucesso.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/dependents'] });
+      dependentForm.reset();
+      setIsDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro',
+        description: error?.message || 'Erro ao adicionar dependente.',
+        variant: 'destructive',
+      });
+    },
+  });
 
   // Handle patient profile form submission
   const onPatientSubmit = async (data: PatientProfileFormValues) => {
@@ -720,6 +801,11 @@ const Profile: React.FC = () => {
     }
   };
   
+  // Handle dependent form submission
+  const onDependentSubmit = (data: DependentFormValues) => {
+    createDependentMutation.mutate(data);
+  };
+  
   // Handle password form submission
   const onPasswordSubmit = async (data: PasswordFormValues) => {
     setIsChangingPassword(true);
@@ -934,6 +1020,12 @@ const Profile: React.FC = () => {
     }
   };
   
+  // Função para formatar CPF
+  const formatCpf = (cpf: string) => {
+    const cleaned = cpf.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  };
+  
 
   if (profileLoading || (user?.role === "partner" && partnerLoading) || (user?.role === "doctor" && doctorLoading)) {
     return (
@@ -967,11 +1059,17 @@ const Profile: React.FC = () => {
         </div>
         
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className={`grid w-full ${user?.role === "patient" && user?.subscriptionPlan?.includes('_family') ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <TabsTrigger value="profile">
               <User className="h-4 w-4 mr-2" />
               Perfil
             </TabsTrigger>
+            {user?.role === "patient" && user?.subscriptionPlan?.includes('_family') && (
+              <TabsTrigger value="dependents">
+                <Users className="h-4 w-4 mr-2" />
+                Dependentes
+              </TabsTrigger>
+            )}
             <TabsTrigger value="security">
               <Lock className="h-4 w-4 mr-2" />
               Segurança
@@ -1679,6 +1777,223 @@ const Profile: React.FC = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          
+          {/* Aba de Dependentes - apenas para pacientes com plano familiar */}
+          {user?.role === "patient" && user?.subscriptionPlan?.includes('_family') && (
+            <TabsContent value="dependents">
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <div>
+                      <CardTitle>Dependentes do Plano Familiar</CardTitle>
+                      <CardDescription>
+                        Gerencie até 3 dependentes no seu plano familiar
+                      </CardDescription>
+                    </div>
+                    
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          disabled={dependents.length >= 3}
+                          size="sm"
+                        >
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Adicionar Dependente
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Adicionar Novo Dependente</DialogTitle>
+                          <DialogDescription>
+                            Cadastre um dependente no seu plano familiar.
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <Form {...dependentForm}>
+                          <form onSubmit={dependentForm.handleSubmit(onDependentSubmit)} className="space-y-4">
+                            <FormField
+                              control={dependentForm.control}
+                              name="fullName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Nome Completo *</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Digite o nome completo"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={dependentForm.control}
+                              name="cpf"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>CPF *</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Digite apenas números"
+                                      maxLength={11}
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={dependentForm.control}
+                              name="relationship"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Parentesco</FormLabel>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o parentesco" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="pai">Pai</SelectItem>
+                                      <SelectItem value="mae">Mãe</SelectItem>
+                                      <SelectItem value="filho">Filho(a)</SelectItem>
+                                      <SelectItem value="conjuge">Cônjuge</SelectItem>
+                                      <SelectItem value="outro">Outro</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                              control={dependentForm.control}
+                              name="birthDate"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Data de Nascimento</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="date"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <div className="flex gap-2 pt-4">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsDialogOpen(false)}
+                                className="flex-1"
+                              >
+                                Cancelar
+                              </Button>
+                              <Button
+                                type="submit"
+                                disabled={createDependentMutation.isPending}
+                                className="flex-1"
+                              >
+                                {createDependentMutation.isPending ? 'Salvando...' : 'Adicionar'}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  {/* Alert sobre limite */}
+                  {dependents.length >= 3 && (
+                    <Alert className="mb-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Você atingiu o limite máximo de 3 dependentes para planos familiares.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {/* Lista de dependentes */}
+                  {dependentsLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-20 bg-gray-200 rounded"></div>
+                      <div className="h-20 bg-gray-200 rounded"></div>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                      {dependents.length === 0 ? (
+                        <div className="lg:col-span-2 text-center py-12">
+                          <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                            Nenhum dependente cadastrado
+                          </h3>
+                          <p className="text-gray-600">
+                            Comece adicionando seu primeiro dependente ao plano familiar.
+                          </p>
+                        </div>
+                      ) : (
+                        dependents.map((dependent) => (
+                          <Card key={dependent.id} className="hover:shadow-md transition-shadow">
+                            <CardHeader className="pb-3">
+                              <div className="flex justify-between items-start">
+                                <div className="space-y-1">
+                                  <CardTitle className="text-lg font-semibold">
+                                    {dependent.fullName}
+                                  </CardTitle>
+                                  <p className="text-sm text-gray-600">
+                                    <strong>CPF:</strong> {formatCpf(dependent.cpf)}
+                                  </p>
+                                  {dependent.relationship && (
+                                    <p className="text-sm text-gray-600">
+                                      <strong>Parentesco:</strong> {dependent.relationship}
+                                    </p>
+                                  )}
+                                  {dependent.birthDate && (
+                                    <p className="text-sm text-gray-600">
+                                      <strong>Data de nascimento:</strong> {new Date(dependent.birthDate).toLocaleDateString('pt-BR')}
+                                    </p>
+                                  )}
+                                </div>
+                                <Badge variant="secondary">
+                                  Dependente
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                          </Card>
+                        ))
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Informações do plano */}
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Informações do Plano Familiar</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm text-gray-600 space-y-2">
+                      <p>• Você pode adicionar até 3 dependentes no seu plano familiar</p>
+                      <p>• Os dependentes têm acesso aos mesmos benefícios do seu plano</p>
+                      <p>• Dependentes utilizados: {dependents.length}/3</p>
+                      <p className="text-amber-600">• Para remover dependentes, entre em contato com o suporte</p>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
           
           <TabsContent value="security">
             <Card>
