@@ -70,5 +70,5 @@ server-working.js
 public/uploads/
 
 # Capacitor
-ios/
-android/
+# ios/
+# android/
