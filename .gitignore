@@ -47,10 +47,6 @@ Thumbs.db
 .cache/
 .next/
 
-# Uploads
-server/uploads/*
-!server/uploads/.gitkeep
-
 # Server logs
 *.log
 server-*.log
@@ -67,7 +63,12 @@ test-*.cjs
 server-fixed.js
 server-simple.js
 server-working.js
-public/uploads/
+
+# Uploads (ignorar arquivos mas manter estrutura de pastas)
+public/uploads/*
+!public/uploads/.gitkeep
+!public/uploads/*/
+!public/uploads/*/.gitkeep
 
 # Capacitor
 # ios/
