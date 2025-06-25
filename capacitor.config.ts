@@ -6,10 +6,10 @@ const config: CapacitorConfig = {
   webDir: 'dist/client',
   version: '1.0.0',
   server: {
-    // Para desenvolvimento, apontar para o servidor local
-    // Remover ou comentar para produção
-    // url: 'http://localhost:5173',
-    cleartext: true
+    // Configuração para carregar o app do servidor remoto
+    url: 'https://cnvidas.onrender.com',
+    cleartext: true,
+    allowNavigation: ['https://cnvidas.onrender.com']
   },
   plugins: {
     PushNotifications: {
@@ -19,7 +19,9 @@ const config: CapacitorConfig = {
   ios: {
     // Configurações específicas do iOS
     contentInset: 'never',
-    backgroundColor: '#eff6ff'
+    backgroundColor: '#eff6ff',
+    limitsNavigationsToAppBoundDomains: false,
+    allowsLinkPreview: false
   }
 };
 
