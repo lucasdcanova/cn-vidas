@@ -70,7 +70,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       // Fazer a requisição com todas as configurações necessárias
-      const res = await fetch("/api/user", {
+      const apiBaseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+        ? '' 
+        : 'https://cnvidas.onrender.com';
+      
+      const res = await fetch(`${apiBaseUrl}/api/user`, {
         method: 'GET',
         credentials: "include", // Importante: inclui cookies na requisição
         headers,

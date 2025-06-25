@@ -55,7 +55,11 @@ export async function apiRequest(
       }
     }
     
-    const res = await fetch(API_BASE_URL + url, {
+    // Para iOS, garantir que estamos usando a URL completa
+    const fullUrl = API_BASE_URL + url;
+    console.log(`Full API URL: ${fullUrl}`);
+    
+    const res = await fetch(fullUrl, {
       method,
       headers,
       body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
@@ -119,7 +123,11 @@ export const getQueryFn: <T>(options: {
         headers["Authorization"] = `Bearer ${authToken}`;
       }
       
-      const res = await fetch(API_BASE_URL + endpoint, {
+      // Para iOS, garantir que estamos usando a URL completa
+      const fullUrl = API_BASE_URL + endpoint;
+      console.log(`Full Query URL: ${fullUrl}`);
+      
+      const res = await fetch(fullUrl, {
         method: 'GET',
         credentials: "include",
         headers,
