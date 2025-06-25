@@ -2,8 +2,8 @@ import express from 'express';
 import { PKPass } from 'passkit-generator';
 import path from 'path';
 import fs from 'fs/promises';
-import { requireAuth } from '../middleware/auth-middleware';
-import { User } from '@prisma/client';
+import { requireAuth } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -57,9 +57,13 @@ const planDisplayNames: { [key: string]: string } = {
 };
 
 // Gerar Apple Wallet Pass
-router.post('/generate-pass', requireAuth, async (req, res) => {
+router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res) => {
   try {
-    const user = req.user as User;
+    if (!req.user) {
+      return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+    
+    const user = req.user;
     const { planName, qrCode } = req.body;
 
     // Configurar cores do plano
@@ -87,8 +91,18 @@ router.post('/generate-pass', requireAuth, async (req, res) => {
     }
 
     // Criar o pass
-    const pass = new PKPass({
-      'pass.json': {
+    const pass = new PKPass({}, {
+      wwdr: await fs.readFile(wwdrPath),
+      signerCert: await fs.readFile(signerCertPath),
+      signerKey: {
+        keyFile: await fs.readFile(signerKeyPath),
+        passphrase: process.env.APPLE_PASS_KEY_PASSWORD || ''
+      }
+    });
+    
+    // Definir dados do pass
+    pass.type = 'generic';
+    pass.props = {
         passTypeIdentifier: process.env.APPLE_PASS_TYPE_ID || 'pass.com.cnvidas.membership',
         teamIdentifier: process.env.APPLE_TEAM_ID || 'YOUR_TEAM_ID',
         organizationName: 'CN Vidas',
@@ -105,7 +119,7 @@ router.post('/generate-pass', requireAuth, async (req, res) => {
             {
               key: 'member',
               label: 'MEMBRO',
-              value: user.fullName || user.username
+              value: user.fullName || user.email
             }
           ],
           secondaryFields: [
