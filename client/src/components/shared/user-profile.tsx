@@ -5,6 +5,7 @@ import { LogOut, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlanIndicator, getPlanColor } from "./plan-indicator";
 import { UserData, UserRole } from "@/shared/types";
+import { useLocation } from "wouter";
 
 interface UserProfileProps {
   user: UserData | null;
@@ -13,6 +14,7 @@ interface UserProfileProps {
 
 export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false }) => {
   const { logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
   
   if (!user) {
     return null;
@@ -92,12 +94,17 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
   
   if (compact) {
     return (
-      <Button variant="ghost" size="icon" className="ml-2 rounded-full glass-card-subtle hover:bg-white/50 p-0 h-9 w-9 transition-all duration-300">
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="ml-2 rounded-full glass-card-subtle hover:bg-white/70 hover:scale-110 p-0 h-9 w-9 transition-all duration-300 ease-out cursor-pointer"
+        onClick={() => setLocation('/profile')}
+      >
         <div className="relative h-full w-full">
           {user.subscriptionPlan && user.subscriptionPlan !== "free" && (
-            <div className={`absolute -inset-0.5 rounded-full bg-gradient-to-r ${planColors.gradient} opacity-90 blur-[1px]`}></div>
+            <div className={`absolute -inset-0.5 rounded-full bg-gradient-to-r ${planColors.gradient} opacity-90 blur-[1px] transition-all duration-300`}></div>
           )}
-          <Avatar className={`relative h-full w-full ${user.subscriptionPlan && user.subscriptionPlan !== "free" ? "" : "ring-2 ring-white/40"} shadow-sm`}>
+          <Avatar className={`relative h-full w-full ${user.subscriptionPlan && user.subscriptionPlan !== "free" ? "" : "ring-2 ring-white/40"} shadow-sm transition-all duration-300`}>
             {profileImageUrl ? (
               <AvatarImage 
                 src={profileImageUrl} 
@@ -109,7 +116,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
             </AvatarFallback>
           </Avatar>
           {user.subscriptionPlan && user.subscriptionPlan !== "free" && (
-            <div className="absolute -bottom-1 -right-1">
+            <div className="absolute -bottom-1 -right-1 transition-all duration-300">
               <PlanIndicator plan={user.subscriptionPlan} variant="icon" size="sm" />
             </div>
           )}

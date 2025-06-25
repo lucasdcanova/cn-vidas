@@ -118,10 +118,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               className="h-9 w-auto" 
             />
             
-            {/* Plano do usuário */}
-            {user?.subscriptionPlan && user.subscriptionPlan !== "free" && (
-              <PlanIndicator plan={user.subscriptionPlan} size="sm" variant="badge" />
-            )}
             
             {/* Close button on mobile */}
             <button 
@@ -159,9 +155,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   alt="CN Vidas" 
                   className="h-8 w-auto" 
                 />
-                {user?.subscriptionPlan && user.subscriptionPlan !== "free" && (
-                  <PlanIndicator plan={user.subscriptionPlan} size="sm" variant="badge" />
-                )}
               </div>
             </div>
             <div className="flex items-center">
@@ -172,40 +165,35 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <div className="hidden md:flex items-center justify-between px-6 py-4">
             <div className="flex-1 flex items-center gap-3">
               <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
-              {user?.subscriptionPlan && user.subscriptionPlan !== "free" && (
-                <div className="flex items-center">
-                  <div className={`h-2 w-2 rounded-full mr-1.5 ${getPlanColor(user.subscriptionPlan).bg}`}></div>
-                  <PlanIndicator plan={user.subscriptionPlan} size="sm" variant="text" className="text-sm" />
-                </div>
-              )}
             </div>
-            <div className="flex items-center ml-4 space-x-2">
-              {/* Exibir ícones apenas para pacientes */}
+            <div className="flex items-center ml-4 space-x-3">
+              {/* Link para Configurações */}
+              <Link to={user?.role === "doctor" ? "/doctor/settings" : "/settings"}>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-all duration-300 ease-out"
+                >
+                  <Settings className="h-5 w-5 text-gray-700" />
+                </Button>
+              </Link>
+              
+              {/* Link para Ajuda - apenas para pacientes */}
               {user?.role === "patient" && (
-                <>
-                  {/* Link para Ajuda */}
-                  <Link to="/help">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full glass-card-subtle hover:bg-white/80 transition-all duration-200"
-                    >
-                      <HelpCircle className="h-5 w-5 text-gray-700" />
-                    </Button>
-                  </Link>
-                  
-                  {/* Link para Configurações */}
-                  <Link to="/settings">
-                    <Button variant="ghost" size="icon" className="rounded-full glass-card-subtle hover:bg-white/80 transition-all duration-200">
-                      <Settings className="h-5 w-5 text-gray-700" />
-                    </Button>
-                  </Link>
-                  
-                  <div className="ml-4 h-8 w-px bg-gray-200"></div>
-                </>
+                <Link to="/help">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-all duration-300 ease-out"
+                  >
+                    <HelpCircle className="h-5 w-5 text-gray-700" />
+                  </Button>
+                </Link>
               )}
               
-              <div className={user?.role === "doctor" ? "" : "ml-4"}>
+              {/* Foto do perfil com separador */}
+              <div className="flex items-center">
+                <div className="h-8 w-px bg-gray-200 mr-4"></div>
                 <UserProfile user={userWithProfileImage} compact />
               </div>
             </div>
