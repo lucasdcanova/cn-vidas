@@ -92,9 +92,14 @@ yarn lint
 3. Testar funcionalidades afetadas
 4. Verificar console por erros
 
-## Sincronização automática com iOS
+## Sincronização com iOS
 
-O projeto está configurado para sincronizar automaticamente com o iOS após cada commit usando um hook post-commit do Husky.
+Para fazer push e sincronizar automaticamente com o iOS, use:
+```bash
+./push-and-sync.sh
+```
+
+Este script faz o push para o GitHub e, se bem-sucedido, executa a sincronização com o iOS automaticamente.
 
 ## Notas de desenvolvimento
 
