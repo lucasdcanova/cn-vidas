@@ -36,9 +36,9 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
   };
 
   const sectionTitleClass = "text-xs font-semibold text-primary/70 uppercase tracking-wider mb-3 mt-6 px-4";
-  const linkBaseClass = "flex items-center px-4 py-2.5 text-sm font-medium rounded-lg my-1 transition-all duration-200";
-  const linkActiveClass = "bg-white/50 text-primary shadow-sm backdrop-blur-sm border border-white/20";
-  const linkInactiveClass = "text-gray-600 hover:bg-white/30 hover:text-primary/90";
+  const linkBaseClass = "flex items-center px-4 py-2.5 text-sm font-medium rounded-lg my-1 transition-all duration-300 ease-out transform-gpu";
+  const linkActiveClass = "bg-white/50 text-primary shadow-sm backdrop-blur-sm border border-white/20 scale-[1.02]";
+  const linkInactiveClass = "text-gray-600 hover:bg-white/30 hover:text-primary/90 hover:scale-[1.01] active:scale-[0.99]";
 
   return (
     <nav className="flex-1 overflow-y-auto py-6 px-3">
@@ -286,16 +286,6 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
         
         <div className="mt-auto">
           <p className={sectionTitleClass}>Conta</p>
-          
-          <Link href="/profile" 
-            className={`${linkBaseClass} ${
-              isLinkActive("/profile") 
-                ? linkActiveClass 
-                : linkInactiveClass
-            }`}>
-              <User className="w-5 h-5 mr-3" />
-              Perfil
-          </Link>
           
           {/* Planos disponível apenas para pacientes */}
           {userRole === "patient" && (
