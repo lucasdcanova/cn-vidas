@@ -112,6 +112,7 @@ Este script faz o push para o GitHub e, se bem-sucedido, executa a sincronizaç�
 ## Memórias de Desenvolvimento
 
 - sempre sincronizar o ios apos um push
+- lembre dos certificados antes de pedirmos a publicacao na app store
 
 ## Deploy
 
@@ -119,5 +120,3 @@ O projeto está configurado para deploy automático no Render:
 - **URL de produção**: https://cnvidas.onrender.com
 - **Deploy automático**: Após cada `git push` para a branch `main`
 - **Configuração**: Definida no arquivo `render.yaml`
-
-[... restante do conteúdo original permanece inalterado ...]

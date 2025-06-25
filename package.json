@@ -104,6 +104,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.9",
     "openai": "^4.24.1",
+    "passkit-generator": "^3.4.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "postcss": "^8.4.33",

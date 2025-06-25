@@ -40,6 +40,7 @@ import emergencyAvailabilityRouter from './emergency-availability';
 import cleanupRouter from './cleanup-notifications';
 import prescriptionRouter from './prescription-routes';
 import pushNotificationsRouter from './push-notifications-routes';
+import walletRouter from './wallet-routes';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -282,6 +283,10 @@ export default async function setupRoutes(app: express.Express) {
   // Rotas de prescrições médicas
   console.log('Registrando prescriptionRouter em /api/prescriptions');
   app.use('/api/prescriptions', prescriptionRouter);
+  
+  // Rotas do Apple Wallet
+  console.log('Registrando walletRouter em /api/wallet');
+  app.use('/api/wallet', walletRouter);
   
   // Rotas de manutenção
   app.use('/api/admin', cleanupRouter);

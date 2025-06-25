@@ -150,22 +150,61 @@ class WalletPassService {
   // Fazer download do pass
   async downloadPass(passData: WalletPassData): Promise<boolean> {
     try {
-      // Por enquanto, vamos criar um arquivo .pkpass simulado
-      // Em produção, isso seria gerado no servidor com certificados da Apple
-      
-      if (this.isNative) {
-        // No iOS, mostrar alerta informativo
-        alert('Funcionalidade de Wallet em desenvolvimento.\n\nEm breve você poderá adicionar seu cartão CN Vidas à Wallet do iPhone!');
-      } else {
-        // No navegador, mostrar instruções
-        alert('Para adicionar à Wallet:\n\n1. Acesse pelo seu iPhone\n2. Toque em "Ver QR Code"\n3. Toque em "Adicionar à Wallet"');
+      // Fazer chamada para o servidor para gerar o .pkpass
+      const response = await fetch('/api/wallet/generate-pass', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Auth-Token': localStorage.getItem('authToken') || ''
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          planName: passData.planName,
+          qrCode: passData.qrCode
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao gerar pass');
       }
+
+      // Baixar o arquivo .pkpass
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      // No iOS, o Safari abrirá automaticamente o arquivo .pkpass
+      if (this.isNative) {
+        window.location.href = url;
+      } else {
+        // No navegador desktop, fazer download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cnvidas-${passData.userId}.pkpass`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      
+      // Limpar URL temporária
+      setTimeout(() => URL.revokeObjectURL(url), 100);
       
       return true;
     } catch (error) {
       console.error('Erro ao gerar wallet pass:', error);
-      return false;
+      throw error;
     }
+  }
+
+  // Verificar se Wallet está disponível
+  isAvailable(): boolean {
+    // Wallet está disponível apenas no iOS
+    return this.isNative && Capacitor.getPlatform() === 'ios';
+  }
+
+  // Adicionar à Wallet (método principal)
+  async addToWallet(data: WalletPassData): Promise<boolean> {
+    return this.downloadPass(data);
   }
 }
 
