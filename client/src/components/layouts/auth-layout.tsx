@@ -17,45 +17,45 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   }, []);
   
   return (
-    <div className="min-h-screen flex flex-col bg-blue-50 relative">
-      {/* Spacer para empurrar conteúdo para baixo quando teclado não está ativo */}
-      {!isKeyboardVisible && <div className="flex-1" />}
-      
-      {/* Header com logo - ajusta tamanho e posição com animação */}
-      <div 
-        className={`flex items-center justify-center transition-all ease-out ${
-          isKeyboardVisible ? 'h-12 duration-150' : 'h-32 duration-200'
-        }`}
-        style={{ 
-          marginTop: isKeyboardVisible ? '10px' : '0',
-          transform: `translateY(${isKeyboardVisible ? '0' : '-20px'})`,
-          willChange: 'transform, height',
-          opacity: isKeyboardVisible ? 0.7 : 1
-        }}
-      >
-        <img 
-          src={cnvidasLogo} 
-          alt="CN Vidas" 
-          className={`w-auto transition-all ease-out ${
-            isKeyboardVisible ? 'h-10 duration-150' : 'h-24 duration-200'
+    <div className="fixed inset-0 bg-blue-50 overflow-hidden">
+      <div className="min-h-screen flex flex-col relative">
+        {/* Spacer para empurrar conteúdo para baixo quando teclado não está ativo */}
+        {!isKeyboardVisible && <div className="flex-1" style={{ minHeight: '15vh' }} />}
+        
+        {/* Header com logo - ajusta tamanho e posição com animação */}
+        <div 
+          className={`flex items-center justify-center transition-all ease-out ${
+            isKeyboardVisible ? 'h-12 duration-150' : 'h-20 duration-200'
           }`}
-          style={{ willChange: 'height' }}
-        />
-      </div>
-      
-      {/* Container principal com altura dinâmica */}
-      <div 
-        className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out"
-        style={{ 
-          height: isKeyboardVisible 
-            ? `calc(100vh - ${keyboardHeight}px - 120px)` 
-            : '55vh',
-          marginBottom: '0',
-          transform: isKeyboardVisible ? `translateY(-${Math.min(keyboardHeight * 0.3, 100)}px)` : 'translateY(0)',
-          transitionDuration: isKeyboardVisible ? '150ms' : '200ms',
-          willChange: 'height, transform'
-        }}
-      >
+          style={{ 
+            marginTop: isKeyboardVisible ? '10px' : '40px',
+            willChange: 'height',
+            opacity: isKeyboardVisible ? 0.7 : 1
+          }}
+        >
+          <img 
+            src={cnvidasLogo} 
+            alt="CN Vidas" 
+            className={`w-auto transition-all ease-out ${
+              isKeyboardVisible ? 'h-10 duration-150' : 'h-16 duration-200'
+            }`}
+            style={{ willChange: 'height' }}
+          />
+        </div>
+        
+        {/* Container principal com altura dinâmica */}
+        <div 
+          className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out mt-8"
+          style={{ 
+            height: isKeyboardVisible 
+              ? `calc(100vh - ${keyboardHeight}px - 120px)` 
+              : '58vh',
+            marginBottom: '0',
+            transform: isKeyboardVisible ? `translateY(-${Math.min(keyboardHeight * 0.25, 80)}px)` : 'translateY(0)',
+            transitionDuration: isKeyboardVisible ? '150ms' : '200ms',
+            willChange: 'height, transform'
+          }}
+        >
         {/* Background gradient blobs */}
         <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-400 opacity-10 rounded-full filter blur-3xl"></div>
         <div className="absolute bottom-20 -right-20 w-80 h-80 bg-green-400 opacity-10 rounded-full filter blur-3xl"></div>
@@ -73,6 +73,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };
