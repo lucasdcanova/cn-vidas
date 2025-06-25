@@ -1,5 +1,6 @@
 import { storage } from '../storage';
 import { InsertNotification } from '../interfaces/notification';
+import { pushNotificationService } from '../services/push-notification-service';
 
 export class NotificationService {
   
@@ -21,6 +22,13 @@ export class NotificationService {
       
       await storage.createNotification(notification);
       console.log('✅ Notificação de consulta criada para usuário:', userId);
+      
+      // Enviar push notification
+      await pushNotificationService.sendToUser(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: { type: 'appointment', appointmentId },
+      });
     } catch (error) {
       console.error('❌ Erro ao criar notificação de consulta:', error);
     }
@@ -42,6 +50,13 @@ export class NotificationService {
       
       await storage.createNotification(notification);
       console.log('✅ Notificação de consulta concluída criada para usuário:', userId);
+      
+      // Enviar push notification
+      await pushNotificationService.sendToUser(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: { type: 'appointment_completed', appointmentId },
+      });
     } catch (error) {
       console.error('❌ Erro ao criar notificação de consulta concluída:', error);
     }
@@ -98,6 +113,18 @@ export class NotificationService {
         try {
           await storage.createNotification(notification);
           notifications.push(notification);
+          
+          // Enviar push notification de emergência
+          await pushNotificationService.sendToUser(doctor.userId, {
+            title: '🚨 Consulta de Emergência',
+            body: `Paciente ${patientName} está aguardando atendimento urgente!`,
+            data: { 
+              type: 'emergency', 
+              appointmentId,
+              priority: 'high'
+            },
+            sound: 'emergency.wav',
+          });
         } catch (err) {
           console.error(`❌ Erro ao criar notificação para médico ${doctor.id}:`, err);
         }

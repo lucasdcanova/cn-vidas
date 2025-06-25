@@ -28,6 +28,9 @@ pool.on('error', (err) => {
 // Inicialização da instância Drizzle
 export const db = drizzle(pool, { schema });
 
+// Re-exportar schemas necessários
+export { deviceTokens } from '../db/schema/device-tokens';
+
 // Função auxiliar para garantir que o pool está funcionando
 export const testConnection = async () => {
   try {

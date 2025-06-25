@@ -9,11 +9,14 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { getUserSubscription } from "@/lib/api";
 import { apiRequest } from "@/lib/queryClient";
+import { NotificationPermissionModal } from "@/components/NotificationPermissionModal";
+import { isNativeApp } from "@/utils/platform";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [isFirstLogin, setIsFirstLogin] = useState<boolean | null>(null);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const queryClient = useQueryClient();
   
   // Invalidar cache da assinatura quando o componente montar
@@ -21,6 +24,18 @@ const Dashboard: React.FC = () => {
     if (user?.role === "patient") {
       console.log("🔄 Dashboard montado - invalidando cache de assinatura");
       queryClient.invalidateQueries({ queryKey: ["/api/subscription/current"] });
+    }
+    
+    // Verificar se deve mostrar modal de notificações
+    if (isNativeApp() && user) {
+      const skippedTime = localStorage.getItem('notificationPermissionSkipped');
+      const hasAsked = localStorage.getItem('notificationPermissionAsked');
+      
+      // Se nunca perguntou, ou se passou mais de 7 dias desde que pulou
+      if (!hasAsked || (skippedTime && Date.now() - parseInt(skippedTime) > 7 * 24 * 60 * 60 * 1000)) {
+        setShowNotificationModal(true);
+        localStorage.setItem('notificationPermissionAsked', 'true');
+      }
     }
   }, []); // Executar apenas na montagem
   
@@ -111,6 +126,10 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardLayout title="Dashboard">
       {renderDashboard()}
+      <NotificationPermissionModal 
+        isOpen={showNotificationModal}
+        onClose={() => setShowNotificationModal(false)}
+      />
     </DashboardLayout>
   );
 };

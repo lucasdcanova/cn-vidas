@@ -39,6 +39,7 @@ import paymentHistoryRouter from './payment-history-routes';
 import emergencyAvailabilityRouter from './emergency-availability';
 import cleanupRouter from './cleanup-notifications';
 import prescriptionRouter from './prescription-routes';
+import pushNotificationsRouter from './push-notifications-routes';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -265,6 +266,10 @@ export default async function setupRoutes(app: express.Express) {
   // Rotas de prontuários médicos
   console.log('Registrando medicalRecordsRouter em /api/medical-records');
   app.use('/api/medical-records', medicalRecordsRouter);
+  
+  // Rotas de push notifications
+  console.log('Registrando pushNotificationsRouter em /api/push-notifications');
+  app.use('/api/push-notifications', pushNotificationsRouter);
   
   // Rotas de prontuários médicos com IA
   console.log('Registrando medicalRecordsAIRouter em /api/medical-records-ai');

@@ -1,0 +1,18 @@
+{
+  "iconBackgroundColor": "#ffffff",
+  "iconBackgroundColorDark": "#222222",
+  "splashBackgroundColor": "#ffffff",
+  "splashBackgroundColorDark": "#222222",
+  "platforms": {
+    "ios": {
+      "icon": {
+        "source": "resources/icon.png",
+        "target": "ios/App/App/Assets.xcassets/AppIcon.appiconset"
+      },
+      "splash": {
+        "source": "resources/splash.png",
+        "target": "ios/App/App/Assets.xcassets/Splash.imageset"
+      }
+    }
+  }
+}

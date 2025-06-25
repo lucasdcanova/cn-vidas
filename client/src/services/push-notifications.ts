@@ -85,12 +85,43 @@ export class PushNotificationService {
       
       // Navegar para a tela apropriada baseado nos dados da notificação
       const data = notification.notification.data;
-      if (data?.type === 'appointment') {
-        // Navegar para consulta
-        window.location.href = `/appointment/${data.appointmentId}`;
-      } else if (data?.type === 'emergency') {
-        // Navegar para emergência
-        window.location.href = '/emergency';
+      
+      // Deep linking baseado no tipo de notificação
+      switch (data?.type) {
+        case 'appointment':
+        case 'appointment_reminder':
+        case 'appointment_confirmed':
+          // Navegar para detalhes da consulta
+          window.location.href = `/telemedicine`;
+          break;
+          
+        case 'appointment_completed':
+          // Navegar para histórico de consultas
+          window.location.href = `/telemedicine`;
+          break;
+          
+        case 'emergency':
+          // Navegar para sala de emergência
+          if (data.appointmentId) {
+            window.location.href = `/emergency-room/${data.appointmentId}`;
+          } else {
+            window.location.href = '/telemedicine-emergency';
+          }
+          break;
+          
+        case 'prescription':
+          // Navegar para prescrições
+          window.location.href = '/prescriptions';
+          break;
+          
+        case 'medical_record':
+          // Navegar para prontuário
+          window.location.href = '/medical-records';
+          break;
+          
+        default:
+          // Navegar para dashboard por padrão
+          window.location.href = '/dashboard';
       }
     });
   }
