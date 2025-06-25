@@ -4,6 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.cnvidas.app',
   appName: 'CN Vidas',
   webDir: 'dist/client',
+  version: '1.0.0',
   server: {
     // Para desenvolvimento, apontar para o servidor local
     // Remover ou comentar para produção
