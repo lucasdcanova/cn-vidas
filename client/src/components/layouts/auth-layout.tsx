@@ -48,7 +48,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         <div 
           className="rounded-t-3xl flex flex-col relative z-10 flex-1 min-h-0"
           style={{ 
-            paddingBottom: 'env(safe-area-inset-bottom)',
+            paddingBottom: isKeyboardVisible ? '0' : 'env(safe-area-inset-bottom)',
             background: isKeyboardVisible ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
@@ -66,11 +66,11 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
           </div>
           
           {/* Copyright */}
-          <div className={`text-center py-4 text-gray-500 text-xs border-t border-gray-100/30 shrink-0 transition-opacity duration-300 ${
-            isKeyboardVisible ? 'opacity-0' : 'opacity-100'
-          }`}>
-            &copy; {new Date().getFullYear()} CN Vidas. Todos os direitos reservados.
-          </div>
+          {!isKeyboardVisible && (
+            <div className="text-center py-4 text-gray-500 text-xs border-t border-gray-100/30 shrink-0">
+              &copy; {new Date().getFullYear()} CN Vidas. Todos os direitos reservados.
+            </div>
+          )}
         </div>
       </div>
     </div>
