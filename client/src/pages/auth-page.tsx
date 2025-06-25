@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useIOSKeyboard } from "@/hooks/use-ios-keyboard";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -200,6 +201,7 @@ const AuthPage: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [estadoSelecionado, setEstadoSelecionado] = useState("SP");
   const [, navigate] = useLocation();
+  const { isKeyboardVisible } = useIOSKeyboard();
   
   // Redirect if already authenticated with role-based routing
   useEffect(() => {
@@ -345,7 +347,9 @@ const AuthPage: React.FC = () => {
   
   return (
     <AuthLayout>
-      <div className="flex-1 flex flex-col max-w-xl mx-auto w-full px-6 py-6">
+      <div className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-6 ${
+        isKeyboardVisible ? 'py-2' : 'py-6'
+      } overflow-y-auto auth-form-container`}>
         <Tabs defaultValue="register" className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-2 mb-4 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg">
             <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">

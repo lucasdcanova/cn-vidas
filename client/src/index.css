@@ -195,6 +195,14 @@
     overflow-x: hidden;
   }
   
+  /* iOS safe area handling - apply to root element instead of body */
+  #root {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    min-height: 100vh;
+  }
+  
   /* Smooth scrolling for all elements */
   * {
     -webkit-overflow-scrolling: touch;
@@ -369,6 +377,21 @@
     button:active, a:active, [role="button"]:active {
       opacity: 0.8;
       transition-duration: 0.1s;
+    }
+  }
+  
+  /* iOS keyboard handling for auth page */
+  @supports (-webkit-touch-callout: none) {
+    /* iOS only */
+    .auth-form-container {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    
+    /* Ensure inputs are visible when focused */
+    input:focus, textarea:focus, select:focus {
+      position: relative;
+      z-index: 1;
     }
   }
   
