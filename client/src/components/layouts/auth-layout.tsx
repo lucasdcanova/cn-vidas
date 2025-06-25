@@ -17,53 +17,41 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   }, []);
   
   return (
-    <div className="fixed inset-0 bg-blue-50" style={{ backgroundColor: '#eff6ff' }}>
-      <div className="min-h-screen flex flex-col relative" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="h-screen bg-blue-50" style={{ backgroundColor: '#eff6ff' }}>
+      <div className="h-full flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Logo com posição ajustada */}
-        <div 
-          className={`flex items-center justify-center transition-all ease-out ${
-            isKeyboardVisible ? 'h-0 duration-150 overflow-hidden' : 'h-20 duration-200'
-          }`}
-          style={{ 
-            marginTop: isKeyboardVisible ? '0' : '100px',
-            willChange: 'height',
-            opacity: isKeyboardVisible ? 0 : 1
-          }}
-        >
-          <img 
-            src={cnvidasLogo} 
-            alt="CN Vidas" 
-            className={`w-auto transition-all ease-out ${
-              isKeyboardVisible ? 'h-10 duration-150' : 'h-16 duration-200'
-            }`}
-            style={{ willChange: 'height' }}
-          />
-        </div>
+        {!isKeyboardVisible && (
+          <div 
+            className="flex items-center justify-center h-20"
+            style={{ 
+              marginTop: '100px'
+            }}
+          >
+            <img 
+              src={cnvidasLogo} 
+              alt="CN Vidas" 
+              className="w-auto h-16"
+            />
+          </div>
+        )}
         
         {/* Spacer menor */}
-        <div style={{ height: isKeyboardVisible ? '10px' : '40px' }} className="transition-all duration-200" />
+        {!isKeyboardVisible && (
+          <div style={{ height: '40px' }} />
+        )}
         
-        {/* Container principal com altura dinâmica */}
+        {/* Container principal */}
         <div 
-          className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out flex-1"
+          className="glass-morphism rounded-t-3xl flex flex-col relative z-10 flex-1"
           style={{ 
-            maxHeight: isKeyboardVisible 
-              ? `calc(100vh - ${keyboardHeight}px - 60px - env(safe-area-inset-top))` 
-              : 'none',
-            marginBottom: '0',
-            paddingBottom: 'env(safe-area-inset-bottom)',
-            transform: 'translateY(0)',
-            transitionDuration: isKeyboardVisible ? '150ms' : '200ms',
-            willChange: 'height'
+            paddingBottom: 'env(safe-area-inset-bottom)'
           }}
         >
         {/* Background gradient blobs */}
         <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-400 opacity-10 rounded-full filter blur-3xl"></div>
         <div className="absolute bottom-20 -right-20 w-80 h-80 bg-green-400 opacity-10 rounded-full filter blur-3xl"></div>
         
-        <div className={`flex-1 flex flex-col overflow-y-auto ${
-          isKeyboardVisible ? 'pb-4' : ''
-        }`}>
+        <div className="flex-1 flex flex-col overflow-y-auto">
           {children}
         </div>
         
