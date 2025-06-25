@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -203,6 +203,10 @@ const AuthPage: React.FC = () => {
   const [, navigate] = useLocation();
   const { isKeyboardVisible } = useIOSKeyboard();
   
+  // Refs para os campos de input
+  const emailLoginRef = useRef<HTMLInputElement>(null);
+  const passwordLoginRef = useRef<HTMLInputElement>(null);
+  
   // Redirect if already authenticated with role-based routing
   useEffect(() => {
     if (user) {
@@ -349,8 +353,9 @@ const AuthPage: React.FC = () => {
     <AuthLayout>
       <div className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
         isKeyboardVisible ? 'py-2' : 'py-6'
-      } overflow-y-auto auth-form-container`} style={{
-        maxHeight: isKeyboardVisible ? '100%' : 'auto'
+      } overflow-y-auto`} style={{
+        maxHeight: isKeyboardVisible ? '100%' : 'auto',
+        paddingBottom: isKeyboardVisible ? '0' : undefined
       }}>
         <Tabs defaultValue="register" className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-2 mb-4 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg">
@@ -387,10 +392,21 @@ const AuthPage: React.FC = () => {
                       <FormLabel className="text-gray-700 text-sm">E-mail</FormLabel>
                       <FormControl>
                         <Input 
+                          ref={emailLoginRef}
                           placeholder="seu@email.com" 
                           type="email" 
                           disabled={isLoggingIn}
                           className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          autoComplete="email"
+                          autoCapitalize="off"
+                          autoCorrect="off"
+                          returnKeyType="next"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              passwordLoginRef.current?.focus();
+                            }
+                          }}
                           {...field} 
                         />
                       </FormControl>
@@ -412,10 +428,19 @@ const AuthPage: React.FC = () => {
                       </div>
                       <FormControl>
                         <Input 
+                          ref={passwordLoginRef}
                           placeholder="Sua senha" 
                           type="password"
                           disabled={isLoggingIn}
                           className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          autoComplete="current-password"
+                          returnKeyType="done"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              loginForm.handleSubmit(onLoginSubmit)();
+                            }
+                          }}
                           {...field} 
                         />
                       </FormControl>
