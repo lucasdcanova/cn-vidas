@@ -365,8 +365,8 @@ const AuthPage: React.FC = () => {
         <TabsContent value="login">
           <div className="p-6">
             <div className="mb-6 text-center">
-              <h1 className="text-2xl font-semibold text-gray-800">Bem-vindo de volta</h1>
-              <p className="text-gray-500 mt-2 text-sm">
+              <h1 className="text-xl font-semibold text-gray-800">Bem-vindo de volta</h1>
+              <p className="text-gray-500 mt-2 text-xs">
                 Acesse sua conta para continuar
               </p>
             </div>
@@ -378,7 +378,7 @@ const AuthPage: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">E-mail</FormLabel>
+                      <FormLabel className="text-gray-700 text-sm">E-mail</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="seu@email.com" 
@@ -399,7 +399,7 @@ const AuthPage: React.FC = () => {
                   render={({ field }) => (
                     <FormItem>
                       <div className="flex justify-between items-center">
-                        <FormLabel className="text-gray-700">Senha</FormLabel>
+                        <FormLabel className="text-gray-700 text-sm">Senha</FormLabel>
                         <a href="/esqueci-senha" className="text-xs font-medium text-blue-600 hover:text-blue-700">
                           Esqueceu a senha?
                         </a>
@@ -425,7 +425,7 @@ const AuthPage: React.FC = () => {
                     type="checkbox" 
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="remember-me" className="ml-2 block text-xs text-gray-700">
                     Lembrar-me
                   </label>
                 </div>
@@ -450,8 +450,8 @@ const AuthPage: React.FC = () => {
         <TabsContent value="register">
           <div className="p-6">
             <div className="mb-6 text-center">
-              <h1 className="text-2xl font-semibold text-gray-800">Crie sua conta</h1>
-              <p className="text-gray-500 mt-2 text-sm">
+              <h1 className="text-xl font-semibold text-gray-800">Crie sua conta</h1>
+              <p className="text-gray-500 mt-2 text-xs">
                 Preencha os dados para criar seu perfil na CN Vidas
               </p>
             </div>
@@ -463,7 +463,7 @@ const AuthPage: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">E-mail</FormLabel>
+                      <FormLabel className="text-gray-700 text-sm">E-mail</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="seu@email.com" 
@@ -485,7 +485,7 @@ const AuthPage: React.FC = () => {
                       name="cpf"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700">CPF</FormLabel>
+                          <FormLabel className="text-gray-700 text-sm">CPF</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="000.000.000-00" 
@@ -515,7 +515,7 @@ const AuthPage: React.FC = () => {
                     />
                   ) : registerForm.watch("role") === "doctor" ? (
                     <div className="space-y-2">
-                      <FormLabel className="text-gray-700">Registro no CRM</FormLabel>
+                      <FormLabel className="text-gray-700 text-sm">Registro no CRM</FormLabel>
                       <div className="flex items-center space-x-2">
                         <div className="w-1/3">
                           <Select 
@@ -566,7 +566,7 @@ const AuthPage: React.FC = () => {
                       name="cnpj"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700">CNPJ da Empresa</FormLabel>
+                          <FormLabel className="text-gray-700 text-sm">CNPJ da Empresa</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="00.000.000/0000-00" 
@@ -602,7 +602,7 @@ const AuthPage: React.FC = () => {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700">Nome de usuário</FormLabel>
+                          <FormLabel className="text-gray-700 text-sm">Nome de usuário</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="seunome123" 
@@ -622,7 +622,7 @@ const AuthPage: React.FC = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700">Senha</FormLabel>
+                        <FormLabel className="text-gray-700 text-sm">Senha</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Mínimo de 6 caracteres" 
@@ -643,7 +643,7 @@ const AuthPage: React.FC = () => {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Nome completo</FormLabel>
+                      <FormLabel className="text-gray-700 text-sm">Nome completo</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="Seu Nome Completo" 
@@ -662,7 +662,7 @@ const AuthPage: React.FC = () => {
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Tipo de perfil</FormLabel>
+                      <FormLabel className="text-gray-700 text-sm">Tipo de perfil</FormLabel>
                       <div className="grid grid-cols-3 gap-3 mb-2">
                         <div 
                           className={`flex flex-col items-center p-4 border ${
@@ -675,7 +675,7 @@ const AuthPage: React.FC = () => {
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                          <span className="text-sm font-medium">Paciente</span>
+                          <span className="text-xs font-medium">Paciente</span>
                         </div>
                         
                         <div 
@@ -689,7 +689,7 @@ const AuthPage: React.FC = () => {
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                           </svg>
-                          <span className="text-sm font-medium">Médico</span>
+                          <span className="text-xs font-medium">Médico</span>
                         </div>
                         
                         <div 
@@ -703,7 +703,7 @@ const AuthPage: React.FC = () => {
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
-                          <span className="text-sm font-medium">Empresa</span>
+                          <span className="text-xs font-medium">Empresa</span>
                         </div>
                       </div>
                       <FormMessage />
