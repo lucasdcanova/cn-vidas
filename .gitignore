@@ -72,3 +72,14 @@ public/uploads/
 # Capacitor
 # ios/
 # android/
+
+# Apple Wallet Certificates
+server/wallet/certificates/*.pem
+server/wallet/certificates/*.key
+server/wallet/certificates/*.p12
+server/wallet/certificates/*.cer
+!server/wallet/certificates/README.md
+
+# Apple Wallet Assets (opcional - descomente se quiser ignorar)
+# server/wallet/assets/*.png
+# !server/wallet/assets/README.md
