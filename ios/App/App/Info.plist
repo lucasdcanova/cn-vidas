@@ -45,5 +45,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>CN Vidas precisa acessar a câmera para realizar videochamadas com médicos</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>CN Vidas precisa acessar o microfone para realizar videochamadas com médicos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>CN Vidas precisa acessar suas fotos para enviar documentos médicos</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>CN Vidas precisa salvar imagens de exames e documentos médicos</string>
 </dict>
 </plist>
