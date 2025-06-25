@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { getUpcomingAppointments, getServices, getRecentActivities } from "@/lib/api";
+import { getUpcomingAppointments, getServices, getRecentActivities, generateQrToken } from "@/lib/api";
 import StatusCard from "@/components/shared/status-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,6 +13,8 @@ import { getPlanColor, getPlanName } from "@/components/shared/plan-indicator";
 import { useToast } from "@/hooks/use-toast";
 import { Service, Notification, Partner } from "@/shared/types";
 import logoFallback from "@/assets/logo_cn_vidas_white_bg.svg";
+import { WalletQRCard } from "@/components/dashboard/wallet-qr-card";
+import { Capacitor } from '@capacitor/core';
 
 interface Activity {
   icon: string;
@@ -56,6 +58,14 @@ const getServiceImage = (service: ServiceWithPartner) => {
 export const PatientDashboard: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const isIOS = Capacitor.getPlatform() === 'ios';
+  
+  // Buscar QR Code do usuário
+  const { data: qrData } = useQuery({
+    queryKey: ["/api/users/qr-code"],
+    queryFn: generateQrToken,
+    enabled: !!user && isIOS,
+  });
   
   // Debug: Log user data
   React.useEffect(() => {
@@ -178,6 +188,15 @@ export const PatientDashboard: React.FC = () => {
                   <h1 className="text-3xl font-light text-gray-900">
                     Olá, <span className="font-semibold text-primary bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">{user?.fullName}</span>
                   </h1>
+                  {isIOS && qrData?.qrCode && user && (
+                    <WalletQRCard
+                      userName={user.fullName || user.username || ''}
+                      userEmail={user.email || ''}
+                      userId={user.id}
+                      planType={user.subscriptionPlan || 'basic'}
+                      qrCode={qrData.qrCode}
+                    />
+                  )}
                 </div>
               </div>
             </div>
