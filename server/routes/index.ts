@@ -41,6 +41,7 @@ import cleanupRouter from './cleanup-notifications';
 import prescriptionRouter from './prescription-routes';
 import pushNotificationsRouter from './push-notifications-routes';
 import walletRouter from './wallet-routes';
+import uploadDiagnosticsRouter from './upload-diagnostics';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -290,6 +291,10 @@ export default async function setupRoutes(app: express.Express) {
   
   // Rotas de manutenção
   app.use('/api/admin', cleanupRouter);
+  
+  // Rotas de diagnóstico de uploads (apenas para debug)
+  console.log('Registrando uploadDiagnosticsRouter em /api/uploads');
+  app.use('/api/uploads', uploadDiagnosticsRouter);
   
   return app;
 } 

@@ -1,17 +1,12 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { ensureUploadDir, getPublicUrl } from '../config/upload-config';
 
 // Configuração de armazenamento padrão para uploads de perfil
 const profileStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'profiles');
-    
-    // Criar diretório se não existir
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    
+    const uploadDir = ensureUploadDir('profiles');
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
@@ -59,12 +54,7 @@ export const profileImageUpload = multer({
 // Configuração para outros tipos de upload (documentos, etc)
 const documentStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'documents');
-    
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    
+    const uploadDir = ensureUploadDir('documents');
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
