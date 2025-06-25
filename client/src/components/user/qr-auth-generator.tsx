@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, QrCode } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { generateQrToken } from '@/lib/api';
+import { Capacitor } from '@capacitor/core';
 
 interface QRAuthToken {
   qrCode: string;
@@ -16,26 +16,20 @@ const QRAuthGenerator = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [qrToken, setQrToken] = useState<QRAuthToken | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const isNative = Capacitor.isNativePlatform();
 
-  // Gerar um novo token QR code (agora permanente)
-  const generateQRCode = async () => {
+  // Buscar o QR code permanente do usuário
+  const fetchUserQRCode = async () => {
     if (!user) return;
     
     setLoading(true);
     try {
       const data = await generateQrToken();
       setQrToken(data);
-      
-      // Não precisamos mais calcular tempo de expiração,
-      // pois o QR code é permanente. Definimos um valor
-      // alto apenas para manter compatibilidade com o resto do código
-      setTimeLeft(3153600000); // 100 anos em segundos
-      
     } catch (error) {
       toast({
-        title: "Erro ao gerar QR Code",
+        title: "Erro ao carregar QR Code",
         description: error instanceof Error ? error.message : "Tente novamente",
         variant: "destructive",
       });
@@ -44,12 +38,10 @@ const QRAuthGenerator = () => {
     }
   };
 
-  // Não precisamos mais do efeito para atualizar o contador de tempo
-
-  // Gerar QR code quando componente é montado
+  // Buscar QR code quando componente é montado
   useEffect(() => {
     if (user) {
-      generateQRCode();
+      fetchUserQRCode();
     }
   }, [user]);
 
@@ -101,25 +93,14 @@ const QRAuthGenerator = () => {
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-center">
-        <Button 
-          onClick={generateQRCode} 
-          disabled={loading}
-          variant="outline"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Gerando...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Mostrar Meu QR Code
-            </>
-          )}
-        </Button>
-      </CardFooter>
+      {!isNative && (
+        <CardFooter className="flex justify-center">
+          <div className="text-center text-sm text-muted-foreground">
+            <QrCode className="h-4 w-4 inline mr-1" />
+            Seu código QR é único e permanente
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 };
