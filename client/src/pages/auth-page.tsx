@@ -345,16 +345,16 @@ const AuthPage: React.FC = () => {
   
   return (
     <AuthLayout>
-      <div className="flex-1 flex flex-col max-w-xl mx-auto w-full px-6 py-8">
+      <div className="flex-1 flex flex-col max-w-xl mx-auto w-full px-6 py-6">
         <Tabs defaultValue="register" className="w-full flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-gray-100/60 backdrop-blur-sm rounded-xl">
-            <TabsTrigger value="login" className="rounded-lg py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">
+          <TabsList className="grid w-full grid-cols-2 mb-4 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg">
+            <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
               Login
             </TabsTrigger>
-            <TabsTrigger value="register" className="rounded-lg py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">
+            <TabsTrigger value="register" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
@@ -363,8 +363,8 @@ const AuthPage: React.FC = () => {
           </TabsList>
         
         <TabsContent value="login">
-          <div className="p-6">
-            <div className="mb-6 text-center">
+          <div className="p-4">
+            <div className="mb-4 text-center">
               <h1 className="text-xl font-semibold text-gray-800">Bem-vindo de volta</h1>
               <p className="text-gray-500 mt-2 text-xs">
                 Acesse sua conta para continuar
@@ -384,7 +384,7 @@ const AuthPage: React.FC = () => {
                           placeholder="seu@email.com" 
                           type="email" 
                           disabled={isLoggingIn}
-                          className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           {...field} 
                         />
                       </FormControl>
@@ -409,7 +409,7 @@ const AuthPage: React.FC = () => {
                           placeholder="Sua senha" 
                           type="password"
                           disabled={isLoggingIn}
-                          className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           {...field} 
                         />
                       </FormControl>
@@ -432,7 +432,7 @@ const AuthPage: React.FC = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
+                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
                   disabled={isLoggingIn}
                 >
                   {isLoggingIn ? (
@@ -448,8 +448,8 @@ const AuthPage: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="register">
-          <div className="p-6">
-            <div className="mb-6 text-center">
+          <div className="p-4">
+            <div className="mb-4 text-center">
               <h1 className="text-xl font-semibold text-gray-800">Crie sua conta</h1>
               <p className="text-gray-500 mt-2 text-xs">
                 Preencha os dados para criar seu perfil na CN Vidas
@@ -469,7 +469,7 @@ const AuthPage: React.FC = () => {
                           placeholder="seu@email.com" 
                           type="email" 
                           disabled={isRegistering}
-                          className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           {...field} 
                         />
                       </FormControl>
@@ -490,7 +490,7 @@ const AuthPage: React.FC = () => {
                             <Input 
                               placeholder="000.000.000-00" 
                               disabled={isRegistering}
-                              className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                              className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                               onChange={(e) => {
                                 // Formata o CPF enquanto o usuário digita
                                 let value = e.target.value.replace(/\D/g, '');
@@ -544,7 +544,7 @@ const AuthPage: React.FC = () => {
                                   <Input 
                                     placeholder="12345" 
                                     disabled={isRegistering}
-                                    className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                                    className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                                     {...field}
                                     value={field.value?.replace(/CRM[A-Z]{2}/i, '') || ''}
                                     onChange={(e) => {
@@ -571,7 +571,7 @@ const AuthPage: React.FC = () => {
                             <Input 
                               placeholder="00.000.000/0000-00" 
                               disabled={isRegistering}
-                              className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                              className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                               onChange={(e) => {
                                 // Formatação do CNPJ
                                 let value = e.target.value.replace(/\D/g, '');
@@ -607,7 +607,7 @@ const AuthPage: React.FC = () => {
                             <Input 
                               placeholder="seunome123" 
                               disabled={isRegistering}
-                              className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                              className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                               {...field} 
                             />
                           </FormControl>
@@ -628,7 +628,7 @@ const AuthPage: React.FC = () => {
                             placeholder="Mínimo de 6 caracteres" 
                             type="password" 
                             disabled={isRegistering}
-                            className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                            className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                             {...field} 
                           />
                         </FormControl>
@@ -648,7 +648,7 @@ const AuthPage: React.FC = () => {
                         <Input 
                           placeholder="Seu Nome Completo" 
                           disabled={isRegistering}
-                          className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           {...field} 
                         />
                       </FormControl>
@@ -663,44 +663,44 @@ const AuthPage: React.FC = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-gray-700 text-sm">Tipo de perfil</FormLabel>
-                      <div className="grid grid-cols-3 gap-3 mb-2">
+                      <div className="grid grid-cols-3 gap-2 mb-2">
                         <div 
-                          className={`flex flex-col items-center p-4 border ${
+                          className={`flex flex-col items-center p-3 border ${
                             field.value === "patient" 
                               ? "border-blue-500 bg-blue-50 text-blue-700" 
                               : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-xl cursor-pointer transition-all duration-200 shadow-sm hover:shadow`}
+                          } rounded-lg cursor-pointer transition-all duration-200 shadow-sm hover:shadow`}
                           onClick={() => field.onChange("patient")}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
                           <span className="text-xs font-medium">Paciente</span>
                         </div>
                         
                         <div 
-                          className={`flex flex-col items-center p-4 border ${
+                          className={`flex flex-col items-center p-3 border ${
                             field.value === "doctor" 
                               ? "border-blue-500 bg-blue-50 text-blue-700" 
                               : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-xl cursor-pointer transition-all duration-200 shadow-sm hover:shadow`}
+                          } rounded-lg cursor-pointer transition-all duration-200 shadow-sm hover:shadow`}
                           onClick={() => field.onChange("doctor")}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                           </svg>
                           <span className="text-xs font-medium">Médico</span>
                         </div>
                         
                         <div 
-                          className={`flex flex-col items-center p-4 border ${
+                          className={`flex flex-col items-center p-3 border ${
                             field.value === "partner" 
                               ? "border-blue-500 bg-blue-50 text-blue-700" 
                               : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-xl cursor-pointer transition-all duration-200 shadow-sm hover:shadow`}
+                          } rounded-lg cursor-pointer transition-all duration-200 shadow-sm hover:shadow`}
                           onClick={() => field.onChange("partner")}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
                           <span className="text-xs font-medium">Empresa</span>
@@ -931,7 +931,7 @@ const AuthPage: React.FC = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg mt-6"
+                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg mt-4"
                   disabled={isRegistering}
                 >
                   {isRegistering ? (
