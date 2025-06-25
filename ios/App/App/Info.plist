@@ -62,5 +62,7 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>NSFaceIDUsageDescription</key>
+	<string>CN Vidas usa o Face ID para fazer login de forma rápida e segura</string>
 </dict>
 </plist>
