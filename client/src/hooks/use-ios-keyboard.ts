@@ -2,28 +2,21 @@ import { useState, useEffect } from 'react';
 import { Keyboard } from '@capacitor/keyboard';
 import { Capacitor } from '@capacitor/core';
 
-interface UseIOSKeyboardReturn {
-  isKeyboardVisible: boolean;
-  keyboardHeight: number;
-}
-
-export const useIOSKeyboard = (): UseIOSKeyboardReturn => {
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+export const useIOSKeyboard = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform()) {
-      return;
-    }
+    if (!Capacitor.isNativePlatform()) return;
 
     const showListener = Keyboard.addListener('keyboardWillShow', (info) => {
-      setIsKeyboardVisible(true);
       setKeyboardHeight(info.keyboardHeight);
+      setIsKeyboardVisible(true);
     });
 
     const hideListener = Keyboard.addListener('keyboardWillHide', () => {
-      setIsKeyboardVisible(false);
       setKeyboardHeight(0);
+      setIsKeyboardVisible(false);
     });
 
     return () => {
@@ -32,5 +25,5 @@ export const useIOSKeyboard = (): UseIOSKeyboardReturn => {
     };
   }, []);
 
-  return { isKeyboardVisible, keyboardHeight };
+  return { keyboardHeight, isKeyboardVisible };
 };
