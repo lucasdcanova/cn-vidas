@@ -14,7 +14,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   }, []);
   
   return (
-    <div className="h-[100dvh] bg-blue-50 overflow-hidden" style={{ backgroundColor: '#eff6ff' }}>
+    <div className="fixed inset-0 bg-blue-50" style={{ backgroundColor: '#eff6ff' }}>
       <div className="h-full flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Logo com posição ajustada */}
         <div 
