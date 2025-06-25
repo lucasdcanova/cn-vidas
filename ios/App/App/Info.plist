@@ -55,5 +55,22 @@
 	<string>CN Vidas precisa acessar suas fotos para enviar documentos médicos</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>CN Vidas precisa salvar imagens de exames e documentos médicos</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>cnvidas.onrender.com</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSRequiresCertificateTransparency</key>
+				<false/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>
