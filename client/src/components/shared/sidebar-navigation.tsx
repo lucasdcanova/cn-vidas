@@ -98,19 +98,6 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
                 Sinistros
             </Link>
             
-            {/* Only show Dependentes for users with family plans */}
-            {subscriptionPlan && (subscriptionPlan.includes('_family') || subscriptionPlan === 'ultra_family' || subscriptionPlan === 'premium_family' || subscriptionPlan === 'basic_family') && (
-              <Link href="/dependents"
-                className={`${linkBaseClass} ${
-                  isLinkActive("/dependents") 
-                    ? linkActiveClass 
-                    : linkInactiveClass
-                }`}>
-                  <UserPlus className="w-5 h-5 mr-3" />
-                  Dependentes
-              </Link>
-            )}
-            
             <Link href="/recent-activities"
               className={`${linkBaseClass} ${
                 isLinkActive("/recent-activities") 
