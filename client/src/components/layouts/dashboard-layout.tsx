@@ -14,6 +14,8 @@ import MobileNavigation from "@/components/shared/mobile-navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getUnreadNotificationsCount, markAllNotificationsAsRead, getDoctorByUserId } from "@/lib/api";
 import { getPlanColor } from "@/components/shared/plan-indicator";
+import { StatusBar, Style } from "@capacitor/status-bar";
+import { Capacitor } from "@capacitor/core";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -32,6 +34,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   // Use o hook para garantir dados frescos do usuário ao montar o componente
   useFreshUserData();
+  
+  // Configurar status bar para iOS
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      // Definir cor de fundo branca para a status bar
+      StatusBar.setBackgroundColor({ color: '#ffffff' });
+      // Definir estilo escuro (texto preto) para a status bar
+      StatusBar.setStyle({ style: Style.Light });
+    }
+    
+    // Cleanup - voltar para as cores originais quando sair do dashboard
+    return () => {
+      if (Capacitor.isNativePlatform()) {
+        // Voltar para a cor azul clara da página de auth
+        StatusBar.setBackgroundColor({ color: '#eff6ff' });
+        StatusBar.setStyle({ style: Style.Light });
+      }
+    };
+  }, []);
 
   // Auto-refresh após completar onboarding
   React.useEffect(() => {
