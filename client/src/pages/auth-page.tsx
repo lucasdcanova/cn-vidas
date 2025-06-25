@@ -345,21 +345,22 @@ const AuthPage: React.FC = () => {
   
   return (
     <AuthLayout>
-      <Tabs defaultValue="register" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-gray-100/60 backdrop-blur-sm rounded-xl">
-          <TabsTrigger value="login" className="rounded-lg py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-            </svg>
-            Login
-          </TabsTrigger>
-          <TabsTrigger value="register" className="rounded-lg py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-            Cadastro
-          </TabsTrigger>
-        </TabsList>
+      <div className="flex-1 flex flex-col max-w-xl mx-auto w-full px-6 py-8">
+        <Tabs defaultValue="register" className="w-full flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-gray-100/60 backdrop-blur-sm rounded-xl">
+            <TabsTrigger value="login" className="rounded-lg py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              Login
+            </TabsTrigger>
+            <TabsTrigger value="register" className="rounded-lg py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              Cadastro
+            </TabsTrigger>
+          </TabsList>
         
         <TabsContent value="login">
           <div className="p-6">
@@ -949,7 +950,8 @@ const AuthPage: React.FC = () => {
           </div>
         </TabsContent>
         
-      </Tabs>
+        </Tabs>
+      </div>
     </AuthLayout>
   );
 };
