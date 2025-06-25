@@ -22,12 +22,12 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         {/* Logo com posição ajustada */}
         <div 
           className={`flex items-center justify-center transition-all ease-out ${
-            isKeyboardVisible ? 'h-12 duration-150' : 'h-20 duration-200'
+            isKeyboardVisible ? 'h-0 duration-150 overflow-hidden' : 'h-20 duration-200'
           }`}
           style={{ 
-            marginTop: isKeyboardVisible ? '20px' : '100px',
+            marginTop: isKeyboardVisible ? '0' : '100px',
             willChange: 'height',
-            opacity: isKeyboardVisible ? 0.7 : 1
+            opacity: isKeyboardVisible ? 0 : 1
           }}
         >
           <img 
@@ -41,20 +41,20 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         </div>
         
         {/* Spacer menor */}
-        <div style={{ height: isKeyboardVisible ? '20px' : '40px' }} className="transition-all duration-200" />
+        <div style={{ height: isKeyboardVisible ? '10px' : '40px' }} className="transition-all duration-200" />
         
         {/* Container principal com altura dinâmica */}
         <div 
           className="glass-morphism rounded-t-3xl overflow-hidden flex flex-col relative z-10 transition-all ease-out flex-1"
           style={{ 
             maxHeight: isKeyboardVisible 
-              ? `calc(100vh - ${keyboardHeight}px - 140px - env(safe-area-inset-top))` 
+              ? `calc(100vh - ${keyboardHeight}px - 60px - env(safe-area-inset-top))` 
               : 'none',
             marginBottom: '0',
             paddingBottom: 'env(safe-area-inset-bottom)',
-            transform: isKeyboardVisible ? `translateY(-${Math.min(keyboardHeight * 0.2, 60)}px)` : 'translateY(0)',
+            transform: 'translateY(0)',
             transitionDuration: isKeyboardVisible ? '150ms' : '200ms',
-            willChange: 'transform'
+            willChange: 'height'
           }}
         >
         {/* Background gradient blobs */}
