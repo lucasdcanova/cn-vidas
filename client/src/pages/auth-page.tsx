@@ -400,8 +400,9 @@ const AuthPage: React.FC = () => {
                           autoComplete="email"
                           autoCapitalize="off"
                           autoCorrect="off"
-                          returnKeyType="next"
-                          onKeyPress={(e) => {
+                          inputMode="email"
+                          enterKeyHint="next"
+                          onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
                               passwordLoginRef.current?.focus();
@@ -434,8 +435,8 @@ const AuthPage: React.FC = () => {
                           disabled={isLoggingIn}
                           className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                           autoComplete="current-password"
-                          returnKeyType="done"
-                          onKeyPress={(e) => {
+                          enterKeyHint="done"
+                          onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
                               loginForm.handleSubmit(onLoginSubmit)();

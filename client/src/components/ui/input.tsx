@@ -2,12 +2,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-export interface InputProps extends React.ComponentProps<"input"> {
-  returnKeyType?: 'done' | 'go' | 'next' | 'search' | 'send';
-}
-
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, returnKeyType, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+  ({ className, type, ...props }, ref) => {
     return (
       <input
         type={type}
@@ -16,7 +12,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
-        enterKeyHint={returnKeyType}
         {...props}
       />
     )
