@@ -347,8 +347,8 @@ const AuthPage: React.FC = () => {
   
   return (
     <AuthLayout>
-      <div className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-6 ${
-        isKeyboardVisible ? 'py-2' : 'py-6'
+      <div className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
+        isKeyboardVisible ? 'py-1' : 'py-6'
       } overflow-y-auto auth-form-container`}>
         <Tabs defaultValue="register" className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-2 mb-4 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg">
