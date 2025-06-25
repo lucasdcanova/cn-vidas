@@ -10,7 +10,6 @@ import { InstallPWA } from "@/components/InstallPWA";
 import { PushNotificationService } from "@/services/push-notifications";
 import { isNativeApp } from "@/utils/platform";
 import { useThemeColor } from "@/hooks/use-theme-color";
-import { initializeIOSConfig } from "@/utils/ios-config";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
