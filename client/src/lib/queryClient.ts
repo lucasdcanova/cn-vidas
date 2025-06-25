@@ -1,5 +1,6 @@
 import { QueryClient, QueryFunction, useQuery, useMutation } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/config/api";
+import { httpRequest } from "./http-client";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -55,13 +56,11 @@ export async function apiRequest(
       }
     }
     
-    const res = await fetch(API_BASE_URL + url, {
-      method,
+    const res = await httpRequest({
+      url,
+      method: method as any,
       headers,
-      body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
-      credentials: "include", // Importante para enviar cookies
-      mode: 'cors',
-      cache: 'no-cache',
+      data: data instanceof FormData ? data : data,
     });
 
     console.log(`API Request ${method} ${url} - Status: ${res.status}`);
@@ -119,12 +118,10 @@ export const getQueryFn: <T>(options: {
         headers["Authorization"] = `Bearer ${authToken}`;
       }
       
-      const res = await fetch(API_BASE_URL + endpoint, {
+      const res = await httpRequest({
+        url: endpoint,
         method: 'GET',
-        credentials: "include",
         headers,
-        mode: 'cors',
-        cache: 'no-cache'
       });
 
       console.log(`Query ${endpoint} - Status: ${res.status}`);
