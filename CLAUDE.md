@@ -92,6 +92,10 @@ yarn lint
 3. Testar funcionalidades afetadas
 4. Verificar console por erros
 
+## Sincronização automática com iOS
+
+O projeto está configurado para sincronizar automaticamente com o iOS após cada commit usando um hook post-commit do Husky.
+
 ## Notas de desenvolvimento
 
 - Sistema usa autenticação por cookies HTTP-only

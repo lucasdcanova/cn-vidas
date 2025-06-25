@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "🔄 Executando sincronização iOS automática via Husky..."
+
+# Caminho para o script de sincronização
+SYNC_SCRIPT="./sync-ios.sh"
+
+# Verifica se o script existe
+if [ -f "$SYNC_SCRIPT" ]; then
+    # Executa o script de sincronização
+    bash "$SYNC_SCRIPT"
+else
+    echo "⚠️  Script de sincronização não encontrado: $SYNC_SCRIPT"
+fi
