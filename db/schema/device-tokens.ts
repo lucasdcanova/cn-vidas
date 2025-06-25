@@ -1,5 +1,5 @@
 import { pgTable, serial, integer, varchar, text, jsonb, boolean, timestamp, unique, index } from 'drizzle-orm/pg-core';
-import { users } from './users';
+import { users } from '../../shared/schema';
 
 export const deviceTokens = pgTable('device_tokens', {
   id: serial('id').primaryKey(),
