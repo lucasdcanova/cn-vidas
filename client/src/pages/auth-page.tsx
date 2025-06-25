@@ -391,21 +391,25 @@ const AuthPage: React.FC = () => {
                     <FormItem>
                       <FormLabel className="text-gray-700 text-sm">E-mail</FormLabel>
                       <FormControl>
-                        <Input 
+                        <input 
                           ref={emailLoginRef}
                           placeholder="seu@email.com" 
                           type="email" 
                           disabled={isLoggingIn}
-                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-blue-500 flex w-full px-3 py-2 focus:outline-none focus:ring-2"
                           autoComplete="email"
                           autoCapitalize="off"
                           autoCorrect="off"
                           inputMode="email"
                           enterKeyHint="next"
+                          tabIndex={1}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === 'Enter' || e.key === 'Return') {
                               e.preventDefault();
-                              passwordLoginRef.current?.focus();
+                              setTimeout(() => {
+                                passwordLoginRef.current?.focus();
+                                passwordLoginRef.current?.click();
+                              }, 100);
                             }
                           }}
                           {...field} 
@@ -428,16 +432,17 @@ const AuthPage: React.FC = () => {
                         </a>
                       </div>
                       <FormControl>
-                        <Input 
+                        <input 
                           ref={passwordLoginRef}
                           placeholder="Sua senha" 
                           type="password"
                           disabled={isLoggingIn}
-                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-blue-500 flex w-full px-3 py-2 focus:outline-none focus:ring-2"
                           autoComplete="current-password"
                           enterKeyHint="done"
+                          tabIndex={2}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === 'Enter' || e.key === 'Return') {
                               e.preventDefault();
                               loginForm.handleSubmit(onLoginSubmit)();
                             }
