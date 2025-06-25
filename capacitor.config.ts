@@ -6,10 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'dist/client',
   version: '1.0.0',
   server: {
-    // Configuração para carregar o app do servidor remoto
-    url: 'https://cnvidas.onrender.com',
-    cleartext: true,
-    allowNavigation: ['https://cnvidas.onrender.com']
+    // Carregar arquivos localmente, não do servidor remoto
+    cleartext: true
   },
   plugins: {
     PushNotifications: {
