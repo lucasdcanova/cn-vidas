@@ -14,11 +14,11 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   }, []);
   
   return (
-    <div className="min-h-screen bg-blue-50" style={{ backgroundColor: '#eff6ff' }}>
-      <div className="min-h-screen flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="h-[100dvh] bg-blue-50 overflow-hidden" style={{ backgroundColor: '#eff6ff' }}>
+      <div className="h-full flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Logo com posição ajustada */}
         <div 
-          className="flex items-center justify-center h-20"
+          className="flex items-center justify-center h-20 shrink-0"
           style={{ 
             marginTop: '100px'
           }}
@@ -31,11 +31,11 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         </div>
         
         {/* Spacer menor */}
-        <div style={{ height: '40px' }} />
+        <div style={{ height: '40px' }} className="shrink-0" />
         
         {/* Container principal */}
         <div 
-          className="glass-morphism rounded-t-3xl flex flex-col relative z-10 flex-1"
+          className="glass-morphism rounded-t-3xl flex flex-col relative z-10 flex-1 min-h-0"
           style={{ 
             paddingBottom: 'env(safe-area-inset-bottom)'
           }}
@@ -44,12 +44,12 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-400 opacity-10 rounded-full filter blur-3xl"></div>
         <div className="absolute bottom-20 -right-20 w-80 h-80 bg-green-400 opacity-10 rounded-full filter blur-3xl"></div>
         
-        <div className="flex-1 flex flex-col overflow-y-auto">
+        <div className="flex-1 flex flex-col overflow-y-auto min-h-0">
           {children}
         </div>
         
         {/* Copyright dentro da caixa */}
-        <div className="text-center py-4 text-gray-500 text-xs border-t border-gray-100/30">
+        <div className="text-center py-4 text-gray-500 text-xs border-t border-gray-100/30 shrink-0">
           &copy; {new Date().getFullYear()} CN Vidas. Todos os direitos reservados.
         </div>
       </div>
