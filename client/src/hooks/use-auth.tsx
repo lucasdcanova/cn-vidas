@@ -221,8 +221,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("🏥 [Login] Usuário é médico, verificando status de onboarding...");
         console.log("📱 [Login] Plataforma:", isNativeApp() ? 'iOS' : 'Web');
         
+        // No iOS, se temos problemas para buscar o perfil, vamos direto para telemedicina
+        // e deixar o guard verificar
+        if (isNativeApp()) {
+          console.log("📱 [Login] iOS detectado - redirecionando direto para /doctor-telemedicine");
+          console.log("📱 [Login] O guard de onboarding irá verificar o status do perfil");
+          window.location.href = "/doctor-telemedicine";
+          return;
+        }
+        
+        // Na web, continuar com a verificação normal
         try {
-          // No iOS, usar httpRequest para garantir headers corretos
           const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
             method: 'GET'
           });
@@ -254,33 +263,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             errorObject: JSON.stringify(error)
           });
           
-          // Tentar uma segunda vez após pequeno delay (problema de timing no iOS)
-          console.log("🔄 [Login] Tentando buscar perfil novamente após 1 segundo...");
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          try {
-            const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
-              method: 'GET'
-            });
-            
-            console.log("✅ [Login] Segunda tentativa bem-sucedida:", {
-              id: doctorProfile.id,
-              onboardingCompleted: doctorProfile.onboardingCompleted
-            });
-            
-            if (doctorProfile.onboardingCompleted === true) {
-              console.log("✅ [Login] Segunda tentativa: Médico com onboarding completo");
-              window.location.href = "/doctor-telemedicine";
-              return;
-            } else {
-              console.log("⚠️ [Login] Segunda tentativa: Médico sem onboarding completo");
-              window.location.href = "/onboarding/doctor";
-              return;
-            }
-          } catch (secondError) {
-            console.error("❌ [Login] Segunda tentativa também falhou:", secondError);
-          }
-          
           // Se for 404, redirecionar para onboarding
           if (error?.status === 404) {
             console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /onboarding/doctor");
@@ -288,9 +270,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
           
-          // Em caso de outro erro, também redirecionar para onboarding por segurança
-          console.log("🚨 [Login] Erro desconhecido, redirecionando para /onboarding/doctor por segurança");
-          window.location.href = "/onboarding/doctor";
+          // Em caso de outro erro, ir para telemedicina e deixar o guard decidir
+          console.log("🚨 [Login] Erro ao buscar perfil, redirecionando para /doctor-telemedicine");
+          window.location.href = "/doctor-telemedicine";
           return;
         }
       } else if (userData.role === "partner") {
@@ -379,8 +361,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("🏥 [Login] Usuário é médico, verificando status de onboarding...");
         console.log("📱 [Login] Plataforma:", isNativeApp() ? 'iOS' : 'Web');
         
+        // No iOS, se temos problemas para buscar o perfil, vamos direto para telemedicina
+        // e deixar o guard verificar
+        if (isNativeApp()) {
+          console.log("📱 [Login] iOS detectado - redirecionando direto para /doctor-telemedicine");
+          console.log("📱 [Login] O guard de onboarding irá verificar o status do perfil");
+          window.location.href = "/doctor-telemedicine";
+          return;
+        }
+        
+        // Na web, continuar com a verificação normal
         try {
-          // No iOS, usar httpRequest para garantir headers corretos
           const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
             method: 'GET'
           });
@@ -412,33 +403,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             errorObject: JSON.stringify(error)
           });
           
-          // Tentar uma segunda vez após pequeno delay (problema de timing no iOS)
-          console.log("🔄 [Login] Tentando buscar perfil novamente após 1 segundo...");
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          try {
-            const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
-              method: 'GET'
-            });
-            
-            console.log("✅ [Login] Segunda tentativa bem-sucedida:", {
-              id: doctorProfile.id,
-              onboardingCompleted: doctorProfile.onboardingCompleted
-            });
-            
-            if (doctorProfile.onboardingCompleted === true) {
-              console.log("✅ [Login] Segunda tentativa: Médico com onboarding completo");
-              window.location.href = "/doctor-telemedicine";
-              return;
-            } else {
-              console.log("⚠️ [Login] Segunda tentativa: Médico sem onboarding completo");
-              window.location.href = "/onboarding/doctor";
-              return;
-            }
-          } catch (secondError) {
-            console.error("❌ [Login] Segunda tentativa também falhou:", secondError);
-          }
-          
           // Se for 404, redirecionar para onboarding
           if (error?.status === 404) {
             console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /onboarding/doctor");
@@ -446,9 +410,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
           
-          // Em caso de outro erro, também redirecionar para onboarding por segurança
-          console.log("🚨 [Login] Erro desconhecido, redirecionando para /onboarding/doctor por segurança");
-          window.location.href = "/onboarding/doctor";
+          // Em caso de outro erro, ir para telemedicina e deixar o guard decidir
+          console.log("🚨 [Login] Erro ao buscar perfil, redirecionando para /doctor-telemedicine");
+          window.location.href = "/doctor-telemedicine";
           return;
         }
       } else if (userData.role === "partner") {

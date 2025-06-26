@@ -57,14 +57,35 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
       
       console.log(`[Native HTTP] Response status: ${response.status}`);
       
+      // Verificar se a resposta foi bem-sucedida
+      if (response.status >= 400) {
+        console.error(`[Native HTTP] Erro HTTP ${response.status}:`, response.data);
+      }
+      
       // Converter resposta do Capacitor para Response padrão
       return new Response(JSON.stringify(response.data), {
         status: response.status,
         headers: response.headers,
       });
-    } catch (error) {
-      console.error('[Native HTTP] Error:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('[Native HTTP] Error completo:', {
+        message: error.message,
+        code: error.code,
+        url: fullUrl,
+        headers: authHeaders
+      });
+      
+      // Criar uma resposta de erro mais detalhada
+      const errorResponse = new Response(JSON.stringify({
+        error: error.message || 'Network request failed',
+        code: error.code,
+        url: fullUrl
+      }), {
+        status: error.status || 500,
+        statusText: error.message || 'Internal Server Error'
+      });
+      
+      return errorResponse;
     }
   }
   
