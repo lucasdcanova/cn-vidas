@@ -257,7 +257,6 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
-            <IOSSessionGuard />
             <Toaster />
             <InstallPWA />
             <Router />

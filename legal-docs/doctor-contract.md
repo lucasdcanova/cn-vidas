@@ -143,23 +143,34 @@ c) **Documentação Necessária:**
 
 ### 5.2 Valores e Repasses
 
-**a) Consultas Particulares:**
+**a) Consultas de Pacientes Plano Gratuito:**
 - Médico define valor da consulta
-- Repasse de 85% do valor ao médico
-- 15% retidos para custos operacionais da plataforma
-- Pagamento via transferência bancária
+- Repasse de 100% do valor ao médico
+- Sem retenção pela plataforma
+- Pagamento direto do paciente ao médico
 
-**b) Consultas via Planos CN Vidas:**
-- Valor fixo por consulta: R$ 120,00
-- Repasse de R$ 102,00 ao médico (85%)
-- Atendimentos de emergência: R$ 150,00
-- Repasse de R$ 127,50 ao médico (85%)
+**b) Consultas de Pacientes Plano Básico:**
+- Valor da consulta definido pelo médico
+- Repasse de 70% do valor ao médico
+- 30% retidos para custos operacionais da plataforma
+- Processamento via plataforma
 
-**c) Processamento de Pagamentos:**
+**c) Consultas de Pacientes Planos Premium/Ultra:**
+- Valor da consulta definido pelo médico
+- Repasse de 50% do valor ao médico
+- 50% retidos para custos operacionais da plataforma
+- Processamento via plataforma
+
+**d) Atendimentos de Emergência:**
+- Acréscimo de 25% sobre valor base da consulta
+- Mesmos percentuais de repasse conforme plano do paciente
+- Prioridade no processamento de pagamento
+
+**e) Processamento de Pagamentos:**
 - Consolidação semanal dos atendimentos
-- Pagamento toda quinta-feira
-- Relatório detalhado de atendimentos
-- Emissão de nota fiscal pelo médico
+- Pagamento toda quinta-feira via transferência bancária
+- Relatório detalhado por tipo de plano
+- Emissão de nota fiscal ou RPA pelo médico
 
 ### 5.3 Tributação
 
