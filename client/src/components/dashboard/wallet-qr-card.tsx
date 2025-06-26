@@ -70,13 +70,13 @@ export function WalletQRCard({ userName, userEmail, userId, planType, qrCode }: 
 
   return (
     <>
-      {/* Botão minimalista no dashboard */}
+      {/* Botão discreto sem moldura */}
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors"
       >
-        <QrCode className="h-4 w-4" />
-        Ver QR Code
+        Ver
+        <QrCode className="h-3.5 w-3.5" />
       </button>
 
       {/* Dialog com preview do Wallet Pass */}
