@@ -36,6 +36,9 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
             className={`w-auto transition-all duration-400 ease-out ${
               isKeyboardVisible ? 'h-12' : 'h-16'
             }`}
+            style={{
+              filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06))'
+            }}
           />
         </div>
         
@@ -52,7 +55,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
             background: isKeyboardVisible ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.05)',
+            boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.08), 0 -4px 20px rgba(0, 0, 0, 0.04)',
             border: '1px solid rgba(255, 255, 255, 0.18)',
             transition: 'background 400ms ease-out'
           }}
