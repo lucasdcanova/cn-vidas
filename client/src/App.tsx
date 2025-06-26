@@ -258,7 +258,6 @@ function App() {
         <AuthProvider>
           <TooltipProvider>
             <IOSSessionGuard />
-            <IOSAppLifecycle />
             <Toaster />
             <InstallPWA />
             <Router />

@@ -14,6 +14,7 @@ const AVAILABLE_DOCUMENTS = {
   'adhesion-contract.md': 'Contrato de Adesão',
   'cancellation-policy.md': 'Política de Cancelamento',
   'partner-contract.md': 'Contrato de Parceria',
+  'doctor-contract.md': 'Contrato de Prestação de Serviços Médicos',
   'user-manual.md': 'Manual do Usuário'
 };
 
