@@ -682,7 +682,7 @@ const AdminUsersPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="w-full overflow-auto">
+              <div className="w-full table-container">
                 <div className="pr-4">
                   <ResponsiveTable>
                   <ResponsiveTableHeader>

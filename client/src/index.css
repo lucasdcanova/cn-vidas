@@ -208,6 +208,36 @@
     min-height: 100vh;
   }
   
+  /* Fix for admin layout scrolling */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  /* Ensure modals/dialogs are not cut off */
+  [role="dialog"] {
+    max-height: calc(100vh - 2rem);
+    margin: 1rem auto;
+  }
+  
+  /* Fix for Radix UI Dialog positioning */
+  [data-radix-popper-content-wrapper] {
+    position: fixed !important;
+    z-index: 50 !important;
+  }
+  
+  /* Ensure dialog content is scrollable if needed */
+  [role="dialog"] > div {
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+  
+  /* Fix table containers in admin pages */
+  .table-container {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  
   /* Smooth scrolling for all elements */
   * {
     -webkit-overflow-scrolling: touch;

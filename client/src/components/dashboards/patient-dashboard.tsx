@@ -180,15 +180,15 @@ export const PatientDashboard: React.FC = () => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-primary/5 to-transparent rounded-full transform translate-x-32 -translate-y-32"></div>
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-400/5 to-transparent rounded-full transform -translate-x-24 translate-y-24"></div>
             
-            <div className="relative z-10 p-12 md:p-16">
+            <div className={`relative z-10 ${isIOS ? 'p-14 md:p-20' : 'p-12 md:p-16'}`}>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                    <div className="w-1.5 h-1.5 bg-primary/70 rounded-full"></div>
-                    <div className="w-1 h-1 bg-primary/40 rounded-full"></div>
+                    <div className={`${isIOS ? 'w-2.5 h-2.5' : 'w-2 h-2'} bg-primary rounded-full animate-pulse`}></div>
+                    <div className={`${isIOS ? 'w-2 h-2' : 'w-1.5 h-1.5'} bg-primary/70 rounded-full`}></div>
+                    <div className={`${isIOS ? 'w-1.5 h-1.5' : 'w-1 h-1'} bg-primary/40 rounded-full`}></div>
                   </div>
-                  <h1 className="text-3xl font-light text-gray-900">
+                  <h1 className={`${isIOS ? 'text-4xl' : 'text-3xl'} font-light text-gray-900`}>
                     Olá, <span className="font-semibold text-primary bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">{user?.fullName}</span>
                   </h1>
                 </div>
@@ -196,7 +196,7 @@ export const PatientDashboard: React.FC = () => {
               
               {/* QR Code button - positioned at bottom right */}
               {isIOS && qrData?.qrCode && user && (
-                <div className="absolute bottom-4 right-4">
+                <div className={`absolute ${isIOS ? 'bottom-6 right-6' : 'bottom-4 right-4'}`}>
                   <WalletQRCard
                     userName={user.fullName || user.username || ''}
                     userEmail={user.email || ''}
