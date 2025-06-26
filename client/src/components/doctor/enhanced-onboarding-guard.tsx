@@ -24,7 +24,12 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
           if (!res.ok) throw new Error('Falha ao buscar perfil');
           return res.json();
         }),
-    enabled: !!user && user.role === 'doctor'
+    enabled: !!user && user.role === 'doctor',
+    // Forçar busca fresca no iOS para evitar dados desatualizados
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   useEffect(() => {
@@ -34,8 +39,18 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
     // Skip if already on onboarding pages
     if (location === '/onboarding/doctor' || location === '/doctor-onboarding') return;
     
+    // Debug log para iOS
+    console.log('🔍 EnhancedDoctorOnboardingGuard - Verificando perfil do médico:', {
+      doctorProfile,
+      onboardingCompleted: doctorProfile?.onboardingCompleted,
+      location,
+      user: user?.email
+    });
+    
     // Check if onboarding is complete with the new field
     if (doctorProfile && !doctorProfile.onboardingCompleted) {
+      console.log('⚠️ EnhancedDoctorOnboardingGuard - Onboarding não completado, verificando campos...');
+      
       // Check if essential fields are filled
       const isProfileIncomplete = !doctorProfile.specialization || 
                                  !doctorProfile.education ||
@@ -43,7 +58,17 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
                                  !doctorProfile.pixKey ||
                                  !doctorProfile.bankName;
       
+      console.log('📄 EnhancedDoctorOnboardingGuard - Campos do perfil:', {
+        specialization: !!doctorProfile.specialization,
+        education: !!doctorProfile.education,
+        consultationFee: !!doctorProfile.consultationFee,
+        pixKey: !!doctorProfile.pixKey,
+        bankName: !!doctorProfile.bankName,
+        isProfileIncomplete
+      });
+      
       if (isProfileIncomplete) {
+        console.log('🚀 EnhancedDoctorOnboardingGuard - Redirecionando para onboarding...');
         navigate('/onboarding/doctor');
       }
     }
