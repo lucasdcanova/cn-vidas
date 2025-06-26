@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { UpgradePlanMessage } from "@/components/ui/upgrade-plan-message";
+import { httpRequest } from "@/lib/http-client";
 
 // Função para obter a imagem do serviço com sistema de fallback
 const getServiceImage = (service: any) => {
@@ -58,31 +59,13 @@ const Services: React.FC = () => {
   const { data: services = [], error, isError } = useQuery<any[]>({
     queryKey: ["/api/services", showAllServices, user?.city],
     queryFn: async () => {
-      // Se o usuário não estiver logado ou não quiser filtrar, busca sem filtro de cidade
-      const params = new URLSearchParams();
+      // Use getServices da API que já usa httpRequest internamente
+      const userCity = !showAllServices && user?.city ? user.city : undefined;
       
-      // Se showAllServices for false e o usuário tiver cidade, envia a cidade para filtrar
-      if (!showAllServices && user?.city) {
-        params.append("userCity", user.city);
-      }
+      console.log('[Services] Fetching services with city:', userCity);
+      console.log('[Services] Show all services:', showAllServices);
       
-      const url = `/api/services${params.toString() ? `?${params.toString()}` : ''}`;
-      
-      console.log('[Services] Fetching URL:', url);
-      console.log('[Services] User city:', user?.city);
-      console.log('[Services] Params:', params.toString());
-      
-      const response = await fetch(url, {
-        headers: {
-          'X-Auth-Token': localStorage.getItem('authToken') || '',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch services');
-      }
-      
-      return response.json();
+      return await getServices(undefined, userCity);
     },
     retry: false,
   });
