@@ -90,9 +90,11 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     }
 
     // Usar SQL direto para verificar se usuário já existe
-    const existingUserResult = await db.select({ id: users.id })
+    const existingUserResult = await safeQuery(() => 
+      db.select({ id: users.id })
       .from(users)
-      .where(eq(users.email, email));
+      .where(eq(users.email, email))
+    );
     
     if (existingUserResult.length > 0) {
       return res.status(400).json({ error: 'Este email já está cadastrado' });
@@ -111,9 +113,11 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     }
 
     // Verificar se username já existe
-    const existingUsernameResult = await db.select({ id: users.id })
+    const existingUsernameResult = await safeQuery(() => 
+      db.select({ id: users.id })
       .from(users)
-      .where(eq(users.username, finalUsername));
+      .where(eq(users.username, finalUsername))
+    );
     
     if (existingUsernameResult.length > 0) {
       finalUsername = `${finalUsername}_${Date.now()}`;
@@ -123,7 +127,8 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     const hashedPassword = await hash(password, 10);
 
     // Criar usuário usando Drizzle
-    const newUserResult = await db.insert(users)
+    const newUserResult = await safeQuery(() => 
+      db.insert(users)
       .values({
         email,
         username: finalUsername,
@@ -138,7 +143,9 @@ authRouter.post('/register', async (req: Request, res: Response) => {
         username: users.username,
         fullName: users.fullName,
         role: users.role
-      });
+      })
+      .returning()
+    );
     
     const newUser = newUserResult[0];
 
@@ -270,12 +277,12 @@ authRouter.post('/register', async (req: Request, res: Response) => {
       expiresAt.setHours(expiresAt.getHours() + 24); // Expira em 24 horas
 
       // Salvar token de verificação no banco de dados
-      await db.insert(emailVerifications).values({
+      await safeQuery(() => db.insert(emailVerifications).values({
         token: verificationToken,
         userId: newUser.id,
         expiresAt,
         createdAt: new Date(),
-      });
+      }));
 
       // Enviar email
       await sendVerificationEmail(newUser.email, verificationToken);
@@ -359,9 +366,11 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
     console.log('Iniciando query no banco de dados...');
     
     // Usar select() sem campos específicos para evitar erro do Drizzle
-    const result = await db.select()
-    .from(users)
-    .where(eq(users.email, email));
+    const result = await safeQuery(() => 
+      db.select()
+      .from(users)
+      .where(eq(users.email, email))
+    );
     
     console.log('Query executada, resultado:', result.length, 'usuários encontrados');
     const user = result[0];
@@ -698,8 +707,10 @@ authRouter.get('/verify', async (req: Request, res: Response) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as { id: string | number };
     const userId = toNumberOrThrow(decoded.id);
     
-    const result = await db.select().from(users)
-      .where(eq(users.id, userId));
+    const result = await safeQuery(() => 
+      db.select().from(users)
+      .where(eq(users.id, userId))
+    );
 
     const user = result[0];
     if (!user) {
@@ -801,7 +812,8 @@ authRouter.post('/resend-verification', async (req: Request, res: Response) => {
     }
 
     // Verificar se o usuário existe
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const userResult = await safeQuery(() => db.select().from(users).where(eq(users.email, email)));
+    const user = userResult[0];
     
     if (!user) {
       // Por segurança, não informamos que o email não existe
@@ -824,7 +836,7 @@ authRouter.post('/resend-verification', async (req: Request, res: Response) => {
     expiresAt.setHours(expiresAt.getHours() + 24); // Expira em 24 horas
 
     // Salvar token de verificação no banco de dados
-    await db.insert(emailVerifications).values({
+    await safeQuery(() => db.insert(emailVerifications).values({
       token,
       userId: user.id,
       expiresAt,
@@ -851,7 +863,8 @@ authRouter.post('/forgot-password', async (req: Request, res: Response) => {
     }
 
     // Verificar se o usuário existe
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const userResult = await safeQuery(() => db.select().from(users).where(eq(users.email, email)));
+    const user = userResult[0];
     
     if (!user) {
       // Por segurança, não informamos que o email não existe
@@ -869,7 +882,7 @@ authRouter.post('/forgot-password', async (req: Request, res: Response) => {
     expiresAt.setHours(expiresAt.getHours() + 1); // Expira em 1 hora
 
     // Salvar token de redefinição no banco de dados
-    await db.insert(passwordResets).values({
+    await safeQuery(() => db.insert(passwordResets).values({
       token,
       userId: user.id,
       expiresAt,
