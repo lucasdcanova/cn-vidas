@@ -15,9 +15,18 @@ const partnerRouter = express.Router();
  * Middleware para verificar se o usuário é um parceiro
  */
 const requirePartner = (req: AuthenticatedRequest, res: Response, next: Function) => {
+  console.log('🔐 [requirePartner] Verificando permissão - User:', req.user ? {
+    id: req.user.id,
+    email: req.user.email,
+    role: req.user.role
+  } : 'No user');
+  
   if (!req.user || req.user.role !== 'partner') {
+    console.log('❌ [requirePartner] Acesso negado - role:', req.user?.role);
     return res.status(403).json({ error: 'Acesso negado. Apenas parceiros podem acessar esta funcionalidade.' });
   }
+  
+  console.log('✅ [requirePartner] Acesso permitido para parceiro');
   next();
 };
 
@@ -69,18 +78,30 @@ partnerRouter.get('/me', requireAuth, requirePartner, async (req: AuthenticatedR
  */
 partnerRouter.get('/my-services', requireAuth, requirePartner, async (req: AuthenticatedRequest, res: Response) => {
   try {
+    console.log('🔍 [Partner /my-services] Buscando serviços para user ID:', req.user!.id);
+    
     // Primeiro, buscar o parceiro pelo userId
     const partner = await storage.getPartnerByUserId(req.user!.id);
+    
+    console.log('📊 [Partner /my-services] Parceiro encontrado?', !!partner);
+    
     if (!partner) {
+      console.log('❌ [Partner /my-services] Perfil de parceiro não encontrado para userId:', req.user!.id);
       return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
     }
 
+    console.log('🔎 [Partner /my-services] Buscando serviços do parceiro ID:', partner.id);
+    
     // Buscar apenas os serviços deste parceiro
     const services = await storage.getPartnerServicesByPartnerId(partner.id);
     
+    console.log('✅ [Partner /my-services] Retornando', services.length, 'serviços');
+    
     res.json(services);
   } catch (error) {
-    console.error('Erro ao buscar serviços do parceiro:', error);
+    console.error('❌ [Partner /my-services] Erro ao buscar serviços do parceiro:', error);
+    console.error('❌ [Partner /my-services] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+    
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {
