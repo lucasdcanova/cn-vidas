@@ -576,8 +576,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPartnerByUserId(userId: number): Promise<Partner | undefined> {
-    const [partner] = await this.db.select().from(partners).where(eq(partners.userId, userId));
-    return partner as Partner;
+    try {
+      console.log('🔍 [Storage] getPartnerByUserId - Buscando parceiro para userId:', userId);
+      
+      const result = await this.db.select().from(partners).where(eq(partners.userId, userId));
+      console.log('📊 [Storage] getPartnerByUserId - Resultado da query:', result.length, 'parceiros encontrados');
+      
+      if (result.length > 0) {
+        console.log('✅ [Storage] getPartnerByUserId - Parceiro encontrado:', {
+          id: result[0].id,
+          userId: result[0].userId,
+          businessName: result[0].businessName
+        });
+      } else {
+        console.log('❌ [Storage] getPartnerByUserId - Nenhum parceiro encontrado para userId:', userId);
+      }
+      
+      return result[0] as Partner | undefined;
+    } catch (error) {
+      console.error('❌ [Storage] getPartnerByUserId - Erro ao buscar parceiro:', error);
+      throw error;
+    }
   }
 
   async createPartner(partnerData: InsertPartner): Promise<Partner> {
@@ -810,12 +829,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPartnerServicesByPartnerId(partnerId: number): Promise<PartnerService[]> {
-    const results = await this.db
-      .select()
-      .from(partnerServices)
-      .where(eq(partnerServices.partnerId, partnerId));
-    
-    return results as PartnerService[];
+    try {
+      console.log('🔍 [Storage] getPartnerServicesByPartnerId - Buscando serviços para partnerId:', partnerId);
+      
+      const results = await this.db
+        .select()
+        .from(partnerServices)
+        .where(eq(partnerServices.partnerId, partnerId));
+      
+      console.log('📊 [Storage] getPartnerServicesByPartnerId - Encontrados', results.length, 'serviços');
+      
+      return results as PartnerService[];
+    } catch (error) {
+      console.error('❌ [Storage] getPartnerServicesByPartnerId - Erro ao buscar serviços:', error);
+      throw error;
+    }
   }
 
   async createPartnerService(serviceData: InsertPartnerService): Promise<PartnerService> {
