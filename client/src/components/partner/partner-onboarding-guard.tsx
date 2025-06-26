@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
+import { httpRequest } from '@/lib/http-client';
 
 interface PartnerOnboardingGuardProps {
   children: React.ReactNode;
@@ -15,52 +16,88 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
   // Get partner profile
   const { data: partnerProfile, isLoading: loadingProfile } = useQuery({
     queryKey: ['/api/partners/me'],
-    queryFn: ({ signal }) => 
-      fetch('/api/partners/me', { 
-        signal,
-        credentials: 'include' 
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Falha ao buscar perfil');
-          return res.json();
-        }),
-    enabled: !!user && user.role === 'partner'
+    queryFn: async () => {
+      try {
+        return await httpRequest('/api/partners/me');
+      } catch (error) {
+        console.error('❌ [PartnerOnboardingGuard] Erro ao buscar perfil:', error);
+        throw error;
+      }
+    },
+    enabled: !!user && user.role === 'partner',
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true
   });
 
   // Check partner addresses
-  const { data: addresses, isLoading: loadingAddresses } = useQuery({
+  const { data: addresses, isLoading: loadingAddresses, error: addressesError } = useQuery({
     queryKey: ['/api/partners/addresses'],
-    queryFn: ({ signal }) => 
-      fetch('/api/partners/addresses', { 
-        signal,
-        credentials: 'include' 
-      })
-        .then(res => res.json()),
-    enabled: !!partnerProfile
+    queryFn: async () => {
+      try {
+        return await httpRequest('/api/partners/addresses');
+      } catch (error) {
+        console.error('❌ [PartnerOnboardingGuard] Erro ao buscar endereços:', error);
+        // Em caso de erro, retornar array vazio para não bloquear
+        return [];
+      }
+    },
+    enabled: !!partnerProfile,
+    staleTime: 0,
+    gcTime: 0,
+    retry: 1
   });
 
   // Check partner services
-  const { data: services, isLoading: loadingServices } = useQuery({
+  const { data: services, isLoading: loadingServices, error: servicesError } = useQuery({
     queryKey: ['/api/partners/my-services'],
-    queryFn: ({ signal }) => 
-      fetch('/api/partners/my-services', { 
-        signal,
-        credentials: 'include' 
-      })
-        .then(res => res.json()),
-    enabled: !!partnerProfile
+    queryFn: async () => {
+      try {
+        return await httpRequest('/api/partners/my-services');
+      } catch (error) {
+        console.error('❌ [PartnerOnboardingGuard] Erro ao buscar serviços:', error);
+        // Em caso de erro, retornar array vazio para não bloquear
+        return [];
+      }
+    },
+    enabled: !!partnerProfile,
+    staleTime: 0,
+    gcTime: 0,
+    retry: 1
   });
 
   useEffect(() => {
     // Skip if not a partner or still loading
-    if (!user || user.role !== 'partner' || loadingProfile || loadingAddresses || loadingServices) return;
+    if (!user || user.role !== 'partner' || loadingProfile || loadingAddresses || loadingServices) {
+      console.log('🔍 [PartnerOnboardingGuard] Skipping check:', {
+        hasUser: !!user,
+        userRole: user?.role,
+        loadingProfile,
+        loadingAddresses,
+        loadingServices
+      });
+      return;
+    }
     
     // Skip if already on onboarding page
-    if (location === '/partner-onboarding') return;
+    if (location === '/partner-onboarding') {
+      console.log('🔍 [PartnerOnboardingGuard] Already on onboarding page');
+      return;
+    }
     
     // Check if onboarding is complete
     if (partnerProfile) {
-      // Check if essential fields are filled
+      console.log('🔍 [PartnerOnboardingGuard] Partner profile:', partnerProfile);
+      console.log('🔍 [PartnerOnboardingGuard] Addresses:', addresses);
+      console.log('🔍 [PartnerOnboardingGuard] Services:', services);
+      
+      // First check if onboardingCompleted flag is set
+      if (partnerProfile.onboardingCompleted === true) {
+        console.log('✅ [PartnerOnboardingGuard] Partner already completed onboarding (flag=true)');
+        return;
+      }
+      
+      // If flag is not set, check if essential data exists
       const isProfileIncomplete = !partnerProfile.businessName || 
                                  !partnerProfile.businessType || 
                                  !partnerProfile.cnpj ||
@@ -70,9 +107,24 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
       const hasNoAddresses = !addresses || addresses.length === 0;
       const hasNoActiveServices = !services || !services.some((s: any) => s.isActive);
       
-      if (isProfileIncomplete || hasNoAddresses || hasNoActiveServices) {
+      console.log('🔍 [PartnerOnboardingGuard] Check results:', {
+        onboardingCompleted: partnerProfile.onboardingCompleted,
+        isProfileIncomplete,
+        hasNoAddresses,
+        hasNoActiveServices,
+        needsOnboarding: !partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses || hasNoActiveServices),
+        addressesError: addressesError ? String(addressesError) : null,
+        servicesError: servicesError ? String(servicesError) : null
+      });
+      
+      if (!partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses || hasNoActiveServices)) {
+        console.log('❌ [PartnerOnboardingGuard] Redirecting to onboarding');
         navigate('/partner-onboarding');
+      } else {
+        console.log('✅ [PartnerOnboardingGuard] Onboarding complete, no redirect needed');
       }
+    } else {
+      console.log('❌ [PartnerOnboardingGuard] No partner profile found');
     }
   }, [user, partnerProfile, addresses, services, loadingProfile, loadingAddresses, loadingServices, location, navigate]);
 
