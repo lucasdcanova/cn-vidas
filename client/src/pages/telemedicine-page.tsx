@@ -926,7 +926,7 @@ export default function TelemedicinePage() {
                   <div className="text-center space-y-4">
                     <div className="flex items-center justify-center text-green-600 mb-2">
                       <CheckCircle className="h-5 w-5 mr-2" />
-                      <span className="font-medium">{emergencyDoctors.length} médicos disponíveis agora</span>
+                      <span className="font-medium">Médicos disponíveis agora</span>
                     </div>
                     
                     <Button 
