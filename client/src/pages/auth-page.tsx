@@ -52,6 +52,138 @@ const loginSchema = z.object({
 // Importação das funções de validação de CPF e CNPJ
 import { validateCPF, formatCPF, unformatCPF } from "@/lib/cpf-validator";
 import { validateCNPJ, formatCNPJ, unformatCNPJ } from "@/lib/cnpj-validator";
+import { useState as useStateHook, useEffect as useEffectHook } from 'react';
+
+// Componentes para exibir conteúdo completo dos contratos
+const TermsOfUseContent = () => {
+  const [content, setContent] = useStateHook<string>("");
+  const [loading, setLoading] = useStateHook(true);
+  
+  useEffectHook(() => {
+    fetch("/api/legal-documents/terms-of-use.md")
+      .then(res => res.text())
+      .then(text => {
+        setContent(text);
+        setLoading(false);
+      })
+      .catch(() => {
+        setContent("Erro ao carregar o documento. Por favor, tente novamente.");
+        setLoading(false);
+      });
+  }, []);
+  
+  if (loading) return <div className="text-center py-4">Carregando...</div>;
+  
+  return (
+    <div className="prose prose-sm max-w-none">
+      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    </div>
+  );
+};
+
+const PrivacyPolicyContent = () => {
+  const [content, setContent] = useStateHook<string>("");
+  const [loading, setLoading] = useStateHook(true);
+  
+  useEffectHook(() => {
+    fetch("/api/legal-documents/privacy-policy.md")
+      .then(res => res.text())
+      .then(text => {
+        setContent(text);
+        setLoading(false);
+      })
+      .catch(() => {
+        setContent("Erro ao carregar o documento. Por favor, tente novamente.");
+        setLoading(false);
+      });
+  }, []);
+  
+  if (loading) return <div className="text-center py-4">Carregando...</div>;
+  
+  return (
+    <div className="prose prose-sm max-w-none">
+      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    </div>
+  );
+};
+
+const AdhesionContractContent = () => {
+  const [content, setContent] = useStateHook<string>("");
+  const [loading, setLoading] = useStateHook(true);
+  
+  useEffectHook(() => {
+    fetch("/api/legal-documents/adhesion-contract.md")
+      .then(res => res.text())
+      .then(text => {
+        setContent(text);
+        setLoading(false);
+      })
+      .catch(() => {
+        setContent("Erro ao carregar o documento. Por favor, tente novamente.");
+        setLoading(false);
+      });
+  }, []);
+  
+  if (loading) return <div className="text-center py-4">Carregando...</div>;
+  
+  return (
+    <div className="prose prose-sm max-w-none">
+      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    </div>
+  );
+};
+
+const PartnerContractContent = () => {
+  const [content, setContent] = useStateHook<string>("");
+  const [loading, setLoading] = useStateHook(true);
+  
+  useEffectHook(() => {
+    fetch("/api/legal-documents/partner-contract.md")
+      .then(res => res.text())
+      .then(text => {
+        setContent(text);
+        setLoading(false);
+      })
+      .catch(() => {
+        setContent("Erro ao carregar o documento. Por favor, tente novamente.");
+        setLoading(false);
+      });
+  }, []);
+  
+  if (loading) return <div className="text-center py-4">Carregando...</div>;
+  
+  return (
+    <div className="prose prose-sm max-w-none">
+      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    </div>
+  );
+};
+
+const DoctorContractContent = () => {
+  const [content, setContent] = useStateHook<string>("");
+  const [loading, setLoading] = useStateHook(true);
+  
+  useEffectHook(() => {
+    fetch("/api/legal-documents/doctor-contract.md")
+      .then(res => res.text())
+      .then(text => {
+        setContent(text);
+        setLoading(false);
+      })
+      .catch(() => {
+        setContent("Erro ao carregar o documento. Por favor, tente novamente.");
+        setLoading(false);
+      });
+  }, []);
+  
+  if (loading) return <div className="text-center py-4">Carregando...</div>;
+  
+  return (
+    <div className="prose prose-sm max-w-none">
+      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    </div>
+  );
+};
 
 // Registration form schema
 const registerSchema = z.discriminatedUnion("role", [
