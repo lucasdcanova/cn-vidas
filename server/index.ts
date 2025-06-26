@@ -19,6 +19,7 @@ import jwt from "jsonwebtoken";
 import fs from 'fs';
 import { setupCronJobs } from "./cron-setup";
 import { startEmergencyCleanupJob } from "./utils/emergency-cleanup";
+import { tokenBlacklist } from "./utils/token-blacklist";
 
 (async () => {
   const app = express();
@@ -98,6 +99,12 @@ import { startEmergencyCleanupJob } from "./utils/emergency-cleanup";
           console.log('🔍 Token decodificado:', decoded);
         }
         
+        // Verificar se o token está na blacklist
+        if (tokenBlacklist.isBlacklisted(authToken)) {
+          console.log('🚫 Token está na blacklist, rejeitando autenticação');
+          return next();
+        }
+        
         if (decoded && decoded.userId) {
           try {
             // Buscar dados completos do usuário do banco de dados
@@ -157,6 +164,12 @@ import { startEmergencyCleanupJob } from "./utils/emergency-cleanup";
         
         if (req.url.includes('/api/subscription/current')) {
           console.log('🔍 Cookie decodificado:', decoded);
+        }
+        
+        // Verificar se o token está na blacklist
+        if (tokenBlacklist.isBlacklisted(req.cookies.auth_token)) {
+          console.log('🚫 Token do cookie está na blacklist, rejeitando autenticação');
+          return next();
         }
         
         if (decoded && decoded.userId) {

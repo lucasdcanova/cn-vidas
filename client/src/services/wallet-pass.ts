@@ -17,42 +17,42 @@ export interface PlanColors {
   };
 }
 
-// Cores dos planos seguindo as diretrizes da Apple
+// Cores dos planos seguindo as diretrizes da Apple - Design Premium
 const planColors: PlanColors = {
   basic: {
-    backgroundColor: 'rgb(59, 130, 246)', // Blue
+    backgroundColor: 'rgb(37, 99, 235)', // Azul vibrante
     foregroundColor: 'rgb(255, 255, 255)',
-    labelColor: 'rgb(219, 234, 254)'
+    labelColor: 'rgb(191, 219, 254)'
   },
   standard: {
-    backgroundColor: 'rgb(168, 85, 247)', // Purple
+    backgroundColor: 'rgb(147, 51, 234)', // Roxo vibrante
     foregroundColor: 'rgb(255, 255, 255)',
-    labelColor: 'rgb(233, 213, 255)'
+    labelColor: 'rgb(221, 214, 254)'
   },
   premium: {
-    backgroundColor: 'rgb(251, 191, 36)', // Amber
-    foregroundColor: 'rgb(0, 0, 0)',
-    labelColor: 'rgb(92, 51, 23)'
+    backgroundColor: 'rgb(245, 158, 11)', // Dourado premium
+    foregroundColor: 'rgb(255, 255, 255)',
+    labelColor: 'rgb(254, 243, 199)'
   },
   family_basic: {
-    backgroundColor: 'rgb(34, 197, 94)', // Green
+    backgroundColor: 'rgb(34, 197, 94)', // Verde esmeralda
     foregroundColor: 'rgb(255, 255, 255)',
-    labelColor: 'rgb(220, 252, 231)'
+    labelColor: 'rgb(187, 247, 208)'
   },
   family_plus: {
-    backgroundColor: 'rgb(236, 72, 153)', // Pink
+    backgroundColor: 'rgb(236, 72, 153)', // Rosa vibrante
     foregroundColor: 'rgb(255, 255, 255)',
-    labelColor: 'rgb(252, 231, 243)'
+    labelColor: 'rgb(251, 207, 232)'
   },
   ultra_family: {
-    backgroundColor: 'rgb(79, 70, 229)', // Indigo
+    backgroundColor: 'rgb(99, 102, 241)', // Índigo premium
     foregroundColor: 'rgb(255, 255, 255)',
     labelColor: 'rgb(224, 231, 255)'
   },
   medical: {
-    backgroundColor: 'rgb(14, 165, 233)', // Sky
+    backgroundColor: 'rgb(6, 182, 212)', // Ciano médico
     foregroundColor: 'rgb(255, 255, 255)',
-    labelColor: 'rgb(224, 242, 254)'
+    labelColor: 'rgb(207, 250, 254)'
   }
 };
 
