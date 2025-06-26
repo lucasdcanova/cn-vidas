@@ -24,7 +24,9 @@
     "cap:sync": "npx cap sync",
     "cap:copy": "npx cap copy",
     "check-doctor-onboarding": "node check-doctor-onboarding-simple.js",
-    "fix-doctor-onboarding": "node fix-doctor-onboarding-simple.js"
+    "fix-doctor-onboarding": "node fix-doctor-onboarding-simple.js",
+    "check-partner": "node check-partner.js",
+    "create-partner": "node create-partner.js"
   },
   "dependencies": {
     "@aparajita/capacitor-biometric-auth": "^9.0.0",
