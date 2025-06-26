@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import ImageCropper from './ImageCropper';
 import ImageCropperSimple from './ImageCropperSimple';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { isNativeApp } from '@/utils/platform';
+import { getApiBaseUrl } from '@/config/api';
 
 interface ProfilePhotoUploaderProps {
   currentImage?: string | null;
@@ -234,12 +236,37 @@ export default function ProfilePhotoUploader({
       } else if (userType === 'partner') {
         endpoint = '/api/profile/partners/profile-image';
       }
+      
+      // Para apps nativos, incluir a URL base completa
+      if (isNativeApp()) {
+        const baseUrl = getApiBaseUrl();
+        endpoint = `${baseUrl}${endpoint}`;
+        console.log('App nativo detectado, usando URL completa:', endpoint);
+      }
 
       // Obter token de autenticação
-      const authToken = localStorage.getItem('authToken') || '';
+      let authToken = '';
+      
+      // No iOS, preferir secure storage
+      if (isNativeApp()) {
+        try {
+          // Tentar obter do secure storage primeiro
+          const { SecureStorage } = await import('@/services/secure-storage');
+          authToken = await SecureStorage.get('auth_token') || '';
+        } catch (error) {
+          console.log('Erro ao obter token do secure storage:', error);
+          // Fallback para localStorage
+          authToken = localStorage.getItem('authToken') || '';
+        }
+      } else {
+        // Web usa localStorage
+        authToken = localStorage.getItem('authToken') || '';
+      }
 
       console.log('=== INICIANDO UPLOAD ===');
       console.log('Endpoint:', endpoint);
+      console.log('Is Native App:', isNativeApp());
+      console.log('Base URL:', getApiBaseUrl());
       console.log('Tipo de usuário:', userType);
       console.log(`Tamanho final do arquivo: ${(finalBlob.size / 1024).toFixed(1)}KB`);
       console.log('Auth token presente:', !!authToken);
