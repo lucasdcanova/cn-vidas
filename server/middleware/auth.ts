@@ -14,6 +14,18 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
   console.log(`🔐 requireAuth - Verificando autenticação para ${req.method} ${req.path}`);
   console.log(`🔐 requireAuth - req.user:`, authReq.user ? `${authReq.user.id} (${authReq.user.role})` : 'undefined');
   
+  // Log adicional para debugging no iOS
+  if (req.path.includes('/profile')) {
+    console.log('🔐 requireAuth - Headers recebidos:', {
+      'x-auth-token': req.headers['x-auth-token'] ? 'PRESENTE' : 'AUSENTE',
+      'authorization': req.headers.authorization ? 'PRESENTE' : 'AUSENTE',
+      'x-request-source': req.headers['x-request-source'],
+      'x-platform': req.headers['x-platform'],
+      'x-session-id': req.headers['x-session-id']
+    });
+    console.log('🔐 requireAuth - Cookies:', req.cookies ? Object.keys(req.cookies) : 'NENHUM');
+  }
+  
   if (!authReq.user) {
     console.log(`❌ requireAuth - Usuário não autenticado para ${req.method} ${req.path}`);
     return res.status(401).json({ message: 'Não autorizado' });

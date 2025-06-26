@@ -49,6 +49,7 @@ import { EmergencyNotification } from '@/components/doctor/EmergencyNotification
 import { EmergencyAppointmentsListOptimized } from '@/components/doctor/EmergencyAppointmentsListOptimized';
 import { AutoRefreshIndicator } from '@/components/doctor/AutoRefreshIndicator';
 import { EmergencyAwareAppointmentsList } from '@/components/doctor/EmergencyAwareAppointmentsList';
+import TestDoctorAPI from '@/components/doctor/test-doctor-api';
 
 // Definimos uma versão simplificada do EmergencyBanner que não causa erros de hooks
 const EmergencyBanner = () => {
@@ -542,6 +543,9 @@ export default function DoctorTelemedicinePage() {
         </div>
         
         <EmergencyBanner />
+        
+        {/* Componente de teste para diagnóstico no iOS */}
+        <TestDoctorAPI />
         
         {/* Auto Refresh Indicator */}
         <AutoRefreshIndicator 

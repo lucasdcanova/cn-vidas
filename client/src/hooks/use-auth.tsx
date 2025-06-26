@@ -233,11 +233,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             window.location.href = "/onboarding/doctor";
             return;
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error("❌ [Login] Erro ao verificar perfil do médico:", error);
+          console.error("❌ [Login] Detalhes do erro:", {
+            status: error?.status,
+            message: error?.message,
+            code: error?.code,
+            errorObject: JSON.stringify(error)
+          });
+          
+          // Tentar uma segunda vez após pequeno delay (problema de timing no iOS)
+          console.log("🔄 [Login] Tentando buscar perfil novamente após 1 segundo...");
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          try {
+            const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
+              method: 'GET'
+            });
+            
+            console.log("✅ [Login] Segunda tentativa bem-sucedida:", {
+              id: doctorProfile.id,
+              onboardingCompleted: doctorProfile.onboardingCompleted
+            });
+            
+            if (doctorProfile.onboardingCompleted === true) {
+              console.log("✅ [Login] Segunda tentativa: Médico com onboarding completo");
+              window.location.href = "/doctor-telemedicine";
+              return;
+            } else {
+              console.log("⚠️ [Login] Segunda tentativa: Médico sem onboarding completo");
+              window.location.href = "/onboarding/doctor";
+              return;
+            }
+          } catch (secondError) {
+            console.error("❌ [Login] Segunda tentativa também falhou:", secondError);
+          }
           
           // Se for 404, redirecionar para onboarding
-          if (error && (error as any).status === 404) {
+          if (error?.status === 404) {
             console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /onboarding/doctor");
             window.location.href = "/onboarding/doctor";
             return;
@@ -358,11 +391,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             window.location.href = "/onboarding/doctor";
             return;
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error("❌ [Login] Erro ao verificar perfil do médico:", error);
+          console.error("❌ [Login] Detalhes do erro:", {
+            status: error?.status,
+            message: error?.message,
+            code: error?.code,
+            errorObject: JSON.stringify(error)
+          });
+          
+          // Tentar uma segunda vez após pequeno delay (problema de timing no iOS)
+          console.log("🔄 [Login] Tentando buscar perfil novamente após 1 segundo...");
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          try {
+            const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
+              method: 'GET'
+            });
+            
+            console.log("✅ [Login] Segunda tentativa bem-sucedida:", {
+              id: doctorProfile.id,
+              onboardingCompleted: doctorProfile.onboardingCompleted
+            });
+            
+            if (doctorProfile.onboardingCompleted === true) {
+              console.log("✅ [Login] Segunda tentativa: Médico com onboarding completo");
+              window.location.href = "/doctor-telemedicine";
+              return;
+            } else {
+              console.log("⚠️ [Login] Segunda tentativa: Médico sem onboarding completo");
+              window.location.href = "/onboarding/doctor";
+              return;
+            }
+          } catch (secondError) {
+            console.error("❌ [Login] Segunda tentativa também falhou:", secondError);
+          }
           
           // Se for 404, redirecionar para onboarding
-          if (error && (error as any).status === 404) {
+          if (error?.status === 404) {
             console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /onboarding/doctor");
             window.location.href = "/onboarding/doctor";
             return;
