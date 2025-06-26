@@ -16,6 +16,7 @@ import { getUnreadNotificationsCount, markAllNotificationsAsRead, getDoctorByUse
 import { getPlanColor } from "@/components/shared/plan-indicator";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Capacitor } from "@capacitor/core";
+import { isNativeApp } from "@/utils/platform";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -114,48 +115,53 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   });
   
   const unreadCount = notificationsData?.count || 0;
+  
+  // Determinar se deve mostrar a sidebar
+  const shouldShowSidebar = !(isNativeApp() && user?.role === "patient");
 
   return (
     <div className="flex h-screen overflow-hidden bg-blue-50">{/* Fundo azul claro sólido que corresponde à identidade visual */}
 
-      {/* Overlay when sidebar is open on mobile */}
-      {sidebarOpen && (
+      {/* Overlay when sidebar is open on mobile - não mostrar para pacientes no iOS */}
+      {shouldShowSidebar && sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity duration-300 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
       
-      {/* Sidebar for desktop */}
-      <aside className={`fixed inset-y-0 left-0 z-50 md:relative md:flex md:flex-col md:w-64 glass-sidebar shadow-lg transition-transform transform ${
-        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-      }`}>
-        <div className="p-5 border-b border-gray-100/50">
-          <div className="flex items-center space-x-2">
-            {/* Logo */}
-            <img 
-              src={cnvidasLogo} 
-              alt="CN Vidas" 
-              className="h-9 w-auto" 
-            />
-            
-            
-            {/* Close button on mobile */}
-            <button 
-              className="ml-auto md:hidden text-gray-500 hover:text-gray-700 transition-colors" 
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X className="h-5 w-5" />
-            </button>
+      {/* Sidebar for desktop - ocultar para pacientes no iOS */}
+      {shouldShowSidebar && (
+        <aside className={`fixed inset-y-0 left-0 z-50 md:relative md:flex md:flex-col md:w-64 glass-sidebar shadow-lg transition-transform transform ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}>
+          <div className="p-5 border-b border-gray-100/50">
+            <div className="flex items-center space-x-2">
+              {/* Logo */}
+              <img 
+                src={cnvidasLogo} 
+                alt="CN Vidas" 
+                className="h-9 w-auto" 
+              />
+              
+              
+              {/* Close button on mobile */}
+              <button 
+                className="ml-auto md:hidden text-gray-500 hover:text-gray-700 transition-colors" 
+                onClick={() => setSidebarOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
-        </div>
-        
-        <SidebarNavigation userRole={user?.role} subscriptionPlan={user?.subscriptionPlan} />
-        
-        <div className="mt-auto p-4 border-t border-gray-100/50">
-          <UserProfile user={userWithProfileImage} />
-        </div>
-      </aside>
+          
+          <SidebarNavigation userRole={user?.role} subscriptionPlan={user?.subscriptionPlan} />
+          
+          <div className="mt-auto p-4 border-t border-gray-100/50">
+            <UserProfile user={userWithProfileImage} />
+          </div>
+        </aside>
+      )}
 
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden relative z-10">
@@ -163,14 +169,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <header className="bg-white sticky top-0 z-10 shadow-sm border-b border-gray-100">
           <div className="md:hidden flex items-center justify-between p-4">
             <div className="flex items-center">
-              <button 
-                type="button" 
-                className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors"
-                onClick={() => setSidebarOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-              <div className="ml-3 flex items-center space-x-2">
+              {/* Mostrar botão de menu apenas quando houver sidebar */}
+              {shouldShowSidebar && (
+                <button 
+                  type="button" 
+                  className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors"
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              )}
+              <div className={shouldShowSidebar ? "ml-3 flex items-center space-x-2" : "flex items-center space-x-2"}>
                 <img 
                   src={cnvidasLogo} 
                   alt="CN Vidas" 
