@@ -63,16 +63,18 @@ import { tokenBlacklist } from "./utils/token-blacklist";
     const authReq = req as any;
     
     // Debug: log da requisição
-    if (req.url.includes('/api/subscription/current') || req.url.includes('/api/admin/')) {
+    if (req.url.includes('/api/subscription/current') || req.url.includes('/api/admin/') || req.url.includes('/api/doctors/profile')) {
       console.log('🔍 Middleware JWT Global - Processando:', req.url);
       console.log('🔍 Cookies:', req.cookies);
       console.log('🔍 Headers auth:', req.headers.authorization);
       console.log('🔍 Header x-auth-token:', req.headers['x-auth-token']);
+      console.log('🔍 Header x-request-source:', req.headers['x-request-source']);
+      console.log('🔍 Header x-platform:', req.headers['x-platform']);
     }
     
     // Se já está autenticado via sessão, continuar
     if (authReq.user) {
-      if (req.url.includes('/api/subscription/current') || req.url.includes('/api/admin/')) {
+      if (req.url.includes('/api/subscription/current') || req.url.includes('/api/admin/') || req.url.includes('/api/doctors/profile')) {
         console.log('✅ Já autenticado via sessão:', authReq.user.email);
       }
       return next();
@@ -85,17 +87,17 @@ import { tokenBlacklist } from "./utils/token-blacklist";
                       : null);
     
     if (authToken) {
-      if (req.url.includes('/api/subscription/current') || req.url.includes('/api/admin/')) {
+      if (req.url.includes('/api/subscription/current') || req.url.includes('/api/admin/') || req.url.includes('/api/doctors/profile')) {
         console.log('🔍 Token encontrado nos headers:', authToken.substring(0, 20) + '...');
       }
       try {
         const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
-        if (req.url.includes('/api/subscription/current')) {
+        if (req.url.includes('/api/subscription/current') || req.url.includes('/api/doctors/profile')) {
           console.log('🔍 Usando segredo JWT:', jwtSecret.substring(0, 10) + '...');
         }
         
         const decoded: any = jwt.verify(authToken, jwtSecret);
-        if (req.url.includes('/api/subscription/current')) {
+        if (req.url.includes('/api/subscription/current') || req.url.includes('/api/doctors/profile')) {
           console.log('🔍 Token decodificado:', decoded);
         }
         

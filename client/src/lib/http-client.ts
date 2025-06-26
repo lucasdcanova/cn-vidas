@@ -8,22 +8,50 @@ interface HttpOptions {
   data?: any;
 }
 
-export async function httpRequest(options: HttpOptions): Promise<Response> {
+interface HttpRequestOptions {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  headers?: Record<string, string>;
+  body?: any;
+}
+
+async function httpRequestInternal(options: HttpOptions): Promise<Response> {
   const { url, method, headers = {}, data } = options;
+  
+  // Obter tokens de autenticação
+  const authToken = localStorage.getItem('authToken');
+  const sessionId = localStorage.getItem('sessionID');
+  
+  // Construir headers com autenticação
+  const authHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...headers,
+  };
+  
+  // Adicionar tokens de autenticação se disponíveis
+  if (authToken) {
+    authHeaders['X-Auth-Token'] = authToken;
+    authHeaders['Authorization'] = `Bearer ${authToken}`;
+  }
+  
+  if (sessionId) {
+    authHeaders['X-Session-ID'] = sessionId;
+  }
   
   // Se estamos no iOS/Android, usar Http nativo
   if (Capacitor.isNativePlatform()) {
     try {
       const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
       console.log(`[Native HTTP] ${method} ${fullUrl}`);
+      console.log(`[Native HTTP] Headers:`, {
+        ...authHeaders,
+        'X-Auth-Token': authHeaders['X-Auth-Token'] ? 'PRESENTE' : 'AUSENTE',
+        'Authorization': authHeaders['Authorization'] ? 'PRESENTE' : 'AUSENTE'
+      });
       
       const response = await Http.request({
         url: fullUrl,
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers,
-        },
+        headers: authHeaders,
         data,
       });
       
@@ -43,11 +71,39 @@ export async function httpRequest(options: HttpOptions): Promise<Response> {
   // Se estamos na web, usar fetch normal
   return fetch(API_BASE_URL + url, {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers,
-    },
+    headers: authHeaders,
     body: data ? JSON.stringify(data) : undefined,
     credentials: 'include',
   });
+}
+
+// Exportar função principal
+export async function httpRequest(options: HttpOptions): Promise<Response>;
+export async function httpRequest<T = any>(url: string, options?: HttpRequestOptions): Promise<T>;
+export async function httpRequest<T = any>(urlOrOptions: string | HttpOptions, maybeOptions?: HttpRequestOptions): Promise<T | Response> {
+  // Se o primeiro argumento é uma string, é a versão antiga
+  if (typeof urlOrOptions === 'string') {
+    const url = urlOrOptions;
+    const options = maybeOptions || { method: 'GET' };
+    
+    const httpOptions: HttpOptions = {
+      url,
+      method: options.method,
+      headers: options.headers,
+      data: options.body
+    };
+    
+    const response = await httpRequestInternal(httpOptions);
+    
+    // Para a versão antiga, retornar o JSON parseado
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || `HTTP ${response.status}`);
+    }
+    
+    return response.json();
+  }
+  
+  // Se o primeiro argumento é um objeto, chamar a função principal
+  return httpRequestInternal(urlOrOptions as HttpOptions);
 }
