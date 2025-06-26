@@ -10,9 +10,13 @@ const router = Router();
 
 // Verificar se storage foi importado corretamente
 console.log('[Admin Routes] Storage importado:', !!storage);
+console.log('[Admin Routes] Storage type:', typeof storage);
 console.log('[Admin Routes] Storage é instância de DatabaseStorage:', storage?.constructor?.name);
 console.log('[Admin Routes] Tem método getAllPartners?', typeof storage?.getAllPartners === 'function');
 console.log('[Admin Routes] Tem método getAllServices?', typeof storage?.getAllServices === 'function');
+console.log('[Admin Routes] NODE_ENV:', process.env.NODE_ENV);
+console.log('[Admin Routes] DATABASE_URL definida?', !!process.env.DATABASE_URL);
+console.log('[Admin Routes] Timestamp:', new Date().toISOString());
 
 // Middleware para garantir que apenas admins acessem estas rotas
 router.use(requireAuth);
@@ -23,11 +27,22 @@ router.get('/health', async (req, res) => {
   res.json({ 
     status: 'ok', 
     message: 'Admin routes working',
-    version: '1.1.0', // Incrementar para verificar se está atualizado
+    version: '1.2.0', // Incrementar para verificar se está atualizado
     timestamp: new Date().toISOString(),
     routes: {
       partners: 'available',
       services: 'available'
+    },
+    storage: {
+      available: !!storage,
+      type: typeof storage,
+      constructor: storage?.constructor?.name,
+      hasGetAllPartners: typeof storage?.getAllPartners === 'function',
+      hasGetAllServices: typeof storage?.getAllServices === 'function'
+    },
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      hasDatabaseUrl: !!process.env.DATABASE_URL
     }
   });
 });
