@@ -33,6 +33,8 @@ import {
 } from "@/lib/api";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
+import { LogOut } from "lucide-react";
+import { Capacitor } from '@capacitor/core';
 import { useFreshUserData } from "@/hooks/use-fresh-user-data";
 import { 
   Loader2, 
@@ -153,7 +155,7 @@ interface Dependent {
 }
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -2084,6 +2086,43 @@ const Profile: React.FC = () => {
             {/* Card de Vendedor/Consultor - apenas para pacientes */}
             {user?.role === "patient" && (
               <SellerForm subscriptionChangedAt={profileData?.updatedAt} />
+            )}
+            
+            {/* Botão de Logout para iOS */}
+            {Capacitor.isNativePlatform() && (
+              <Card className="mt-6">
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="text-center">
+                      <h3 className="font-medium text-gray-900">Sair da Conta</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Desconecte-se da sua conta CN Vidas
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        logoutMutation.mutate();
+                      }}
+                      disabled={logoutMutation.isPending}
+                      className="w-full max-w-xs bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border-red-200"
+                    >
+                      {logoutMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saindo...
+                        </>
+                      ) : (
+                        <>
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Sair da Conta
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
         </Tabs>
