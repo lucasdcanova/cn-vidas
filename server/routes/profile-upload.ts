@@ -27,6 +27,9 @@ const removeOldImage = async (imagePath: string) => {
 // Upload de imagem de perfil geral (paciente)
 router.post('/upload-image', requireAuth, upload.single('profileImage'), async (req: AuthRequest, res) => {
   try {
+    // Garantir que sempre retornamos JSON
+    res.setHeader('Content-Type', 'application/json');
+    
     console.log('=== UPLOAD PROFILE IMAGE (PATIENT) ===');
     console.log('User ID:', req.user?.id);
     console.log('File received:', req.file ? {
