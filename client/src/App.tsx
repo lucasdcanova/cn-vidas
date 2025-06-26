@@ -259,6 +259,7 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <InstallPWA />
+            <IOSSessionGuard />
             <Router />
           </TooltipProvider>
         </AuthProvider>

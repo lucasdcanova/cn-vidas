@@ -193,6 +193,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Salvar os dados do usuário na cache
       queryClient.setQueryData(["/api/user"], userData);
       
+      // Para médicos, invalidar cache do perfil para forçar busca fresca
+      if (userData.role === "doctor") {
+        console.log("🔄 Invalidando cache do perfil do médico após login...");
+        queryClient.invalidateQueries({ queryKey: ['/api/doctors/profile'] });
+        queryClient.removeQueries({ queryKey: ['/api/doctors/profile'] });
+      }
+      
       // Redirecionar com base no papel do usuário
       if (userData.role === "admin") {
         console.log("Usuário é administrador, redirecionando para /admin/users");
@@ -299,6 +306,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Salvar os dados do usuário na cache
       queryClient.setQueryData(["/api/user"], userData);
+      
+      // Para médicos, invalidar cache do perfil para forçar busca fresca
+      if (userData.role === "doctor") {
+        console.log("🔄 Invalidando cache do perfil do médico após login com QR Code...");
+        queryClient.invalidateQueries({ queryKey: ['/api/doctors/profile'] });
+        queryClient.removeQueries({ queryKey: ['/api/doctors/profile'] });
+      }
       
       // Redirecionar com base no papel do usuário
       if (userData.role === "admin") {
