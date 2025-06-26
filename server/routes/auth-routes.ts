@@ -448,6 +448,8 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
       address: user.address,
       zipcode: user.zipcode,
       token: token,
+      authToken: token, // Para compatibilidade com o iOS
+      sessionId: `session_${user.id}_${Date.now()}`, // Para compatibilidade com o iOS
       message: 'Login realizado com sucesso'
     });
 
@@ -1031,6 +1033,11 @@ authRouter.get('/user', async (req: Request, res: Response) => {
       if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.replace('Bearer ', '');
       }
+    }
+    
+    // Se ainda não tiver, tentar X-Auth-Token (usado pelo iOS)
+    if (!token && req.headers['x-auth-token']) {
+      token = req.headers['x-auth-token'] as string;
     }
     
     if (!token) {

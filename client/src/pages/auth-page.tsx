@@ -53,6 +53,64 @@ const loginSchema = z.object({
 import { validateCPF, formatCPF, unformatCPF } from "@/lib/cpf-validator";
 import { validateCNPJ, formatCNPJ, unformatCNPJ } from "@/lib/cnpj-validator";
 import { useState as useStateHook, useEffect as useEffectHook } from 'react';
+import * as haptic from '@capacitor/haptics';
+
+// Função para processar o conteúdo e adicionar formatação
+const formatLegalContent = (content: string): React.ReactNode => {
+  // Processar linhas individualmente para preservar quebras de linha
+  const lines = content.split('\n');
+  
+  return lines.map((line, lineIndex) => {
+    // Processar cada linha para formatação
+    let processedLine: React.ReactNode = line;
+    
+    // Detectar títulos principais (linhas em maiúsculas ou começando com números romanos)
+    if (/^[IVX]+\.\s+/.test(line) || /^\d+\.\s+[A-Z]/.test(line) || /^[A-Z\s]{10,}$/.test(line.trim())) {
+      processedLine = <strong>{line}</strong>;
+    }
+    // Detectar cláusulas importantes
+    else if (/^(CLÁUSULA|Cláusula|PARÁGRAFO|Parágrafo|ARTIGO|Art\.)/.test(line)) {
+      processedLine = <strong>{line}</strong>;
+    }
+    // Detectar termos importantes para sublinhar
+    else if (line.length > 0) {
+      // Substituir termos importantes por versões sublinhadas
+      const importantTerms = [
+        /\b(IMPORTANTE|ATENÇÃO|OBSERVAÇÃO|NOTA)\b/gi,
+        /\b(obrigatório|obrigatória|necessário|necessária)\b/gi,
+        /\b(prazo|vencimento|validade|vigência)\b/gi,
+        /\b(multa|penalidade|sanção|descumprimento)\b/gi,
+        /\b(rescisão|cancelamento|término|encerramento)\b/gi,
+        /\b(responsabilidade|obrigação|dever)\b/gi,
+        /\b(carência|cobertura|exclusão)\b/gi,
+        /\b(não será|não serão|vedado|proibido)\b/gi
+      ];
+      
+      let processedText = line;
+      importantTerms.forEach(term => {
+        processedText = processedText.replace(term, (match) => `<u>${match}</u>`);
+      });
+      
+      // Converter o texto processado em React elements
+      if (processedText !== line) {
+        const parts = processedText.split(/(<u>.*?<\/u>)/g);
+        processedLine = parts.map((part, partIndex) => {
+          if (part.startsWith('<u>') && part.endsWith('</u>')) {
+            return <u key={partIndex}>{part.slice(3, -4)}</u>;
+          }
+          return part;
+        });
+      }
+    }
+    
+    return (
+      <React.Fragment key={lineIndex}>
+        {processedLine}
+        {lineIndex < lines.length - 1 && <br />}
+      </React.Fragment>
+    );
+  });
+};
 
 // Componentes para exibir conteúdo completo dos contratos
 const TermsOfUseContent = () => {
@@ -75,8 +133,8 @@ const TermsOfUseContent = () => {
   if (loading) return <div className="text-center py-4">Carregando...</div>;
   
   return (
-    <div className="prose prose-sm max-w-none">
-      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    <div className="bg-white text-black p-4">
+      <div className="font-sans text-sm leading-relaxed">{formatLegalContent(content)}</div>
     </div>
   );
 };
@@ -101,8 +159,8 @@ const PrivacyPolicyContent = () => {
   if (loading) return <div className="text-center py-4">Carregando...</div>;
   
   return (
-    <div className="prose prose-sm max-w-none">
-      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    <div className="bg-white text-black p-4">
+      <div className="font-sans text-sm leading-relaxed">{formatLegalContent(content)}</div>
     </div>
   );
 };
@@ -127,8 +185,8 @@ const AdhesionContractContent = () => {
   if (loading) return <div className="text-center py-4">Carregando...</div>;
   
   return (
-    <div className="prose prose-sm max-w-none">
-      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    <div className="bg-white text-black p-4">
+      <div className="font-sans text-sm leading-relaxed">{formatLegalContent(content)}</div>
     </div>
   );
 };
@@ -153,8 +211,8 @@ const PartnerContractContent = () => {
   if (loading) return <div className="text-center py-4">Carregando...</div>;
   
   return (
-    <div className="prose prose-sm max-w-none">
-      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    <div className="bg-white text-black p-4">
+      <div className="font-sans text-sm leading-relaxed">{formatLegalContent(content)}</div>
     </div>
   );
 };
@@ -179,8 +237,8 @@ const DoctorContractContent = () => {
   if (loading) return <div className="text-center py-4">Carregando...</div>;
   
   return (
-    <div className="prose prose-sm max-w-none">
-      <pre className="whitespace-pre-wrap font-sans text-sm text-gray-700">{content}</pre>
+    <div className="bg-white text-black p-4">
+      <div className="font-sans text-sm leading-relaxed">{formatLegalContent(content)}</div>
     </div>
   );
 };
@@ -1026,7 +1084,7 @@ const AuthPage: React.FC = () => {
                                   Termos de Uso
                                 </button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[80vh]">
+                              <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
                                 <DialogHeader>
                                   <DialogTitle>Termos de Uso - CN Vidas</DialogTitle>
                                   <DialogDescription>
@@ -1048,7 +1106,7 @@ const AuthPage: React.FC = () => {
                                   Política de Privacidade
                                 </button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[80vh]">
+                              <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
                                 <DialogHeader>
                                   <DialogTitle>Política de Privacidade - CN Vidas</DialogTitle>
                                   <DialogDescription>
@@ -1072,7 +1130,7 @@ const AuthPage: React.FC = () => {
                                       Contrato de Adesão dos Planos
                                     </button>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                                  <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
                                     <DialogHeader>
                                       <DialogTitle>Contrato de Adesão - Planos CN Vidas</DialogTitle>
                                       <DialogDescription>
@@ -1098,7 +1156,7 @@ const AuthPage: React.FC = () => {
                                       Contrato de Parceria
                                     </button>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                                  <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
                                     <DialogHeader>
                                       <DialogTitle>Contrato de Parceria - CN Vidas</DialogTitle>
                                       <DialogDescription>
@@ -1124,7 +1182,7 @@ const AuthPage: React.FC = () => {
                                       Contrato de Prestação de Serviços Médicos
                                     </button>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                                  <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
                                     <DialogHeader>
                                       <DialogTitle>Contrato de Prestação de Serviços Médicos</DialogTitle>
                                       <DialogDescription>
@@ -1151,7 +1209,7 @@ const AuthPage: React.FC = () => {
                                       Política de Gravação de Teleconsultas
                                     </button>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                                  <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
                                     <DialogHeader>
                                       <DialogTitle>Política de Gravação de Teleconsultas</DialogTitle>
                                     </DialogHeader>
