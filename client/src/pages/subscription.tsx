@@ -208,9 +208,11 @@ const SubscriptionPage: React.FC = () => {
             ${(() => {
               const subscription = userSubscription.subscription || userSubscription;
               const planName = subscription.plan?.name;
-              if (planName === 'premium' || planName === 'premium_family') return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white';
-              if (planName === 'basic' || planName === 'basic_family') return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
+              if (planName === 'premium' || planName === 'premium_family' || planName === 'family_plus') return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white';
+              if (planName === 'basic' || planName === 'basic_family' || planName === 'family_basic') return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
               if (planName === 'ultra' || planName === 'ultra_family') return 'bg-gradient-to-r from-violet-500 to-purple-600 text-white';
+              if (planName === 'standard') return 'bg-gradient-to-r from-blue-400 to-sky-500 text-white';
+              if (planName === 'medical') return 'bg-gradient-to-r from-indigo-500 to-slate-600 text-white';
               return 'bg-gradient-to-r from-gray-100 to-gray-200';
             })()}
           `}>
@@ -288,12 +290,61 @@ const SubscriptionPage: React.FC = () => {
             const isDowngrade = currentSubscription?.plan && 
                               currentSubscription.plan.price > plan.price;
             
+            // Função para obter as cores do plano
+            const getPlanColorClass = (planName: string) => {
+              // Planos Premium (dourado/laranja)
+              if (planName === 'premium' || planName === 'premium_family' || planName === 'family_plus') {
+                return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300';
+              }
+              // Planos Básicos (verde/esmeralda)
+              if (planName === 'basic' || planName === 'basic_family' || planName === 'family_basic') {
+                return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300';
+              }
+              // Planos Ultra (violeta/roxo)
+              if (planName === 'ultra' || planName === 'ultra_family') {
+                return 'bg-gradient-to-br from-violet-50 to-purple-50 border-violet-200 hover:border-violet-300';
+              }
+              // Plano Standard (azul)
+              if (planName === 'standard') {
+                return 'bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200 hover:border-blue-300';
+              }
+              // Plano Médico (indigo)
+              if (planName === 'medical') {
+                return 'bg-gradient-to-br from-indigo-50 to-slate-50 border-indigo-200 hover:border-indigo-300';
+              }
+              return 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200';
+            };
+
+            const getPlanHeaderClass = (planName: string) => {
+              // Planos Premium (dourado/laranja)
+              if (planName === 'premium' || planName === 'premium_family' || planName === 'family_plus') {
+                return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white';
+              }
+              // Planos Básicos (verde/esmeralda)
+              if (planName === 'basic' || planName === 'basic_family' || planName === 'family_basic') {
+                return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
+              }
+              // Planos Ultra (violeta/roxo)
+              if (planName === 'ultra' || planName === 'ultra_family') {
+                return 'bg-gradient-to-r from-violet-500 to-purple-600 text-white';
+              }
+              // Plano Standard (azul)
+              if (planName === 'standard') {
+                return 'bg-gradient-to-r from-blue-400 to-sky-500 text-white';
+              }
+              // Plano Médico (indigo)
+              if (planName === 'medical') {
+                return 'bg-gradient-to-r from-indigo-500 to-slate-600 text-white';
+              }
+              return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white';
+            };
+
             return (
               <Card 
                 key={plan.id} 
-                className={`relative overflow-hidden transition-all hover:shadow-lg ${
+                className={`relative overflow-hidden transition-all hover:shadow-lg border-2 ${
                   isCurrentPlan ? 'ring-2 ring-primary' : ''
-                }`}
+                } ${getPlanColorClass(plan.name)}`}
               >
                 {isCurrentPlan && (
                   <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-sm font-medium rounded-bl-lg">
@@ -301,18 +352,18 @@ const SubscriptionPage: React.FC = () => {
                   </div>
                 )}
                 
-                <CardHeader>
+                <CardHeader className={`${getPlanHeaderClass(plan.name)}`}>
                   <CardTitle className="flex items-center justify-between">
                     <span>{getPlanName(plan.name)}</span>
                     {plan.name.includes("family") && (
-                      <Users className="h-5 w-5 text-muted-foreground" />
+                      <Users className="h-5 w-5 opacity-80" />
                     )}
                   </CardTitle>
-                  <CardDescription>
-                    <span className="text-2xl font-bold">
+                  <CardDescription className="text-white/90">
+                    <span className="text-2xl font-bold text-white">
                       R$ {(plan.price / 100).toFixed(2)}
                     </span>
-                    <span className="text-muted-foreground">/mês</span>
+                    <span>/mês</span>
                   </CardDescription>
                 </CardHeader>
                 
@@ -338,7 +389,19 @@ const SubscriptionPage: React.FC = () => {
                     </Button>
                   ) : (
                     <Button 
-                      className="w-full" 
+                      className={`w-full ${
+                        !isDowngrade && (plan.name === 'premium' || plan.name === 'premium_family' || plan.name === 'family_plus') ? 
+                          'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white border-0' :
+                        !isDowngrade && (plan.name === 'basic' || plan.name === 'basic_family' || plan.name === 'family_basic') ? 
+                          'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0' :
+                        !isDowngrade && (plan.name === 'ultra' || plan.name === 'ultra_family') ? 
+                          'bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 text-white border-0' :
+                        !isDowngrade && plan.name === 'standard' ? 
+                          'bg-gradient-to-r from-blue-500 to-sky-600 hover:from-blue-600 hover:to-sky-700 text-white border-0' :
+                        !isDowngrade && plan.name === 'medical' ? 
+                          'bg-gradient-to-r from-indigo-600 to-slate-700 hover:from-indigo-700 hover:to-slate-800 text-white border-0' :
+                        ''
+                      }`}
                       onClick={() => {
                         setSelectedPlan({
                           id: plan.id,
