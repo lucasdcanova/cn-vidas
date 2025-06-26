@@ -155,17 +155,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Armazenar token de autenticação se disponível
       if (responseData.authToken) {
         console.log("Token de autenticação recebido:", responseData.authToken);
-        // Salvar no armazenamento seguro e localStorage como fallback
-        await secureStorage.save('auth_token', responseData.authToken);
+        // Sempre usar localStorage no iOS devido a problemas com SecureStorage
         localStorage.setItem("authToken", responseData.authToken);
+        
+        // Tentar salvar no armazenamento seguro, mas não falhar se der erro
+        try {
+          await secureStorage.save('auth_token', responseData.authToken);
+        } catch (error) {
+          console.warn("SecureStorage falhou, usando apenas localStorage:", error);
+        }
       }
       
       // Armazenar ID da sessão se disponível
       if (responseData.sessionId) {
         console.log("ID da sessão recebido:", responseData.sessionId);
-        // Salvar no armazenamento seguro e localStorage como fallback
-        await secureStorage.save('session_id', responseData.sessionId);
+        // Sempre usar localStorage no iOS devido a problemas com SecureStorage
         localStorage.setItem("sessionID", responseData.sessionId);
+        
+        // Tentar salvar no armazenamento seguro, mas não falhar se der erro
+        try {
+          await secureStorage.save('session_id', responseData.sessionId);
+        } catch (error) {
+          console.warn("SecureStorage falhou, usando apenas localStorage:", error);
+        }
       }
       
       // Armazenar dados do usuário localmente para autenticação alternativa em chamadas de emergência

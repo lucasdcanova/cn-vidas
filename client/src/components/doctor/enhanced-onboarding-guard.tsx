@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
 import { isNativeApp } from '@/utils/platform';
+import { httpRequest } from '@/lib/http-client';
 
 interface EnhancedDoctorOnboardingGuardProps {
   children: React.ReactNode;
