@@ -67,15 +67,21 @@ const legalDocuments: LegalDocument[] = [
   },
   {
     id: "adhesion-contract",
-    title: "Contrato de Adesão",
+    title: "Contrato de Adesão - Pacientes",
     filename: "adhesion-contract.md",
-    description: "Contrato que rege a relação entre a CN Vidas e seus assinantes, detalhando obrigações e direitos."
+    description: "Contrato que rege a relação entre a CN Vidas e seus assinantes, detalhando planos, coberturas, obrigações e direitos."
   },
   {
-    id: "plan-conditions",
-    title: "Condições dos Planos",
-    filename: "adhesion-contract.md", // Está no mesmo arquivo do contrato de adesão
-    description: "Descrição detalhada de cada plano, coberturas, limites, carências e condições específicas."
+    id: "partner-contract",
+    title: "Contrato de Parceria",
+    filename: "partner-contract.md",
+    description: "Termos de parceria para clínicas, laboratórios e profissionais de saúde que integram a rede CN Vidas."
+  },
+  {
+    id: "doctor-contract",
+    title: "Contrato de Prestação de Serviços Médicos",
+    filename: "doctor-contract.md",
+    description: "Contrato para médicos que prestam serviços de telemedicina através da plataforma CN Vidas."
   },
   {
     id: "cancellation-policy",
