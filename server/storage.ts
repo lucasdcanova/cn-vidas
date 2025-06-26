@@ -1,7 +1,7 @@
 import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, medicalRecords, medicalRecordEntries } from '../shared/schema';
 import { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, Dependent, InsertDependent, MedicalRecord, InsertMedicalRecord, MedicalRecordEntry, InsertMedicalRecordEntry, MedicalRecordAccess, InsertMedicalRecordAccess } from '@shared/types';
 import { PartnerAddress, InsertPartnerAddress } from './interfaces/partner';
-import { db } from "./db";
+import { db, safeQuery } from "./db";
 import { eq, and, gte, lte, desc, sql, count, or, gt, asc, inArray, ne } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -569,8 +569,10 @@ export class DatabaseStorage implements IStorage {
 
   // Partner methods
   async getPartner(id: number): Promise<Partner | undefined> {
-    const [partner] = await this.db.select().from(partners).where(eq(partners.id, id));
-    return partner as Partner;
+    const result = await safeQuery(() => 
+      this.db.select().from(partners).where(eq(partners.id, id))
+    );
+    return result[0] as Partner;
   }
 
   async getPartnerByUserId(userId: number): Promise<Partner | undefined> {
@@ -596,7 +598,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllPartners(): Promise<Partner[]> {
-    return this.db.select().from(partners);
+    return safeQuery(() => this.db.select().from(partners));
   }
 
   // Partner Address methods
@@ -1473,7 +1475,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllServices(): Promise<any[]> {
-    const result = await this.db.select().from(partnerServices).orderBy(desc(partnerServices.createdAt));
+    const result = await safeQuery(() => 
+      this.db.select().from(partnerServices).orderBy(desc(partnerServices.createdAt))
+    );
     return result;
   }
 
