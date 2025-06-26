@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
 import { db } from '../db';
@@ -8,6 +8,27 @@ import { requireAuth, requireDoctor, requirePartner, AuthRequest } from '../midd
 import { profileImageUpload, removeFile } from '../middleware/multer-config';
 
 const router = Router();
+
+// Middleware para garantir que sempre retornamos JSON
+const ensureJson = (req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('Content-Type', 'application/json');
+  
+  // Interceptar res.send para garantir JSON
+  const originalSend = res.send;
+  res.send = function(data: any) {
+    if (typeof data === 'string' && (data.startsWith('<!DOCTYPE') || data.startsWith('<html'))) {
+      console.error('⚠️ Tentativa de enviar HTML em rota de upload:', req.path);
+      return originalSend.call(this, JSON.stringify({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: 'Resposta HTML detectada'
+      }));
+    }
+    return originalSend.call(this, data);
+  };
+  
+  next();
+};
 
 // Usar a configuração centralizada do multer
 const upload = profileImageUpload;
@@ -25,10 +46,8 @@ const removeOldImage = async (imagePath: string) => {
 };
 
 // Upload de imagem de perfil geral (paciente)
-router.post('/upload-image', requireAuth, upload.single('profileImage'), async (req: AuthRequest, res) => {
+router.post('/upload-image', ensureJson, requireAuth, upload.single('profileImage'), async (req: AuthRequest, res) => {
   try {
-    // Garantir que sempre retornamos JSON
-    res.setHeader('Content-Type', 'application/json');
     
     console.log('=== UPLOAD PROFILE IMAGE (PATIENT) ===');
     console.log('User ID:', req.user?.id);
@@ -119,7 +138,7 @@ router.post('/upload-image', requireAuth, upload.single('profileImage'), async (
 });
 
 // Upload de imagem para médicos
-router.post('/doctors/profile-image', requireDoctor, upload.single('profileImage'), async (req: AuthRequest, res) => {
+router.post('/doctors/profile-image', ensureJson, requireDoctor, upload.single('profileImage'), async (req: AuthRequest, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ 
@@ -182,7 +201,7 @@ router.post('/doctors/profile-image', requireDoctor, upload.single('profileImage
 });
 
 // Upload de imagem para parceiros
-router.post('/partners/profile-image', requirePartner, upload.single('profileImage'), async (req: AuthRequest, res) => {
+router.post('/partners/profile-image', ensureJson, requirePartner, upload.single('profileImage'), async (req: AuthRequest, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ 
@@ -364,6 +383,15 @@ router.delete('/partners/remove-profile-image', requirePartner, async (req: Auth
       message: error.message || 'Erro interno do servidor'
     });
   }
+});
+
+// Rota de teste para verificar se a API está respondendo JSON
+router.get('/test-json', ensureJson, (req, res) => {
+  res.json({
+    success: true,
+    message: 'API respondendo corretamente em JSON',
+    timestamp: new Date().toISOString()
+  });
 });
 
 export default router; 
