@@ -132,13 +132,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
   );
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr] lg:grid-cols-[280px_1fr] xl:grid-cols-[320px_1fr]">
+    <div className="flex h-screen w-full overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden border-r bg-muted/40 md:block">
+      <div className="hidden border-r bg-muted/40 md:block md:w-[240px] lg:w-[280px] xl:w-[320px] flex-shrink-0">
         <SidebarContent />
       </div>
 
-      <div className="flex flex-col min-w-0">
+      <div className="flex flex-col flex-1 min-w-0 h-full">
         {/* Mobile Header */}
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 md:hidden flex-shrink-0">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -178,9 +178,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-hidden min-h-0">
-          <div className="w-full max-w-none overflow-auto flex-1">
+        {/* Main Content - Improved scrolling -->*/}
+        <main className="flex-1 overflow-y-auto bg-background">
+          <div className="container mx-auto p-4 lg:p-6 max-w-full">
             {children}
           </div>
         </main>
