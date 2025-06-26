@@ -151,6 +151,11 @@ class BiometricAuthService {
   }
 
   getBiometryTypeName(): string {
+    // No iOS, sempre mostrar Face ID como padrão
+    if (Capacitor.getPlatform() === 'ios') {
+      return 'Face ID';
+    }
+    
     switch (this.biometryType) {
       case 'touchId':
         return 'Touch ID';
