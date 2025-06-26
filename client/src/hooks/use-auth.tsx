@@ -206,37 +206,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.href = "/admin/users";
       } else if (userData.role === "doctor") {
         // Verificar se o médico completou o onboarding
-        console.log("Usuário é médico, verificando status de onboarding...");
+        console.log("🏥 [Login] Usuário é médico, verificando status de onboarding...");
+        console.log("📱 [Login] Plataforma:", isNativeApp() ? 'iOS' : 'Web');
+        
         try {
-          const profileResponse = await fetch('/api/doctors/profile', {
-            credentials: 'include',
-            headers: {
-              'Authorization': `Bearer ${userData.authToken || localStorage.getItem('authToken')}`
-            }
+          // No iOS, usar httpRequest para garantir headers corretos
+          const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
+            method: 'GET'
           });
           
-          if (profileResponse.ok) {
-            const doctorProfile = await profileResponse.json();
-            if (!doctorProfile.onboardingCompleted) {
-              console.log("Médico não completou onboarding, redirecionando para /onboarding/doctor");
-              window.location.href = "/onboarding/doctor";
-              return;
-            }
-          } else if (profileResponse.status === 404) {
-            // Se o perfil não existe, redirecionar para onboarding
-            console.log("Perfil de médico não encontrado, redirecionando para /onboarding/doctor");
+          console.log('📊 [Login] Perfil do médico recebido:', {
+            id: doctorProfile.id,
+            userId: doctorProfile.userId,
+            onboardingCompleted: doctorProfile.onboardingCompleted,
+            onboardingCompletedType: typeof doctorProfile.onboardingCompleted,
+            profileExists: !!doctorProfile
+          });
+          
+          // IMPORTANTE: Verificação explícita de onboardingCompleted
+          if (doctorProfile.onboardingCompleted === true) {
+            console.log("✅ [Login] Médico com onboarding completo, redirecionando para /doctor-telemedicine");
+            window.location.href = "/doctor-telemedicine";
+            return;
+          } else {
+            console.log("⚠️ [Login] Médico não completou onboarding (onboardingCompleted =", doctorProfile.onboardingCompleted, "), redirecionando para /onboarding/doctor");
             window.location.href = "/onboarding/doctor";
             return;
           }
         } catch (error) {
-          console.error("Erro ao verificar perfil do médico:", error);
-          // Em caso de erro, redirecionar para onboarding por segurança
+          console.error("❌ [Login] Erro ao verificar perfil do médico:", error);
+          
+          // Se for 404, redirecionar para onboarding
+          if (error && (error as any).status === 404) {
+            console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /onboarding/doctor");
+            window.location.href = "/onboarding/doctor";
+            return;
+          }
+          
+          // Em caso de outro erro, também redirecionar para onboarding por segurança
+          console.log("🚨 [Login] Erro desconhecido, redirecionando para /onboarding/doctor por segurança");
           window.location.href = "/onboarding/doctor";
           return;
         }
-        
-        console.log("Médico com onboarding completo, redirecionando para /doctor-telemedicine");
-        window.location.href = "/doctor-telemedicine";
       } else if (userData.role === "partner") {
         console.log("Usuário é parceiro, redirecionando para /partner/dashboard");
         window.location.href = "/partner/dashboard";
@@ -320,37 +331,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.href = "/admin/users";
       } else if (userData.role === "doctor") {
         // Verificar se o médico completou o onboarding
-        console.log("Usuário é médico, verificando status de onboarding...");
+        console.log("🏥 [Login] Usuário é médico, verificando status de onboarding...");
+        console.log("📱 [Login] Plataforma:", isNativeApp() ? 'iOS' : 'Web');
+        
         try {
-          const profileResponse = await fetch('/api/doctors/profile', {
-            credentials: 'include',
-            headers: {
-              'Authorization': `Bearer ${userData.authToken || localStorage.getItem('authToken')}`
-            }
+          // No iOS, usar httpRequest para garantir headers corretos
+          const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
+            method: 'GET'
           });
           
-          if (profileResponse.ok) {
-            const doctorProfile = await profileResponse.json();
-            if (!doctorProfile.onboardingCompleted) {
-              console.log("Médico não completou onboarding, redirecionando para /onboarding/doctor");
-              window.location.href = "/onboarding/doctor";
-              return;
-            }
-          } else if (profileResponse.status === 404) {
-            // Se o perfil não existe, redirecionar para onboarding
-            console.log("Perfil de médico não encontrado, redirecionando para /onboarding/doctor");
+          console.log('📊 [Login] Perfil do médico recebido:', {
+            id: doctorProfile.id,
+            userId: doctorProfile.userId,
+            onboardingCompleted: doctorProfile.onboardingCompleted,
+            onboardingCompletedType: typeof doctorProfile.onboardingCompleted,
+            profileExists: !!doctorProfile
+          });
+          
+          // IMPORTANTE: Verificação explícita de onboardingCompleted
+          if (doctorProfile.onboardingCompleted === true) {
+            console.log("✅ [Login] Médico com onboarding completo, redirecionando para /doctor-telemedicine");
+            window.location.href = "/doctor-telemedicine";
+            return;
+          } else {
+            console.log("⚠️ [Login] Médico não completou onboarding (onboardingCompleted =", doctorProfile.onboardingCompleted, "), redirecionando para /onboarding/doctor");
             window.location.href = "/onboarding/doctor";
             return;
           }
         } catch (error) {
-          console.error("Erro ao verificar perfil do médico:", error);
-          // Em caso de erro, redirecionar para onboarding por segurança
+          console.error("❌ [Login] Erro ao verificar perfil do médico:", error);
+          
+          // Se for 404, redirecionar para onboarding
+          if (error && (error as any).status === 404) {
+            console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /onboarding/doctor");
+            window.location.href = "/onboarding/doctor";
+            return;
+          }
+          
+          // Em caso de outro erro, também redirecionar para onboarding por segurança
+          console.log("🚨 [Login] Erro desconhecido, redirecionando para /onboarding/doctor por segurança");
           window.location.href = "/onboarding/doctor";
           return;
         }
-        
-        console.log("Médico com onboarding completo, redirecionando para /doctor-telemedicine");
-        window.location.href = "/doctor-telemedicine";
       } else if (userData.role === "partner") {
         console.log("Usuário é parceiro, redirecionando para /partner/dashboard");
         window.location.href = "/partner/dashboard";

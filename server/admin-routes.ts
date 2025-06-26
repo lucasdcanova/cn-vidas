@@ -3,6 +3,7 @@ import { requireAuth, requireAdmin } from './middleware/auth';
 import { AuthenticatedRequest } from './types';
 import fs from 'fs';
 import path from 'path';
+import { storage } from './storage';
 
 const router = Router();
 
@@ -27,7 +28,6 @@ router.get('/health', async (req, res) => {
 // Admin routes with real implementations
 router.get('/users', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     const users = await storage.getAllUsers();
     // Remove passwords before sending
     const usersWithoutPassword = users.map(({ password, ...user }) => user);
@@ -53,7 +53,6 @@ router.post('/users', async (req, res) => {
       return res.status(400).json({ error: 'Invalid role' });
     }
     
-    const { storage } = await import('./storage');
     
     // Verificar se o email já existe
     const existingUser = await storage.getUserByEmail(userData.email);
@@ -134,7 +133,6 @@ async function updateUserHandler(req: Request, res: Response) {
       data: updateData
     });
     
-    const { storage } = await import('./storage');
     
     // Verificar se o usuário existe
     const user = await storage.getUserById(parseInt(id));
@@ -267,7 +265,6 @@ async function updateUserHandler(req: Request, res: Response) {
 router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { storage } = await import('./storage');
     
     // Verificar se o usuário existe
     const user = await storage.getUserById(parseInt(id));
@@ -311,11 +308,13 @@ router.put('/claims/:id', async (req, res) => {
 
 router.get('/partners', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
+    console.log('[Admin Partners] Iniciando busca de parceiros...');
     const partners = await storage.getAllPartners();
+    console.log(`[Admin Partners] ${partners.length} parceiros encontrados`);
     res.json(partners);
   } catch (error) {
-    console.error('Error in admin partners route:', error);
+    console.error('[Admin Partners] Erro detalhado:', error);
+    console.error('[Admin Partners] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -361,10 +360,12 @@ router.delete('/partners/:id', async (req, res) => {
 
 router.get('/services', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
+    console.log('[Admin Services] Iniciando busca de serviços...');
     const services = await storage.getAllServices();
+    console.log(`[Admin Services] ${services.length} serviços encontrados`);
     
     // Enrich services with partner names
+    console.log('[Admin Services] Buscando parceiros para enriquecer dados...');
     const partners = await storage.getAllPartners();
     const partnersMap = new Map(partners.map(p => [p.id, p]));
     
@@ -373,9 +374,11 @@ router.get('/services', async (req, res) => {
       partnerName: partnersMap.get(service.partnerId)?.businessName || 'Parceiro Desconhecido'
     }));
     
+    console.log('[Admin Services] Retornando serviços enriquecidos');
     res.json(enrichedServices);
   } catch (error) {
-    console.error('Error in admin services route:', error);
+    console.error('[Admin Services] Erro detalhado:', error);
+    console.error('[Admin Services] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -389,7 +392,6 @@ router.post('/services', async (req, res) => {
       return res.status(400).json({ error: 'Partner ID and name are required' });
     }
     
-    const { storage } = await import('./storage');
     
     // Verificar se o parceiro existe
     const partner = await storage.getPartner(parseInt(serviceData.partnerId));
@@ -423,7 +425,6 @@ router.put('/services/:id', async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
     
-    const { storage } = await import('./storage');
     
     // Verificar se o serviço existe
     const service = await storage.getService(parseInt(id));
@@ -453,7 +454,6 @@ router.patch('/services/:id', async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
     
-    const { storage } = await import('./storage');
     
     // Verificar se o serviço existe
     const service = await storage.getService(parseInt(id));
@@ -480,7 +480,6 @@ router.patch('/services/:id', async (req, res) => {
 router.delete('/services/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { storage } = await import('./storage');
     
     // Verificar se o serviço existe
     const service = await storage.getService(parseInt(id));
@@ -507,7 +506,6 @@ router.patch('/services/:id/feature', async (req, res) => {
     const { id } = req.params;
     const { isFeatured } = req.body;
     
-    const { storage } = await import('./storage');
     
     // Verificar se o serviço existe
     const service = await storage.getService(parseInt(id));
@@ -529,7 +527,6 @@ router.patch('/services/:id/feature', async (req, res) => {
 
 router.get('/pending-claims', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     const claims = await storage.getPendingClaims();
     res.json(claims);
   } catch (error) {
@@ -540,7 +537,6 @@ router.get('/pending-claims', async (req, res) => {
 
 router.get('/claims', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     const claims = await storage.getAllClaims();
     res.json(claims);
   } catch (error) {
@@ -553,7 +549,6 @@ router.patch('/claims/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-    const { storage } = await import('./storage');
     
     // Verificar se o claim existe
     const claim = await storage.getClaim(parseInt(id));
@@ -582,7 +577,6 @@ router.patch('/claims/:id', async (req, res) => {
 router.delete('/claims/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { storage } = await import('./storage');
     
     // Verificar se o claim existe
     const claim = await storage.getClaim(parseInt(id));
@@ -606,7 +600,6 @@ router.delete('/claims/:id', async (req, res) => {
 
 router.get('/analytics/overview', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     
     // Obter dados reais
     const allUsers = await storage.getAllUsers();
@@ -657,7 +650,6 @@ router.get('/analytics/overview', async (req, res) => {
 // Rota para dados de crescimento mensal
 router.get('/analytics/growth', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     const { months = 6 } = req.query;
     
     const allUsers = await storage.getAllUsers();
@@ -693,7 +685,6 @@ router.get('/analytics/growth', async (req, res) => {
 // Rota para dados de receita
 router.get('/analytics/revenue', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     const { months = 6 } = req.query;
     
     const allUsers = await storage.getAllUsers();
@@ -773,7 +764,6 @@ router.patch('/users/:id/subscription', async (req, res) => {
     const { id } = req.params;
     const { subscriptionPlan, subscriptionStatus } = req.body;
     
-    const { storage } = await import('./storage');
     
     // Verificar se o usuário existe
     const user = await storage.getUserById(parseInt(id));
@@ -829,7 +819,6 @@ router.get('/subscription-stats', async (req, res) => {
 // Rota para estatísticas gerais do admin
 router.get('/stats', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     
     // Get all users to count by role
     const allUsers = await storage.getAllUsers();
@@ -856,7 +845,6 @@ router.get('/stats', async (req, res) => {
 // Rota para usuários recentes
 router.get('/recent-users', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     const users = await storage.getAllUsers();
     
     // Sort by createdAt descending and take the first 10
@@ -888,7 +876,6 @@ router.get('/recent-appointments', async (req, res) => {
 router.get('/qr-auth-logs', async (req, res) => {
   try {
     console.log('📋 Buscando logs de autenticação QR...');
-    const { storage } = await import('./storage');
     const logs = await storage.getQrAuthLogs();
     console.log(`✅ ${logs.length} logs encontrados`);
     res.json(logs);
@@ -905,7 +892,6 @@ router.get('/sellers', async (req, res) => {
     const sellers = await getAllSellers();
     
     // Contar quantos usuários cada vendedor tem por plano e status
-    const { storage } = await import('./storage');
     const sellersWithStats = await Promise.all(
       sellers.map(async (sellerName) => {
         // Buscar usuários deste vendedor
@@ -979,7 +965,6 @@ router.get('/sellers/stats', async (req, res) => {
 // Rotas para gerenciar perfis médicos
 router.get('/doctors', async (req, res) => {
   try {
-    const { storage } = await import('./storage');
     
     // Get all users with doctor role
     const allUsers = await storage.getAllUsers();
@@ -1020,7 +1005,6 @@ router.patch('/doctors/:id', async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
     
-    const { storage } = await import('./storage');
     
     // Verificar se o médico existe
     const doctor = await storage.getDoctor(parseInt(id));
@@ -1044,7 +1028,6 @@ router.put('/doctors/:id/availability', async (req, res) => {
     const { id } = req.params;
     const { slots } = req.body;
     
-    const { storage } = await import('./storage');
     
     // Verificar se o médico existe
     const doctor = await storage.getDoctor(parseInt(id));
@@ -1075,7 +1058,6 @@ router.put('/doctors/:id/availability', async (req, res) => {
 router.get('/user-for-dependents/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const { storage } = await import('./storage');
     
     const user = await storage.getUserById(parseInt(userId));
     if (!user) {
@@ -1093,7 +1075,6 @@ router.get('/user-for-dependents/:userId', async (req, res) => {
 router.get('/user-dependents/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const { storage } = await import('./storage');
     
     // Verificar se o usuário existe
     const user = await storage.getUserById(parseInt(userId));
@@ -1115,7 +1096,6 @@ router.post('/user-dependents/:userId', async (req, res) => {
     const { userId } = req.params;
     const dependentData = req.body;
     
-    const { storage } = await import('./storage');
     
     // Verificar se o usuário existe e é paciente
     const user = await storage.getUserById(parseInt(userId));
@@ -1145,7 +1125,6 @@ router.put('/user-dependents/:id', async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
     
-    const { storage } = await import('./storage');
     
     // Verificar se o dependente existe
     const dependent = await storage.getDependent(parseInt(id));
@@ -1173,7 +1152,6 @@ router.put('/user-dependents/:id', async (req, res) => {
 router.delete('/user-dependents/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { storage } = await import('./storage');
     
     // Verificar se o dependente existe
     const dependent = await storage.getDependent(parseInt(id));
@@ -1201,7 +1179,6 @@ router.post('/users/:id/premium-access', async (req: AuthenticatedRequest, res: 
       return res.status(400).json({ error: 'Plan and reason are required' });
     }
     
-    const { storage } = await import('./storage');
     const user = await storage.getUserById(parseInt(id));
     
     if (!user) {
@@ -1267,7 +1244,6 @@ router.post('/cleanup-missing-images', async (req: AuthenticatedRequest, res: Re
   try {
     console.log('🧹 Iniciando limpeza de imagens inexistentes...');
 
-    const { storage } = await import('./storage');
     
     // Buscar todos os usuários com imagem de perfil
     const usersWithImages = await storage.getUsersWithProfileImages();
@@ -1341,7 +1317,6 @@ router.get('/partners', async (req: AuthenticatedRequest, res: Response) => {
   console.log('User:', req.user?.email, 'Role:', req.user?.role);
   
   try {
-    const { storage } = await import('./storage');
     console.log('Storage imported successfully');
     
     const partners = await storage.getAllPartners();
@@ -1365,7 +1340,6 @@ router.get('/services', async (req: AuthenticatedRequest, res: Response) => {
   console.log('User:', req.user?.email, 'Role:', req.user?.role);
   
   try {
-    const { storage } = await import('./storage');
     console.log('Storage imported successfully');
     
     const services = await storage.getAllServices();
