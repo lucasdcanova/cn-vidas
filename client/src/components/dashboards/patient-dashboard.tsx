@@ -182,28 +182,30 @@ export const PatientDashboard: React.FC = () => {
             
             <div className="relative z-10 p-12 md:p-16">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                      <div className="w-1.5 h-1.5 bg-primary/70 rounded-full"></div>
-                      <div className="w-1 h-1 bg-primary/40 rounded-full"></div>
-                    </div>
-                    <h1 className="text-3xl font-light text-gray-900">
-                      Olá, <span className="font-semibold text-primary bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">{user?.fullName}</span>
-                    </h1>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                    <div className="w-1.5 h-1.5 bg-primary/70 rounded-full"></div>
+                    <div className="w-1 h-1 bg-primary/40 rounded-full"></div>
                   </div>
-                  {isIOS && qrData?.qrCode && user && (
-                    <WalletQRCard
-                      userName={user.fullName || user.username || ''}
-                      userEmail={user.email || ''}
-                      userId={user.id}
-                      planType={user.subscriptionPlan || 'basic'}
-                      qrCode={qrData.qrCode}
-                    />
-                  )}
+                  <h1 className="text-3xl font-light text-gray-900">
+                    Olá, <span className="font-semibold text-primary bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">{user?.fullName}</span>
+                  </h1>
                 </div>
               </div>
+              
+              {/* QR Code button - positioned at bottom right */}
+              {isIOS && qrData?.qrCode && user && (
+                <div className="absolute bottom-4 right-4">
+                  <WalletQRCard
+                    userName={user.fullName || user.username || ''}
+                    userEmail={user.email || ''}
+                    userId={user.id}
+                    planType={user.subscriptionPlan || 'basic'}
+                    qrCode={qrData.qrCode}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
