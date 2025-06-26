@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth';
 import { AppError } from '../utils/app-error';
@@ -10,6 +10,33 @@ import path from 'path';
 import fs from 'fs';
 
 const partnerRouter = express.Router();
+
+// Middleware de log para todas as rotas de parceiro
+partnerRouter.use((req: Request, res: Response, next: NextFunction) => {
+  console.log('📨 [Partner Router] Requisição recebida:', {
+    method: req.method,
+    path: req.path,
+    url: req.url,
+    headers: {
+      'content-type': req.headers['content-type'],
+      'x-auth-token': req.headers['x-auth-token'] ? 'presente' : 'ausente',
+      'authorization': req.headers.authorization ? 'presente' : 'ausente'
+    }
+  });
+  next();
+});
+
+/**
+ * Rota de teste para debug
+ * GET /api/partners/test
+ */
+partnerRouter.get('/test', (req: Request, res: Response) => {
+  console.log('🧪 [Partner /test] Rota de teste acessada');
+  res.json({ 
+    message: 'Rota de parceiro funcionando',
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * Middleware para verificar se o usuário é um parceiro
@@ -29,6 +56,27 @@ const requirePartner = (req: AuthenticatedRequest, res: Response, next: Function
   console.log('✅ [requirePartner] Acesso permitido para parceiro');
   next();
 };
+
+/**
+ * Rota de debug para verificar autenticação
+ * GET /api/partners/debug-auth
+ */
+partnerRouter.get('/debug-auth', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  console.log('🐛 [Partner /debug-auth] Debug de autenticação');
+  res.json({
+    user: req.user ? {
+      id: req.user.id,
+      email: req.user.email,
+      role: req.user.role,
+      fullName: req.user.fullName
+    } : null,
+    headers: {
+      authorization: req.headers.authorization,
+      'x-auth-token': req.headers['x-auth-token'],
+      'x-session-id': req.headers['x-session-id']
+    }
+  });
+});
 
 /**
  * Obter parceiro pelo userId do usuário logado
@@ -668,6 +716,23 @@ partnerRouter.put('/addresses/:id/set-primary', requireAuth, requirePartner, asy
   } catch (error) {
     console.error('Erro ao definir endereço principal:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Middleware de tratamento de erros para rotas de parceiro
+partnerRouter.use((error: any, req: Request, res: Response, next: NextFunction) => {
+  console.error('❌ [Partner Router] Erro não tratado:', {
+    message: error.message,
+    stack: error.stack,
+    path: req.path,
+    method: req.method
+  });
+  
+  if (!res.headersSent) {
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
