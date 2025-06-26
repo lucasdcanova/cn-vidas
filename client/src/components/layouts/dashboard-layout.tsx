@@ -188,6 +188,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               </div>
             </div>
             <div className="flex items-center space-x-2">
+              {/* Link para Financeiro - apenas para médicos */}
+              {user?.role === "doctor" && (
+                <>
+                  <Link to="/doctor-financeiro">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                      title="Financeiro"
+                    >
+                      <DollarSign className="h-5 w-5 text-gray-600" />
+                    </Button>
+                  </Link>
+                  <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                </>
+              )}
+              
               {/* Ícones de configurações e ajuda apenas para pacientes */}
               {user?.role === "patient" && (
                 <>
@@ -221,6 +238,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
             </div>
             <div className="flex items-center ml-4 space-x-3">
+              {/* Link para Financeiro - apenas para médicos */}
+              {user?.role === "doctor" && (
+                <Link to="/doctor-financeiro">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-all duration-300 ease-out"
+                    title="Financeiro"
+                  >
+                    <DollarSign className="h-5 w-5 text-gray-700" />
+                  </Button>
+                </Link>
+              )}
+              
               {/* Link para Configurações */}
               <Link to={user?.role === "doctor" ? "/doctor/settings" : "/settings"}>
                 <Button 
