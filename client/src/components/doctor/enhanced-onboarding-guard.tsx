@@ -17,22 +17,41 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
   // Get doctor profile to check if onboarding is complete
   const { data: doctorProfile, isLoading, error } = useQuery({
     queryKey: ['/api/doctors/profile'],
-    queryFn: ({ signal }) => 
-      fetch('/api/doctors/profile', { 
-        signal,
-        credentials: 'include' 
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Falha ao buscar perfil');
-          return res.json();
-        }),
+    queryFn: async ({ signal }) => {
+      try {
+        // No iOS, usar httpRequest para garantir envio de tokens
+        if (isNativeApp()) {
+          console.log('🔍 [EnhancedDoctorOnboardingGuard] Buscando perfil via httpRequest...');
+          return await httpRequest<any>('/api/doctors/profile', {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            }
+          });
+        }
+        
+        // Na web, usar fetch normal
+        const res = await fetch('/api/doctors/profile', { 
+          signal,
+          credentials: 'include' 
+        });
+        
+        if (!res.ok) throw new Error('Falha ao buscar perfil');
+        return res.json();
+      } catch (error: any) {
+        console.error('❌ [EnhancedDoctorOnboardingGuard] Erro ao buscar perfil:', error);
+        throw error;
+      }
+    },
     enabled: !!user && user.role === 'doctor',
     // Forçar busca fresca no iOS para evitar dados desatualizados
     staleTime: 0,
     cacheTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    gcTime: 0 // Garante que não use garbage collection
+    gcTime: 0, // Garante que não use garbage collection
+    retry: 2, // Tentar 2 vezes em caso de erro
+    retryDelay: 1000 // Aguardar 1 segundo entre tentativas
   });
 
   useEffect(() => {
