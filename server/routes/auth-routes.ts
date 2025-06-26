@@ -841,7 +841,7 @@ authRouter.post('/resend-verification', async (req: Request, res: Response) => {
       userId: user.id,
       expiresAt,
       createdAt: new Date(),
-    });
+    }));
 
     // Enviar email de verificação
     await sendVerificationEmail(email, token);
@@ -887,7 +887,7 @@ authRouter.post('/forgot-password', async (req: Request, res: Response) => {
       userId: user.id,
       expiresAt,
       createdAt: new Date(),
-    });
+    }));
 
     // Enviar email de redefinição de senha
     await sendPasswordResetEmail(email, token);
@@ -1074,9 +1074,11 @@ authRouter.get('/user', async (req: Request, res: Response) => {
     }
     
     // Buscar dados atualizados do usuário no banco
-    const result = await db.select()
-    .from(users)
-    .where(eq(users.id, decoded.userId));
+    const result = await safeQuery(() => 
+      db.select()
+      .from(users)
+      .where(eq(users.id, decoded.userId))
+    );
     
     const user = result[0];
     
