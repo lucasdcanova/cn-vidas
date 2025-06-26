@@ -1029,29 +1029,12 @@ const AuthPage: React.FC = () => {
                               <DialogContent className="max-w-4xl max-h-[80vh]">
                                 <DialogHeader>
                                   <DialogTitle>Termos de Uso - CN Vidas</DialogTitle>
+                                  <DialogDescription>
+                                    Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-blue-600 hover:underline">Central de Documentos</a>
+                                  </DialogDescription>
                                 </DialogHeader>
                                 <ScrollArea className="h-[60vh] w-full">
-                                  <div className="text-sm space-y-4 pr-4">
-                                    <p>Este documento estabelece os termos e condições para uso da plataforma CN Vidas...</p>
-                                    <p><strong>Ao aceitar estes termos, você concorda com:</strong></p>
-                                    <ul className="list-disc pl-6 space-y-1">
-                                      <li>Uso responsável da plataforma</li>
-                                      <li>Fornecer informações verdadeiras</li>
-                                      <li>Seguir as orientações médicas</li>
-                                      <li>Respeitar outros usuários e profissionais</li>
-                                    </ul>
-                                    
-                                    <h3 className="font-semibold mt-4">Gravação de Consultas</h3>
-                                    <p>Para pacientes e médicos que utilizam o serviço de telemedicina:</p>
-                                    <ul className="list-disc pl-6 space-y-1">
-                                      <li>As teleconsultas podem ser gravadas automaticamente quando ambas as partes autorizam</li>
-                                      <li>As gravações são processadas por inteligência artificial para gerar prontuários médicos</li>
-                                      <li>O áudio é transcrito e deletado após o processamento</li>
-                                      <li>Apenas médico e paciente têm acesso ao prontuário gerado</li>
-                                      <li>Você pode desativar esta funcionalidade nas configurações de privacidade</li>
-                                      <li>O consentimento específico para gravação será solicitado durante o cadastro</li>
-                                    </ul>
-                                  </div>
+                                  <TermsOfUseContent />
                                 </ScrollArea>
                               </DialogContent>
                             </Dialog>
@@ -1068,29 +1051,12 @@ const AuthPage: React.FC = () => {
                               <DialogContent className="max-w-4xl max-h-[80vh]">
                                 <DialogHeader>
                                   <DialogTitle>Política de Privacidade - CN Vidas</DialogTitle>
+                                  <DialogDescription>
+                                    Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-blue-600 hover:underline">Central de Documentos</a>
+                                  </DialogDescription>
                                 </DialogHeader>
                                 <ScrollArea className="h-[60vh] w-full">
-                                  <div className="text-sm space-y-4 pr-4">
-                                    <p>Esta política explica como coletamos, usamos e protegemos seus dados pessoais...</p>
-                                    <p><strong>Seus dados são protegidos por:</strong></p>
-                                    <ul className="list-disc pl-6 space-y-1">
-                                      <li>Criptografia de ponta a ponta</li>
-                                      <li>Conformidade com a LGPD</li>
-                                      <li>Servidores seguros no Brasil</li>
-                                      <li>Acesso restrito e auditado</li>
-                                    </ul>
-                                    
-                                    <h3 className="font-semibold mt-4">Dados de Teleconsultas</h3>
-                                    <p>Quando você autoriza a gravação de consultas:</p>
-                                    <ul className="list-disc pl-6 space-y-1">
-                                      <li>O áudio é temporariamente armazenado para processamento</li>
-                                      <li>A transcrição é realizada por IA com total sigilo</li>
-                                      <li>O áudio original é deletado após a transcrição</li>
-                                      <li>O prontuário gerado fica armazenado com criptografia</li>
-                                      <li>Apenas médico e paciente têm acesso aos dados</li>
-                                      <li>Você pode solicitar a exclusão dos dados a qualquer momento</li>
-                                    </ul>
-                                  </div>
+                                  <PrivacyPolicyContent />
                                 </ScrollArea>
                               </DialogContent>
                             </Dialog>
@@ -1109,18 +1075,12 @@ const AuthPage: React.FC = () => {
                                   <DialogContent className="max-w-4xl max-h-[80vh]">
                                     <DialogHeader>
                                       <DialogTitle>Contrato de Adesão - Planos CN Vidas</DialogTitle>
+                                      <DialogDescription>
+                                        <span className="text-red-600 font-semibold">IMPORTANTE:</span> Leia todo o contrato, especialmente as cláusulas sobre carência e coberturas
+                                      </DialogDescription>
                                     </DialogHeader>
                                     <ScrollArea className="h-[60vh] w-full">
-                                      <div className="text-sm space-y-4 pr-4">
-                                        <p><strong className="text-red-600">ATENÇÃO:</strong> A cobertura de seguro só inicia no segundo mês após a contratação.</p>
-                                        <p>Este contrato estabelece os termos dos planos de assinatura...</p>
-                                        <ul className="list-disc pl-6 space-y-1">
-                                          <li>Planos disponíveis e preços</li>
-                                          <li>Período de carência de 30 dias</li>
-                                          <li>Direitos e deveres do usuário</li>
-                                          <li>Política de cancelamento</li>
-                                        </ul>
-                                      </div>
+                                      <AdhesionContractContent />
                                     </ScrollArea>
                                   </DialogContent>
                                 </Dialog>
@@ -1141,19 +1101,38 @@ const AuthPage: React.FC = () => {
                                   <DialogContent className="max-w-4xl max-h-[80vh]">
                                     <DialogHeader>
                                       <DialogTitle>Contrato de Parceria - CN Vidas</DialogTitle>
+                                      <DialogDescription>
+                                        Parceria gratuita e sem exclusividade. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-blue-600 hover:underline">Central de Documentos</a>
+                                      </DialogDescription>
                                     </DialogHeader>
                                     <ScrollArea className="h-[60vh] w-full">
-                                      <div className="text-sm space-y-4 pr-4">
-                                        <p><strong>Parceria de cooperação mútua</strong> sem exclusividade ou repasse financeiro.</p>
-                                        <p>Este contrato estabelece:</p>
-                                        <ul className="list-disc pl-6 space-y-1">
-                                          <li>Relação de parceria não exclusiva</li>
-                                          <li>Sem repasse de valores financeiros</li>
-                                          <li>Encaminhamento de pacientes</li>
-                                          <li>Descontos voluntários aos usuários</li>
-                                          <li>Cancelamento a qualquer momento</li>
-                                        </ul>
-                                      </div>
+                                      <PartnerContractContent />
+                                    </ScrollArea>
+                                  </DialogContent>
+                                </Dialog>
+                              </>
+                            )}
+                            {registerForm.watch("role") === "doctor" && (
+                              <>
+                                ,{" "}
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="text-blue-600 hover:underline font-medium text-xs"
+                                    >
+                                      Contrato de Prestação de Serviços Médicos
+                                    </button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                                    <DialogHeader>
+                                      <DialogTitle>Contrato de Prestação de Serviços Médicos</DialogTitle>
+                                      <DialogDescription>
+                                        Termos para médicos prestadores de telemedicina. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-blue-600 hover:underline">Central de Documentos</a>
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <ScrollArea className="h-[60vh] w-full">
+                                      <DoctorContractContent />
                                     </ScrollArea>
                                   </DialogContent>
                                 </Dialog>
