@@ -1778,6 +1778,33 @@ const Profile: React.FC = () => {
                 )}
               </CardContent>
             </Card>
+            
+            {/* Botão de Logout para iOS */}
+            {Capacitor.isNativePlatform() && (
+              <div className="mt-6 flex justify-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    logoutMutation.mutate();
+                  }}
+                  disabled={logoutMutation.isPending}
+                  className="text-gray-500 hover:text-red-600 transition-colors"
+                >
+                  {logoutMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      Saindo...
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="mr-2 h-3 w-3" />
+                      Sair
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </TabsContent>
           
           {/* Aba de Dependentes - apenas para pacientes com plano familiar */}
@@ -2086,43 +2113,6 @@ const Profile: React.FC = () => {
             {/* Card de Vendedor/Consultor - apenas para pacientes */}
             {user?.role === "patient" && (
               <SellerForm subscriptionChangedAt={profileData?.updatedAt} />
-            )}
-            
-            {/* Botão de Logout para iOS */}
-            {Capacitor.isNativePlatform() && (
-              <Card className="mt-6">
-                <CardContent className="p-6">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="text-center">
-                      <h3 className="font-medium text-gray-900">Sair da Conta</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Desconecte-se da sua conta CN Vidas
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => {
-                        logoutMutation.mutate();
-                      }}
-                      disabled={logoutMutation.isPending}
-                      className="w-full max-w-xs bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border-red-200"
-                    >
-                      {logoutMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saindo...
-                        </>
-                      ) : (
-                        <>
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Sair da Conta
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
             )}
           </TabsContent>
         </Tabs>
