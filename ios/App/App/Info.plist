@@ -64,5 +64,7 @@
 	</dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>CN Vidas usa o Face ID para fazer login de forma rápida e segura</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
