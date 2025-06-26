@@ -114,14 +114,9 @@ class SessionManager {
    */
   private async clearIOSWebViewData(): Promise<void> {
     try {
-      // Importar plugin do Capacitor App para iOS
-      const { App } = await import('@capacitor/app');
+      console.log('🔄 iOS: Tentando limpar dados do WebView');
       
-      // Forçar reload da aplicação para limpar cache do WebView
-      // Isso é mais agressivo mas garante limpeza completa no iOS
-      console.log('🔄 iOS: Forçando reload do WebView');
-      
-      // Primeiro tentar limpar dados do WebView se disponível
+      // Tentar limpar dados do WebView se disponível
       if ('webkit' in window && window.webkit?.messageHandlers) {
         try {
           // Tentar enviar mensagem para o iOS nativo limpar dados
@@ -131,7 +126,7 @@ class SessionManager {
         }
       }
 
-      // Aguardar um momento antes de recarregar
+      // Aguardar um momento
       await new Promise(resolve => setTimeout(resolve, 100));
       
     } catch (error) {
