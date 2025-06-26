@@ -84,6 +84,7 @@ export const partners = pgTable("partners", {
   cnpj: text("cnpj"),
   profileImage: text("profile_image"),
   nationwideService: boolean("nationwide_service").default(false).notNull(),
+  onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
   status: text("status").default('pending').notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
