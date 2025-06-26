@@ -6,15 +6,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, CreditCard, User, Users, AlertCircle } from "lucide-react";
+import { Loader2, Check, CreditCard, User, Users, AlertCircle, Receipt, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import Breadcrumb from "@/components/ui/breadcrumb";
-import { getSubscriptionPlans, getUserSubscription } from "@/lib/api";
+import { getSubscriptionPlans, getUserSubscription, getUserProfile } from "@/lib/api";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import CheckoutModal from "@/components/checkout/checkout-modal";
 import { getPlanName } from "@/components/shared/plan-indicator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { isNativeApp } from "@/utils/platform";
+import { apiRequest } from "@/lib/queryClient";
+import PaymentMethods from "@/components/payment/payment-methods";
+import TransactionHistory from "@/components/payment/transaction-history";
 
 // Definição do tipo de plano de assinatura
 interface SubscriptionPlan {
@@ -48,6 +53,7 @@ const SubscriptionPage: React.FC = () => {
   const [showFamilyPlans, setShowFamilyPlans] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{id: number, name: string, price: string} | null>(null);
+  const [activeTab, setActiveTab] = useState("plans");
 
   // Buscar planos de assinatura disponíveis
   const { data: plans, isLoading: plansLoading } = useQuery({
@@ -68,6 +74,43 @@ const SubscriptionPage: React.FC = () => {
     refetchInterval: false, // Não recarregar automaticamente
     retry: 1, // Tentar apenas uma vez em caso de erro
   });
+
+  // Buscar dados do perfil (apenas para iOS)
+  const { data: profileData } = useQuery({
+    queryKey: ['/api/users/profile'],
+    queryFn: getUserProfile,
+    enabled: !!user && isNativeApp()
+  });
+
+  // Buscar métodos de pagamento (apenas para iOS)
+  const paymentMethodsQuery = useQuery({
+    queryKey: ['/api/subscription/payment-methods'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/subscription/payment-methods');
+      if (!response.ok) {
+        throw new Error('Falha ao buscar métodos de pagamento');
+      }
+      return response.json();
+    },
+    enabled: !!user && isNativeApp()
+  });
+
+  const paymentMethodsData = paymentMethodsQuery.data;
+
+  // Buscar histórico de transações (apenas para iOS)
+  const transactionHistoryQuery = useQuery({
+    queryKey: ['/api/payment-history'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/payment-history');
+      if (!response.ok) {
+        throw new Error('Falha ao buscar histórico de pagamentos');
+      }
+      return response.json();
+    },
+    enabled: !!user && isNativeApp()
+  });
+
+  const transactionData = transactionHistoryQuery.data;
 
   // Forçar refetch quando o componente monta ou quando o usuário muda
   useEffect(() => {
@@ -101,101 +144,28 @@ const SubscriptionPage: React.FC = () => {
         status: currentSubscription?.status
       });
     }
-    if (user) {
-      console.log('👤 Dados do usuário:', {
-        email: user.email,
-        subscriptionPlan: user.subscriptionPlan,
-        subscriptionStatus: user.subscriptionStatus
-      });
-    }
-  }, [userSubscription, currentSubscription, user]);
+  }, [userSubscription, currentSubscription]);
 
-  const isCurrentPlan = (planType: string) => {
-    if (!currentSubscription) return planType === 'free';
-    return currentSubscription.plan?.name === planType;
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  };
-
-  const isLoading = plansLoading || subscriptionLoading;
-
-  const handleSelectPlan = (plan: SubscriptionPlan) => {
-    setSelectedPlan({
-      id: plan.id,
-      name: plan.displayName,
-      price: plan.price > 0 ? `R$ ${(plan.price / 100).toFixed(2)}` : "R$ 0,00"
-    });
-    setCheckoutOpen(true);
-  };
-  
-  // Função para agrupar e filtrar os planos com base na seleção (individual/familiar)
-  const getFilteredAndGroupedPlans = () => {
-    if (!plans) return [];
-    
-    // Filtrar planos com base no toggle familiar/individual
-    const filteredPlans = plans.filter((plan: SubscriptionPlan) => {
-      if (!plan || !plan.name) return false;
-      
-      const isFamilyPlan = plan.name.includes('_family');
-      
-      // Se o toggle está ativo (familiar), mostrar apenas planos familiares
-      // Se o toggle está inativo (individual), mostrar apenas planos individuais
-      return showFamilyPlans ? isFamilyPlan : !isFamilyPlan;
-    });
-    
-    // Definir a ordem personalizada dos planos: básico, premium, ultra e gratuito por último
-    const planOrder = {
-      'basic': 1,
-      'premium': 2,
-      'ultra': 3,
-      'free': 4
-    };
-    
-    return filteredPlans.sort((a, b) => {
-      if (!a?.name || !b?.name) return 0; // Verificação de segurança
-      const baseTypeA = a.name.replace('_family', '');
-      const baseTypeB = b.name.replace('_family', '');
-      
-      return (planOrder[baseTypeA as keyof typeof planOrder] || 99) - 
-             (planOrder[baseTypeB as keyof typeof planOrder] || 99);
-    });
-  };
-
-  const handleCancelSubscription = async () => {
-    try {
-      // Aqui implementaríamos a chamada para cancelar a assinatura
-      toast({
-        title: "Solicitação enviada",
-        description: "Sua solicitação de cancelamento foi registrada. A assinatura permanecerá ativa até o final do período atual.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível processar sua solicitação. Tente novamente mais tarde.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (isLoading) {
+  // Estado de carregamento
+  if (plansLoading || subscriptionLoading) {
     return (
-      <DashboardLayout title="Gerenciar Planos">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Carregando informações...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
   }
 
-  // Mostrar erro se houver problemas ao carregar dados
-  if (subscriptionError || (!plans && !plansLoading)) {
+  // Estado de erro
+  if (!plans || plans.length === 0) {
     return (
-      <DashboardLayout title="Gerenciar Planos">
-        <div className="max-w-7xl mx-auto">
-          <Alert className="mb-4">
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Alert variant="destructive" className="max-w-md">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Erro ao carregar dados</AlertTitle>
             <AlertDescription>
@@ -227,284 +197,289 @@ const SubscriptionPage: React.FC = () => {
     setCheckoutOpen(false);
     setSelectedPlan(null);
   };
+
+  // Conteúdo dos planos
+  const PlansContent = () => (
+    <>
+      {/* Informações da assinatura atual */}
+      {currentSubscription && currentSubscription.status !== "inactive" && (
+        <Card className="mb-8 mt-4 overflow-hidden border-2 border-primary shadow-lg">
+          <CardHeader className={`
+            ${(() => {
+              const subscription = userSubscription.subscription || userSubscription;
+              const planName = subscription.plan?.name;
+              if (planName === 'premium' || planName === 'premium_family') return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white';
+              if (planName === 'basic' || planName === 'basic_family') return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
+              if (planName === 'ultra' || planName === 'ultra_family') return 'bg-gradient-to-r from-violet-500 to-purple-600 text-white';
+              return 'bg-gradient-to-r from-gray-100 to-gray-200';
+            })()}
+          `}>
+            <div className="flex justify-between items-center">
+              <CardTitle className="flex items-center">
+                <CreditCard className="mr-2 h-5 w-5" />
+                Sua assinatura atual
+              </CardTitle>
+              <Badge className="bg-white/20 text-white border-white/30">
+                {currentSubscription.status === "active" ? "Ativa" : 
+                 currentSubscription.status === "trialing" ? "Em teste" : 
+                 currentSubscription.status}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            {currentSubscription.plan && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-2xl font-bold">
+                      {getPlanName(currentSubscription.plan.name)}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {currentSubscription.plan.features.join(" • ")}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">
+                      R$ {(currentSubscription.plan.price / 100).toFixed(2)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">/mês</p>
+                  </div>
+                </div>
+                
+                {currentSubscription.cancelAtPeriodEnd && (
+                  <Alert variant="warning">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Cancelamento pendente</AlertTitle>
+                    <AlertDescription>
+                      Sua assinatura será cancelada em {new Date(currentSubscription.endDate).toLocaleDateString('pt-BR')}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Filtro de tipo de plano */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Planos disponíveis</h2>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="family-plans"
+            checked={showFamilyPlans}
+            onCheckedChange={setShowFamilyPlans}
+          />
+          <Label htmlFor="family-plans" className="cursor-pointer">
+            Mostrar planos familiares
+          </Label>
+        </div>
+      </div>
+
+      {/* Grid de planos */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {plans
+          .filter(plan => {
+            const isFamilyPlan = plan.name.includes("family");
+            return showFamilyPlans ? isFamilyPlan : !isFamilyPlan;
+          })
+          .map((plan) => {
+            const isCurrentPlan = currentSubscription?.plan?.id === plan.id;
+            const isDowngrade = currentSubscription?.plan && 
+                              currentSubscription.plan.price > plan.price;
+            
+            return (
+              <Card 
+                key={plan.id} 
+                className={`relative overflow-hidden transition-all hover:shadow-lg ${
+                  isCurrentPlan ? 'ring-2 ring-primary' : ''
+                }`}
+              >
+                {isCurrentPlan && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-sm font-medium rounded-bl-lg">
+                    Plano Atual
+                  </div>
+                )}
+                
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{getPlanName(plan.name)}</span>
+                    {plan.name.includes("family") && (
+                      <Users className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    <span className="text-2xl font-bold">
+                      R$ {(plan.price / 100).toFixed(2)}
+                    </span>
+                    <span className="text-muted-foreground">/mês</span>
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start">
+                        <Check className="mr-2 h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                
+                <CardFooter>
+                  {isCurrentPlan ? (
+                    <Button 
+                      className="w-full" 
+                      disabled
+                      variant="secondary"
+                    >
+                      Plano Atual
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full" 
+                      onClick={() => {
+                        setSelectedPlan({
+                          id: plan.id,
+                          name: plan.name,
+                          price: (plan.price / 100).toFixed(2)
+                        });
+                        setCheckoutOpen(true);
+                      }}
+                      variant={isDowngrade ? "outline" : "default"}
+                    >
+                      {isDowngrade ? "Fazer Downgrade" : "Assinar Plano"}
+                    </Button>
+                  )}
+                </CardFooter>
+              </Card>
+            );
+          })}
+      </div>
+    </>
+  );
+
+  // Conteúdo de pagamentos (apenas iOS)
+  const PaymentsContent = () => (
+    <div className="space-y-6">
+      {/* Card de Informações de Assinatura */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-primary" />
+            <CardTitle>Informações de Assinatura</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Plano Atual</p>
+              <p className="text-2xl font-bold">
+                {profileData?.subscriptionPlan 
+                  ? profileData.subscriptionPlan.replace(/_/g, ' ').toUpperCase() 
+                  : "Sem Plano"}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Status</p>
+              <div className="flex items-center gap-2">
+                <div className={`h-3 w-3 rounded-full ${
+                  profileData?.subscriptionStatus === 'active' 
+                    ? 'bg-green-500' 
+                    : 'bg-gray-300'
+                }`} />
+                <p className={`text-lg font-semibold ${
+                  profileData?.subscriptionStatus === 'active' 
+                    ? 'text-green-600' 
+                    : 'text-gray-600'
+                }`}>
+                  {profileData?.subscriptionStatus === 'active' ? 'Ativo' : 'Inativo'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Seção de Métodos de Pagamento */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Métodos de Pagamento</h2>
+          </div>
+        </div>
+        <p className="text-muted-foreground mb-6">
+          Gerencie seus métodos de pagamento para assinaturas e consultas
+        </p>
+        
+        <PaymentMethods 
+          paymentMethods={paymentMethodsData?.paymentMethods || []}
+          onUpdate={() => {
+            paymentMethodsQuery.refetch();
+          }}
+        />
+      </div>
+
+      {/* Histórico de Transações */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle>Histórico de Transações</CardTitle>
+          <CardDescription>
+            Visualize todas as suas transações de assinaturas e consultas
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TransactionHistory 
+            transactions={transactionData?.transactions || []}
+            isLoading={transactionHistoryQuery.isLoading}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
   
   return (
     <DashboardLayout title="Gerenciar Planos">
       <div className="max-w-7xl mx-auto">
-        {/* Informações da assinatura atual */}
-        {currentSubscription && currentSubscription.status !== "inactive" && (
-          <Card className="mb-8 mt-4 overflow-hidden border-2 border-primary shadow-lg">
-            <CardHeader className={`
-              ${(() => {
-                const subscription = userSubscription.subscription || userSubscription;
-                const planName = subscription.plan?.name;
-                if (planName === 'premium' || planName === 'premium_family') return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white';
-                if (planName === 'basic' || planName === 'basic_family') return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
-                if (planName === 'ultra' || planName === 'ultra_family') return 'bg-gradient-to-r from-violet-500 to-purple-600 text-white';
-                return 'bg-gradient-to-r from-gray-100 to-gray-200';
-              })()}
-            `}>
-              <div className="flex justify-between items-center">
-                <CardTitle className="flex items-center">
-                  <CreditCard className="mr-2 h-5 w-5" />
-                  Sua Assinatura Atual
-                </CardTitle>
-                <Badge variant="outline" className={`${
-                  currentSubscription?.plan?.name === 'premium' || currentSubscription?.plan?.name === 'premium_family' || 
-                  currentSubscription?.plan?.name === 'basic' || currentSubscription?.plan?.name === 'basic_family' ||
-                  currentSubscription?.plan?.name === 'ultra' || currentSubscription?.plan?.name === 'ultra_family'
-                    ? 'border-white text-white bg-white/20' 
-                    : 'bg-primary/20'
-                } px-3 py-1 rounded-full font-medium`}>
-                  {getPlanName(currentSubscription?.plan?.name as any)}
-                </Badge>
-              </div>
-              <CardDescription className={
-                currentSubscription?.plan?.name === 'premium' || currentSubscription?.plan?.name === 'premium_family' || 
-                currentSubscription?.plan?.name === 'basic' || currentSubscription?.plan?.name === 'basic_family' || 
-                currentSubscription?.plan?.name === 'ultra' || currentSubscription?.plan?.name === 'ultra_family' 
-                ? 'text-white/90' : ''
-              }>
-                Informações sobre seu plano e status de pagamento
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row justify-between md:items-center gap-6">
-                <div>
-                  <h3 className="text-xl font-bold flex items-center">
-                    <span>{currentSubscription?.plan?.displayName || getPlanName(currentSubscription?.plan?.name as any) || "Plano Atual"}</span>
-                    <Badge variant="success" className="ml-3">
-                      {currentSubscription.status === "active" ? "Ativo" : currentSubscription.status}
-                    </Badge>
-                  </h3>
-                  
-                  {currentSubscription?.plan?.features && (
-                    <ul className="space-y-2 mt-4">
-                      {currentSubscription?.plan.features.slice(0, 3).map((feature: string, index: number) => (
-                        <li key={index} className="flex items-start">
-                          <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  
-                  {currentSubscription.cancelAtPeriodEnd && (
-                    <p className="text-sm text-yellow-600 mt-4 p-2 bg-yellow-50 rounded-md border border-yellow-200">
-                      Cancelamento programado. Sua assinatura permanecerá ativa até {formatDate(currentSubscription.endDate)}.
-                    </p>
-                  )}
-                </div>
-                
-                <div className="text-center md:text-right bg-gray-50 p-4 rounded-lg">
-                  <p className="text-3xl font-bold">
-                    {currentSubscription?.plan?.price && currentSubscription?.plan.price > 0 ? `R$ ${(currentSubscription?.plan.price / 100).toFixed(2)}` : "Gratuito"}
-                  </p>
-                  {currentSubscription?.plan?.price && currentSubscription?.plan.price > 0 ? (
-                    <p className="text-sm text-muted-foreground">/mês</p>
-                  ) : null}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {currentSubscription.status === "active" ? (
-                      <>
-                        <span className="font-medium">Próxima cobrança:</span><br />
-                        {formatDate(currentSubscription.endDate)}
-                      </>
-                    ) : (
-                      "Sem cobrança automática"
-                    )}
-                  </p>
-                </div>
-              </div>
-              
-              {!currentSubscription.cancelAtPeriodEnd && currentSubscription.status === "active" && (
-                <div className="mt-6 flex justify-end">
-                  <Button 
-                    variant="outline" 
-                    className="text-destructive hover:bg-destructive/10 border-destructive" 
-                    onClick={handleCancelSubscription}
-                  >
-                    Cancelar Assinatura
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Título dos planos disponíveis */}
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold">Escolha seu plano</h2>
-          <p className="text-muted-foreground mt-2">
-            Selecione o plano que melhor atende às suas necessidades
-          </p>
-        </div>
-        
-        {/* Toggle para planos individuais/familiares */}
-        <div className="flex items-center justify-center space-x-2 mb-8">
-          <div className="flex items-center space-x-2">
-            <User className="h-4 w-4 text-primary" />
-            <Label htmlFor="family-toggle" className={!showFamilyPlans ? "font-semibold" : ""}>Individual</Label>
-          </div>
-          <Switch 
-            id="family-toggle" 
-            checked={showFamilyPlans} 
-            onCheckedChange={setShowFamilyPlans} 
-          />
-          <div className="flex items-center space-x-2">
-            <Users className="h-4 w-4 text-primary" />
-            <Label htmlFor="family-toggle" className={showFamilyPlans ? "font-semibold" : ""}>Familiar</Label>
-          </div>
-        </div>
-
-        {/* Lista de planos */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {getFilteredAndGroupedPlans().length === 0 ? (
-            <div className="col-span-full text-center py-8">
-              <p className="text-muted-foreground">
-                {showFamilyPlans ? 'Nenhum plano familiar disponível' : 'Nenhum plano individual disponível'}
-              </p>
-            </div>
-          ) : (
-            getFilteredAndGroupedPlans().map((plan: SubscriptionPlan) => (
-            <Card 
-              key={plan.id} 
-              className={`overflow-hidden ${isCurrentPlan(plan.name) ? 'border-2 border-primary' : ''} transform transition-all duration-300 ${
-                plan.name === 'ultra' || plan.name === 'ultra_family' 
-                  ? 'hover:shadow-xl hover:-translate-y-1 border-violet-400 shadow-lg shadow-violet-300 animate-pulse-subtle relative ring-2 ring-violet-400/70 scale-105' : 
-                plan.name === 'premium' || plan.name === 'premium_family' 
-                  ? 'hover:shadow-lg hover:-translate-y-0.5 border-amber-300' :
-                plan.name === 'basic' || plan.name === 'basic_family' 
-                  ? 'hover:shadow-md border-emerald-300' : ''
-              }`}
-            >
-
-              <CardHeader className={`${
-                plan.name === 'ultra' || plan.name === 'ultra_family'
-                  ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white' 
-                : plan.name === 'premium' || plan.name === 'premium_family'
-                  ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white' 
-                : plan.name === 'basic' || plan.name === 'basic_family'
-                  ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white' 
-                : ''
-              }`}>
-                <div className="flex justify-between items-center">
-                  <CardTitle className={
-                    plan.name === 'ultra' || plan.name === 'ultra_family'
-                      ? 'text-white flex items-center' 
-                      : plan.name === 'premium' || plan.name === 'premium_family' 
-                        ? 'text-white flex items-center'
-                        : plan.name === 'basic' || plan.name === 'basic_family'
-                          ? 'text-white flex items-center'
-                          : 'flex items-center'
-                  }>
-                    {plan.displayName || getPlanName(plan.name as any)}
-                  </CardTitle>
-                  {isCurrentPlan(plan.name) && (
-                    <Badge variant="outline" className={
-                      (plan.name === 'premium' || plan.name === 'premium_family' || plan.name === 'basic' || plan.name === 'basic_family') 
-                        ? 'border-white text-white' 
-                        : ''
-                    }>
-                      Plano Atual
-                    </Badge>
-                  )}
-                </div>
-                <CardDescription className={
-                    (plan.name === 'premium' || plan.name === 'premium_family' || 
-                     plan.name === 'basic' || plan.name === 'basic_family' || 
-                     plan.name === 'ultra' || plan.name === 'ultra_family') 
-                      ? 'text-white/90' 
-                      : ''
-                  }>
-                    {plan.emergencyConsultations === 'unlimited' 
-                      ? 'Teleconsultas de emergência ilimitadas' 
-                      : plan.emergencyConsultations === '0' 
-                        ? 'Sem teleconsultas de emergência incluídas'
-                        : `${plan.emergencyConsultations} teleconsultas de emergência por mês`}
-                  </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="mb-6">
-                  <span className="text-3xl font-bold">
-                    {plan.price > 0 ? `R$ ${(plan.price / 100).toFixed(2)}` : "Gratuito"}
-                  </span>
-                  {plan.price > 0 && <span className="text-muted-foreground">/mês</span>}
-                </div>
-
-                <ul className="space-y-3">
-                  {plan.features.map((feature: string, index: number) => (
-                    <li key={index} className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  variant={
-                    plan.name === 'ultra' || plan.name === 'ultra_family' ? 'default' : 
-                    plan.name === 'premium' || plan.name === 'premium_family' ? 'secondary' : 
-                    plan.name === 'basic' || plan.name === 'basic_family' ? 'outline' : 
-                    'outline'
-                  } 
-                  className={`w-full ${
-                    plan.name === 'ultra' || plan.name === 'ultra_family' 
-                      ? 'bg-violet-600 hover:bg-violet-700 text-white' : 
-                    plan.name === 'premium' || plan.name === 'premium_family'
-                      ? 'bg-amber-500 hover:bg-amber-600 text-white' :
-                    plan.name === 'basic' || plan.name === 'basic_family'
-                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : ''
-                  }`}
-                  onClick={() => handleSelectPlan(plan)}
-                  disabled={isCurrentPlan(plan.name)}
-                >
-                  {isCurrentPlan(plan.name) ? 'Plano Atual' : 'Selecionar Plano'}
-                </Button>
-              </CardFooter>
-            </Card>
-            ))
-          )}
-        </div>
-
-        {/* FAQ */}
-        <Card className="mb-12">
-          <CardHeader>
-            <CardTitle>Perguntas Frequentes</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Como funciona a cobrança?</h3>
-              <p className="text-muted-foreground">
-                As cobranças são realizadas mensalmente no cartão de crédito. Você pode cancelar sua assinatura a qualquer momento.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Posso mudar de plano?</h3>
-              <p className="text-muted-foreground">
-                Sim, você pode alterar seu plano a qualquer momento. Se você fizer um upgrade, a diferença será cobrada proporcionalmente ao período restante. Se fizer um downgrade, o novo valor será aplicado no próximo ciclo de cobrança.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Como cancelar minha assinatura?</h3>
-              <p className="text-muted-foreground">
-                Você pode cancelar sua assinatura a qualquer momento através desta página. Após o cancelamento, você continuará tendo acesso aos recursos do plano até o final do período já pago.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Modal de Checkout do Stripe */}
-        {selectedPlan && (
-          <CheckoutModal
-            isOpen={checkoutOpen}
-            onClose={handleCloseCheckout}
-            planId={selectedPlan.id}
-            planName={selectedPlan.name}
-            planPrice={selectedPlan.price}
-          />
+        {/* Mostrar tabs apenas no iOS */}
+        {isNativeApp() ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="plans">Planos</TabsTrigger>
+              <TabsTrigger value="payments">Pagamentos</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="plans" className="mt-6">
+              <PlansContent />
+            </TabsContent>
+            
+            <TabsContent value="payments" className="mt-6">
+              <PaymentsContent />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <PlansContent />
         )}
       </div>
+
+      {/* Modal de checkout */}
+      {selectedPlan && (
+        <CheckoutModal
+          isOpen={checkoutOpen}
+          onClose={handleCloseCheckout}
+          selectedPlan={selectedPlan}
+          onSuccess={() => {
+            handleCloseCheckout();
+            refetchSubscription();
+            toast({
+              title: "Sucesso!",
+              description: "Sua assinatura foi atualizada com sucesso.",
+            });
+          }}
+        />
+      )}
     </DashboardLayout>
   );
 };

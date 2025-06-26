@@ -22,6 +22,7 @@ import {
   FolderOpen,
   Receipt
 } from "lucide-react";
+import { isNativeApp } from "@/utils/platform";
 
 interface SidebarNavigationProps {
   userRole?: string;
@@ -287,8 +288,8 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
             </Link>
           )}
           
-          {/* Pagamentos disponível apenas para pacientes */}
-          {userRole === "patient" && (
+          {/* Pagamentos disponível apenas para pacientes e não no iOS */}
+          {userRole === "patient" && !isNativeApp() && (
             <Link href="/payments" 
               className={`${linkBaseClass} ${
                 isLinkActive("/payments") 
