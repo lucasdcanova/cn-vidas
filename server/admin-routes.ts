@@ -1,3 +1,4 @@
+import 'dotenv/config'; // Carregar variáveis de ambiente antes de importar storage
 import { Router, Request, Response } from 'express';
 import { requireAuth, requireAdmin } from './middleware/auth';
 import { AuthenticatedRequest } from './types';
@@ -6,6 +7,12 @@ import path from 'path';
 import { storage } from './storage';
 
 const router = Router();
+
+// Verificar se storage foi importado corretamente
+console.log('[Admin Routes] Storage importado:', !!storage);
+console.log('[Admin Routes] Storage é instância de DatabaseStorage:', storage?.constructor?.name);
+console.log('[Admin Routes] Tem método getAllPartners?', typeof storage?.getAllPartners === 'function');
+console.log('[Admin Routes] Tem método getAllServices?', typeof storage?.getAllServices === 'function');
 
 // Middleware para garantir que apenas admins acessem estas rotas
 router.use(requireAuth);
@@ -309,6 +316,13 @@ router.put('/claims/:id', async (req, res) => {
 router.get('/partners', async (req, res) => {
   try {
     console.log('[Admin Partners] Iniciando busca de parceiros...');
+    console.log('[Admin Partners] Storage disponível?', !!storage);
+    console.log('[Admin Partners] getAllPartners é função?', typeof storage?.getAllPartners === 'function');
+    
+    if (!storage || typeof storage.getAllPartners !== 'function') {
+      throw new Error('Storage não está disponível ou getAllPartners não é uma função');
+    }
+    
     const partners = await storage.getAllPartners();
     console.log(`[Admin Partners] ${partners.length} parceiros encontrados`);
     res.json(partners);
@@ -361,6 +375,13 @@ router.delete('/partners/:id', async (req, res) => {
 router.get('/services', async (req, res) => {
   try {
     console.log('[Admin Services] Iniciando busca de serviços...');
+    console.log('[Admin Services] Storage disponível?', !!storage);
+    console.log('[Admin Services] getAllServices é função?', typeof storage?.getAllServices === 'function');
+    
+    if (!storage || typeof storage.getAllServices !== 'function') {
+      throw new Error('Storage não está disponível ou getAllServices não é uma função');
+    }
+    
     const services = await storage.getAllServices();
     console.log(`[Admin Services] ${services.length} serviços encontrados`);
     
@@ -1311,50 +1332,5 @@ router.post('/cleanup-missing-images', async (req: AuthenticatedRequest, res: Re
   }
 });
 
-// Rota para listar todos os parceiros
-router.get('/partners', async (req: AuthenticatedRequest, res: Response) => {
-  console.log('🔍 Admin partners route called');
-  console.log('User:', req.user?.email, 'Role:', req.user?.role);
-  
-  try {
-    console.log('Storage imported successfully');
-    
-    const partners = await storage.getAllPartners();
-    console.log(`✅ Found ${partners.length} partners`);
-    
-    res.json(partners);
-  } catch (error) {
-    console.error('❌ Error fetching partners:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    res.status(500).json({ 
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      details: process.env.NODE_ENV === 'development' ? error : undefined
-    });
-  }
-});
-
-// Rota para listar todos os serviços
-router.get('/services', async (req: AuthenticatedRequest, res: Response) => {
-  console.log('🔍 Admin services route called');
-  console.log('User:', req.user?.email, 'Role:', req.user?.role);
-  
-  try {
-    console.log('Storage imported successfully');
-    
-    const services = await storage.getAllServices();
-    console.log(`✅ Found ${services.length} services`);
-    
-    res.json(services);
-  } catch (error) {
-    console.error('❌ Error fetching services:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    res.status(500).json({ 
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      details: process.env.NODE_ENV === 'development' ? error : undefined
-    });
-  }
-});
 
 export { router as adminRoutes };
