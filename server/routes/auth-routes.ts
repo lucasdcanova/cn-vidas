@@ -20,6 +20,7 @@ import passport from 'passport';
 import { toNumberOrThrow } from '../utils/id-converter';
 import { AuthenticatedRequest } from '../types/authenticated-request';
 import { getCookieOptions } from '../utils/cookie-config';
+import { tokenBlacklist } from '../utils/token-blacklist';
 
 const authRouter = Router();
 
@@ -586,6 +587,37 @@ authRouter.post('/verify-qr', async (req: Request, res: Response) => {
  */
 authRouter.post('/logout', async (req: Request, res: Response) => {
   try {
+    // Log para debug
+    console.log('🚪 Logout iniciado');
+    console.log('Headers recebidos:', req.headers);
+    console.log('Cookies recebidos:', req.cookies);
+    
+    // Obter token de autenticação dos headers ou cookies
+    const authToken = req.headers['x-auth-token'] as string || 
+                     (req.headers.authorization?.startsWith('Bearer ') 
+                      ? req.headers.authorization.substring(7) 
+                      : null) ||
+                     req.cookies.auth_token;
+    
+    if (authToken) {
+      try {
+        // Decodificar o token para obter informações do usuário
+        const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+        const decoded: any = jwt.verify(authToken, jwtSecret);
+        
+        if (decoded && decoded.userId) {
+          // Calcular quando o token expira
+          const expiresAt = decoded.exp ? new Date(decoded.exp * 1000) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+          
+          // Adicionar token à blacklist
+          tokenBlacklist.add(authToken, decoded.userId, expiresAt);
+          console.log(`🚫 Token adicionado à blacklist para usuário ${decoded.userId}`);
+        }
+      } catch (error) {
+        console.log('⚠️ Erro ao decodificar token para blacklist:', error.message);
+      }
+    }
+    
     // Primeiro, definir o cookie como string vazia com tempo de expiração imediato
     res.cookie('auth_token', '', {
       httpOnly: true,
@@ -604,6 +636,11 @@ authRouter.post('/logout', async (req: Request, res: Response) => {
       path: '/',
       domain: process.env.COOKIE_DOMAIN || undefined // Adicionar domínio se configurado
     });
+    
+    // Limpar também possíveis variações do cookie
+    res.clearCookie('auth_token', { path: '/' });
+    res.clearCookie('auth_token', { path: '/', domain: '.cnvidas-updated.onrender.com' });
+    res.clearCookie('auth_token', { path: '/', domain: 'cnvidas-updated.onrender.com' });
     
     // Também limpar qualquer outro cookie relacionado
     res.cookie('session', '', {

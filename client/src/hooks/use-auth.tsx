@@ -9,6 +9,9 @@ import { httpRequest } from "@/lib/http-client";
 import { useToast } from "@/hooks/use-toast";
 import { User, UserData, LoginCredentials, RegisterCredentials } from "@/shared/types";
 import { secureStorage } from "@/services/secure-storage";
+import { isNativeApp } from '@/utils/platform';
+import { getApiBaseUrl } from '@/config/api';
+import { sessionManager } from '@/services/session-manager';
 
 type AuthContextType = {
   user: UserData | null;
@@ -30,14 +33,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Função para verificar a autenticação do usuário
   const checkAuth = async (): Promise<UserData | null> => {
     try {
-      console.log("Verificando autenticação do usuário...");
+      console.log("🔍 Verificando autenticação do usuário...");
       
-      // Verificar cookies disponíveis - deve mostrar o cookie da sessão
-      console.log("Cookies disponíveis ANTES da requisição:", document.cookie);
+      // No iOS, verificar se não há dados residuais de sessão
+      if (isNativeApp()) {
+        // Se não há token mas há dados de usuário em cache, limpar
+        const hasToken = localStorage.getItem("authToken") || 
+                        (await secureStorage.get<string>('auth_token')).success;
+        const hasCachedUser = queryClient.getQueryData(['/api/user']);
+        
+        if (!hasToken && hasCachedUser) {
+          console.log("⚠️ Detectado cache de usuário sem token no iOS, limpando...");
+          queryClient.setQueryData(['/api/user'], null);
+          return null;
+        }
+      }
+      
+      // Verificar cookies disponíveis
+      console.log("🍪 Cookies disponíveis:", document.cookie);
       
       // Obter token de autenticação do armazenamento seguro se disponível
       const authTokenResult = await secureStorage.get<string>('auth_token');
       const authToken = authTokenResult.success ? authTokenResult.data : localStorage.getItem("authToken");
+      
+      // Se não há token, não há sessão ativa
+      if (!authToken && !document.cookie.includes('auth_token')) {
+        console.log("❌ Nenhum token de autenticação encontrado");
+        return null;
+      }
       
       // Criar headers com token de autenticação se disponível
       const headers: Record<string, string> = {
@@ -50,26 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authToken) {
         headers["Authorization"] = `Bearer ${authToken}`;
         headers["X-Auth-Token"] = authToken;
-        console.log("Usando token de autenticação:", authToken);
+        console.log("🔑 Usando token de autenticação");
       }
       
       // Adicionar ID da sessão para facilitar debugging
       const sessionID = localStorage.getItem("sessionID");
       if (sessionID) {
         headers["X-Session-ID"] = sessionID;
-      }
-      
-      // Adicionar ID de usuário como backup se disponível
-      const userDataString = localStorage.getItem("userData");
-      if (userDataString && !authToken) {
-        try {
-          const userData = JSON.parse(userDataString);
-          if (userData && userData.id) {
-            headers["X-User-ID"] = userData.id.toString();
-          }
-        } catch (e) {
-          console.warn("Erro ao processar dados de usuário do localStorage");
-        }
       }
       
       // Fazer a requisição com todas as configurações necessárias
@@ -80,17 +90,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (!res.ok) {
-        console.error("Erro na verificação de autenticação:", res.status, res.statusText);
+        console.error("❌ Erro na verificação de autenticação:", res.status, res.statusText);
+        
+        // Se recebeu 401, limpar dados locais no iOS
+        if (res.status === 401 && isNativeApp()) {
+          console.log("🧹 Limpando dados locais após 401 no iOS");
+          await sessionManager.clearSession();
+        }
+        
         return null;
       }
       
       const userData = await res.json();
-      console.log("Usuário autenticado:", userData);
+      console.log("✅ Usuário autenticado:", userData.email);
       console.log("🎯 Plano do usuário:", userData.subscriptionPlan);
       console.log("🎯 Status da assinatura:", userData.subscriptionStatus);
       return userData;
     } catch (error) {
-      console.error("Erro ao verificar autenticação:", error);
+      console.error("❌ Erro ao verificar autenticação:", error);
+      
+      // Em caso de erro no iOS, limpar sessão se não há token válido
+      if (isNativeApp()) {
+        const hasValidToken = localStorage.getItem("authToken") || 
+                             (await secureStorage.get<string>('auth_token')).success;
+        if (!hasValidToken) {
+          console.log("🧹 Limpando sessão no iOS após erro sem token válido");
+          await sessionManager.clearSession();
+        }
+      }
+      
       return null;
     }
   };
@@ -334,96 +362,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Mutation para logout
   const logoutMutation = useMutation({
     mutationFn: async () => {
+      console.log("🚪 Iniciando processo de logout");
+      
       try {
         // Obter token de autenticação para enviar no header
         const authToken = localStorage.getItem("authToken");
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache",
-        };
         
-        if (authToken) {
-          headers["Authorization"] = `Bearer ${authToken}`;
-        }
-        
-        // Tentar fazer logout no servidor
-        const response = await fetch("/api/auth/logout", {
-          method: "POST",
-          credentials: "include",
-          headers,
-          cache: "no-cache",
-        });
-        
-        // Log da resposta para debug
-        console.log("Logout response status:", response.status);
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Logout response data:", data);
+        // Fazer logout no servidor
+        if (isNativeApp()) {
+          // No iOS, usar CapacitorHttp para garantir que cookies sejam limpos
+          const { CapacitorHttp } = await import('@capacitor/core');
+          
+          try {
+            const response = await CapacitorHttp.request({
+              url: `${getApiBaseUrl()}/api/auth/logout`,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Auth-Token': authToken || '',
+              }
+            });
+            
+            console.log("✅ Logout no servidor (iOS):", response.status);
+          } catch (error) {
+            console.log("⚠️ Erro ao fazer logout no servidor (iOS):", error);
+          }
+        } else {
+          // Para web, usar fetch normal
+          try {
+            const headers: Record<string, string> = {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
+            };
+            
+            if (authToken) {
+              headers["Authorization"] = `Bearer ${authToken}`;
+              headers["X-Auth-Token"] = authToken;
+            }
+            
+            const response = await fetch("/api/auth/logout", {
+              method: "POST",
+              credentials: "include",
+              headers,
+              cache: "no-cache",
+            });
+            
+            console.log("✅ Logout no servidor (Web):", response.status);
+          } catch (error) {
+            console.log("⚠️ Erro ao fazer logout no servidor (Web):", error);
+          }
         }
       } catch (error) {
-        console.log("Erro ao chamar logout no servidor, continuando com limpeza local:", error);
+        console.log("⚠️ Erro geral ao chamar logout no servidor:", error);
       }
       
-      // Limpar dados locais imediatamente, independente da resposta do servidor
-      // Limpar armazenamento seguro
-      await secureStorage.clear();
-      // Limpar localStorage e sessionStorage
-      localStorage.clear();
-      sessionStorage.clear();
+      // Usar SessionManager para limpar sessão completamente
+      await sessionManager.clearSession();
       
-      // Função melhorada para limpar cookies
-      const clearAllCookies = () => {
-        // Obter todos os cookies
-        const cookies = document.cookie.split(";");
-        
-        // Para cada cookie, tentar removê-lo de várias formas
-        cookies.forEach(cookie => {
-          const eqPos = cookie.indexOf("=");
-          const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
-          
-          if (name) {
-            // Tentar remover o cookie com diferentes combinações de path e domain
-            const paths = ["/", window.location.pathname];
-            const domains = [
-              "",
-              window.location.hostname,
-              `.${window.location.hostname}`,
-              window.location.hostname.replace(/^www\./, ""),
-              `.${window.location.hostname.replace(/^www\./, "")}`,
-            ];
-            
-            paths.forEach(path => {
-              domains.forEach(domain => {
-                // Definir cookie com valor vazio e data de expiração no passado
-                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path};${domain ? ` domain=${domain};` : ""}`;
-                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; path=${path};${domain ? ` domain=${domain};` : ""}`;
-              });
-            });
-          }
-        });
-        
-        // Verificar se ainda há cookies e logar
-        console.log("Cookies após limpeza:", document.cookie);
-      };
-      
-      // Limpar todos os cookies
-      clearAllCookies();
-      
-      // Limpar cache do React Query
-      queryClient.clear();
-      queryClient.removeQueries();
-      queryClient.cancelQueries();
-      
-      // Retornar sucesso sempre
+      console.log("✅ Logout concluído");
       return { success: true };
     },
-    onSettled: () => {
-      // Sempre redirecionar, mesmo se houve erro
-      console.log("Redirecionando para página de login...");
-      // Usar setTimeout para garantir que todas as operações de limpeza sejam concluídas
-      setTimeout(() => {
-        window.location.href = "/auth";
-      }, 100);
+    onSuccess: async () => {
+      console.log("✅ Logout bem-sucedido");
+      
+      // Aguardar um momento extra no iOS
+      if (isNativeApp()) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      
+      // Redirecionar para página de login
+      window.location.href = "/auth";
+    },
+    onError: (error) => {
+      console.error("❌ Erro no logout:", error);
+      // Mesmo com erro, fazer logout local e redirecionar
+      sessionManager.forceLogout();
     },
   });
 

@@ -11,6 +11,8 @@ import { PushNotificationService } from "@/services/push-notifications";
 import { isNativeApp } from "@/utils/platform";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { configureIOSStatusBar } from "@/utils/ios-config";
+import { IOSSessionGuard } from "@/components/ios-session-guard";
+import { IOSAppLifecycle } from "@/components/ios-app-lifecycle";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
@@ -255,6 +257,8 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
+            <IOSSessionGuard />
+            <IOSAppLifecycle />
             <Toaster />
             <InstallPWA />
             <Router />
