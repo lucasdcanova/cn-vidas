@@ -1326,4 +1326,28 @@ router.post('/cleanup-missing-images', async (req: AuthenticatedRequest, res: Re
   }
 });
 
+// Rota para listar todos os parceiros
+router.get('/partners', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { storage } = await import('./storage');
+    const partners = await storage.getAllPartners();
+    res.json(partners);
+  } catch (error) {
+    console.error('Error fetching partners:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Rota para listar todos os serviços
+router.get('/services', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { storage } = await import('./storage');
+    const services = await storage.getAllServices();
+    res.json(services);
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export { router as adminRoutes };
