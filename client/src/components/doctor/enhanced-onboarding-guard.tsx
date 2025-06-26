@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/use-auth';
 import { Loader2 } from 'lucide-react';
+import { isNativeApp } from '@/utils/platform';
 
 interface EnhancedDoctorOnboardingGuardProps {
   children: React.ReactNode;
@@ -13,7 +14,7 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
   const [location, navigate] = useLocation();
   
   // Get doctor profile to check if onboarding is complete
-  const { data: doctorProfile, isLoading } = useQuery({
+  const { data: doctorProfile, isLoading, error } = useQuery({
     queryKey: ['/api/doctors/profile'],
     queryFn: ({ signal }) => 
       fetch('/api/doctors/profile', { 
@@ -29,7 +30,8 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
     staleTime: 0,
     cacheTime: 0,
     refetchOnMount: true,
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
+    gcTime: 0 // Garante que não use garbage collection
   });
 
   useEffect(() => {
@@ -39,26 +41,53 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
     // Skip if already on onboarding pages
     if (location === '/onboarding/doctor' || location === '/doctor-onboarding') return;
     
-    // Debug log para iOS
-    console.log('🔍 EnhancedDoctorOnboardingGuard - Verificando perfil do médico:', {
-      doctorProfile,
-      onboardingCompleted: doctorProfile?.onboardingCompleted,
+    // Debug log detalhado para iOS
+    console.log('🔍 [EnhancedDoctorOnboardingGuard] Verificação iniciada:', {
+      platform: isNativeApp() ? 'iOS' : 'Web',
+      user: user?.email,
       location,
-      user: user?.email
+      error: error?.message,
+      profileLoaded: !!doctorProfile,
+      onboardingCompleted: doctorProfile?.onboardingCompleted,
+      rawProfile: JSON.stringify(doctorProfile)
     });
     
-    // Check if onboarding is complete with the new field
-    if (doctorProfile && !doctorProfile.onboardingCompleted) {
-      console.log('⚠️ EnhancedDoctorOnboardingGuard - Onboarding não completado, verificando campos...');
+    // Se houve erro ao carregar o perfil
+    if (error) {
+      console.error('❌ [EnhancedDoctorOnboardingGuard] Erro ao carregar perfil:', error);
+      return;
+    }
+    
+    // Se o perfil foi carregado
+    if (doctorProfile) {
+      console.log('📊 [EnhancedDoctorOnboardingGuard] Perfil carregado:', {
+        id: doctorProfile.id,
+        userId: doctorProfile.userId,
+        onboardingCompleted: doctorProfile.onboardingCompleted,
+        onboardingCompletedType: typeof doctorProfile.onboardingCompleted,
+        hasAllFields: !!(doctorProfile.specialization && 
+                         doctorProfile.education &&
+                         doctorProfile.consultationFee &&
+                         doctorProfile.pixKey &&
+                         doctorProfile.bankName)
+      });
       
-      // Check if essential fields are filled
+      // IMPORTANTE: Se onboardingCompleted é true, NÃO redirecionar
+      if (doctorProfile.onboardingCompleted === true) {
+        console.log('✅ [EnhancedDoctorOnboardingGuard] Onboarding já completado, permitindo acesso');
+        return;
+      }
+      
+      // Se onboardingCompleted é false ou null, verificar campos
+      console.log('⚠️ [EnhancedDoctorOnboardingGuard] Onboarding não completado, verificando campos...');
+      
       const isProfileIncomplete = !doctorProfile.specialization || 
                                  !doctorProfile.education ||
                                  !doctorProfile.consultationFee ||
                                  !doctorProfile.pixKey ||
                                  !doctorProfile.bankName;
       
-      console.log('📄 EnhancedDoctorOnboardingGuard - Campos do perfil:', {
+      console.log('📄 [EnhancedDoctorOnboardingGuard] Status dos campos:', {
         specialization: !!doctorProfile.specialization,
         education: !!doctorProfile.education,
         consultationFee: !!doctorProfile.consultationFee,
@@ -68,11 +97,11 @@ export function EnhancedDoctorOnboardingGuard({ children }: EnhancedDoctorOnboar
       });
       
       if (isProfileIncomplete) {
-        console.log('🚀 EnhancedDoctorOnboardingGuard - Redirecionando para onboarding...');
+        console.log('🚀 [EnhancedDoctorOnboardingGuard] Redirecionando para onboarding...');
         navigate('/onboarding/doctor');
       }
     }
-  }, [user, doctorProfile, isLoading, location, navigate]);
+  }, [user, doctorProfile, isLoading, location, navigate, error]);
 
   // Show loading while checking profile
   if (user && user.role === 'doctor' && isLoading) {
