@@ -27,14 +27,34 @@ const requirePartner = (req: AuthenticatedRequest, res: Response, next: Function
  */
 partnerRouter.get('/me', requireAuth, requirePartner, async (req: AuthenticatedRequest, res: Response) => {
   try {
+    console.log('🔍 [Partner /me] Buscando parceiro para user ID:', req.user!.id);
+    console.log('🔍 [Partner /me] Dados do usuário:', {
+      id: req.user!.id,
+      email: req.user!.email,
+      role: req.user!.role,
+      fullName: req.user!.fullName
+    });
+    
     const partner = await storage.getPartnerByUserId(req.user!.id);
+    
+    console.log('📊 [Partner /me] Resultado da busca:', partner ? {
+      id: partner.id,
+      userId: partner.userId,
+      businessName: partner.businessName,
+      tradingName: partner.tradingName
+    } : 'Parceiro não encontrado');
+    
     if (!partner) {
+      console.log('❌ [Partner /me] Perfil de parceiro não encontrado para userId:', req.user!.id);
       return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
     }
 
+    console.log('✅ [Partner /me] Parceiro encontrado, retornando dados');
     res.json(partner);
   } catch (error) {
-    console.error('Erro ao obter dados do parceiro:', error);
+    console.error('❌ [Partner /me] Erro ao obter dados do parceiro:', error);
+    console.error('❌ [Partner /me] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+    
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {
