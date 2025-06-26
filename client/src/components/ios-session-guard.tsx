@@ -22,25 +22,30 @@ export function IOSSessionGuard() {
       console.log('🔒 IOSSessionGuard: Verificando sessão na página de login');
       
       const checkAndClearPhantomSession = async () => {
-        // Verificar se há dados de usuário em cache mas sem token válido
-        const cachedUser = queryClient.getQueryData(['/api/user']);
-        const authToken = localStorage.getItem('authToken');
-        const hasCookies = document.cookie.includes('auth_token');
-        
-        if (cachedUser && !authToken && !hasCookies) {
-          console.log('👻 IOSSessionGuard: Detectada sessão fantasma, limpando...');
+        try {
+          // Verificar se há dados de usuário em cache mas sem token válido
+          const cachedUser = queryClient.getQueryData(['/api/user']);
+          const authToken = localStorage.getItem('authToken');
+          const hasCookies = document.cookie.includes('auth_token');
           
-          // Limpar completamente a sessão
-          await sessionManager.clearSession();
-          
-          // Forçar reload da página para garantir estado limpo
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
+          if (cachedUser && !authToken && !hasCookies) {
+            console.log('👻 IOSSessionGuard: Detectada sessão fantasma, limpando...');
+            
+            // Limpar completamente a sessão
+            await sessionManager.clearSession();
+            
+            // Forçar reload da página para garantir estado limpo
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+          }
+        } catch (error) {
+          console.error('Erro ao verificar sessão fantasma:', error);
         }
       };
 
-      checkAndClearPhantomSession();
+      // Adicionar delay para evitar conflitos no carregamento inicial
+      setTimeout(checkAndClearPhantomSession, 100);
     }
   }, [location.pathname]);
 

@@ -18,61 +18,75 @@ export function IOSAppLifecycle() {
       return;
     }
 
-    // Função para verificar e limpar sessão fantasma
-    const checkSessionOnResume = async () => {
-      console.log('📱 App iOS resumido - verificando sessão');
-      
-      // Verificar se há token válido
-      const authToken = localStorage.getItem('authToken');
-      const hasCookies = document.cookie.includes('auth_token');
-      
-      // Se não há token nem cookies mas há usuário em cache, limpar
-      if (!authToken && !hasCookies && user) {
-        console.log('👻 Sessão fantasma detectada ao resumir app, limpando...');
-        await sessionManager.clearSession();
+    try {
+      // Função para verificar e limpar sessão fantasma
+      const checkSessionOnResume = async () => {
+        try {
+          console.log('📱 App iOS - verificando sessão');
+          
+          // Verificar se há token válido
+          const authToken = localStorage.getItem('authToken');
+          const hasCookies = document.cookie.includes('auth_token');
+          
+          // Se não há token nem cookies mas há usuário em cache, limpar
+          if (!authToken && !hasCookies && user) {
+            console.log('👻 Sessão fantasma detectada, limpando...');
+            await sessionManager.clearSession();
+            
+            // Forçar reload da página após um delay maior
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+          }
+        } catch (error) {
+          console.error('Erro ao verificar sessão:', error);
+        }
+      };
+
+      // Listener para quando o app volta ao primeiro plano
+      const resumeListener = App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) {
+          console.log('📱 App iOS voltou ao primeiro plano');
+          // Adicionar delay para evitar conflitos
+          setTimeout(checkSessionOnResume, 100);
+        } else {
+          console.log('📱 App iOS foi para segundo plano');
+        }
+      });
+
+      // Listener para quando o app é pausado (vai para background)
+      const pauseListener = App.addListener('pause', () => {
+        console.log('⏸️ App iOS pausado');
         
-        // Forçar reload da página
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
-      }
-    };
+        // Se não há token válido, limpar qualquer cache residual
+        const authToken = localStorage.getItem('authToken');
+        if (!authToken) {
+          queryClient.setQueryData(['/api/user'], null);
+        }
+      });
 
-    // Listener para quando o app volta ao primeiro plano
-    const resumeListener = App.addListener('appStateChange', ({ isActive }) => {
-      if (isActive) {
-        console.log('📱 App iOS voltou ao primeiro plano');
-        checkSessionOnResume();
-      } else {
-        console.log('📱 App iOS foi para segundo plano');
-      }
-    });
+      // Listener para quando o app é resumido
+      const resumeDirectListener = App.addListener('resume', () => {
+        console.log('▶️ App iOS resumido diretamente');
+        // Adicionar delay para evitar conflitos
+        setTimeout(checkSessionOnResume, 100);
+      });
 
-    // Listener para quando o app é pausado (vai para background)
-    const pauseListener = App.addListener('pause', () => {
-      console.log('⏸️ App iOS pausado');
-      
-      // Se não há token válido, limpar qualquer cache residual
-      const authToken = localStorage.getItem('authToken');
-      if (!authToken) {
-        queryClient.setQueryData(['/api/user'], null);
-      }
-    });
+      // NÃO verificar sessão ao montar o componente para evitar loops
+      // checkSessionOnResume();
 
-    // Listener para quando o app é resumido
-    const resumeDirectListener = App.addListener('resume', () => {
-      console.log('▶️ App iOS resumido diretamente');
-      checkSessionOnResume();
-    });
-
-    // Verificar sessão ao montar o componente
-    checkSessionOnResume();
-
-    return () => {
-      resumeListener.remove();
-      pauseListener.remove();
-      resumeDirectListener.remove();
-    };
+      return () => {
+        try {
+          resumeListener.remove();
+          pauseListener.remove();
+          resumeDirectListener.remove();
+        } catch (error) {
+          console.error('Erro ao remover listeners:', error);
+        }
+      };
+    } catch (error) {
+      console.error('Erro ao configurar IOSAppLifecycle:', error);
+    }
   }, [user]);
 
   return null;
