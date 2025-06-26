@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { isAuthenticated } from '../middleware/auth';
 import { AppError } from '../utils/app-error';
 import { users, User, legalAcceptances } from '../../shared/schema';
-import { db } from '../db';
+import { db, safeQuery } from '../db';
 import { storage } from '../storage';
 import { eq } from 'drizzle-orm';
 import { hash, compare } from 'bcrypt';
@@ -975,9 +975,11 @@ authRouter.post('/refresh-user', async (req: Request, res: Response) => {
     }
     
     // Buscar dados atualizados do usuário no banco - SEMPRE frescos
-    const result = await db.select()
-    .from(users)
-    .where(eq(users.id, decoded.userId));
+    const result = await safeQuery(async () => 
+      db.select()
+      .from(users)
+      .where(eq(users.id, decoded.userId))
+    );
     
     const user = result[0];
     

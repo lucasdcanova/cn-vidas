@@ -12,12 +12,16 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Configurando o pool com opções mínimas para evitar sobrecarga do plano gratuito do Neon
+// Configurando o pool com opções otimizadas para produção
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 1,                // apenas uma conexão simultânea (plano gratuito tem limitações)
-  idleTimeoutMillis: 10000, // tempo reduzido que uma conexão permanece inativa
-  connectionTimeoutMillis: 3000 // tempo curto para estabelecer conexão
+  max: 10,                          // Aumentar para suportar múltiplas requisições simultâneas
+  idleTimeoutMillis: 30000,         // 30 segundos - tempo adequado para conexão inativa
+  connectionTimeoutMillis: 15000,   // 15 segundos - mais tempo para conexões instáveis
+  allowExitOnIdle: true,            // Permitir que o processo encerre quando idle
+  ssl: process.env.NODE_ENV === 'production' 
+    ? { rejectUnauthorized: false } // SSL para produção (Neon requer)
+    : false
 });
 
 // Adicione um handler para eventos de erro no pool de conexão
@@ -45,7 +49,48 @@ export const testConnection = async () => {
   }
 };
 
-// Testar a conexão durante a inicialização
-testConnection().catch(err => {
-  console.error('Falha no teste inicial de conexão:', err);
+// Implementação de retry logic para queries
+export async function executeWithRetry<T>(
+  operation: () => Promise<T>,
+  maxRetries = 3,
+  delay = 1000
+): Promise<T> {
+  let lastError: any;
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      lastError = error;
+      
+      // Se for erro de timeout ou conexão, tentar novamente
+      if (error.message?.includes('timeout') || 
+          error.message?.includes('connect') ||
+          error.code === 'ECONNRESET' ||
+          error.code === 'ETIMEDOUT') {
+        
+        if (i < maxRetries - 1) {
+          const waitTime = delay * Math.pow(2, i); // Backoff exponencial
+          console.log(`Retry ${i + 1}/${maxRetries} após ${waitTime}ms - Erro: ${error.message}`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+      }
+      
+      // Se não for erro de conexão, lançar imediatamente
+      throw error;
+    }
+  }
+  
+  throw lastError;
+}
+
+// Função wrapper para queries com retry automático
+export async function safeQuery<T>(queryFn: () => Promise<T>): Promise<T> {
+  return executeWithRetry(queryFn);
+}
+
+// Testar a conexão durante a inicialização com retry
+executeWithRetry(testConnection, 5, 2000).catch(err => {
+  console.error('Falha no teste inicial de conexão após múltiplas tentativas:', err);
 });
