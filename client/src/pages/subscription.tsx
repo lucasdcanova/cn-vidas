@@ -20,6 +20,7 @@ import { isNativeApp } from "@/utils/platform";
 import { apiRequest } from "@/lib/queryClient";
 import PaymentMethods from "@/components/payment/payment-methods";
 import TransactionHistory from "@/components/payment/transaction-history";
+import { Capacitor } from '@capacitor/core';
 
 // Definição do tipo de plano de assinatura
 interface SubscriptionPlan {
@@ -54,6 +55,9 @@ const SubscriptionPage: React.FC = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{id: number, name: string, price: string} | null>(null);
   const [activeTab, setActiveTab] = useState("plans");
+  
+  // Detectar se está no iOS
+  const isIOS = Capacitor.getPlatform() === 'ios';
 
   // Buscar planos de assinatura disponíveis
   const { data: plans, isLoading: plansLoading } = useQuery({
@@ -204,7 +208,7 @@ const SubscriptionPage: React.FC = () => {
       {/* Informações da assinatura atual */}
       {currentSubscription && currentSubscription.status !== "inactive" && (
         <Card className="mb-8 mt-4 overflow-hidden border-2 border-primary shadow-lg">
-          <CardHeader className={`
+          <CardHeader className={`p-4 md:p-6
             ${(() => {
               const subscription = userSubscription.subscription || userSubscription;
               const planName = subscription.plan?.name;
@@ -217,34 +221,34 @@ const SubscriptionPage: React.FC = () => {
             })()}
           `}>
             <div className="flex justify-between items-center">
-              <CardTitle className="flex items-center">
-                <CreditCard className="mr-2 h-5 w-5" />
+              <CardTitle className="flex items-center text-base md:text-xl">
+                <CreditCard className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                 Sua assinatura atual
               </CardTitle>
-              <Badge className="bg-white/20 text-white border-white/30">
+              <Badge className="bg-white/20 text-white border-white/30 text-xs md:text-sm">
                 {currentSubscription.status === "active" ? "Ativa" : 
                  currentSubscription.status === "trialing" ? "Em teste" : 
                  currentSubscription.status}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="p-4 md:p-6">
             {currentSubscription.plan && (
               <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-2xl font-bold">
+                <div className="flex flex-col md:flex-row justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl md:text-2xl font-bold">
                       {getPlanName(currentSubscription.plan.name)}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-sm md:text-base text-muted-foreground mt-2 leading-relaxed">
                       {currentSubscription.plan.features.join(" • ")}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold">
+                  <div className="text-left md:text-right">
+                    <p className="text-2xl md:text-3xl font-bold">
                       R$ {(currentSubscription.plan.price / 100).toFixed(2)}
                     </p>
-                    <p className="text-sm text-muted-foreground">/mês</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">/mês</p>
                   </div>
                 </div>
                 
@@ -264,22 +268,22 @@ const SubscriptionPage: React.FC = () => {
       )}
 
       {/* Filtro de tipo de plano */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Planos disponíveis</h2>
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+        <h2 className="text-xl md:text-2xl font-semibold">Planos disponíveis</h2>
         <div className="flex items-center space-x-2">
           <Switch
             id="family-plans"
             checked={showFamilyPlans}
             onCheckedChange={setShowFamilyPlans}
           />
-          <Label htmlFor="family-plans" className="cursor-pointer">
+          <Label htmlFor="family-plans" className="cursor-pointer text-sm md:text-base">
             Mostrar planos familiares
           </Label>
         </div>
       </div>
 
       {/* Grid de planos */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className={`grid ${isIOS ? 'gap-5' : 'gap-4 md:gap-6'} grid-cols-1 md:grid-cols-2 lg:grid-cols-3`}>
         {plans
           .filter(plan => {
             const isFamilyPlan = plan.name.includes("family");
@@ -347,41 +351,41 @@ const SubscriptionPage: React.FC = () => {
                 } ${getPlanColorClass(plan.name)}`}
               >
                 {isCurrentPlan && (
-                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-sm font-medium rounded-bl-lg">
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-2 py-1 text-xs md:text-sm font-medium rounded-bl-lg z-10">
                     Plano Atual
                   </div>
                 )}
                 
-                <CardHeader className={`${getPlanHeaderClass(plan.name)}`}>
-                  <CardTitle className="flex items-center justify-between">
+                <CardHeader className={`${getPlanHeaderClass(plan.name)} ${isIOS ? 'p-5' : 'p-4 md:p-6'}`}>
+                  <CardTitle className={`flex items-center justify-between ${isIOS ? 'text-[17px]' : 'text-base md:text-lg'}`}>
                     <span>{getPlanName(plan.name)}</span>
                     {plan.name.includes("family") && (
-                      <Users className="h-5 w-5 opacity-80" />
+                      <Users className={`${isIOS ? 'h-4 w-4' : 'h-4 w-4 md:h-5 md:w-5'} opacity-80`} />
                     )}
                   </CardTitle>
-                  <CardDescription className="text-white/90">
-                    <span className="text-2xl font-bold text-white">
+                  <CardDescription className="text-white/90 mt-2">
+                    <span className={`${isIOS ? 'text-[22px]' : 'text-xl md:text-2xl'} font-bold text-white`}>
                       R$ {(plan.price / 100).toFixed(2)}
                     </span>
-                    <span>/mês</span>
+                    <span className={`${isIOS ? 'text-[14px]' : 'text-sm md:text-base'}`}>/mês</span>
                   </CardDescription>
                 </CardHeader>
                 
-                <CardContent>
-                  <ul className="space-y-2">
+                <CardContent className={`${isIOS ? 'p-5' : 'p-4 md:p-6'}`}>
+                  <ul className={`${isIOS ? 'space-y-4' : 'space-y-3'}`}>
                     {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <Check className="mr-2 h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
+                      <li key={index} className="flex items-start gap-3">
+                        <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className={`${isIOS ? 'text-[13px] leading-[1.6]' : 'text-xs md:text-sm'} text-gray-700`}>{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
                 
-                <CardFooter>
+                <CardFooter className={`${isIOS ? 'p-5 pt-3' : 'p-4 md:p-6 pt-2'}`}>
                   {isCurrentPlan ? (
                     <Button 
-                      className="w-full" 
+                      className={`w-full ${isIOS ? 'text-[15px] h-11' : 'text-sm md:text-base'}`} 
                       disabled
                       variant="secondary"
                     >
@@ -389,7 +393,7 @@ const SubscriptionPage: React.FC = () => {
                     </Button>
                   ) : (
                     <Button 
-                      className={`w-full ${
+                      className={`w-full ${isIOS ? 'text-[15px] h-11' : 'text-sm md:text-base'} ${
                         !isDowngrade && (plan.name === 'premium' || plan.name === 'premium_family' || plan.name === 'family_plus') ? 
                           'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white border-0' :
                         !isDowngrade && (plan.name === 'basic' || plan.name === 'basic_family' || plan.name === 'family_basic') ? 
