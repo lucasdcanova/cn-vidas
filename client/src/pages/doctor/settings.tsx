@@ -49,7 +49,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
-import { Bell, Shield, Clock, Mail, Phone, Lock, UserPlus, Eye, EyeOff, Mic, FileText, AlertCircle } from "lucide-react";
+import { Bell, Shield, Clock, Mail, Phone, Lock, UserPlus, Eye, EyeOff, Mic, FileText, AlertCircle, Calendar } from "lucide-react";
 
 // Schema para validação de formulário de preferências de notificação
 const notificationSchema = z.object({
