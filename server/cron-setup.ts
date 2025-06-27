@@ -1,4 +1,5 @@
 import { processAppointmentPayments, cancelExpiredPreAuthorizations } from './jobs/process-appointment-payments';
+import { sendAppointmentReminders, checkUnattendedEmergencies } from './jobs/appointment-reminders';
 
 /**
  * Configuração dos jobs agendados do sistema
@@ -20,6 +21,18 @@ export function setupCronJobs() {
     cron.schedule('0 */6 * * *', async () => {
       console.log('⏰ Executando job de cancelamento de pré-autorizações...');
       await cancelExpiredPreAuthorizations();
+    });
+
+    // Job para enviar lembretes de consultas (executa a cada 5 minutos)
+    cron.schedule('*/5 * * * *', async () => {
+      console.log('⏰ Executando job de lembretes de consultas...');
+      await sendAppointmentReminders();
+    });
+
+    // Job para verificar emergências não atendidas (executa a cada 2 minutos)
+    cron.schedule('*/2 * * * *', async () => {
+      console.log('🚨 Verificando emergências não atendidas...');
+      await checkUnattendedEmergencies();
     });
 
     console.log('✅ Jobs agendados configurados com sucesso');

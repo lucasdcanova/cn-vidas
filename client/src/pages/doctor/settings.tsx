@@ -349,6 +349,91 @@ const DoctorSettings = () => {
                           )}
                         />
                       </div>
+                      
+                      <div className="space-y-4 mt-6">
+                        <h3 className="text-lg font-medium">Notificações Profissionais</h3>
+                        <Separator />
+                        
+                        <FormField
+                          control={notificationForm.control}
+                          name="newAppointmentNotifications"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 transition-all duration-300 hover:shadow-sm">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base flex items-center gap-2">
+                                  <Calendar className="w-5 h-5 text-primary" />
+                                  Nova Consulta Agendada
+                                </FormLabel>
+                                <FormDescription>
+                                  Receba notificação quando um paciente agendar consulta com você.
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={notificationForm.control}
+                          name="emergencyConsultationNotifications"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 transition-all duration-300 hover:shadow-sm bg-red-50/50 border-red-200">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base flex items-center gap-2">
+                                  <AlertCircle className="w-5 h-5 text-red-500" />
+                                  Consultas de Emergência
+                                </FormLabel>
+                                <FormDescription>
+                                  Receba notificações imediatas sobre novas consultas de emergência.
+                                  <span className="block text-xs mt-1 text-red-600 font-medium">
+                                    Recomendado manter sempre ativo
+                                  </span>
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={notificationForm.control}
+                          name="appointmentReminderTime"
+                          render={({ field }) => (
+                            <FormItem className="space-y-3">
+                              <FormLabel>Tempo do Lembrete de Consulta</FormLabel>
+                              <FormControl>
+                                <Select
+                                  value={field.value?.toString() || "60"}
+                                  onValueChange={(value) => field.onChange(parseInt(value))}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o tempo" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="15">15 minutos antes</SelectItem>
+                                    <SelectItem value="30">30 minutos antes</SelectItem>
+                                    <SelectItem value="60">1 hora antes</SelectItem>
+                                    <SelectItem value="120">2 horas antes</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormDescription>
+                                Defina quando receber o lembrete antes da consulta agendada.
+                              </FormDescription>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                     
                     <div className="flex justify-end">

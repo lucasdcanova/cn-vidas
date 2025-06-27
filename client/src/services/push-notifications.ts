@@ -89,20 +89,38 @@ export class PushNotificationService {
       // Deep linking baseado no tipo de notificação
       switch (data?.type) {
         case 'appointment':
+          // Verificar se é médico ou paciente pela presença do campo role
+          if (data.role === 'doctor') {
+            window.location.href = '/doctor-telemedicine';
+          } else {
+            window.location.href = '/telemedicine';
+          }
+          break;
+          
         case 'appointment_reminder':
         case 'appointment_confirmed':
           // Navegar para detalhes da consulta
-          window.location.href = `/telemedicine`;
+          if (data.role === 'doctor') {
+            window.location.href = '/doctor-telemedicine';
+          } else {
+            window.location.href = '/telemedicine';
+          }
           break;
           
         case 'appointment_completed':
           // Navegar para histórico de consultas
-          window.location.href = `/telemedicine`;
+          if (data.role === 'doctor') {
+            window.location.href = '/doctor/consultation-history';
+          } else {
+            window.location.href = '/telemedicine';
+          }
           break;
           
         case 'emergency':
-          // Navegar para sala de emergência
-          if (data.appointmentId) {
+          // Para médicos, navegar para tela de teleconsultas onde aparecem as emergências
+          if (data.role === 'doctor' || data.priority === 'high') {
+            window.location.href = '/doctor-telemedicine';
+          } else if (data.appointmentId) {
             window.location.href = `/emergency-room/${data.appointmentId}`;
           } else {
             window.location.href = '/telemedicine-emergency';
@@ -116,12 +134,20 @@ export class PushNotificationService {
           
         case 'medical_record':
           // Navegar para prontuário
-          window.location.href = '/medical-records';
+          if (data.role === 'doctor') {
+            window.location.href = '/doctor/medical-records';
+          } else {
+            window.location.href = '/medical-records';
+          }
           break;
           
         default:
           // Navegar para dashboard por padrão
-          window.location.href = '/dashboard';
+          if (data.role === 'doctor') {
+            window.location.href = '/doctor-telemedicine';
+          } else {
+            window.location.href = '/dashboard';
+          }
       }
     });
   }
