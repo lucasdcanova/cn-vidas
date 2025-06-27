@@ -110,8 +110,9 @@ export default async function setupRoutes(app: express.Express) {
   app.use('/api/dependents', dependentsRouter);
   
   // Rotas de perfil (ordem específica para evitar conflitos)
-  app.use('/api/profile', profileUploadRouter);
+  // IMPORTANTE: Rotas S3 primeiro para ter prioridade
   app.use('/api', profileImageRouter); // Rotas de imagem de perfil com S3
+  // app.use('/api/profile', profileUploadRouter); // DESATIVADO - Upload local removido
   app.use('/api/address', addressRouter);
   
   // Rotas de agendamento

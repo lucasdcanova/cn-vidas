@@ -45,86 +45,19 @@ const removeOldImage = async (imagePath: string) => {
   }
 };
 
-// Upload de imagem de perfil geral (paciente)
-router.post('/upload-image', ensureJson, requireAuth, upload.single('profileImage'), async (req: AuthRequest, res) => {
-  try {
-    
-    console.log('=== UPLOAD PROFILE IMAGE (PATIENT) ===');
-    console.log('User ID:', req.user?.id);
-    console.log('File received:', req.file ? {
-      filename: req.file.filename,
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: `${(req.file.size / 1024 / 1024).toFixed(2)}MB`
-    } : 'No file');
-
-    if (!req.file) {
-      console.error('Erro: Nenhum arquivo foi enviado');
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Nenhum arquivo foi enviado',
-        details: 'O campo profileImage é obrigatório'
-      });
-    }
-
-    const userId = req.user!.id;
-    if (!userId) {
-      console.error('Erro: Usuário não autenticado');
-      return res.status(401).json({ 
-        success: false,
-        message: 'Usuário não autenticado',
-        details: 'Token de autenticação inválido ou expirado'
-      });
-    }
-
-    const imageUrl = `/uploads/profiles/${req.file.filename}`;
-    console.log('Image URL gerada:', imageUrl);
-
-    // Buscar imagem atual do usuário
-    const currentUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    const oldImage = currentUser[0]?.profileImage;
-
-    // Atualizar usuário com nova imagem
-    const updateResult = await db.update(users)
-      .set({ 
-        profileImage: imageUrl,
-        updatedAt: new Date()
-      })
-      .where(eq(users.id, userId));
-
-    console.log('Update result:', updateResult);
-
-    // Remover imagem antiga se existir
-    if (oldImage && oldImage !== imageUrl) {
-      await removeOldImage(oldImage);
-    }
-
-    // Buscar dados atualizados do usuário para retornar
-    const updatedUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    
-    console.log('Upload de paciente concluído com sucesso');
-    res.json({
-      success: true,
-      message: 'Foto de perfil atualizada com sucesso',
-      imageUrl,
-      profileImage: imageUrl,
-      user: updatedUser[0] // Retornar dados completos do usuário
-    });
-
-  } catch (error: any) {
-    console.error('Erro detalhado no upload de paciente:', {
-      message: error.message,
-      stack: error.stack,
-      userId: req.user?.id,
-      file: req.file?.filename
-    });
-    
-    // Remover arquivo se houve erro
-    if (req.file) {
-      const filePath = req.file.path;
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log('Arquivo removido após erro:', filePath);
+// Upload de imagem de perfil geral (paciente) - REDIRECIONAR PARA S3
+router.post('/upload-image', ensureJson, requireAuth, async (req: AuthRequest, res) => {
+  // Redirecionar para o novo endpoint S3
+  console.log('=== REDIRECIONANDO UPLOAD PARA S3 ===');
+  console.log('User ID:', req.user?.id);
+  console.log('Redirecionando de /api/profile/upload-image para /api/profile/upload-image (S3)');
+  
+  // O endpoint é o mesmo mas agora usa S3
+  // Este arquivo será removido em breve
+  res.status(404).json({
+    success: false,
+    message: 'Este endpoint foi migrado. Use /api/profile/upload-image com suporte S3.',
+    details: 'O upload local foi desativado. Todos os uploads agora usam AWS S3.'
       }
     }
 
