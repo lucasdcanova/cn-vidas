@@ -61,11 +61,15 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
       });
       
       // Para FormData no Capacitor, converter para base64
+      let requestData = data;
+      
       if (isFormData) {
         console.log('[Native HTTP] FormData detectado, convertendo para base64...');
         
         // Extrair o blob do FormData
         const entries = Array.from(data.entries());
+        console.log('[Native HTTP] FormData entries:', entries.map(([k, v]) => `${k}: ${v instanceof Blob ? 'Blob' : typeof v}`));
+        
         const imageEntry = entries.find(([key]) => key === 'profileImage');
         
         if (imageEntry && imageEntry[1] instanceof Blob) {
@@ -77,15 +81,21 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
           const base64Promise = new Promise<string>((resolve, reject) => {
             reader.onloadend = () => {
               const base64 = reader.result as string;
-              resolve(base64.split(',')[1]); // Remover o prefixo data:image/jpeg;base64,
+              // Remover o prefixo data:image/jpeg;base64,
+              const base64Data = base64.split(',')[1] || base64;
+              console.log('[Native HTTP] Base64 result length:', base64Data.length);
+              resolve(base64Data);
             };
-            reader.onerror = reject;
+            reader.onerror = (error) => {
+              console.error('[Native HTTP] FileReader error:', error);
+              reject(error);
+            };
           });
           reader.readAsDataURL(blob);
           
           try {
             const base64Data = await base64Promise;
-            console.log('[Native HTTP] Base64 criado, tamanho:', base64Data.length);
+            console.log('[Native HTTP] Base64 criado com sucesso, primeiros 50 chars:', base64Data.substring(0, 50));
             
             // Enviar como JSON com base64
             requestData = {
@@ -95,6 +105,7 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
             
             // Atualizar headers para JSON
             authHeaders['Content-Type'] = 'application/json';
+            console.log('[Native HTTP] Request data preparado para envio');
             
           } catch (error) {
             console.error('[Native HTTP] Erro ao converter para base64:', error);
@@ -105,8 +116,6 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
           requestData = {};
         }
       }
-      
-      let requestData = data;
       
       const response = await Http.request({
         url: fullUrl,
