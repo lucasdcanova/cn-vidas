@@ -208,7 +208,7 @@ const SubscriptionPage: React.FC = () => {
       {/* Informações da assinatura atual */}
       {currentSubscription && currentSubscription.status !== "inactive" && (
         <Card className="mb-8 mt-4 overflow-hidden border-2 border-primary shadow-lg">
-          <CardHeader className={`p-4 md:p-6
+          <CardHeader className={`${isIOS ? 'p-5' : 'p-4 md:p-6'}
             ${(() => {
               const subscription = userSubscription.subscription || userSubscription;
               const planName = subscription.plan?.name;
@@ -221,34 +221,34 @@ const SubscriptionPage: React.FC = () => {
             })()}
           `}>
             <div className="flex justify-between items-center">
-              <CardTitle className="flex items-center text-base md:text-xl">
-                <CreditCard className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+              <CardTitle className={`flex items-center ${isIOS ? 'text-[17px]' : 'text-base md:text-xl'}`}>
+                <CreditCard className={`mr-2 ${isIOS ? 'h-4 w-4' : 'h-4 w-4 md:h-5 md:w-5'}`} />
                 Sua assinatura atual
               </CardTitle>
-              <Badge className="bg-white/20 text-white border-white/30 text-xs md:text-sm">
+              <Badge className={`bg-white/20 text-white border-white/30 ${isIOS ? 'text-[11px] px-2 py-0.5' : 'text-xs md:text-sm'}`}>
                 {currentSubscription.status === "active" ? "Ativa" : 
                  currentSubscription.status === "trialing" ? "Em teste" : 
                  currentSubscription.status}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="p-4 md:p-6">
+          <CardContent className={`${isIOS ? 'p-5' : 'p-4 md:p-6'}`}>
             {currentSubscription.plan && (
-              <div className="space-y-4">
+              <div className={`${isIOS ? 'space-y-5' : 'space-y-4'}`}>
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-xl md:text-2xl font-bold">
+                    <h3 className={`${isIOS ? 'text-[20px]' : 'text-xl md:text-2xl'} font-bold`}>
                       {getPlanName(currentSubscription.plan.name)}
                     </h3>
-                    <p className="text-sm md:text-base text-muted-foreground mt-2 leading-relaxed">
+                    <p className={`${isIOS ? 'text-[13px] leading-[1.7] mt-3' : 'text-sm md:text-base mt-2 leading-relaxed'} text-muted-foreground`}>
                       {currentSubscription.plan.features.join(" • ")}
                     </p>
                   </div>
-                  <div className="text-left md:text-right">
-                    <p className="text-2xl md:text-3xl font-bold">
+                  <div className={`${isIOS ? 'mt-3' : ''} text-left md:text-right`}>
+                    <p className={`${isIOS ? 'text-[24px]' : 'text-2xl md:text-3xl'} font-bold`}>
                       R$ {(currentSubscription.plan.price / 100).toFixed(2)}
                     </p>
-                    <p className="text-xs md:text-sm text-muted-foreground">/mês</p>
+                    <p className={`${isIOS ? 'text-[12px]' : 'text-xs md:text-sm'} text-muted-foreground`}>/mês</p>
                   </div>
                 </div>
                 
