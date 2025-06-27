@@ -60,20 +60,50 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
         'Authorization': authHeaders['Authorization'] ? 'PRESENTE' : 'AUSENTE'
       });
       
-      // Para FormData no Capacitor, usar fetch nativo diretamente
+      // Para FormData no Capacitor, converter para base64
       if (isFormData) {
-        console.log('[Native HTTP] FormData detectado, usando fetch nativo...');
-        const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+        console.log('[Native HTTP] FormData detectado, convertendo para base64...');
         
-        const nativeResponse = await fetch(fullUrl, {
-          method,
-          headers: authHeaders,
-          body: data,
-          credentials: 'include'
-        });
+        // Extrair o blob do FormData
+        const entries = Array.from(data.entries());
+        const imageEntry = entries.find(([key]) => key === 'profileImage');
         
-        console.log('[Native Fetch] Response status:', nativeResponse.status);
-        return nativeResponse;
+        if (imageEntry && imageEntry[1] instanceof Blob) {
+          const blob = imageEntry[1] as Blob;
+          console.log('[Native HTTP] Blob encontrado:', { size: blob.size, type: blob.type });
+          
+          // Converter blob para base64
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => {
+              const base64 = reader.result as string;
+              resolve(base64.split(',')[1]); // Remover o prefixo data:image/jpeg;base64,
+            };
+            reader.onerror = reject;
+          });
+          reader.readAsDataURL(blob);
+          
+          try {
+            const base64Data = await base64Promise;
+            console.log('[Native HTTP] Base64 criado, tamanho:', base64Data.length);
+            
+            // Enviar como JSON com base64
+            requestData = {
+              profileImage: base64Data,
+              mimeType: blob.type || 'image/jpeg'
+            };
+            
+            // Atualizar headers para JSON
+            authHeaders['Content-Type'] = 'application/json';
+            
+          } catch (error) {
+            console.error('[Native HTTP] Erro ao converter para base64:', error);
+            throw error;
+          }
+        } else {
+          console.log('[Native HTTP] Nenhum blob encontrado no FormData');
+          requestData = {};
+        }
       }
       
       let requestData = data;
