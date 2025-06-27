@@ -53,7 +53,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useBiometricAuth } from "@/hooks/use-biometric-auth";
 import { Capacitor } from '@capacitor/core';
-import AddressForm from "@/components/forms/address-form-optimized";
+import { AddressFormOptimized as AddressForm } from "@/components/forms/address-form-optimized";
 
 // Schemas de validação
 const patientProfileSchema = z.object({
