@@ -620,13 +620,15 @@ const AuthPage: React.FC = () => {
   return (
     <AuthLayout>
       <div className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
-        isKeyboardVisible ? 'py-2' : (activeTab === 'register' && isNativeApp() ? 'pt-1' : 'py-6')
+        isKeyboardVisible ? 'py-2' : 'py-6'
       } overflow-y-auto transition-all duration-300`} style={{
         maxHeight: isKeyboardVisible ? '100%' : 'auto',
         paddingBottom: isKeyboardVisible ? '0' : undefined,
-        paddingTop: activeTab === 'register' && isNativeApp() && !isKeyboardVisible ? '4px' : undefined
+        paddingTop: activeTab === 'register' && isNativeApp() && !isKeyboardVisible ? '0.5rem' : undefined
       }}>
-        <Tabs defaultValue="register" value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
+        <Tabs defaultValue="register" value={activeTab} onValueChange={setActiveTab} className={`w-full flex-1 flex flex-col transition-all duration-300 ${
+          activeTab === 'register' && isNativeApp() && !isKeyboardVisible ? '-mt-10' : ''
+        }`}>
           <TabsList className="grid w-full grid-cols-2 mb-4 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg">
             <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
