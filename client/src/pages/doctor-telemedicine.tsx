@@ -543,7 +543,7 @@ export default function DoctorTelemedicinePage() {
             />
           </div>
           <p className="text-muted-foreground">
-            Gerencie suas consultas de telemedicina e configure sua disponibilidade
+            Visualize e atenda suas consultas agendadas e chamadas de emergência
           </p>
         </div>
         
