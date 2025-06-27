@@ -60,14 +60,23 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
         'Authorization': authHeaders['Authorization'] ? 'PRESENTE' : 'AUSENTE'
       });
       
-      // Para FormData no Capacitor, precisamos converter para objeto
-      let requestData = data;
+      // Para FormData no Capacitor, usar fetch nativo diretamente
       if (isFormData) {
-        console.log('[Native HTTP] Convertendo FormData para objeto...');
-        // FormData não é suportado diretamente pelo Capacitor HTTP
-        // Vamos usar fetch nativo mesmo no iOS
-        throw new Error('FormData requires native fetch');
+        console.log('[Native HTTP] FormData detectado, usando fetch nativo...');
+        const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+        
+        const nativeResponse = await fetch(fullUrl, {
+          method,
+          headers: authHeaders,
+          body: data,
+          credentials: 'include'
+        });
+        
+        console.log('[Native Fetch] Response status:', nativeResponse.status);
+        return nativeResponse;
       }
+      
+      let requestData = data;
       
       const response = await Http.request({
         url: fullUrl,
@@ -93,53 +102,21 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
         message: error.message,
         code: error.code,
         url: url,
-        headers: authHeaders,
         errorType: error.constructor?.name
       });
       
-      // Se for erro de FormData, usar fetch nativo
-      if (error.message === 'FormData requires native fetch') {
-        console.log('[Native HTTP] Fallback para fetch nativo com FormData');
-        const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-        
-        try {
-          console.log('[Native Fetch] Tentando fetch nativo para FormData...');
-          console.log('[Native Fetch] URL:', fullUrl);
-          console.log('[Native Fetch] Headers:', {
-            ...authHeaders,
-            'X-Auth-Token': authHeaders['X-Auth-Token'] ? 'PRESENTE' : 'AUSENTE',
-            'Authorization': authHeaders['Authorization'] ? 'PRESENTE' : 'AUSENTE'
-          });
-          
-          // Usar fetch nativo para FormData
-          const nativeResponse = await fetch(fullUrl, {
-            method,
-            headers: authHeaders,
-            body: data, // FormData deve ser passado diretamente
-            credentials: 'include'
-          });
-          
-          console.log('[Native Fetch] Response status:', nativeResponse.status);
-          console.log('[Native Fetch] Response ok:', nativeResponse.ok);
-          
-          return nativeResponse;
-        } catch (fetchError: any) {
-          console.error('[Native Fetch] Erro no fetch nativo:', fetchError);
-          throw fetchError;
-        }
-      } else {
-        // Criar uma resposta de erro mais detalhada
-        const errorResponse = new Response(JSON.stringify({
-          error: error.message || 'Network request failed',
-          code: error.code,
-          url: fullUrl
-        }), {
-          status: error.status || 500,
-          statusText: error.message || 'Internal Server Error'
-        });
-        
-        return errorResponse;
-      }
+      // Criar uma resposta de erro mais detalhada
+      const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+      const errorResponse = new Response(JSON.stringify({
+        error: error.message || 'Network request failed',
+        code: error.code,
+        url: fullUrl
+      }), {
+        status: error.status || 500,
+        statusText: error.message || 'Internal Server Error'
+      });
+      
+      return errorResponse;
     }
   }
   
