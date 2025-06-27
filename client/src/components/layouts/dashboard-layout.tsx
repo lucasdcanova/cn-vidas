@@ -116,8 +116,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   const unreadCount = notificationsData?.count || 0;
   
-  // Determinar se deve mostrar a sidebar
-  const shouldShowSidebar = !(isNativeApp() && user?.role === "patient");
+  // Determinar se deve mostrar a sidebar - esconder para pacientes e médicos no iOS
+  const shouldShowSidebar = !(isNativeApp() && (user?.role === "patient" || user?.role === "doctor"));
 
   return (
     <div className="flex h-screen overflow-hidden bg-blue-50">{/* Fundo azul claro sólido que corresponde à identidade visual */}
