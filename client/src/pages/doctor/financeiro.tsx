@@ -184,17 +184,17 @@ export default function FinanceiroPage() {
       <div className="space-y-4">
         <h1 className="text-2xl font-bold tracking-tight">Financeiro</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          <Card className="col-span-1">
+            <CardHeader className="pb-2 px-3 pt-3">
+              <CardTitle className="text-xs font-medium">
                 Total a Receber
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
+            <CardContent className="px-3 pb-3">
+              <div className="text-lg font-bold">
                 {isLoadingPayments ? (
-                  <div className="h-6 w-24 bg-muted animate-pulse rounded" />
+                  <div className="h-5 w-20 bg-muted animate-pulse rounded" />
                 ) : (
                   formatCurrency(totalPendingAmount)
                 )}
@@ -202,16 +202,16 @@ export default function FinanceiroPage() {
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Já Recebido
+          <Card className="col-span-1">
+            <CardHeader className="pb-2 px-3 pt-3">
+              <CardTitle className="text-xs font-medium">
+                Total Recebido
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
+            <CardContent className="px-3 pb-3">
+              <div className="text-lg font-bold">
                 {isLoadingPayments ? (
-                  <div className="h-6 w-24 bg-muted animate-pulse rounded" />
+                  <div className="h-5 w-20 bg-muted animate-pulse rounded" />
                 ) : (
                   formatCurrency(totalPaidAmount)
                 )}
@@ -219,16 +219,16 @@ export default function FinanceiroPage() {
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Valor por Consulta
+          <Card className="col-span-1">
+            <CardHeader className="pb-2 px-3 pt-3">
+              <CardTitle className="text-xs font-medium">
+                Por Consulta
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
+            <CardContent className="px-3 pb-3">
+              <div className="text-lg font-bold">
                 {isLoadingDoctor ? (
-                  <div className="h-6 w-24 bg-muted animate-pulse rounded" />
+                  <div className="h-5 w-20 bg-muted animate-pulse rounded" />
                 ) : (
                   new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
