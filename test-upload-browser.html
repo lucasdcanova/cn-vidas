@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Upload de Foto - CNVidas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a73e8;
+            text-align: center;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #1a73e8;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px;
+        }
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+        .preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 10px auto;
+            display: block;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .device-info {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Teste de Upload de Foto - CNVidas</h1>
+        
+        <div class="device-info" id="deviceInfo">
+            <strong>Informações do Dispositivo:</strong>
+            <div id="deviceDetails"></div>
+        </div>
+
+        <div class="section">
+            <h2>1️⃣ Configuração</h2>
+            <label>
+                Ambiente:
+                <select id="environment">
+                    <option value="https://www.homologacao.cnvidas.com.br">Produção (Homologação)</option>
+                    <option value="http://localhost:8080">Local</option>
+                </select>
+            </label>
+            <label>
+                Email:
+                <input type="email" id="email" value="lucas.canova@hotmail.com" />
+            </label>
+            <label>
+                Senha:
+                <input type="password" id="password" value="666666" />
+            </label>
+        </div>
+
+        <div class="section">
+            <h2>2️⃣ Login</h2>
+            <button id="loginBtn" onclick="doLogin()">Fazer Login</button>
+            <div id="loginStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>3️⃣ Upload de Foto</h2>
+            <input type="file" id="fileInput" accept="image/*" disabled />
+            <img id="preview" class="preview" style="display:none;" />
+            <button id="uploadBtn" onclick="doUpload()" disabled>Fazer Upload</button>
+            <div id="uploadStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>4️⃣ Verificar Perfil</h2>
+            <button id="checkBtn" onclick="checkProfile()" disabled>Verificar Perfil</button>
+            <div id="profileStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Log de Execução</h2>
+            <button onclick="clearLog()">Limpar Log</button>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let authCookie = null;
+        let userInfo = null;
+
+        // Detectar informações do dispositivo
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            const isIOS = /iPhone|iPad|iPod/.test(ua);
+            const isAndroid = /Android/.test(ua);
+            const isCapacitor = window.Capacitor !== undefined;
+            
+            const info = {
+                userAgent: ua,
+                platform: navigator.platform,
+                isIOS,
+                isAndroid,
+                isCapacitor,
+                isMobile: isIOS || isAndroid,
+                screen: `${screen.width}x${screen.height}`
+            };
+            
+            document.getElementById('deviceDetails').innerHTML = `
+                <div>User Agent: ${info.userAgent}</div>
+                <div>Plataforma: ${info.platform}</div>
+                <div>Tela: ${info.screen}</div>
+                <div>iOS: ${info.isIOS ? 'Sim' : 'Não'}</div>
+                <div>Android: ${info.isAndroid ? 'Sim' : 'Não'}</div>
+                <div>Capacitor: ${info.isCapacitor ? 'Sim' : 'Não'}</div>
+            `;
+            
+            return info;
+        }
+
+        // Adicionar entrada no log
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Limpar log
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Preview da imagem
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+                addLog(`Arquivo selecionado: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`, 'info');
+            }
+        });
+
+        // Fazer login
+        async function doLogin() {
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            
+            const baseUrl = document.getElementById('environment').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            addLog(`Fazendo login em ${baseUrl}...`, 'info');
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    userInfo = data.user;
+                    
+                    addLog(`Login bem-sucedido! User ID: ${userInfo.id}`, 'success');
+                    addLog(`Role: ${userInfo.role}, Plano: ${userInfo.subscriptionPlan}`, 'info');
+                    
+                    document.getElementById('loginStatus').innerHTML = 
+                        '<div class="status success">✅ Logado com sucesso!</div>';
+                    
+                    // Habilitar upload
+                    document.getElementById('fileInput').disabled = false;
+                    document.getElementById('uploadBtn').disabled = false;
+                    document.getElementById('checkBtn').disabled = false;
+                } else {
+                    throw new Error(data.error || 'Falha no login');
+                }
+            } catch (error) {
+                addLog(`Erro no login: ${error.message}`, 'error');
+                document.getElementById('loginStatus').innerHTML = 
+                    '<div class="status error">❌ Erro no login</div>';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Fazer upload
+        async function doUpload() {
+            const btn = document.getElementById('uploadBtn');
+            btn.disabled = true;
+            
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                addLog('Nenhum arquivo selecionado', 'warning');
+                btn.disabled = false;
+                return;
+            }
+            
+            const baseUrl = document.getElementById('environment').value;
+            const deviceInfo = detectDevice();
+            
+            addLog(`Iniciando upload de ${file.name}...`, 'info');
+            
+            const formData = new FormData();
+            formData.append('profileImage', file);
+            
+            // Log do FormData
+            addLog(`FormData criado com arquivo: ${file.name}`, 'info');
+            
+            try {
+                const headers = {
+                    'Authorization': `Bearer ${authToken}`,
+                    'X-Auth-Token': authToken,
+                };
+                
+                // Se for mobile/iOS, adicionar headers especiais
+                if (deviceInfo.isMobile || deviceInfo.isCapacitor) {
+                    headers['X-Platform'] = deviceInfo.isIOS ? 'ios' : 'android';
+                    headers['X-Request-Source'] = 'capacitor';
+                    addLog('Adicionando headers mobile', 'info');
+                }
+                
+                addLog(`Enviando requisição para ${baseUrl}/api/upload-image`, 'info');
+                
+                const response = await fetch(`${baseUrl}/api/upload-image`, {
+                    method: 'POST',
+                    headers,
+                    credentials: 'include',
+                    body: formData
+                });
+                
+                const responseText = await response.text();
+                let data;
+                
+                try {
+                    data = JSON.parse(responseText);
+                } catch {
+                    data = responseText;
+                }
+                
+                addLog(`Status da resposta: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    addLog('Upload bem-sucedido!', 'success');
+                    if (data.imageUrl) {
+                        addLog(`URL da imagem: ${data.imageUrl}`, 'info');
+                    }
+                    document.getElementById('uploadStatus').innerHTML = 
+                        '<div class="status success">✅ Upload realizado com sucesso!</div>';
+                } else {
+                    throw new Error(data.error || data.message || 'Falha no upload');
+                }
+            } catch (error) {
+                addLog(`Erro no upload: ${error.message}`, 'error');
+                document.getElementById('uploadStatus').innerHTML = 
+                    '<div class="status error">❌ Erro no upload</div>';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Verificar perfil
+        async function checkProfile() {
+            const btn = document.getElementById('checkBtn');
+            btn.disabled = true;
+            
+            const baseUrl = document.getElementById('environment').value;
+            
+            addLog('Verificando perfil do usuário...', 'info');
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/users/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'X-Auth-Token': authToken,
+                    },
+                    credentials: 'include'
+                });
+                
+                const profile = await response.json();
+                
+                if (response.ok) {
+                    addLog('Perfil recuperado com sucesso!', 'success');
+                    addLog(`Nome: ${profile.fullName}`, 'info');
+                    addLog(`Email: ${profile.email}`, 'info');
+                    addLog(`Imagem: ${profile.profileImage || 'Nenhuma'}`, 'info');
+                    
+                    let statusHtml = '<div class="status success">✅ Perfil verificado!</div>';
+                    if (profile.profileImage) {
+                        statusHtml += `<img src="${profile.profileImage}" class="preview" />`;
+                    }
+                    document.getElementById('profileStatus').innerHTML = statusHtml;
+                } else {
+                    throw new Error('Falha ao buscar perfil');
+                }
+            } catch (error) {
+                addLog(`Erro ao verificar perfil: ${error.message}`, 'error');
+                document.getElementById('profileStatus').innerHTML = 
+                    '<div class="status error">❌ Erro ao verificar perfil</div>';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Inicializar
+        detectDevice();
+        addLog('Teste de upload inicializado', 'info');
+    </script>
+</body>
+</html>
