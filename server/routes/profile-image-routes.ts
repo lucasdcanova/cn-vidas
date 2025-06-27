@@ -22,8 +22,44 @@ const upload = multer({
   }
 });
 
+// Middleware para processar base64 quando vindo do iOS
+const processBase64Upload = async (req: any, res: any, next: any) => {
+  console.log('=== VERIFICANDO TIPO DE UPLOAD ===');
+  console.log('Content-Type:', req.headers['content-type']);
+  console.log('Body keys:', req.body ? Object.keys(req.body) : 'sem body');
+  
+  // Se é JSON com base64 (vindo do iOS)
+  if (req.headers['content-type']?.includes('application/json') && req.body?.profileImage) {
+    try {
+      console.log('📱 Upload base64 detectado (iOS)');
+      const { profileImage: base64Data, mimeType = 'image/jpeg' } = req.body;
+      
+      // Converter base64 para Buffer
+      const buffer = Buffer.from(base64Data, 'base64');
+      console.log('Buffer criado, tamanho:', buffer.length);
+      
+      // Simular req.file para compatibilidade
+      req.file = {
+        buffer: buffer,
+        originalname: 'profile.jpg',
+        mimetype: mimeType,
+        size: buffer.length,
+        fieldname: 'profileImage'
+      };
+      
+      next();
+    } catch (error) {
+      console.error('❌ Erro ao processar base64:', error);
+      return res.status(400).json({ error: 'Erro ao processar imagem base64' });
+    }
+  } else {
+    // Upload normal via FormData
+    upload.single('profileImage')(req, res, next);
+  }
+};
+
 // Upload de imagem de perfil (paciente)
-router.post('/profile/upload-image', requireAuth, upload.single('profileImage'), async (req, res) => {
+router.post('/profile/upload-image', requireAuth, processBase64Upload, async (req, res) => {
   console.log('=== UPLOAD DE IMAGEM S3 INICIADO ===');
   console.log('Headers recebidos:', {
     'content-type': req.headers['content-type'],
@@ -103,7 +139,7 @@ router.post('/profile/upload-image', requireAuth, upload.single('profileImage'),
 });
 
 // Upload de imagem de perfil (médico)
-router.post('/doctor-profile-image', requireAuth, upload.single('profileImage'), async (req, res) => {
+router.post('/doctor-profile-image', requireAuth, processBase64Upload, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
@@ -169,7 +205,7 @@ router.post('/doctor-profile-image', requireAuth, upload.single('profileImage'),
 });
 
 // Upload de imagem de perfil (parceiro)  
-router.post('/partner-profile-image', requireAuth, upload.single('profileImage'), async (req, res) => {
+router.post('/partner-profile-image', requireAuth, processBase64Upload, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
