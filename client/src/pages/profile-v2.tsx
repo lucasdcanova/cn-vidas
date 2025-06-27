@@ -12,6 +12,7 @@ import { Form } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { LogOut } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { 
   getUserProfile,
@@ -44,7 +45,8 @@ import {
   X,
   Loader2,
   Edit3,
-  CheckCircle2
+  CheckCircle2,
+  Stethoscope
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -118,7 +120,7 @@ type PartnerProfileFormValues = z.infer<typeof partnerProfileSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 const ProfileV2: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
@@ -987,6 +989,38 @@ const ProfileV2: React.FC = () => {
                   </div>
                 </ProfileCard>
               )}
+
+              {/* Logout Button */}
+              <ProfileCard
+                title="Sair da Conta"
+                description="Encerrar sua sessão atual"
+                icon={LogOut}
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="text-center sm:text-left mb-4 sm:mb-0">
+                    <p className="font-medium text-gray-900">Deseja sair da sua conta?</p>
+                    <p className="text-sm text-gray-500 mt-1">Você precisará fazer login novamente para acessar o app</p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    onClick={() => logoutMutation.mutate()}
+                    disabled={logoutMutation.isPending}
+                    className="w-full sm:w-auto"
+                  >
+                    {logoutMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saindo...
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sair
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </ProfileCard>
             </TabsContent>
 
             {/* Tab de Dependentes */}
