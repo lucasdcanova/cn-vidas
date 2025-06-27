@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { cn } from '@/lib/utils';
 
 interface TimeSlot {
   time: string;
@@ -56,6 +57,7 @@ export function AvailabilityManagerEnhanced() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [weeklyAvailability, setWeeklyAvailability] = useState<DayAvailability[]>(generateWeekTemplate());
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Set<string>>(new Set());
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(1); // Segunda-feira por padrão
   const [recurringPattern, setRecurringPattern] = useState<RecurringPattern>(() => {
     // Recuperar padrão recorrente do localStorage ou usar padrão
     if (typeof window !== 'undefined') {
@@ -462,11 +464,100 @@ export function AvailabilityManagerEnhanced() {
               <Alert>
                 <Clock className="h-4 w-4" />
                 <AlertDescription>
-                  Clique nos horários para marcar como disponível/indisponível
+                  Selecione o dia e depois os horários disponíveis
                 </AlertDescription>
               </Alert>
 
-              <div className="grid grid-cols-7 gap-2">
+              {/* Seletor de dia para mobile */}
+              <div className="md:hidden space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {weeklyAvailability.map((day, index) => (
+                    <Badge
+                      key={index}
+                      variant={selectedDayIndex === index ? "default" : "outline"}
+                      className={cn(
+                        "cursor-pointer px-3 py-2",
+                        !day.enabled && "opacity-50"
+                      )}
+                      onClick={() => setSelectedDayIndex(index)}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>{day.dayName.substring(0, 3)}</span>
+                        <Switch
+                          checked={day.enabled}
+                          onCheckedChange={(checked) => {
+                            const newAvailability = [...weeklyAvailability];
+                            newAvailability[index].enabled = checked;
+                            setWeeklyAvailability(newAvailability);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="scale-75"
+                        />
+                      </div>
+                    </Badge>
+                  ))}
+                </div>
+
+                {selectedDayIndex !== null && weeklyAvailability[selectedDayIndex].enabled && (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">{weeklyAvailability[selectedDayIndex].dayName}</h4>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const newAvailability = [...weeklyAvailability];
+                            newAvailability[selectedDayIndex].slots.forEach(slot => {
+                              slot.available = true;
+                            });
+                            setWeeklyAvailability(newAvailability);
+                          }}
+                        >
+                          Marcar todos
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const newAvailability = [...weeklyAvailability];
+                            newAvailability[selectedDayIndex].slots.forEach(slot => {
+                              slot.available = false;
+                            });
+                            setWeeklyAvailability(newAvailability);
+                          }}
+                        >
+                          Desmarcar todos
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto p-1">
+                      {weeklyAvailability[selectedDayIndex].slots.map((slot, slotIndex) => (
+                        <Button
+                          key={slotIndex}
+                          variant={slot.available ? "default" : "outline"}
+                          size="sm"
+                          className="h-10"
+                          onClick={() => toggleSlot(selectedDayIndex, slotIndex)}
+                        >
+                          {slot.time}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedDayIndex !== null && !weeklyAvailability[selectedDayIndex].enabled && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                    <p>Ative este dia para configurar os horários</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Layout desktop original */}
+              <div className="hidden md:grid md:grid-cols-7 gap-2">
                 {weeklyAvailability.map((day, dayIndex) => (
                   <div key={dayIndex} className="space-y-2">
                     <div className="flex items-center justify-between">
