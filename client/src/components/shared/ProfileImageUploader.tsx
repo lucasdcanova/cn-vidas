@@ -97,7 +97,21 @@ export default function ProfileImageUploader({
       const formData = new FormData();
       formData.append('profileImage', croppedImageBlob, 'profile.jpg');
 
-      const response = await apiRequest('POST', '/api/profile/upload-image', formData);
+      console.log('[ProfileImageUploader] FormData preparado, enviando requisição...');
+      
+      let response;
+      try {
+        response = await apiRequest('POST', '/api/profile/upload-image', formData);
+      } catch (fetchError: any) {
+        console.error('[ProfileImageUploader] Erro na requisição HTTP:', {
+          message: fetchError.message,
+          name: fetchError.name,
+          stack: fetchError.stack,
+          code: fetchError.code,
+          statusCode: fetchError.statusCode
+        });
+        throw new Error(`Erro na requisição: ${fetchError.message}`);
+      }
       
       console.log('[ProfileImageUploader] Resposta recebida:', {
         status: response.status,
