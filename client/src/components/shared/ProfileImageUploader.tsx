@@ -110,10 +110,10 @@ export default function ProfileImageUploader({
       let response;
       try {
         console.log('[ProfileImageUploader] Chamando apiRequest...');
-        console.log('[ProfileImageUploader] Endpoint:', '/api/upload-image');
+        console.log('[ProfileImageUploader] Endpoint:', '/api/profile/upload-image');
         console.log('[ProfileImageUploader] FormData tem entradas:', Array.from((formData as any).entries ? (formData as any).entries() : []));
         
-        response = await apiRequest('POST', '/api/upload-image', formData);
+        response = await apiRequest('POST', '/api/profile/upload-image', formData);
         console.log('[ProfileImageUploader] apiRequest retornou resposta:', {
           type: response?.constructor?.name,
           status: response?.status,
