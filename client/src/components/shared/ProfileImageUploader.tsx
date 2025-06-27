@@ -85,15 +85,23 @@ export default function ProfileImageUploader({
   };
 
   const handleCropComplete = async (croppedImageBlob: Blob) => {
+    console.log('[ProfileImageUploader] handleCropComplete iniciado');
     setShowCropper(false);
     setIsUploading(true);
 
     try {
       console.log('[ProfileImageUploader] Iniciando upload:', {
         blobSize: croppedImageBlob.size,
-        blobType: croppedImageBlob.type
+        blobType: croppedImageBlob.type,
+        blobExists: !!croppedImageBlob
       });
 
+      // Verificar se o blob é válido
+      if (!croppedImageBlob || croppedImageBlob.size === 0) {
+        throw new Error('Imagem inválida ou vazia');
+      }
+
+      console.log('[ProfileImageUploader] Criando FormData...');
       const formData = new FormData();
       formData.append('profileImage', croppedImageBlob, 'profile.jpg');
 
@@ -101,16 +109,32 @@ export default function ProfileImageUploader({
       
       let response;
       try {
-        response = await apiRequest('POST', '/api/profile/upload-image', formData);
+        console.log('[ProfileImageUploader] Chamando apiRequest...');
+        console.log('[ProfileImageUploader] Endpoint:', '/api/upload-image');
+        console.log('[ProfileImageUploader] FormData tem entradas:', Array.from((formData as any).entries ? (formData as any).entries() : []));
+        
+        response = await apiRequest('POST', '/api/upload-image', formData);
+        console.log('[ProfileImageUploader] apiRequest retornou resposta:', {
+          type: response?.constructor?.name,
+          status: response?.status,
+          ok: response?.ok
+        });
       } catch (fetchError: any) {
         console.error('[ProfileImageUploader] Erro na requisição HTTP:', {
           message: fetchError.message,
           name: fetchError.name,
           stack: fetchError.stack,
           code: fetchError.code,
-          statusCode: fetchError.statusCode
+          statusCode: fetchError.statusCode,
+          toString: fetchError.toString()
         });
-        throw new Error(`Erro na requisição: ${fetchError.message}`);
+        
+        // Verificar se é um erro de rede
+        if (fetchError.message?.includes('network') || fetchError.message?.includes('fetch')) {
+          throw new Error('Erro de conexão. Verifique sua internet.');
+        }
+        
+        throw new Error(`Erro na requisição: ${fetchError.message || 'Erro desconhecido'}`);
       }
       
       console.log('[ProfileImageUploader] Resposta recebida:', {
