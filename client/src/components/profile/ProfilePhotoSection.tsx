@@ -34,8 +34,8 @@ export default function ProfilePhotoSection({
   const sizeClasses = {
     sm: 'w-20 h-20',
     md: 'w-24 h-24',
-    lg: 'w-32 h-32',
-    xl: 'w-40 h-40'
+    lg: 'w-28 h-28 md:w-32 md:h-32',
+    xl: 'w-32 h-32 md:w-40 md:h-40'
   };
 
   const getInitials = (name: string) => {
@@ -175,9 +175,9 @@ export default function ProfilePhotoSection({
             alt={userName}
             className="object-cover"
           />
-          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-2xl font-semibold">
+          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xl md:text-2xl font-semibold">
             {previewImage ? (
-              <User className="w-12 h-12" />
+              <User className="w-10 h-10 md:w-12 md:h-12" />
             ) : (
               getInitials(userName)
             )}
@@ -199,7 +199,7 @@ export default function ProfilePhotoSection({
               onClick={() => fileInputRef.current?.click()}
               className="flex flex-col items-center text-white"
             >
-              <Camera className="w-8 h-8 mb-1" />
+              <Camera className="w-6 h-6 md:w-8 md:h-8 mb-1" />
               <span className="text-xs font-medium">Alterar</span>
             </button>
           )}
@@ -216,7 +216,7 @@ export default function ProfilePhotoSection({
             "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
         >
-          <Camera className="w-5 h-5 text-gray-700" />
+          <Camera className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
         </button>
 
         {/* Input oculto */}
