@@ -240,7 +240,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <div className="w-px h-6 bg-gray-200 mx-1"></div>
                 </>
               )}
-              <UserProfile user={user} compact />
+              <UserProfile user={userWithProfileImage} compact />
             </div>
           </div>
           
