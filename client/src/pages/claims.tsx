@@ -195,10 +195,22 @@ const Claims: React.FC = () => {
         
         {/* Header section */}
         <div className="mb-6 mt-4">
-          <h1 className="text-2xl font-bold text-gray-900">Sinistros</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Seguro Internação</h1>
           <p className="text-gray-600 mt-1">
-            Acompanhe o status dos seus pedidos de reembolso
+            Acompanhe seus pedidos de seguro internação hospitalar
           </p>
+          <div className="mt-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800 font-medium mb-2">
+              💰 Valores do seguro por 24h de internação:
+            </p>
+            <ul className="text-sm text-blue-700 space-y-1 ml-4">
+              <li>• Plano Ultra Familiar: <strong>R$ 500,00</strong> por dia</li>
+              <li>• Planos Premium e Básico: <strong>R$ 300,00</strong> por dia</li>
+            </ul>
+            <p className="text-xs text-blue-600 mt-3 font-medium">
+              ⚠️ Importante: O seguro passa a valer a partir do segundo mês de plano
+            </p>
+          </div>
         </div>
         
         {/* Status Summary */}
@@ -236,7 +248,7 @@ const Claims: React.FC = () => {
         
         {/* All claims with tabs */}
         <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Todos os Sinistros</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Todas as Solicitações</h2>
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid grid-cols-4 mb-6">
               <TabsTrigger value="all">Todos ({claims.length})</TabsTrigger>

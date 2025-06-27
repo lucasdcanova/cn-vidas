@@ -23,7 +23,7 @@ const upload = multer({
 });
 
 // Upload de imagem de perfil (paciente)
-router.post('/api/profile/upload-image', requireAuth, upload.single('profileImage'), async (req, res) => {
+router.post('/profile/upload-image', requireAuth, upload.single('profileImage'), async (req, res) => {
   console.log('=== UPLOAD DE IMAGEM S3 INICIADO ===');
   console.log('Headers recebidos:', {
     'content-type': req.headers['content-type'],
@@ -103,7 +103,7 @@ router.post('/api/profile/upload-image', requireAuth, upload.single('profileImag
 });
 
 // Upload de imagem de perfil (médico)
-router.post('/api/doctor-profile-image', requireAuth, upload.single('profileImage'), async (req, res) => {
+router.post('/doctor-profile-image', requireAuth, upload.single('profileImage'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
@@ -169,7 +169,7 @@ router.post('/api/doctor-profile-image', requireAuth, upload.single('profileImag
 });
 
 // Upload de imagem de perfil (parceiro)  
-router.post('/api/partner-profile-image', requireAuth, upload.single('profileImage'), async (req, res) => {
+router.post('/partner-profile-image', requireAuth, upload.single('profileImage'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
@@ -234,7 +234,7 @@ router.post('/api/partner-profile-image', requireAuth, upload.single('profileIma
 });
 
 // Remover imagem de perfil
-router.delete('/api/profile/remove-image', requireAuth, async (req, res) => {
+router.delete('/profile/remove-image', requireAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     const user = await storage.getUserById(userId);
@@ -274,7 +274,7 @@ router.delete('/api/profile/remove-image', requireAuth, async (req, res) => {
 });
 
 // Endpoint para gerar nova URL assinada (quando a atual expirar)
-router.get('/api/profile/refresh-image-url', requireAuth, async (req, res) => {
+router.get('/profile/refresh-image-url', requireAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     const user = await storage.getUserById(userId);
@@ -311,7 +311,7 @@ router.get('/api/profile/refresh-image-url', requireAuth, async (req, res) => {
 });
 
 // Endpoint LGPD - Exportar dados do usuário
-router.get('/api/profile/export-my-data', requireAuth, async (req, res) => {
+router.get('/profile/export-my-data', requireAuth, async (req, res) => {
   try {
     const userId = req.user!.id;
     
