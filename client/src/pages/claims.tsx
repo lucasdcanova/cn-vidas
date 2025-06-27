@@ -212,33 +212,33 @@ const Claims: React.FC = () => {
         </div>
         
         {/* Status Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-6">
           <Card>
-            <CardContent className="p-6 flex items-center space-x-4">
-              <AlertCircle className="h-10 w-10 text-yellow-500" />
-              <div>
-                <p className="text-sm font-medium text-gray-500">Em análise</p>
-                <h3 className="text-2xl font-bold">{pendingClaims.length}</h3>
+            <CardContent className="p-3 sm:p-4 md:p-6 flex flex-col sm:flex-row items-center sm:space-x-2 md:space-x-4">
+              <AlertCircle className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 text-yellow-500 mb-2 sm:mb-0" />
+              <div className="text-center sm:text-left">
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Em análise</p>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{pendingClaims.length}</h3>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-6 flex items-center space-x-4">
-              <CheckCircle className="h-10 w-10 text-green-500" />
-              <div>
-                <p className="text-sm font-medium text-gray-500">Aprovados</p>
-                <h3 className="text-2xl font-bold">{approvedClaims.length}</h3>
+            <CardContent className="p-3 sm:p-4 md:p-6 flex flex-col sm:flex-row items-center sm:space-x-2 md:space-x-4">
+              <CheckCircle className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 text-green-500 mb-2 sm:mb-0" />
+              <div className="text-center sm:text-left">
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Aprovados</p>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{approvedClaims.length}</h3>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-6 flex items-center space-x-4">
-              <XCircle className="h-10 w-10 text-red-500" />
-              <div>
-                <p className="text-sm font-medium text-gray-500">Rejeitados</p>
-                <h3 className="text-2xl font-bold">{rejectedClaims.length}</h3>
+            <CardContent className="p-3 sm:p-4 md:p-6 flex flex-col sm:flex-row items-center sm:space-x-2 md:space-x-4">
+              <XCircle className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 text-red-500 mb-2 sm:mb-0" />
+              <div className="text-center sm:text-left">
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Rejeitados</p>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold">{rejectedClaims.length}</h3>
               </div>
             </CardContent>
           </Card>
