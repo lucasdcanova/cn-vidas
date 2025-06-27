@@ -424,8 +424,11 @@ const AuthPage: React.FC = () => {
       if (isBiometricAvailable && !user) {
         const credentials = await getStoredCredentials();
         if (credentials?.username) {
-          // Se há credenciais salvas, tentar login biométrico automaticamente
-          handleBiometricLogin();
+          // Se há credenciais salvas e o usuário habilitou Face ID, tentar login biométrico automaticamente
+          const biometricEnabled = localStorage.getItem('biometricEnabled') === 'true';
+          if (biometricEnabled) {
+            handleBiometricLogin();
+          }
         }
       }
     };
@@ -522,6 +525,8 @@ const AuthPage: React.FC = () => {
       // Salvar credenciais biométricas se habilitado
       if (enableBiometric && isBiometricAvailable) {
         await saveBiometricCredentials(data.email, data.password);
+        // Salvar preferência do usuário no localStorage
+        localStorage.setItem('biometricEnabled', 'true');
       }
       
       // Haptic feedback de sucesso
@@ -746,45 +751,18 @@ const AuthPage: React.FC = () => {
                   )}
                 </div>
                 
-                <div className="space-y-3">
-                  <Button 
-                    type="submit" 
-                    className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
-                    disabled={isLoggingIn || isAuthenticating}
-                  >
-                    {isLoggingIn ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Entrando...
-                      </>
-                    ) : "Entrar"}
-                  </Button>
-                  
-                  {isBiometricAvailable && (
-                    <Button
-                      type="button"
-                      onClick={handleBiometricLogin}
-                      className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
-                      disabled={isLoggingIn || isAuthenticating}
-                    >
-                      {isAuthenticating ? (
-                        <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Autenticando...
-                        </>
-                      ) : (
-                        <>
-                          {biometryTypeName === 'Touch ID' || biometryTypeName === 'Impressão Digital' ? (
-                            <Fingerprint className="mr-2 h-5 w-5" />
-                          ) : (
-                            <Smartphone className="mr-2 h-5 w-5" />
-                          )}
-                          Entrar com {biometryTypeName}
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-md hover:shadow-lg"
+                  disabled={isLoggingIn || isAuthenticating}
+                >
+                  {isLoggingIn ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Entrando...
+                    </>
+                  ) : "Entrar"}
+                </Button>
               </form>
             </Form>
           </div>

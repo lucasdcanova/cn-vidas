@@ -36,6 +36,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { LogOut } from "lucide-react";
 import { Capacitor } from '@capacitor/core';
 import { useFreshUserData } from "@/hooks/use-fresh-user-data";
+import { useBiometricAuth } from "@/hooks/use-biometric-auth";
 import { 
   Loader2, 
   User, 
@@ -47,7 +48,9 @@ import {
   MapPin,
   Users,
   UserPlus,
-  AlertCircle
+  AlertCircle,
+  Fingerprint,
+  Smartphone
 } from "lucide-react";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import { AddressFormOptimized as AddressForm, AddressFormValues } from "@/components/forms/address-form-optimized";
@@ -195,6 +198,19 @@ const Profile: React.FC = () => {
   
   // Use o hook para garantir dados frescos do usuário
   const { refreshUserData } = useFreshUserData();
+  
+  // Biometric auth hook
+  const { 
+    isAvailable: isBiometricAvailable, 
+    biometryTypeName,
+    saveCredentials: saveBiometricCredentials,
+    clearCredentials: clearBiometricCredentials
+  } = useBiometricAuth();
+  
+  // Estado para biometric settings
+  const [biometricEnabled, setBiometricEnabled] = useState(() => {
+    return localStorage.getItem('biometricEnabled') === 'true';
+  });
   
   // Form para dependentes
   const dependentForm = useForm<DependentFormValues>({
@@ -808,6 +824,43 @@ const Profile: React.FC = () => {
     createDependentMutation.mutate(data);
   };
   
+  // Handle biometric toggle
+  const handleBiometricToggle = async (enabled: boolean) => {
+    try {
+      setBiometricEnabled(enabled);
+      localStorage.setItem('biometricEnabled', enabled.toString());
+      
+      if (enabled) {
+        // Se habilitando, salvar as credenciais atuais
+        if (profileData?.email) {
+          // Solicitar a senha do usuário para salvar nas credenciais biométricas
+          toast({
+            title: "Biometria habilitada",
+            description: `Login com ${biometryTypeName} será usado automaticamente na próxima vez.`,
+          });
+        }
+      } else {
+        // Se desabilitando, limpar as credenciais
+        await clearBiometricCredentials();
+        toast({
+          title: "Biometria desabilitada",
+          description: "O login biométrico foi desativado.",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao alterar configuração biométrica:", error);
+      // Reverter o estado em caso de erro
+      setBiometricEnabled(!enabled);
+      localStorage.setItem('biometricEnabled', (!enabled).toString());
+      
+      toast({
+        title: "Erro ao alterar configuração",
+        description: "Não foi possível alterar a configuração biométrica.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Handle password form submission
   const onPasswordSubmit = async (data: PasswordFormValues) => {
     setIsChangingPassword(true);
@@ -2032,7 +2085,7 @@ const Profile: React.FC = () => {
                   Altere sua senha e configure outras opções de segurança
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 <Form {...passwordForm}>
                   <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
                     <FormField
@@ -2107,6 +2160,32 @@ const Profile: React.FC = () => {
                     </div>
                   </form>
                 </Form>
+                
+                {/* Biometric Settings - apenas no iOS */}
+                {isBiometricAvailable && Capacitor.isNativePlatform() && (
+                  <div className="mt-6 pt-6 border-t">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          {biometryTypeName === 'Touch ID' || biometryTypeName === 'Impressão Digital' ? (
+                            <Fingerprint className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <Smartphone className="h-5 w-5 text-muted-foreground" />
+                          )}
+                          <h3 className="text-base font-medium">Login com {biometryTypeName}</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Faça login automaticamente usando {biometryTypeName} quando abrir o app
+                        </p>
+                      </div>
+                      <Switch
+                        checked={biometricEnabled}
+                        onCheckedChange={handleBiometricToggle}
+                        aria-label={`Habilitar login com ${biometryTypeName}`}
+                      />
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
             
