@@ -42,6 +42,7 @@ import prescriptionRouter from './prescription-routes';
 import pushNotificationsRouter from './push-notifications-routes';
 import walletRouter from './wallet-routes-simplified';
 import uploadDiagnosticsRouter from './upload-diagnostics';
+import profileImageRouter from './profile-image-routes';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -110,6 +111,7 @@ export default async function setupRoutes(app: express.Express) {
   
   // Rotas de perfil (ordem específica para evitar conflitos)
   app.use('/api/profile', profileUploadRouter);
+  app.use('/api', profileImageRouter); // Rotas de imagem de perfil com S3
   app.use('/api/address', addressRouter);
   
   // Rotas de agendamento

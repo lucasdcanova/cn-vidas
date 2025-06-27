@@ -1874,6 +1874,29 @@ export class DatabaseStorage implements IStorage {
     //   user: r.user
     // })));
   }
+
+  // Secure file storage methods (temporary implementation)
+  async createSecureFile(file: any): Promise<any> {
+    console.log('Creating secure file:', file);
+    // TODO: Implement with proper secure_files table
+    return { id: 1, ...file };
+  }
+
+  async getSecureFileByUrl(url: string): Promise<any> {
+    console.log('Getting secure file by URL:', url);
+    // TODO: Implement with proper secure_files table
+    return null;
+  }
+
+  async softDeleteSecureFile(id: number): Promise<void> {
+    console.log('Soft deleting secure file:', id);
+    // TODO: Implement with proper secure_files table
+  }
+
+  async createLGPDRequest(request: any): Promise<void> {
+    console.log('Creating LGPD request:', request);
+    // TODO: Implement with proper lgpd_requests table
+  }
 }
 
 export const storage = new DatabaseStorage();
