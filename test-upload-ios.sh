@@ -65,7 +65,7 @@ echo -e "\n${CYAN}📤 Testando upload de foto...${NC}"
 
 # Teste 1: Upload padrão
 echo -e "\n${YELLOW}Teste 1: Upload com headers padrão${NC}"
-UPLOAD_RESPONSE=$(curl -s -X POST "$BASE_URL/api/upload-image" \
+UPLOAD_RESPONSE=$(curl -s -X POST "$BASE_URL/api/profile/upload-image" \
     -H "Authorization: Bearer $TOKEN" \
     -H "X-Auth-Token: $TOKEN" \
     -b cookies.txt \
@@ -90,7 +90,7 @@ fi
 
 # Teste 2: Simular iOS com User-Agent
 echo -e "\n${YELLOW}Teste 2: Upload simulando iOS${NC}"
-UPLOAD_RESPONSE_IOS=$(curl -s -X POST "$BASE_URL/api/upload-image" \
+UPLOAD_RESPONSE_IOS=$(curl -s -X POST "$BASE_URL/api/profile/upload-image" \
     -H "Authorization: Bearer $TOKEN" \
     -H "X-Auth-Token: $TOKEN" \
     -H "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148" \
