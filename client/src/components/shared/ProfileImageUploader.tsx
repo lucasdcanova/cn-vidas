@@ -213,7 +213,7 @@ export default function ProfileImageUploader({
     setIsUploading(true);
 
     try {
-      await apiRequest('DELETE', '/api/profile/upload-image');
+      await apiRequest('DELETE', '/api/profile/remove-image');
 
       // Forçar refresh dos dados do usuário primeiro
       try {
