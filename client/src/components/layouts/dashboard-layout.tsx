@@ -191,7 +191,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Link para Financeiro - apenas para médicos */}
               {user?.role === "doctor" && (
                 <>
-                  <Link to="/doctor-financeiro">
+                  <Link to="/doctor/financeiro">
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -240,7 +240,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <div className="flex items-center ml-4 space-x-3">
               {/* Link para Financeiro - apenas para médicos */}
               {user?.role === "doctor" && (
-                <Link to="/doctor-financeiro">
+                <Link to="/doctor/financeiro">
                   <Button 
                     variant="ghost" 
                     size="icon" 
