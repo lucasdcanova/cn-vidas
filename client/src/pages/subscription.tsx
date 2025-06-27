@@ -240,9 +240,14 @@ const SubscriptionPage: React.FC = () => {
                     <h3 className={`${isIOS ? 'text-[20px]' : 'text-xl md:text-2xl'} font-bold`}>
                       {getPlanName(currentSubscription.plan.name)}
                     </h3>
-                    <p className={`${isIOS ? 'text-[13px] leading-[1.7] mt-3' : 'text-sm md:text-base mt-2 leading-relaxed'} text-muted-foreground`}>
-                      {currentSubscription.plan.features.join(" • ")}
-                    </p>
+                    <ul className={`${isIOS ? 'space-y-3 mt-3' : 'space-y-2 mt-2'}`}>
+                      {currentSubscription.plan.features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className={`${isIOS ? 'text-[13px] leading-[1.6]' : 'text-xs md:text-sm'} text-gray-700`}>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                   <div className={`${isIOS ? 'mt-3' : ''} text-left md:text-right`}>
                     <p className={`${isIOS ? 'text-[24px]' : 'text-2xl md:text-3xl'} font-bold`}>

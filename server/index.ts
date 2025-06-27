@@ -28,8 +28,8 @@ import { tokenBlacklist } from "./utils/token-blacklist";
   // Configuração de CORS
   const corsOptions = {
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://cnvidas.com', 'https://www.cnvidas.com']
-      : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'],
+      ? ['https://cnvidas.com', 'https://www.cnvidas.com', 'capacitor://localhost', 'ionic://localhost']
+      : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000', 'capacitor://localhost', 'ionic://localhost'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-Token', 'X-Session-ID'],
