@@ -47,6 +47,8 @@
 	<false/>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleDefault</string>
+	<key>UIStatusBarHidden</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>CN Vidas precisa acessar a câmera para realizar videochamadas com médicos</string>
 	<key>NSMicrophoneUsageDescription</key>
