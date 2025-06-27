@@ -201,6 +201,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       <DollarSign className="h-5 w-5 text-gray-600" />
                     </Button>
                   </Link>
+                  <Link to="/doctor/settings">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                      title="Configurações"
+                    >
+                      <Settings className="h-5 w-5 text-gray-600" />
+                    </Button>
+                  </Link>
                   <div className="w-px h-6 bg-gray-200 mx-1"></div>
                 </>
               )}

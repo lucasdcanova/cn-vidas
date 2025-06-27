@@ -535,19 +535,19 @@ export default function DoctorTelemedicinePage() {
         {/* Componente de paciente em espera removido conforme solicitado */}
         <div className="space-y-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">Teleconsultas</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold tracking-tight">Teleconsultas</h1>
+            <AutoRefreshIndicator 
+              isRefreshing={false}
+              interval={5000}
+            />
+          </div>
           <p className="text-muted-foreground">
             Gerencie suas consultas de telemedicina e configure sua disponibilidade
           </p>
         </div>
         
         <EmergencyBanner />
-        
-        {/* Auto Refresh Indicator */}
-        <AutoRefreshIndicator 
-          isRefreshing={false}
-          interval={5000}
-        />
         
         {/* Emergency Notifications Component - Para notificações popup */}
         {doctorProfile && (
