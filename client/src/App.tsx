@@ -32,6 +32,7 @@ import Claims from "@/pages/claims";
 import NewClaim from "@/pages/claims/new"; 
 import Services from "@/pages/services";
 import Profile from "@/pages/profile";
+import ProfileV2 from "@/pages/profile-v2";
 import Payments from "@/pages/payments";
 import Address from "@/pages/address";
 import Checkout from "@/pages/checkout";
@@ -154,7 +155,7 @@ function Router() {
       <ProtectedRoute path="/claims" component={Claims} allowedRoles={["patient"]} />
       <ProtectedRoute path="/claims/new" component={NewClaim} allowedRoles={["patient"]} />
       <ProtectedRoute path="/services" component={Services} allowedRoles={["patient"]} />
-      <ProtectedRoute path="/profile" component={Profile} />
+      <ProtectedRoute path="/profile" component={ProfileV2} />
       <ProtectedRoute path="/payments" component={Payments} allowedRoles={["patient"]} />
       <ProtectedRoute path="/address" component={Address} />
       <ProtectedRoute path="/settings" component={PatientSettings} allowedRoles={["patient"]} />
