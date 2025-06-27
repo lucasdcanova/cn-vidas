@@ -84,3 +84,10 @@ server/wallet/certificates/*.cer
 # Apple Wallet Assets (opcional - descomente se quiser ignorar)
 # server/wallet/assets/*.png
 # !server/wallet/assets/README.md
+
+# APNs Certificates
+certificates/
+*.p12
+*.pem
+*.cer
+AuthKey_*.p8

@@ -120,12 +120,22 @@ telemedicineRouter.post('/appointments', requireAuth, async (req: Request, res: 
       status: 'scheduled'
     }).returning();
 
-    // Criar notificação de consulta agendada
+    // Criar notificação de consulta agendada para o paciente
     await NotificationService.createAppointmentNotification(
       authReq.user.id, 
       appointment.id, 
       validatedData.type === 'emergency'
     );
+
+    // Criar notificação para o médico sobre a nova consulta
+    if (doctor.userId) {
+      await NotificationService.createAppointmentNotificationForDoctor(
+        doctor.userId,
+        authReq.user.fullName || authReq.user.username || 'Paciente',
+        new Date(validatedData.date),
+        appointment.id
+      );
+    }
 
     res.status(201).json(appointment);
   } catch (error) {

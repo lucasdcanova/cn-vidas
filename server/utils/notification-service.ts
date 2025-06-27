@@ -35,6 +35,35 @@ export class NotificationService {
   }
 
   /**
+   * Criar notificação para médico quando consulta é agendada
+   */
+  static async createAppointmentNotificationForDoctor(doctorUserId: number, patientName: string, appointmentDate: Date, appointmentId: number) {
+    try {
+      const notification: InsertNotification = {
+        userId: doctorUserId,
+        type: 'appointment',
+        title: '📅 Nova Consulta Agendada',
+        message: `${patientName} agendou uma consulta para ${appointmentDate.toLocaleString('pt-BR')}`,
+        isRead: false,
+        data: { appointmentId, role: 'doctor' }
+      };
+      
+      await storage.createNotification(notification);
+      console.log('✅ Notificação de consulta criada para médico:', doctorUserId);
+      
+      // Enviar push notification
+      await pushNotificationService.sendToUser(doctorUserId, {
+        title: notification.title,
+        body: notification.message,
+        data: { type: 'appointment', appointmentId, role: 'doctor' },
+        badge: 1,
+      });
+    } catch (error) {
+      console.error('❌ Erro ao criar notificação de consulta para médico:', error);
+    }
+  }
+
+  /**
    * Criar notificação de consulta concluída
    */
   static async createAppointmentCompletedNotification(userId: number, appointmentId: number) {
@@ -263,6 +292,40 @@ export class NotificationService {
       console.log('✅ Notificação de sistema criada para usuário:', userId);
     } catch (error) {
       console.error('❌ Erro ao criar notificação de sistema:', error);
+    }
+  }
+
+  /**
+   * Criar notificação de lembrete de consulta
+   */
+  static async createAppointmentReminderNotification(userId: number, appointmentId: number, doctorName: string, appointmentDate: Date, isDoctor: boolean = false) {
+    try {
+      const timeUntil = Math.round((appointmentDate.getTime() - Date.now()) / (1000 * 60)); // minutos até a consulta
+      
+      const notification: InsertNotification = {
+        userId,
+        type: 'appointment',
+        title: '⏰ Lembrete de Consulta',
+        message: isDoctor ? 
+          `Sua consulta com ${doctorName} começará em ${timeUntil} minutos` :
+          `Sua consulta com Dr(a). ${doctorName} começará em ${timeUntil} minutos`,
+        isRead: false,
+        data: { appointmentId, reminder: true, role: isDoctor ? 'doctor' : 'patient' }
+      };
+      
+      await storage.createNotification(notification);
+      console.log('✅ Notificação de lembrete criada para usuário:', userId);
+      
+      // Enviar push notification com alta prioridade
+      await pushNotificationService.sendToUser(userId, {
+        title: notification.title,
+        body: notification.message,
+        data: { type: 'appointment_reminder', appointmentId, role: isDoctor ? 'doctor' : 'patient' },
+        badge: 1,
+        sound: 'default',
+      });
+    } catch (error) {
+      console.error('❌ Erro ao criar notificação de lembrete:', error);
     }
   }
 

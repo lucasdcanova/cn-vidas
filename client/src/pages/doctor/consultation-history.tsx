@@ -181,44 +181,44 @@ export default function ConsultationHistory() {
     <DashboardLayout title="Histórico de Consultas">
       <div className="space-y-6">
         {/* Header com estatísticas */}
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Consultas</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
+        <div className="grid gap-2 grid-cols-3">
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 pt-3">
+              <CardTitle className="text-xs font-medium">Total</CardTitle>
+              <Activity className="h-3 w-3 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalConsultations}</div>
+            <CardContent className="px-3 pb-3">
+              <div className="text-lg font-bold">{stats.totalConsultations}</div>
               <p className="text-xs text-muted-foreground">
-                {stats.emergencyCount} emergências | {stats.telemedicineCount} telemedicina
+                {stats.emergencyCount} emerg.
               </p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 pt-3">
+              <CardTitle className="text-xs font-medium">Receita</CardTitle>
+              <DollarSign className="h-3 w-3 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
+            <CardContent className="px-3 pb-3">
+              <div className="text-lg font-bold">
                 R$ {stats.totalEarnings.toFixed(2).replace('.', ',')}
               </div>
               <p className="text-xs text-muted-foreground">
-                No mês selecionado
+                No mês
               </p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Duração Média</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 pt-3">
+              <CardTitle className="text-xs font-medium">Duração</CardTitle>
+              <Clock className="h-3 w-3 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.averageDuration} min</div>
+            <CardContent className="px-3 pb-3">
+              <div className="text-lg font-bold">{stats.averageDuration} min</div>
               <p className="text-xs text-muted-foreground">
-                Por consulta
+                Média
               </p>
             </CardContent>
           </Card>
