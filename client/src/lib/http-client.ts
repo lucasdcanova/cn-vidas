@@ -21,11 +21,23 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
   const authToken = localStorage.getItem('authToken');
   const sessionId = localStorage.getItem('sessionID');
   
+  // Verificar se é FormData
+  const isFormData = data instanceof FormData;
+  console.log(`[httpRequestInternal] Tipo de dados:`, {
+    isFormData,
+    dataType: data?.constructor?.name,
+    hasData: !!data
+  });
+  
   // Construir headers com autenticação
   const authHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...headers,
   };
+  
+  // Só adicionar Content-Type se não for FormData
+  if (!isFormData && !headers['Content-Type']) {
+    authHeaders['Content-Type'] = 'application/json';
+  }
   
   // Adicionar tokens de autenticação se disponíveis
   if (authToken) {
@@ -48,11 +60,20 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
         'Authorization': authHeaders['Authorization'] ? 'PRESENTE' : 'AUSENTE'
       });
       
+      // Para FormData no Capacitor, precisamos converter para objeto
+      let requestData = data;
+      if (isFormData) {
+        console.log('[Native HTTP] Convertendo FormData para objeto...');
+        // FormData não é suportado diretamente pelo Capacitor HTTP
+        // Vamos usar fetch nativo mesmo no iOS
+        throw new Error('FormData requires native fetch');
+      }
+      
       const response = await Http.request({
         url: fullUrl,
         method,
         headers: authHeaders,
-        data,
+        data: requestData,
       });
       
       console.log(`[Native HTTP] Response status: ${response.status}`);
@@ -71,29 +92,72 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
       console.error('[Native HTTP] Error completo:', {
         message: error.message,
         code: error.code,
-        url: fullUrl,
-        headers: authHeaders
+        url: url,
+        headers: authHeaders,
+        errorType: error.constructor?.name
       });
       
-      // Criar uma resposta de erro mais detalhada
-      const errorResponse = new Response(JSON.stringify({
-        error: error.message || 'Network request failed',
-        code: error.code,
-        url: fullUrl
-      }), {
-        status: error.status || 500,
-        statusText: error.message || 'Internal Server Error'
-      });
-      
-      return errorResponse;
+      // Se for erro de FormData, usar fetch nativo
+      if (error.message === 'FormData requires native fetch') {
+        console.log('[Native HTTP] Fallback para fetch nativo com FormData');
+        const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+        
+        try {
+          console.log('[Native Fetch] Tentando fetch nativo para FormData...');
+          console.log('[Native Fetch] URL:', fullUrl);
+          console.log('[Native Fetch] Headers:', {
+            ...authHeaders,
+            'X-Auth-Token': authHeaders['X-Auth-Token'] ? 'PRESENTE' : 'AUSENTE',
+            'Authorization': authHeaders['Authorization'] ? 'PRESENTE' : 'AUSENTE'
+          });
+          
+          // Usar fetch nativo para FormData
+          const nativeResponse = await fetch(fullUrl, {
+            method,
+            headers: authHeaders,
+            body: data, // FormData deve ser passado diretamente
+            credentials: 'include'
+          });
+          
+          console.log('[Native Fetch] Response status:', nativeResponse.status);
+          console.log('[Native Fetch] Response ok:', nativeResponse.ok);
+          
+          return nativeResponse;
+        } catch (fetchError: any) {
+          console.error('[Native Fetch] Erro no fetch nativo:', fetchError);
+          throw fetchError;
+        }
+      } else {
+        // Criar uma resposta de erro mais detalhada
+        const errorResponse = new Response(JSON.stringify({
+          error: error.message || 'Network request failed',
+          code: error.code,
+          url: fullUrl
+        }), {
+          status: error.status || 500,
+          statusText: error.message || 'Internal Server Error'
+        });
+        
+        return errorResponse;
+      }
     }
   }
   
-  // Se estamos na web, usar fetch normal
-  return fetch(API_BASE_URL + url, {
+  // Se estamos na web ou precisamos fazer fallback, usar fetch normal
+  console.log('[Web Fetch] Usando fetch normal para:', url);
+  console.log('[Web Fetch] Headers:', {
+    ...authHeaders,
+    'X-Auth-Token': authHeaders['X-Auth-Token'] ? 'PRESENTE' : 'AUSENTE',
+    'Authorization': authHeaders['Authorization'] ? 'PRESENTE' : 'AUSENTE'
+  });
+  console.log('[Web Fetch] É FormData?', isFormData);
+  
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+  
+  return fetch(fullUrl, {
     method,
     headers: authHeaders,
-    body: data ? JSON.stringify(data) : undefined,
+    body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
     credentials: 'include',
   });
 }
