@@ -86,7 +86,10 @@ export default function ProfilePhotoSection({
 
     try {
       const formData = new FormData();
-      formData.append('profileImage', croppedImageBlob, 'profile.jpg');
+      
+      // Criar um novo blob com tipo explícito se necessário
+      const imageBlob = croppedImageBlob.type ? croppedImageBlob : new Blob([croppedImageBlob], { type: 'image/jpeg' });
+      formData.append('profileImage', imageBlob, 'profile.jpg');
 
       let endpoint = '/api/profile/upload-image';
       if (userType === 'doctor') {
