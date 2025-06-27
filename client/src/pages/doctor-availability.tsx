@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AvailabilityManagerEnhanced } from '@/components/doctor/AvailabilityManagerEnhanced';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function DoctorAvailabilityPage() {
   const { user } = useAuth();
@@ -107,48 +108,95 @@ export default function DoctorAvailabilityPage() {
           </p>
         </div>
 
-        {/* Card de Disponibilidade para Emergências */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              Disponibilidade para Emergências
-            </CardTitle>
-            <CardDescription>
-              Ative esta opção para receber chamadas de consultas de emergência
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label htmlFor="emergency-toggle" className="text-base">
-                  Disponível para consultas de emergência
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Você receberá notificações quando pacientes precisarem de atendimento urgente
-                </p>
-              </div>
-              <Switch
-                id="emergency-toggle"
-                checked={emergencyAvailable}
-                onCheckedChange={handleEmergencyToggle}
-                disabled={isUpdatingEmergency}
-              />
-            </div>
-            
-            {emergencyAvailable && (
-              <Alert className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Você está disponível para emergências. Mantenha seu dispositivo próximo para receber notificações.
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
+        {/* Tabs para dividir a página */}
+        <Tabs defaultValue="emergency" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="emergency">Emergências</TabsTrigger>
+            <TabsTrigger value="scheduled">Consultas Agendadas</TabsTrigger>
+          </TabsList>
 
-        {/* Componente de Gerenciamento de Disponibilidade */}
-        <AvailabilityManagerEnhanced />
+          {/* Tab de Emergências */}
+          <TabsContent value="emergency" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  Disponibilidade para Emergências
+                </CardTitle>
+                <CardDescription>
+                  Ative esta opção para receber chamadas de consultas de emergência
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="emergency-toggle" className="text-base">
+                      Disponível para consultas de emergência
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Você receberá notificações quando pacientes precisarem de atendimento urgente
+                    </p>
+                  </div>
+                  <Switch
+                    id="emergency-toggle"
+                    checked={emergencyAvailable}
+                    onCheckedChange={handleEmergencyToggle}
+                    disabled={isUpdatingEmergency}
+                  />
+                </div>
+                
+                {emergencyAvailable && (
+                  <Alert className="mt-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Você está disponível para emergências. Mantenha seu dispositivo próximo para receber notificações.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Como funcionam as emergências</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-semibold">1</div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium">Receba notificações</p>
+                    <p className="text-sm text-muted-foreground">Quando um paciente solicitar emergência, você será notificado imediatamente</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-semibold">2</div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium">Aceite ou recuse</p>
+                    <p className="text-sm text-muted-foreground">Você tem 2 minutos para aceitar a consulta de emergência</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-semibold">3</div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-medium">Atenda o paciente</p>
+                    <p className="text-sm text-muted-foreground">Consultas de emergência pagam R$ 50,00 após 5 minutos de atendimento</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab de Consultas Agendadas */}
+          <TabsContent value="scheduled" className="space-y-4">
+            <AvailabilityManagerEnhanced />
+          </TabsContent>
+        </Tabs>
 
         {/* Card de Próximas Consultas */}
         {upcomingAppointments && upcomingAppointments.length > 0 && (
