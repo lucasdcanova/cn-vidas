@@ -89,11 +89,31 @@ export default function ProfileImageUploader({
     setIsUploading(true);
 
     try {
+      console.log('[ProfileImageUploader] Iniciando upload:', {
+        blobSize: croppedImageBlob.size,
+        blobType: croppedImageBlob.type
+      });
+
       const formData = new FormData();
       formData.append('profileImage', croppedImageBlob, 'profile.jpg');
 
       const response = await apiRequest('POST', '/api/profile/upload-image', formData);
+      
+      console.log('[ProfileImageUploader] Resposta recebida:', {
+        status: response.status,
+        contentType: response.headers.get('content-type')
+      });
+      
+      // Verificar se a resposta é JSON válida
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('[ProfileImageUploader] Resposta não é JSON:', text.substring(0, 200));
+        throw new Error('Resposta inválida do servidor');
+      }
+      
       const data = await response.json();
+      console.log('[ProfileImageUploader] Dados recebidos:', data);
 
       if (data.imageUrl) {
         // Forçar refresh dos dados do usuário primeiro
