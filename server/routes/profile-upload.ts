@@ -58,16 +58,7 @@ router.post('/upload-image', ensureJson, requireAuth, async (req: AuthRequest, r
     success: false,
     message: 'Este endpoint foi migrado. Use /api/profile/upload-image com suporte S3.',
     details: 'O upload local foi desativado. Todos os uploads agora usam AWS S3.'
-      }
-    }
-
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Erro interno do servidor',
-      details: 'Erro durante o processamento do upload',
-      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
+  });
 });
 
 // Upload de imagem para médicos
