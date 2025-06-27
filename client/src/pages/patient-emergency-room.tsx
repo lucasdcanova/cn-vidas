@@ -265,18 +265,21 @@ export default function PatientEmergencyRoom() {
 
   const handleParticipantJoined = (participant: any) => {
     console.log('Participante entrou:', participant);
-    if (participant.user_id !== user?.id.toString()) {
+    // Verificar se não é o próprio paciente (participante local)
+    if (!participant.local) {
+      console.log('Médico detectado na sala:', participant);
       setCallState(prev => ({ ...prev, doctorJoined: true }));
       toast({
         title: 'Médico conectado!',
-        description: `Dr. ${participant.user_name || 'Médico'} entrou na consulta`,
+        description: `Dr. ${participant.userName || 'Médico'} entrou na consulta`,
       });
     }
   };
 
   const handleParticipantLeft = (participant: any) => {
     console.log('Participante saiu:', participant);
-    if (participant.user_id !== user?.id.toString() && callState.doctorJoined) {
+    // Verificar se não é o próprio paciente (participante local) e se o médico estava na sala
+    if (!participant.local && callState.doctorJoined) {
       toast({
         title: 'Médico desconectou',
         description: 'O médico saiu da consulta',
@@ -458,6 +461,18 @@ export default function PatientEmergencyRoom() {
                     appointmentId={callState.appointmentId || undefined}
                     enableRecording={false}
                   />
+                  
+                  {/* Overlay de aguardando médico - só mostra se médico não entrou */}
+                  {!callState.doctorJoined && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
+                      <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 text-center">
+                        <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4 mx-auto" />
+                        <h2 className="text-white text-2xl font-bold mb-2">Consulta de emergência</h2>
+                        <p className="text-white/80 text-lg">Um médico foi notificado...</p>
+                        <p className="text-white/60 text-sm mt-2">Por favor, aguarde</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               
