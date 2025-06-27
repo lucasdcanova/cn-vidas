@@ -620,8 +620,8 @@ const AuthPage: React.FC = () => {
   return (
     <AuthLayout>
       <div className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
-        isKeyboardVisible ? 'py-2' : (activeTab === 'register' && isNativeApp() ? 'pt-2 pb-6' : 'py-6')
-      } overflow-y-auto transition-all duration-300`} style={{
+        isKeyboardVisible ? 'py-2' : 'py-6'
+      } overflow-y-auto`} style={{
         maxHeight: isKeyboardVisible ? '100%' : 'auto',
         paddingBottom: isKeyboardVisible ? '0' : undefined
       }}>
@@ -642,7 +642,9 @@ const AuthPage: React.FC = () => {
           </TabsList>
         
         <TabsContent value="login">
-          <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/5 border border-white/50">
+          <div className={`p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/5 border border-white/50 transition-transform duration-300 ${
+            activeTab === 'register' && isNativeApp() && !isKeyboardVisible ? '-translate-y-10' : ''
+          }`}>
             <div className="mb-4 text-center">
               <h1 className="text-xl font-semibold text-gray-800">Bem-vindo de volta</h1>
               <p className="text-gray-500 mt-2 text-xs">
@@ -771,8 +773,8 @@ const AuthPage: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="register">
-          <div className={`p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/5 border border-white/50 ${
-            isNativeApp() && !isKeyboardVisible ? 'mb-4' : ''
+          <div className={`p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/5 border border-white/50 transition-transform duration-300 ${
+            activeTab === 'register' && isNativeApp() && !isKeyboardVisible ? '-translate-y-10' : ''
           }`}>
             <div className="mb-4 text-center">
               <h1 className="text-xl font-semibold text-gray-800">Crie sua conta</h1>
