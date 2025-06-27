@@ -78,6 +78,12 @@ export default function ProfilePhotoSection({
     setShowCropper(false);
     setIsUploading(true);
 
+    console.log('[ProfilePhotoSection] handleCropComplete iniciado');
+    console.log('[ProfilePhotoSection] Blob size:', croppedImageBlob.size);
+    console.log('[ProfilePhotoSection] Blob type:', croppedImageBlob.type);
+    console.log('[ProfilePhotoSection] User type:', userType);
+    console.log('[ProfilePhotoSection] Is native platform:', Capacitor.isNativePlatform());
+
     try {
       const formData = new FormData();
       formData.append('profileImage', croppedImageBlob, 'profile.jpg');
@@ -89,15 +95,23 @@ export default function ProfilePhotoSection({
         endpoint = '/api/partner-profile-image';
       }
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
+      console.log('[ProfilePhotoSection] Endpoint:', endpoint);
+      console.log('[ProfilePhotoSection] FormData criado, iniciando upload...');
 
-      if (!response.ok) throw new Error('Falha no upload');
+      const response = await apiRequest('POST', endpoint, formData);
+      
+      console.log('[ProfilePhotoSection] Response status:', response.status);
+      console.log('[ProfilePhotoSection] Response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[ProfilePhotoSection] Upload error:', errorText);
+        throw new Error(errorText || 'Falha no upload');
+      }
 
       const result = await response.json();
+      console.log('[ProfilePhotoSection] Upload result:', result);
+      
       const imageUrl = result.imageUrl || result.url;
 
       if (imageUrl) {
