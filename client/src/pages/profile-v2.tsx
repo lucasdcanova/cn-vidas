@@ -428,32 +428,50 @@ const ProfileV2: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
           }}
         />
+        
+        {/* Nome do usuário abaixo do header */}
+        <div className="text-center px-4 md:px-8 -mt-6 md:-mt-8 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            {displayName || 'Usuário'}
+          </h1>
+          {user?.role === 'doctor' && userSpecialty && (
+            <p className="text-base md:text-lg text-gray-600 mt-1">{userSpecialty}</p>
+          )}
+          {user?.role === 'partner' && partnerData?.businessType && (
+            <p className="text-base md:text-lg text-gray-600 mt-1">{partnerData.businessType}</p>
+          )}
+        </div>
 
         {/* Tabs de conteúdo */}
-        <div className="px-4 md:px-8 -mt-12">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <TabsList className="grid grid-cols-2 md:grid-cols-3 gap-2 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-lg">
+        <div className="px-4 md:px-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className={cn(
+              "grid w-full gap-0 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-lg",
+              user?.role === "patient" && user?.subscriptionPlan?.includes('_family') 
+                ? "grid-cols-3" 
+                : "grid-cols-2"
+            )}>
               <TabsTrigger 
                 value="profile" 
-                className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200 text-sm"
               >
-                <User className="w-4 h-4 mr-2" />
+                <User className="w-4 h-4 mr-1.5" />
                 Informações
               </TabsTrigger>
               {user?.role === "patient" && user?.subscriptionPlan?.includes('_family') && (
                 <TabsTrigger 
                   value="dependents"
-                  className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200 text-sm"
                 >
-                  <Users className="w-4 h-4 mr-2" />
+                  <Users className="w-4 h-4 mr-1.5" />
                   Dependentes
                 </TabsTrigger>
               )}
               <TabsTrigger 
                 value="security"
-                className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200 text-sm"
               >
-                <Shield className="w-4 h-4 mr-2" />
+                <Shield className="w-4 h-4 mr-1.5" />
                 Segurança
               </TabsTrigger>
             </TabsList>
