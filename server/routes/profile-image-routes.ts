@@ -24,12 +24,29 @@ const upload = multer({
 
 // Upload de imagem de perfil (paciente)
 router.post('/api/profile/upload-image', requireAuth, upload.single('profileImage'), async (req, res) => {
+  console.log('=== UPLOAD DE IMAGEM S3 INICIADO ===');
+  console.log('Headers recebidos:', {
+    'content-type': req.headers['content-type'],
+    'authorization': req.headers.authorization ? 'PRESENTE' : 'AUSENTE',
+    'x-auth-token': req.headers['x-auth-token'] ? 'PRESENTE' : 'AUSENTE',
+    'x-session-id': req.headers['x-session-id']
+  });
+  console.log('User autenticado:', req.user ? `ID: ${req.user.id}, Role: ${req.user.role}` : 'NÃO AUTENTICADO');
+  console.log('File recebido:', req.file ? {
+    fieldname: req.file.fieldname,
+    originalname: req.file.originalname,
+    mimetype: req.file.mimetype,
+    size: req.file.size
+  } : 'NENHUM ARQUIVO');
+
   try {
     if (!req.file) {
+      console.error('❌ Nenhum arquivo foi enviado');
       return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
     }
 
     const userId = req.user!.id;
+    console.log(`📸 Processando upload para usuário ${userId}`);
     
     // Fazer upload seguro para S3
     const { url, key } = await SecureStorageService.uploadSecure(
@@ -69,14 +86,19 @@ router.post('/api/profile/upload-image', requireAuth, upload.single('profileImag
       consentDate: new Date()
     });
 
+    console.log(`✅ Upload concluído com sucesso. URL: ${url}`);
     res.json({ 
       success: true, 
       imageUrl: url,
       message: 'Imagem de perfil atualizada com sucesso'
     });
   } catch (error) {
-    console.error('Erro ao fazer upload da imagem:', error);
-    res.status(500).json({ error: 'Erro ao fazer upload da imagem' });
+    console.error('❌ Erro ao fazer upload da imagem:', error);
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    res.status(500).json({ 
+      error: 'Erro ao fazer upload da imagem',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
   }
 });
 

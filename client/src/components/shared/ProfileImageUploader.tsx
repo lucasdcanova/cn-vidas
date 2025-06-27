@@ -101,15 +101,17 @@ export default function ProfileImageUploader({
       
       console.log('[ProfileImageUploader] Resposta recebida:', {
         status: response.status,
-        contentType: response.headers.get('content-type')
+        ok: response.ok,
+        contentType: response.headers.get('content-type'),
+        statusText: response.statusText
       });
       
       // Verificar se a resposta é JSON válida
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
-        console.error('[ProfileImageUploader] Resposta não é JSON:', text.substring(0, 200));
-        throw new Error('Resposta inválida do servidor');
+        console.error('[ProfileImageUploader] Resposta não é JSON:', text.substring(0, 500));
+        throw new Error('Resposta inválida do servidor - recebido: ' + contentType);
       }
       
       const data = await response.json();
@@ -146,7 +148,12 @@ export default function ProfileImageUploader({
         });
       }
     } catch (error: any) {
-      console.error('Erro ao fazer upload:', error);
+      console.error('[ProfileImageUploader] Erro detalhado:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        response: error.response
+      });
       toast({
         title: 'Erro ao fazer upload',
         description: error.message || 'Ocorreu um erro ao atualizar sua foto.',
