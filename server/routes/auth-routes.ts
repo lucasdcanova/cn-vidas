@@ -423,9 +423,10 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
     // Login bem-sucedido - gerar JWT token
     console.log('Login bem-sucedido para:', user.email);
     
-    const jwtSecret = process.env.JWT_SECRET || 'cnvidas-temp-secret-2024';
-    if (!jwtSecret || jwtSecret === 'cnvidas-temp-secret-2024') {
-      console.warn('⚠️ AVISO: JWT_SECRET não configurado corretamente. Usando valor temporário não seguro!');
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error('JWT_SECRET não configurado! Valor atual:', process.env.JWT_SECRET);
+      throw new Error('JWT_SECRET não configurado');
     }
     const token = jwt.sign(
       { 
@@ -465,9 +466,19 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
   } catch (error) {
     console.error('Erro no login:', error);
     console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Tipo do erro:', typeof error);
+    console.error('Erro completo:', JSON.stringify(error, null, 2));
+    
+    // Log mais detalhado para debug
+    if (error instanceof Error) {
+      console.error('Nome do erro:', error.name);
+      console.error('Mensagem do erro:', error.message);
+    }
+    
     res.status(500).json({ 
       error: 'Erro interno do servidor',
-      details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined
+      details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
+      errorType: error instanceof Error ? error.name : 'Unknown'
     });
   }
 });
