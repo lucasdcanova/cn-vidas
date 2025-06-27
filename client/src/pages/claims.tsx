@@ -194,21 +194,11 @@ const Claims: React.FC = () => {
         )}
         
         {/* Header section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 mt-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Meus Sinistros</h1>
-              <p className="text-gray-600 mt-1">
-                Gerencie e acompanhe o status dos seus sinistros
-              </p>
-            </div>
-            <Link href="/claims/new">
-              <Button>
-                <FileText className="mr-2 h-4 w-4" />
-                Novo Sinistro
-              </Button>
-            </Link>
-          </div>
+        <div className="mb-6 mt-4">
+          <h1 className="text-2xl font-bold text-gray-900">Sinistros</h1>
+          <p className="text-gray-600 mt-1">
+            Acompanhe o status dos seus pedidos de reembolso
+          </p>
         </div>
         
         {/* Status Summary */}
