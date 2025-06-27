@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfilePhotoSection from "@/components/profile/ProfilePhotoSection";
 import ProfileCard from "@/components/profile/ProfileCard";
 import ProfileFormField from "@/components/profile/ProfileFormField";
 import { Button } from "@/components/ui/button";
@@ -411,36 +412,7 @@ const ProfileV2: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto -mt-4">
-        {/* Header com foto */}
-        <ProfileHeader
-          userName={displayName || 'Usuário'}
-          userEmail={user?.email || ''}
-          userRole={user?.role || 'patient'}
-          profileImage={profileImage}
-          verified={user?.role === 'doctor' ? doctorData?.onboardingCompleted : true}
-          specialty={userSpecialty}
-          businessName={user?.role === 'partner' ? partnerData?.businessName : undefined}
-          subscriptionPlan={user?.subscriptionPlan}
-          onImageUpdate={(url) => {
-            setProfileImage(url);
-            queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
-          }}
-        />
-        
-        {/* Nome do usuário abaixo do header */}
-        <div className="text-center px-4 md:px-8 -mt-6 md:-mt-8 mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            {displayName || 'Usuário'}
-          </h1>
-          {user?.role === 'doctor' && userSpecialty && (
-            <p className="text-base md:text-lg text-gray-600 mt-1">{userSpecialty}</p>
-          )}
-          {user?.role === 'partner' && partnerData?.businessType && (
-            <p className="text-base md:text-lg text-gray-600 mt-1">{partnerData.businessType}</p>
-          )}
-        </div>
+      <div className="max-w-7xl mx-auto pt-6">
 
         {/* Tabs de conteúdo */}
         <div className="px-4 md:px-8">
@@ -507,7 +479,33 @@ const ProfileV2: React.FC = () => {
                         </Button>
                       }
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Foto de perfil minimalista integrada */}
+                      <div className="flex items-center gap-4 pb-6 border-b">
+                        <ProfilePhotoSection
+                          currentImage={profileImage}
+                          userName={displayName || 'Usuário'}
+                          userType={user?.role || 'patient'}
+                          onImageUpdate={(url) => {
+                            setProfileImage(url);
+                            queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                          }}
+                          size="md"
+                          className="flex-shrink-0"
+                        />
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900">{displayName || 'Usuário'}</h3>
+                          {user?.role === 'doctor' && userSpecialty && (
+                            <p className="text-sm text-gray-600">{userSpecialty}</p>
+                          )}
+                          {user?.role === 'partner' && partnerData?.businessType && (
+                            <p className="text-sm text-gray-600">{partnerData.businessType}</p>
+                          )}
+                          <p className="text-sm text-gray-500 mt-1">Foto do perfil</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
                         <ProfileFormField
                           control={patientForm.control}
                           name="fullName"
