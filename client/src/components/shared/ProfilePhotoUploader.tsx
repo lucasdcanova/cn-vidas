@@ -230,7 +230,7 @@ export default function ProfilePhotoUploader({
       formData.append('profileImage', finalBlob, 'profile.jpg');
 
       // Escolher endpoint baseado no tipo de usuário
-      let endpoint = '/api/profile/upload-image';
+      let endpoint = '/api/upload-image';
       if (userType === 'doctor') {
         endpoint = '/api/profile/doctors/profile-image';
       } else if (userType === 'partner') {
@@ -422,7 +422,7 @@ export default function ProfilePhotoUploader({
         userType,
         endpoint: userType === 'doctor' ? '/api/profile/doctors/profile-image' : 
                  userType === 'partner' ? '/api/profile/partners/profile-image' : 
-                 '/api/profile/upload-image'
+                 '/api/upload-image'
       });
       
       const errorMessage = error.message || 'Erro desconhecido ao fazer upload';
