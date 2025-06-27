@@ -76,11 +76,11 @@ export default function ProfileHeader({
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
       }} />
       
-      <div className="relative z-10 px-4 md:px-8 pt-8 md:pt-12 pb-20 md:pb-24">
+      <div className="relative z-10 px-4 md:px-8 pt-6 md:pt-12 pb-16 md:pb-24">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
-            {/* Foto de perfil */}
-            <div className="relative -mb-12 md:-mb-16">
+          <div className="flex flex-col items-center">
+            {/* Foto de perfil centralizada */}
+            <div className="relative -mb-10 md:-mb-12">
               <ProfilePhotoSection
                 currentImage={profileImage}
                 userName={userName}
@@ -88,51 +88,6 @@ export default function ProfileHeader({
                 onImageUpdate={onImageUpdate}
                 size="xl"
               />
-            </div>
-            
-            {/* Informações do usuário */}
-            <div className="flex-1 text-center md:text-left mb-0 md:mb-4">
-              <div className="flex items-center justify-center md:justify-start gap-2 md:gap-3 mb-1 md:mb-2">
-                <h1 className="text-2xl md:text-4xl font-bold text-white">
-                  {businessName || userName}
-                </h1>
-                {verified && (
-                  <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-blue-200" />
-                )}
-              </div>
-              
-              <p className="text-blue-100 text-base md:text-lg mb-2 md:mb-3">{userEmail}</p>
-              
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
-                {/* Badge do tipo de usuário */}
-                <Badge 
-                  variant="secondary" 
-                  className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5"
-                >
-                  <RoleIcon className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-1.5" />
-                  {roleInfo.label}
-                </Badge>
-                
-                {/* Especialidade (médicos) */}
-                {userRole === 'doctor' && specialty && (
-                  <Badge 
-                    variant="secondary"
-                    className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5"
-                  >
-                    {specialty}
-                  </Badge>
-                )}
-                
-                {/* Plano (pacientes) */}
-                {userRole === 'patient' && subscriptionPlan && (
-                  <Badge 
-                    variant={getPlanBadgeColor(subscriptionPlan)}
-                    className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 text-xs md:text-sm px-2 py-1 md:px-3 md:py-1.5"
-                  >
-                    {getPlanDisplayName(subscriptionPlan)}
-                  </Badge>
-                )}
-              </div>
             </div>
           </div>
         </div>
