@@ -13,6 +13,7 @@ import { useThemeColor } from "@/hooks/use-theme-color";
 import { configureIOSStatusBar } from "@/utils/ios-config";
 import { IOSSessionGuard } from "@/components/ios-session-guard";
 import { IOSAppLifecycle } from "@/components/ios-app-lifecycle";
+import { StatusBarConfig } from "@/utils/statusbar-config";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
@@ -240,7 +241,12 @@ function App() {
   // Inicializar push notifications e configurações iOS em apps nativos
   React.useEffect(() => {
     if (isNativeApp()) {
-      // Inicializar configurações iOS
+      // Inicializar configurações do StatusBar com a nova classe
+      StatusBarConfig.initialize().catch(error => {
+        console.error('Erro ao inicializar StatusBar:', error);
+      });
+      
+      // Manter a configuração antiga também para compatibilidade
       configureIOSStatusBar().catch(error => {
         console.error('Erro ao inicializar configurações iOS:', error);
       });
