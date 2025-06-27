@@ -39,10 +39,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // Configurar status bar para iOS
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      // Definir cor de fundo branca para a status bar
+      // Mostrar e configurar status bar para o dashboard
+      StatusBar.show();
       StatusBar.setBackgroundColor({ color: '#ffffff' });
-      // Definir estilo escuro (texto preto) para a status bar
-      StatusBar.setStyle({ style: Style.Light });
+      StatusBar.setStyle({ style: Style.Light }); // Texto escuro em fundo claro
+      StatusBar.setOverlaysWebView({ overlay: false });
     }
     
     // Cleanup - voltar para as cores originais quando sair do dashboard
