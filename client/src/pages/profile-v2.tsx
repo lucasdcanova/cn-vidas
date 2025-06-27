@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { LogOut } from "lucide-react";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { 
   getUserProfile,
   updateUserProfile,
@@ -138,10 +138,39 @@ const ProfileV2: React.FC = () => {
     return localStorage.getItem('biometricEnabled') === 'true';
   });
 
+  // Debug user data
+  useEffect(() => {
+    if (user) {
+      console.log("🔍 Profile Debug - User data:", {
+        fullName: user.fullName,
+        role: user.role,
+        subscriptionPlan: user.subscriptionPlan,
+        hasFamilyPlan: user.subscriptionPlan?.includes('_family'),
+      });
+    }
+  }, [user]);
+
   // Queries
   const { data: profileData, isLoading: profileLoading } = useQuery({
     queryKey: ["/api/users/profile"],
     queryFn: getUserProfile,
+  });
+
+  // Query to check if user has dependents
+  const { data: dependents = [] } = useQuery({
+    queryKey: ["/api/dependents"],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest("GET", "/api/dependents");
+        const data = await res.json();
+        console.log("🔍 Profile Debug - Dependents data:", data);
+        return data || [];
+      } catch (error) {
+        console.log("Error fetching dependents:", error);
+        return [];
+      }
+    },
+    enabled: user?.role === "patient",
   });
 
   const { data: partnerData, isLoading: partnerLoading } = useQuery({
@@ -419,7 +448,7 @@ const ProfileV2: React.FC = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className={cn(
               "grid w-full gap-0 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-lg",
-              user?.role === "patient" && user?.subscriptionPlan?.includes('_family') 
+              user?.role === "patient" && (user?.subscriptionPlan?.includes('_family') || dependents.length > 0)
                 ? "grid-cols-3" 
                 : "grid-cols-2"
             )}>
@@ -430,13 +459,13 @@ const ProfileV2: React.FC = () => {
                 <User className="w-4 h-4 mr-1.5" />
                 Informações
               </TabsTrigger>
-              {user?.role === "patient" && user?.subscriptionPlan?.includes('_family') && (
+              {user?.role === "patient" && (user?.subscriptionPlan?.includes('_family') || dependents.length > 0) && (
                 <TabsTrigger 
                   value="dependents"
                   className="data-[state=active]:bg-white data-[state=active]:shadow-md rounded-lg transition-all duration-200 text-sm"
                 >
                   <Users className="w-4 h-4 mr-1.5" />
-                  Dependentes
+                  Dependentes {dependents.length > 0 && `(${dependents.length})`}
                 </TabsTrigger>
               )}
               <TabsTrigger 
@@ -1040,28 +1069,82 @@ const ProfileV2: React.FC = () => {
             </TabsContent>
 
             {/* Tab de Dependentes */}
-            {user?.role === "patient" && user?.subscriptionPlan?.includes('_family') && (
+            {user?.role === "patient" && (user?.subscriptionPlan?.includes('_family') || dependents.length > 0) && (
               <TabsContent value="dependents" className="space-y-6">
                 <ProfileCard
                   title="Gerenciar Dependentes"
                   description="Adicione e gerencie os dependentes do seu plano familiar"
                   icon={Users}
                   action={
-                    <Badge variant="secondary">
-                      Plano {user.subscriptionPlan.includes('ultra') ? 'Ultra' : 
-                             user.subscriptionPlan.includes('plus') ? 'Plus' : 'Básico'} Familiar
-                    </Badge>
+                    user?.subscriptionPlan?.includes('_family') ? (
+                      <Badge variant="secondary">
+                        Plano {user.subscriptionPlan.includes('ultra') ? 'Ultra' : 
+                               user.subscriptionPlan.includes('plus') ? 'Plus' : 'Básico'} Familiar
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">
+                        {dependents.length} dependente{dependents.length !== 1 ? 's' : ''}
+                      </Badge>
+                    )
                   }
                 >
-                  <div className="text-center py-12">
-                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Recurso em desenvolvimento
-                    </h3>
-                    <p className="text-gray-600 max-w-md mx-auto">
-                      Em breve você poderá adicionar e gerenciar até 3 dependentes no seu plano familiar.
-                    </p>
-                  </div>
+                  {dependents.length > 0 ? (
+                    <div className="space-y-4">
+                      {dependents.map((dependent: any) => (
+                        <div key={dependent.id} className="p-4 border rounded-lg bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{dependent.fullName}</h4>
+                              <p className="text-sm text-gray-600">
+                                CPF: {dependent.cpf?.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}
+                              </p>
+                              {dependent.relationship && (
+                                <p className="text-sm text-gray-600">Parentesco: {dependent.relationship}</p>
+                              )}
+                            </div>
+                            <Users className="w-5 h-5 text-gray-400" />
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {user?.subscriptionPlan?.includes('_family') && (
+                        <div className="mt-6 text-center">
+                          <Button
+                            variant="outline"
+                            onClick={() => window.location.href = '/dependents'}
+                          >
+                            <Users className="w-4 h-4 mr-2" />
+                            Gerenciar Dependentes
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {user?.subscriptionPlan?.includes('_family') 
+                          ? 'Nenhum dependente cadastrado'
+                          : 'Recurso em desenvolvimento'
+                        }
+                      </h3>
+                      <p className="text-gray-600 max-w-md mx-auto">
+                        {user?.subscriptionPlan?.includes('_family')
+                          ? 'Você pode adicionar até 3 dependentes no seu plano familiar.'
+                          : 'Em breve você poderá adicionar e gerenciar dependentes no seu plano.'
+                        }
+                      </p>
+                      {user?.subscriptionPlan?.includes('_family') && (
+                        <Button
+                          className="mt-4"
+                          onClick={() => window.location.href = '/dependents'}
+                        >
+                          <Users className="w-4 h-4 mr-2" />
+                          Adicionar Dependentes
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </ProfileCard>
               </TabsContent>
             )}
