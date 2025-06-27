@@ -1,5 +1,6 @@
 import { db, deviceTokens } from '../db';
 import { eq, and, inArray } from 'drizzle-orm';
+import { APNsService } from './apns-service';
 
 /**
  * Serviço para envio de push notifications
@@ -130,27 +131,19 @@ export class PushNotificationService {
 
   /**
    * Envia para Apple Push Notification Service (APNs)
-   * TODO: Implementar quando tiver certificados
    */
   private async sendToAPNs(token: string, notification: any): Promise<void> {
-    console.log('APNs ainda não implementado. Será implementado com certificados.');
+    const success = await APNsService.sendNotification(token, {
+      title: notification.title,
+      body: notification.body,
+      badge: notification.badge,
+      sound: notification.sound,
+      data: notification.data,
+    });
     
-    // Estrutura da notificação APNs:
-    /*
-    const apnsNotification = {
-      aps: {
-        alert: {
-          title: notification.title,
-          body: notification.body,
-        },
-        badge: notification.badge || 0,
-        sound: notification.sound || 'default',
-        'content-available': 1,
-      },
-      // Dados customizados
-      ...notification.data,
-    };
-    */
+    if (!success) {
+      console.error('Falha ao enviar notificação APNs');
+    }
   }
 
   /**
