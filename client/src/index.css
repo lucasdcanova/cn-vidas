@@ -674,7 +674,7 @@
 
   /* Estilos específicos para iPad - Barra flutuante com glassmorphism agressivo */
   .glass-nav-ipad {
-    background: rgba(255, 255, 255, 0.65); /* Opacidade reduzida para 65% */
+    background: rgba(255, 255, 255, 0.60); /* Opacidade reduzida para 60% */
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
     border: 1px solid rgba(255, 255, 255, 0.7);
@@ -729,6 +729,19 @@
   }
 
   /* A barra do iPad permanece sempre clara, sem adaptação ao dark mode */
+  
+  /* Header glassmorphism para iPad - consistência com a barra bottom */
+  .header-glassmorphism-ipad {
+    background: rgba(255, 255, 255, 0.60) !important; /* Mesma opacidade da barra bottom */
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.7) !important;
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 0 0 0.5px rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(255, 255, 255, 1) !important;
+  }
 
   /* Ajuste de espaçamento dos ícones no iPad */
   .mobile-nav-bottom-ipad > a > div {
