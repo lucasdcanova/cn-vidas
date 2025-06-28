@@ -32,9 +32,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState<any>(null);
   const [userWithProfileImage, setUserWithProfileImage] = useState(user);
+  const [isIPadDevice, setIsIPadDevice] = useState(false);
   
   // Use o hook para garantir dados frescos do usuário ao montar o componente
   useFreshUserData();
+  
+  // Detectar se é iPad
+  useEffect(() => {
+    setIsIPadDevice(isIPad());
+  }, []);
   
   // Configurar status bar para iOS
   useEffect(() => {
@@ -167,7 +173,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden relative z-10">
         {/* Top navbar */}
-        <header className="bg-white sticky top-0 z-10 shadow-sm border-b border-gray-100">
+        <header className={cn(
+          "sticky top-0 z-10 shadow-sm",
+          isIPadDevice ? "header-glassmorphism-ipad" : "bg-white border-b border-gray-100"
+        )}>
           <div className="md:hidden flex items-center justify-between p-4">
             <div className="flex items-center">
               {/* Mostrar botão de menu apenas quando houver sidebar */}
