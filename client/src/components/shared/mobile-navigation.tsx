@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { isIPad } from "@/utils/platform";
+import { isIPad, isIPhone } from "@/utils/platform";
 
 interface MobileNavigationProps {
   userRole?: string;
@@ -8,10 +8,11 @@ interface MobileNavigationProps {
 
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "patient" }) => {
   const [location] = useLocation();
-  const [isIPadDevice, setIsIPadDevice] = useState(false);
+  const [isIOSDevice, setIsIOSDevice] = useState(false);
   
   useEffect(() => {
-    setIsIPadDevice(isIPad());
+    // Detectar se é iPhone ou iPad
+    setIsIOSDevice(isIPad() || isIPhone());
   }, []);
   
   const isLinkActive = (path: string) => {
@@ -21,9 +22,9 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
   const activeClass = "text-primary"; 
   const inactiveClass = "text-gray-500";
 
-  // Classes condicionais para iPad
-  const navigationClasses = isIPadDevice
-    ? "glass-nav-ipad mobile-nav-bottom-ipad flex items-center justify-around fixed z-50"
+  // Classes condicionais para iOS (iPhone e iPad)
+  const navigationClasses = isIOSDevice
+    ? "glass-nav-ios mobile-nav-bottom-ios flex items-center justify-around fixed z-50"
     : "md:hidden glass-nav mobile-nav-bottom border-t border-gray-100/40 flex items-center justify-around fixed bottom-0 w-full z-10";
 
   return (

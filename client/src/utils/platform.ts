@@ -15,6 +15,19 @@ export const isIOS = (): boolean => {
 };
 
 /**
+ * Detecta se está rodando no iPhone
+ */
+export const isIPhone = (): boolean => {
+  if (Capacitor.getPlatform() === 'ios') {
+    const userAgent = navigator.userAgent.toLowerCase();
+    // É iOS mas não é iPad
+    return !userAgent.includes('ipad') && 
+           !(userAgent.includes('macintosh') && 'ontouchend' in document);
+  }
+  return false;
+};
+
+/**
  * Detecta se está rodando no Android
  */
 export const isAndroid = (): boolean => {
