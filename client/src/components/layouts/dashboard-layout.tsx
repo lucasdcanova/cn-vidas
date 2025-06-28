@@ -16,7 +16,7 @@ import { getUnreadNotificationsCount, markAllNotificationsAsRead, getDoctorByUse
 import { getPlanColor } from "@/components/shared/plan-indicator";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Capacitor } from "@capacitor/core";
-import { isNativeApp, isIPad } from "@/utils/platform";
+import { isNativeApp, isIPad, isIOS } from "@/utils/platform";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -33,13 +33,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [doctorProfile, setDoctorProfile] = useState<any>(null);
   const [userWithProfileImage, setUserWithProfileImage] = useState(user);
   const [isIPadDevice, setIsIPadDevice] = useState(false);
+  const [isIOSDevice, setIsIOSDevice] = useState(false);
   
   // Use o hook para garantir dados frescos do usuário ao montar o componente
   useFreshUserData();
   
-  // Detectar se é iPad
+  // Detectar se é iOS (iPhone ou iPad)
   useEffect(() => {
     setIsIPadDevice(isIPad());
+    setIsIOSDevice(isIOS());
   }, []);
   
   // Configurar status bar para iOS
@@ -133,8 +135,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   const unreadCount = notificationsData?.count || 0;
   
-  // Determinar se deve mostrar a sidebar - esconder para pacientes e médicos no iOS e iPad
-  const shouldShowSidebar = !((isNativeApp() || isIPad()) && (user?.role === "patient" || user?.role === "doctor"));
+  // Determinar se deve mostrar a sidebar - esconder para pacientes e médicos no iOS
+  const shouldShowSidebar = !(isIOSDevice && (user?.role === "patient" || user?.role === "doctor"));
 
   return (
     <>
