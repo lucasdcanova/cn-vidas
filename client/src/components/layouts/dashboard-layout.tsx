@@ -16,7 +16,7 @@ import { getUnreadNotificationsCount, markAllNotificationsAsRead, getDoctorByUse
 import { getPlanColor } from "@/components/shared/plan-indicator";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Capacitor } from "@capacitor/core";
-import { isNativeApp } from "@/utils/platform";
+import { isNativeApp, isIPad } from "@/utils/platform";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -117,8 +117,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   const unreadCount = notificationsData?.count || 0;
   
-  // Determinar se deve mostrar a sidebar - esconder para pacientes e médicos no iOS
-  const shouldShowSidebar = !(isNativeApp() && (user?.role === "patient" || user?.role === "doctor"));
+  // Determinar se deve mostrar a sidebar - esconder para pacientes e médicos no iOS e iPad
+  const shouldShowSidebar = !((isNativeApp() || isIPad()) && (user?.role === "patient" || user?.role === "doctor"));
 
   return (
     <div className="flex h-screen overflow-hidden bg-blue-50">{/* Fundo azul claro sólido que corresponde à identidade visual */}

@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
+import { isIPad } from "@/utils/platform";
 
 interface MobileNavigationProps {
   userRole?: string;
@@ -7,6 +8,11 @@ interface MobileNavigationProps {
 
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "patient" }) => {
   const [location] = useLocation();
+  const [isIPadDevice, setIsIPadDevice] = useState(false);
+  
+  useEffect(() => {
+    setIsIPadDevice(isIPad());
+  }, []);
   
   const isLinkActive = (path: string) => {
     return location === path;
@@ -15,8 +21,13 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
   const activeClass = "text-primary"; 
   const inactiveClass = "text-gray-500";
 
+  // Classes condicionais para iPad
+  const navigationClasses = isIPadDevice
+    ? "glass-nav-ipad mobile-nav-bottom-ipad flex items-center justify-around fixed z-50"
+    : "md:hidden glass-nav mobile-nav-bottom border-t border-gray-100/40 flex items-center justify-around fixed bottom-0 w-full z-10";
+
   return (
-    <div className="md:hidden glass-nav mobile-nav-bottom border-t border-gray-100/40 flex items-center justify-around fixed bottom-0 w-full z-10">
+    <div className={navigationClasses}>
       {userRole !== "doctor" && (
         <Link href="/dashboard">
           <div className={`flex flex-col items-center py-3 px-3 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
