@@ -12,7 +12,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, MessageCircle, QrCode } from "lucide-react";
+import { Search, MessageCircle, QrCode, Loader2 } from "lucide-react";
 import AppointmentForm from "@/components/forms/appointment-form";
 import {
   Dialog,
@@ -56,7 +56,7 @@ const Services: React.FC = () => {
   const [showAllServices, setShowAllServices] = useState(false);
   
   // Query para serviços filtrados por localização (padrão)
-  const { data: services = [], error, isError } = useQuery<any[]>({
+  const { data: services = [], error, isError, isLoading } = useQuery<any[]>({
     queryKey: ["/api/services", showAllServices, user?.city],
     queryFn: async () => {
       // Use getServices da API que já usa httpRequest internamente
@@ -245,7 +245,19 @@ const Services: React.FC = () => {
         
         {/* Service cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServices.length > 0 ? (
+          {isLoading ? (
+            <div className="col-span-3 text-center py-12">
+              <div className="flex flex-col items-center justify-center">
+                <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+                <p className="text-gray-600 font-medium mb-2">
+                  Aguarde enquanto localizamos os serviços...
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Buscando parceiros disponíveis na sua região
+                </p>
+              </div>
+            </div>
+          ) : filteredServices.length > 0 ? (
             filteredServices.map((service, index) => (
               <Card key={service.id} className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow duration-200">
                 <img 
