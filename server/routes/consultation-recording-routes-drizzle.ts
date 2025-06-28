@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { consultationRecordings, appointments, doctors, medicalRecords, medicalRecordEntries } from '../../shared/schema.js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { authenticateToken, requireAuth } from '../middleware/auth.js';
 import multer from 'multer';
 import { promises as fs } from 'fs';
@@ -138,20 +138,90 @@ router.post('/upload', authenticateToken, upload.single('audio'), async (req: Re
 router.get('/appointment/:appointmentId', authenticateToken, async (req: Request, res: Response) => {
   try {
     const appointmentId = parseInt(req.params.appointmentId);
+    const userId = (req as any).user?.id;
     
+    console.log('🔍 [Recording] Buscando gravação para appointment:', appointmentId);
+    console.log('👤 [Recording] User ID:', userId);
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Usuário não autenticado' });
+    }
+    
+    // Primeiro verificar se o usuário tem acesso à consulta
+    const [appointment] = await db.select()
+      .from(appointments)
+      .where(eq(appointments.id, appointmentId))
+      .limit(1);
+      
+    if (!appointment) {
+      console.log('❌ [Recording] Consulta não encontrada:', appointmentId);
+      return res.status(404).json({ success: false, error: 'Consulta não encontrada' });
+    }
+    
+    // Verificar se o usuário é o paciente ou o médico da consulta
+    const isPatient = appointment.userId === userId;
+    
+    // Se não for o paciente, verificar se é o médico
+    let isDoctor = false;
+    if (!isPatient && appointment.doctorId) {
+      const [doctor] = await db.select()
+        .from(doctors)
+        .where(eq(doctors.id, appointment.doctorId))
+        .limit(1);
+      
+      if (doctor && doctor.userId === userId) {
+        isDoctor = true;
+      }
+    }
+    
+    if (!isPatient && !isDoctor) {
+      console.log('❌ [Recording] Usuário não tem acesso à consulta:', { userId, appointmentId, isPatient, isDoctor });
+      return res.status(403).json({ success: false, error: 'Acesso negado' });
+    }
+    
+    // Buscar a gravação
     const [recording] = await db.select()
       .from(consultationRecordings)
       .where(eq(consultationRecordings.appointmentId, appointmentId))
       .limit(1);
 
     if (!recording) {
-      return res.status(404).json({ error: 'Gravação não encontrada' });
+      console.log('❌ [Recording] Nenhuma gravação encontrada para appointment:', appointmentId);
+      return res.status(404).json({ success: false, error: 'Gravação não encontrada' });
     }
+    
+    // Buscar prontuário médico relacionado se existir
+    const [medicalRecordEntry] = await db.select()
+      .from(medicalRecordEntries)
+      .where(eq(medicalRecordEntries.appointmentId, appointmentId))
+      .orderBy(desc(medicalRecordEntries.createdAt))
+      .limit(1);
+    
+    console.log('✅ [Recording] Gravação encontrada:', {
+      id: recording.id,
+      status: recording.transcriptionStatus,
+      medicalRecordId: medicalRecordEntry?.id
+    });
 
-    res.json(recording);
+    res.json({
+      success: true,
+      recording: {
+        id: recording.id,
+        status: recording.transcriptionStatus,
+        hasTranscription: !!recording.transcription,
+        hasAiNotes: !!recording.soapNote,
+        medicalRecordId: medicalRecordEntry?.recordId,
+        error: recording.transcriptionError,
+        createdAt: recording.createdAt,
+        completedAt: recording.processingCompletedAt
+      }
+    });
   } catch (error) {
-    console.error('❌ Erro ao buscar gravação:', error);
-    res.status(500).json({ error: 'Erro ao buscar gravação' });
+    console.error('❌ [Recording] Erro ao buscar gravação por appointmentId:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Erro ao buscar gravação'
+    });
   }
 });
 
