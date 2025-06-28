@@ -742,6 +742,25 @@
       inset 0 0 0 0.5px rgba(255, 255, 255, 1),
       inset 0 -1px 0 rgba(255, 255, 255, 1) !important;
   }
+  
+  /* Status bar overlay para iPad - glassmorphism consistente */
+  .statusbar-glassmorphism-ipad {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 44px); /* Altura da status bar do iOS */
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    z-index: 100;
+    pointer-events: none; /* Permite cliques através do overlay */
+  }
+  
+  /* Ajuste do header no iPad para começar abaixo da status bar */
+  .header-glassmorphism-ipad.sticky {
+    top: env(safe-area-inset-top, 44px) !important;
+  }
 
   /* Ajuste de espaçamento dos ícones no iPad */
   .mobile-nav-bottom-ipad > a > div {
