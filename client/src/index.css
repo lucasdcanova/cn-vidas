@@ -672,8 +672,8 @@
     min-height: 80px;
   }
 
-  /* Estilos específicos para iPad - Barra flutuante com glassmorphism agressivo */
-  .glass-nav-ipad {
+  /* Estilos para iOS (iPhone e iPad) - Barra flutuante com glassmorphism agressivo */
+  .glass-nav-ios {
     background: rgba(255, 255, 255, 0.60); /* Opacidade reduzida para 60% */
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
@@ -690,7 +690,7 @@
   }
   
   /* Efeito de brilho adicional para glassmorphism mais agressivo */
-  .glass-nav-ipad::before {
+  .glass-nav-ios::before {
     content: '';
     position: absolute;
     top: 0;
@@ -707,24 +707,35 @@
     pointer-events: none;
   }
 
-  /* Posicionamento da barra flutuante no iPad */
-  .mobile-nav-bottom-ipad {
+  /* Posicionamento da barra flutuante no iOS */
+  .mobile-nav-bottom-ios {
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
     width: auto;
     max-width: 90%;
     min-width: min(480px, 90vw);
-    height: 72px;
-    min-height: 72px;
+    height: 64px; /* Altura menor para iPhone */
+    min-height: 64px;
     padding: 0 8px;
   }
   
-  /* Ajuste responsivo para iPads menores */
-  @media (max-width: 768px) {
-    .mobile-nav-bottom-ipad {
-      min-width: calc(100vw - 48px);
-      max-width: calc(100vw - 48px);
+  /* Ajuste responsivo para iPhones */
+  @media (max-width: 430px) { /* iPhone Pro Max e menores */
+    .mobile-nav-bottom-ios {
+      min-width: calc(100vw - 32px);
+      max-width: calc(100vw - 32px);
+      height: 60px;
+      min-height: 60px;
+      bottom: 16px;
+    }
+  }
+  
+  /* Ajuste para iPads (telas maiores) */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .mobile-nav-bottom-ios {
+      height: 72px;
+      min-height: 72px;
     }
   }
 
@@ -774,18 +785,36 @@
     margin-top: 0;
   }
 
-  /* Ajuste de espaçamento dos ícones no iPad */
-  .mobile-nav-bottom-ipad > a > div {
-    padding: 12px 24px;
+  /* Ajuste de espaçamento dos ícones no iOS */
+  .mobile-nav-bottom-ios > a > div {
+    padding: 10px 20px;
     border-radius: 16px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  
+  /* Ajuste específico para iPads */
+  @media (min-width: 768px) {
+    .mobile-nav-bottom-ios > a > div {
+      padding: 12px 24px;
+    }
+  }
+  
+  /* Ajuste específico para iPhones pequenos */
+  @media (max-width: 375px) {
+    .mobile-nav-bottom-ios > a > div {
+      padding: 8px 16px;
+    }
+    
+    .mobile-nav-bottom-ios > a > div span.text-xs {
+      font-size: 0.65rem;
+    }
+  }
 
-  .mobile-nav-bottom-ipad > a > div:hover {
+  .mobile-nav-bottom-ios > a > div:hover {
     background: rgba(255, 255, 255, 0.1);
   }
 
-  .mobile-nav-bottom-ipad > a > div:active {
+  .mobile-nav-bottom-ios > a > div:active {
     background: rgba(255, 255, 255, 0.2);
     transform: scale(0.95);
   }
