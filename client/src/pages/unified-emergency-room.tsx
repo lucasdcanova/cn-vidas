@@ -186,61 +186,62 @@ export default function UnifiedEmergencyRoom() {
         <title>Atendimento de Emergência | CN Vidas</title>
       </Helmet>
       
-      <div className="container max-w-6xl py-6">
-        <header className="mb-6">
-          <h1 className="text-2xl font-bold text-center">
-            {isDoctor ? 'Atendimento de Emergência' : 'Consulta de Emergência'}
-          </h1>
-          <p className="text-center text-muted-foreground mt-2">
-            {isDoctor 
-              ? 'Você está atendendo um paciente em emergência'
-              : 'Um médico foi notificado e entrará na sala em instantes'}
-          </p>
-        </header>
-        
-        {/* Conteúdo da página - estados condicionais */}
-        <div className="space-y-6">
-          {loading && (
-            <div className="flex flex-col items-center justify-center p-12">
-              <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-              <p className="text-lg font-medium">
-                {isDoctor ? 'Conectando ao paciente...' : 'Conectando ao médico...'}
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Por favor, aguarde enquanto preparamos sua consulta
-              </p>
-            </div>
-          )}
-          
-          {error && (
-            <div className="rounded-lg border border-destructive bg-destructive/10 p-8 flex flex-col items-center">
-              <ShieldAlert className="w-12 h-12 text-destructive mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Erro na conexão</h2>
-              <p className="text-center mb-6">{error}</p>
-              <Button 
-                onClick={joinEmergencyRoom}
-                variant="default"
-              >
-                Tentar novamente
-              </Button>
-            </div>
-          )}
-          
-          {!loading && !error && roomData && (
-            <div className="fixed inset-0 z-50 bg-black">
-              <MinimalistVideoCall
-                roomUrl={roomData.roomUrl}
-                token={roomData.token || undefined}
-                userName={user?.fullName || (isDoctor ? 'Médico' : 'Paciente')}
-                isDoctor={isDoctor}
-                onLeaveCall={handleLeaveCall}
-                appointmentId={roomData.appointmentId}
-                enableRecording={true}
-              />
-            </div>
-          )}
+      {/* Renderizar vídeo em tela cheia quando conectado */}
+      {!loading && !error && roomData ? (
+        <div className="fixed inset-0 z-50 bg-black">
+          <MinimalistVideoCall
+            roomUrl={roomData.roomUrl}
+            token={roomData.token || undefined}
+            userName={user?.fullName || (isDoctor ? 'Médico' : 'Paciente')}
+            isDoctor={isDoctor}
+            onLeaveCall={handleLeaveCall}
+            appointmentId={roomData.appointmentId}
+            enableRecording={true}
+          />
         </div>
-      </div>
+      ) : (
+        <div className="container max-w-6xl py-6">
+          <header className="mb-6">
+            <h1 className="text-2xl font-bold text-center">
+              {isDoctor ? 'Atendimento de Emergência' : 'Consulta de Emergência'}
+            </h1>
+            <p className="text-center text-muted-foreground mt-2">
+              {isDoctor 
+                ? 'Você está atendendo um paciente em emergência'
+                : 'Um médico foi notificado e entrará na sala em instantes'}
+            </p>
+          </header>
+          
+          {/* Conteúdo da página - estados condicionais */}
+          <div className="space-y-6">
+            {loading && (
+              <div className="flex flex-col items-center justify-center p-12">
+                <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                <p className="text-lg font-medium">
+                  {isDoctor ? 'Conectando ao paciente...' : 'Conectando ao médico...'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Por favor, aguarde enquanto preparamos sua consulta
+                </p>
+              </div>
+            )}
+            
+            {error && (
+              <div className="rounded-lg border border-destructive bg-destructive/10 p-8 flex flex-col items-center">
+                <ShieldAlert className="w-12 h-12 text-destructive mb-4" />
+                <h2 className="text-xl font-semibold mb-2">Erro na conexão</h2>
+                <p className="text-center mb-6">{error}</p>
+                <Button 
+                  onClick={joinEmergencyRoom}
+                  variant="default"
+                >
+                  Tentar novamente
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
