@@ -127,6 +127,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const shouldShowSidebar = !((isNativeApp() || isIPad()) && (user?.role === "patient" || user?.role === "doctor"));
 
   return (
+    <>
+      {/* Status bar glassmorphism overlay para iPad */}
+      {isIPadDevice && (
+        <div className="statusbar-glassmorphism-ipad" />
+      )}
+      
     <div className="flex h-screen overflow-hidden bg-blue-50">{/* Fundo azul claro sólido que corresponde à identidade visual */}
 
       {/* Overlay when sidebar is open on mobile - não mostrar para pacientes no iOS */}
@@ -316,6 +322,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <MobileNavigation userRole={user?.role} />
       </div>
     </div>
+    </>
   );
 };
 
