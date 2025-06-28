@@ -29,6 +29,42 @@ export const isWeb = (): boolean => {
 };
 
 /**
+ * Detecta se está rodando no iPadOS
+ */
+export const isIPad = (): boolean => {
+  if (Capacitor.getPlatform() === 'ios') {
+    // No Capacitor iOS, verificar se é iPad
+    const userAgent = navigator.userAgent.toLowerCase();
+    return userAgent.includes('ipad') || 
+           (userAgent.includes('macintosh') && 'ontouchend' in document);
+  }
+  
+  // Para web, verificar user agent
+  if (Capacitor.getPlatform() === 'web') {
+    const userAgent = navigator.userAgent.toLowerCase();
+    return userAgent.includes('ipad') || 
+           (userAgent.includes('macintosh') && 'ontouchend' in document);
+  }
+  
+  return false;
+};
+
+/**
+ * Detecta se está rodando em um tablet (iPad ou Android tablet)
+ */
+export const isTablet = (): boolean => {
+  if (isIPad()) return true;
+  
+  // Para Android, verificar tamanho da tela
+  if (isAndroid()) {
+    // Considerar tablets se a largura for maior que 768px
+    return window.innerWidth >= 768;
+  }
+  
+  return false;
+};
+
+/**
  * Retorna a plataforma atual
  */
 export const getPlatform = (): string => {
