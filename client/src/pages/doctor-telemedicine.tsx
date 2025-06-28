@@ -45,7 +45,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 // Importamos o componente simplificado
 import { EmergencyBannerSimple } from '@/components/doctor/EmergencyBannerSimple';
-import { EmergencyNotification } from '@/components/doctor/EmergencyNotification';
 import { EmergencyAppointmentsListOptimized } from '@/components/doctor/EmergencyAppointmentsListOptimized';
 import { AutoRefreshIndicator } from '@/components/doctor/AutoRefreshIndicator';
 import { EmergencyAwareAppointmentsList } from '@/components/doctor/EmergencyAwareAppointmentsList';
@@ -549,10 +548,7 @@ export default function DoctorTelemedicinePage() {
         
         <EmergencyBanner />
         
-        {/* Emergency Notifications Component - Para notificações popup */}
-        {doctorProfile && (
-          <EmergencyNotification doctorId={doctorProfile.id} />
-        )}
+        {/* Emergency Notifications Component - Removido a pedido do usuário */}
         
         <div className="space-y-4 mt-8">
           <h2 className="text-xl font-semibold">Consultas</h2>
