@@ -45,16 +45,15 @@ router.post('/upload', authenticateToken, upload.single('audio'), async (req: Re
     }
 
     const appointmentId = parseInt(req.body.appointmentId);
-    const doctorId = parseInt(req.body.doctorId);
 
-    if (!appointmentId || !doctorId) {
+    if (!appointmentId) {
       await fs.unlink(file.path);
-      return res.status(400).json({ success: false, error: 'ID da consulta e médico são obrigatórios' });
+      return res.status(400).json({ success: false, error: 'ID da consulta é obrigatório' });
     }
 
-    console.log(`📋 [Recording Upload] Consulta: ${appointmentId}, Médico: ${doctorId}`);
+    console.log(`📋 [Recording Upload] Consulta: ${appointmentId}`);
 
-    // Verificar se a consulta existe
+    // Verificar se a consulta existe e obter o médico
     const [appointment] = await db.select()
       .from(appointments)
       .where(eq(appointments.id, appointmentId))
@@ -64,6 +63,15 @@ router.post('/upload', authenticateToken, upload.single('audio'), async (req: Re
       await fs.unlink(file.path);
       return res.status(404).json({ success: false, error: 'Consulta não encontrada' });
     }
+
+    // Obter o doctorId da consulta
+    const doctorId = appointment.doctorId;
+    if (!doctorId) {
+      await fs.unlink(file.path);
+      return res.status(400).json({ success: false, error: 'Médico não encontrado para esta consulta' });
+    }
+
+    console.log(`📋 [Recording Upload] Médico: ${doctorId}`);
 
     // Verificar se já existe gravação para esta consulta
     const [existingRecording] = await db.select()
