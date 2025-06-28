@@ -102,7 +102,7 @@ export default function TelemedicinePage() {
     },
   });
   
-  const { data: emergencyDoctors = [] } = useQuery<Doctor[]>({
+  const { data: emergencyDoctors = [], isLoading: isLoadingEmergencyDoctors } = useQuery<Doctor[]>({
     queryKey: ['/api/doctors/available'],
     queryFn: async (): Promise<Doctor[]> => {
       try {
@@ -922,7 +922,19 @@ export default function TelemedicinePage() {
                   </div>
                 </div>
 
-                {emergencyDoctors.length > 0 ? (
+                {isLoadingEmergencyDoctors ? (
+                  <div className="text-center py-8">
+                    <div className="flex flex-col items-center justify-center">
+                      <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+                      <p className="text-gray-600 font-medium mb-2">
+                        Aguarde enquanto localizamos os médicos...
+                      </p>
+                      <p className="text-gray-500 text-sm">
+                        Verificando disponibilidade dos profissionais
+                      </p>
+                    </div>
+                  </div>
+                ) : emergencyDoctors.length > 0 ? (
                   <div className="text-center space-y-4">
                     <div className="flex items-center justify-center text-green-600 mb-2">
                       <CheckCircle className="h-5 w-5 mr-2" />
