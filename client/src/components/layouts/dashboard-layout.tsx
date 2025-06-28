@@ -47,9 +47,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     if (Capacitor.isNativePlatform()) {
       // Mostrar e configurar status bar para o dashboard
       StatusBar.show();
-      StatusBar.setBackgroundColor({ color: '#ffffff' });
-      StatusBar.setStyle({ style: Style.Light }); // Texto escuro em fundo claro
-      StatusBar.setOverlaysWebView({ overlay: false });
+      
+      if (isIPadDevice) {
+        // No iPad, configurar status bar transparente para glassmorphism
+        StatusBar.setBackgroundColor({ color: '#00000000' }); // Totalmente transparente
+        StatusBar.setStyle({ style: Style.Light }); // Texto escuro
+        StatusBar.setOverlaysWebView({ overlay: true }); // Permitir conteúdo sob a status bar
+      } else {
+        // Outros dispositivos mantêm comportamento normal
+        StatusBar.setBackgroundColor({ color: '#ffffff' });
+        StatusBar.setStyle({ style: Style.Light });
+        StatusBar.setOverlaysWebView({ overlay: false });
+      }
     }
     
     // Cleanup - voltar para as cores originais quando sair do dashboard
@@ -58,9 +67,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         // Voltar para a cor azul clara da página de auth
         StatusBar.setBackgroundColor({ color: '#eff6ff' });
         StatusBar.setStyle({ style: Style.Light });
+        StatusBar.setOverlaysWebView({ overlay: false });
       }
     };
-  }, []);
+  }, [isIPadDevice]);
 
   // Auto-refresh após completar onboarding
   React.useEffect(() => {
