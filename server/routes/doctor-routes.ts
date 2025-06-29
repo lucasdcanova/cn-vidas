@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { storage } from '../storage';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth';
 import { AppError } from '../utils/app-error';
+import { InsertDoctor } from '../../shared/schema';
 
 const doctorRouter = express.Router();
 
@@ -161,9 +162,7 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
     }
     
     // Mapear campos para o formato correto do banco
-    const updateData: any = {
-      updatedAt: new Date()
-    };
+    const updateData: Partial<InsertDoctor> = {};
     
     // Usar os nomes corretos dos campos ou os alternativos
     if (specialization !== undefined || specialty !== undefined) {
@@ -236,7 +235,13 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
     console.log('🔍 Doctor PUT /profile - consultationFee value:', updateData.consultationFee);
     console.log('🔍 Doctor PUT /profile - biography/fullBio value:', updateData.biography || updateData.fullBio);
     
+    // Atualizar o perfil do médico
     const updatedDoctor = await storage.updateDoctor(doctor.id, updateData);
+    
+    // Se houver profileImage, também atualizar na tabela users
+    if (profileImage !== undefined) {
+      await storage.updateUser(req.user!.id, { profileImage });
+    }
     
     console.log('✅ Doctor PUT /profile - Perfil atualizado:', updatedDoctor.id);
     console.log('✅ Doctor PUT /profile - onboardingCompleted após update:', updatedDoctor.onboardingCompleted);
@@ -253,10 +258,21 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
     res.json(updatedDoctor);
   } catch (error) {
     console.error('❌ Erro ao atualizar perfil do médico:', error);
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    
+    // Log específico se for erro do Drizzle
+    if (error instanceof Error && error.message.includes('Cannot read properties')) {
+      console.error('Erro Drizzle - campos tentados:', Object.keys(updateData || {}));
+      console.error('Erro Drizzle - valores:', updateData);
+    }
+    
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {
-      res.status(500).json({ error: 'Erro interno do servidor' });
+      res.status(500).json({ 
+        error: 'Erro interno do servidor',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
     }
   }
 });

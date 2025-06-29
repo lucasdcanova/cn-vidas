@@ -199,8 +199,12 @@ router.post('/doctor-profile-image', requireAuth, processBase64Upload, async (re
       message: 'Imagem de perfil do médico atualizada com sucesso'
     });
   } catch (error) {
-    console.error('Erro ao fazer upload da imagem do médico:', error);
-    res.status(500).json({ error: 'Erro ao fazer upload da imagem' });
+    console.error('❌ Erro ao fazer upload da imagem do médico:', error);
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    res.status(500).json({ 
+      error: 'Erro ao fazer upload da imagem',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
   }
 });
 

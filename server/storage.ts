@@ -424,8 +424,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: number, data: Partial<InsertUser>): Promise<User> {
+    // Filter out undefined values to avoid Drizzle errors
+    const cleanData = Object.entries(data).reduce((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as any);
+    
     const [user] = await this.db.update(users)
-      .set(data)
+      .set(cleanData)
       .where(eq(users.id, id))
       .returning();
     if (!user) throw new AppError('Usuário não encontrado', 404);
@@ -740,8 +748,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateDoctor(id: number, data: Partial<InsertDoctor>): Promise<Doctor> {
+    // Filter out undefined values to avoid Drizzle errors
+    const cleanData = Object.entries(data).reduce((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as any);
+    
     const [doctor] = await this.db.update(doctors)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...cleanData, updatedAt: new Date() })
       .where(eq(doctors.id, id))
       .returning();
     return doctor as Doctor;
