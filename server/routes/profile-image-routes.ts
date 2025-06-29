@@ -309,6 +309,51 @@ router.delete('/profile/remove-image', requireAuth, async (req, res) => {
   }
 });
 
+// Remover imagem de perfil (médico)
+router.delete('/doctor-profile-image', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const doctor = await storage.getDoctorByUserId(userId);
+    
+    if (!doctor) {
+      return res.status(404).json({ error: 'Perfil de médico não encontrado' });
+    }
+    
+    if (doctor.profileImage) {
+      // Encontrar o arquivo no banco
+      const secureFile = await storage.getSecureFileByUrl(doctor.profileImage);
+      
+      if (secureFile) {
+        // Deletar do S3
+        await SecureStorageService.deleteSecure(
+          secureFile.fileKey,
+          userId,
+          'profile',
+          {
+            ip: req.ip,
+            userAgent: req.headers['user-agent']
+          }
+        );
+        
+        // Marcar como deletado no banco
+        await storage.softDeleteSecureFile(secureFile.id);
+      }
+    }
+    
+    // Remover URL do perfil do médico e do usuário
+    await storage.updateDoctor(doctor.id, { profileImage: null });
+    await storage.updateUser(userId, { profileImage: null });
+    
+    res.json({ 
+      success: true,
+      message: 'Imagem de perfil do médico removida com sucesso'
+    });
+  } catch (error) {
+    console.error('Erro ao remover imagem do médico:', error);
+    res.status(500).json({ error: 'Erro ao remover imagem' });
+  }
+});
+
 // Endpoint para gerar nova URL assinada (quando a atual expirar)
 router.get('/profile/refresh-image-url', requireAuth, async (req, res) => {
   try {
