@@ -221,7 +221,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Link para Financeiro - apenas para médicos */}
               {user?.role === "doctor" && (
                 <>
-                  <Link to="/doctor/financeiro">
+                  <Link href="/doctor/financeiro" key="doctor-financeiro-link">
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -231,7 +231,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       <DollarSign className="h-5 w-5 text-gray-600" />
                     </Button>
                   </Link>
-                  <Link to="/doctor/settings">
+                  <Link href="/doctor/settings" key="doctor-settings-link">
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -248,18 +248,29 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Ícones de configurações e ajuda apenas para pacientes */}
               {user?.role === "patient" && (
                 <>
-                  <Link to="/settings">
+                  <Link href="/settings" key="settings-link">
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                      title="Configurações"
                     >
                       <Settings className="h-5 w-5 text-gray-600" />
                     </Button>
                   </Link>
+                  <Link href="/help" key="help-link">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                      title="Fale Conosco"
+                    >
+                      <HelpCircle className="h-5 w-5 text-gray-600" />
+                    </Button>
+                  </Link>
                   {/* Botão de Planos - apenas no iPhone */}
                   {isIPhoneDevice && (
-                    <Link to="/subscription">
+                    <Link href="/subscription" key="subscription-link">
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -270,15 +281,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       </Button>
                     </Link>
                   )}
-                  <Link to="/help">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
-                    >
-                      <HelpCircle className="h-5 w-5 text-gray-600" />
-                    </Button>
-                  </Link>
                   <div className="w-px h-6 bg-gray-200 mx-1"></div>
                 </>
               )}
@@ -301,7 +303,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <div className="flex items-center ml-4 space-x-3">
               {/* Link para Financeiro - apenas para médicos */}
               {user?.role === "doctor" && (
-                <Link to="/doctor/financeiro">
+                <Link href="/doctor/financeiro">
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -314,7 +316,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               )}
               
               {/* Link para Configurações */}
-              <Link to={user?.role === "doctor" ? "/doctor/settings" : "/settings"}>
+              <Link href={user?.role === "doctor" ? "/doctor/settings" : "/settings"}>
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -326,7 +328,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               
               {/* Link para Ajuda - apenas para pacientes */}
               {user?.role === "patient" && (
-                <Link to="/help">
+                <Link href="/help">
                   <Button 
                     variant="ghost" 
                     size="icon" 
