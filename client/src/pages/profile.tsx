@@ -55,7 +55,7 @@ import {
 import Breadcrumb from "@/components/ui/breadcrumb";
 import { AddressFormOptimized as AddressForm, AddressFormValues } from "@/components/forms/address-form-optimized";
 import ImageCropper from "@/components/shared/ImageCropper";
-import ProfilePhotoUploader from "@/components/shared/ProfilePhotoUploader";
+import ProfilePhotoSection from "@/components/profile/ProfilePhotoSection";
 import {
   Dialog,
   DialogContent,
@@ -1143,22 +1143,22 @@ const Profile: React.FC = () => {
                   </div>
                   
                   {user?.role === "doctor" && (
-                    <ProfilePhotoUploader
+                    <ProfilePhotoSection
                       currentImage={profileImage}
-                      userName={doctorData?.specialization || user?.fullName || 'Médico'}
+                      userName={user?.fullName || 'Médico'}
                       userType="doctor"
-                      size="lg"
-                                              onImageUpdate={(url) => {
-                          setProfileImage(url);
-                          // Invalidar cache para atualizar dados
-                          queryClient.invalidateQueries({ queryKey: ["/api/user"] }); // Query principal
-                          queryClient.invalidateQueries({ queryKey: ["/api/doctors/user", user?.id] });
-                          queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
-                          // Forçar refetch para garantir atualização
-                          setTimeout(() => {
-                            queryClient.refetchQueries({ queryKey: ["/api/user"] });
-                          }, 300);
-                        }}
+                      size="xl"
+                      onImageUpdate={(url) => {
+                        setProfileImage(url);
+                        // Invalidar cache para atualizar dados
+                        queryClient.invalidateQueries({ queryKey: ["/api/user"] }); // Query principal
+                        queryClient.invalidateQueries({ queryKey: ["/api/doctors/user", user?.id] });
+                        queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                        // Forçar refetch para garantir atualização
+                        setTimeout(() => {
+                          queryClient.refetchQueries({ queryKey: ["/api/user"] });
+                        }, 300);
+                      }}
                       className="w-fit"
                     />
                   )}
@@ -1172,11 +1172,11 @@ const Profile: React.FC = () => {
                     <form onSubmit={patientForm.handleSubmit(onPatientSubmit)} className="space-y-4">
                       {/* Upload de foto de perfil para pacientes */}
                       <div className="flex justify-center mb-6">
-                        <ProfilePhotoUploader
+                        <ProfilePhotoSection
                           currentImage={profileImage}
                           userName={user?.fullName || 'Paciente'}
                           userType="patient"
-                          size="md"
+                          size="xl"
                           onImageUpdate={(url) => {
                             setProfileImage(url);
                             // Invalidar cache para atualizar dados
