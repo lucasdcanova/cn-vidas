@@ -636,6 +636,30 @@ const ProfileV2: React.FC = () => {
               {user?.role === "doctor" && doctorData && (
                 <Form {...doctorForm}>
                   <form onSubmit={doctorForm.handleSubmit(onDoctorSubmit)} className="space-y-6">
+                    {/* Upload de foto de perfil para médicos */}
+                    <div className="flex justify-center mb-6">
+                      <ProfilePhotoSection
+                        currentImage={doctorData?.profileImage || user?.profileImage}
+                        userName={user?.fullName || 'Médico'}
+                        userType="doctor"
+                        size="xl"
+                        onImageUpdate={(url) => {
+                          // Atualizar estado local
+                          if (doctorData) {
+                            doctorData.profileImage = url;
+                          }
+                          // Invalidar cache para atualizar dados
+                          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                          queryClient.invalidateQueries({ queryKey: ["/api/doctors/user", user?.id] });
+                          queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                          // Forçar refetch para garantir atualização
+                          setTimeout(() => {
+                            queryClient.refetchQueries({ queryKey: ["/api/user"] });
+                          }, 300);
+                        }}
+                      />
+                    </div>
+                    
                     <ProfileCard
                       title="Informações Profissionais"
                       description="Seus dados médicos e credenciais"
