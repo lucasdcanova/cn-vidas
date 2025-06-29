@@ -1,6 +1,6 @@
 import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, medicalRecords, medicalRecordEntries } from '../shared/schema';
-import { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, Dependent, InsertDependent, MedicalRecord, InsertMedicalRecord, MedicalRecordEntry, InsertMedicalRecordEntry, MedicalRecordAccess, InsertMedicalRecordAccess } from '@shared/types';
-import { PartnerAddress, InsertPartnerAddress } from './interfaces/partner';
+// Import the actual Drizzle types from schema instead of generic types
+import type { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, Dependent, MedicalRecord, MedicalRecordEntry, MedicalRecordAccess, PartnerAddress, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, InsertDependent, InsertMedicalRecord, InsertMedicalRecordEntry, InsertMedicalRecordAccess, InsertPartnerAddress } from '../shared/schema';
 import { db, safeQuery } from "./db";
 import { eq, and, gte, lte, desc, sql, count, or, gt, asc, inArray, ne } from "drizzle-orm";
 import session from "express-session";
@@ -10,6 +10,7 @@ import { randomBytes } from "crypto";
 import { normalizeObjectKeys } from './utils/normalize';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+// Import ExpressUser separately as it's not a Drizzle type
 import { ExpressUser } from '../shared/types';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
