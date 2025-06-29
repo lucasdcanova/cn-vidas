@@ -1141,27 +1141,6 @@ const Profile: React.FC = () => {
                       Atualize seus dados pessoais e informações de contato
                     </CardDescription>
                   </div>
-                  
-                  {user?.role === "doctor" && (
-                    <ProfilePhotoSection
-                      currentImage={profileImage}
-                      userName={user?.fullName || 'Médico'}
-                      userType="doctor"
-                      size="xl"
-                      onImageUpdate={(url) => {
-                        setProfileImage(url);
-                        // Invalidar cache para atualizar dados
-                        queryClient.invalidateQueries({ queryKey: ["/api/user"] }); // Query principal
-                        queryClient.invalidateQueries({ queryKey: ["/api/doctors/user", user?.id] });
-                        queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
-                        // Forçar refetch para garantir atualização
-                        setTimeout(() => {
-                          queryClient.refetchQueries({ queryKey: ["/api/user"] });
-                        }, 300);
-                      }}
-                      className="w-fit"
-                    />
-                  )}
                 </div>
               </CardHeader>
               
@@ -1379,6 +1358,27 @@ const Profile: React.FC = () => {
                 {user?.role === "doctor" && doctorData && (
                   <Form {...doctorForm}>
                     <form onSubmit={doctorForm.handleSubmit(onDoctorSubmit)} className="space-y-4">
+                      {/* Upload de foto de perfil para médicos */}
+                      <div className="flex justify-center mb-6">
+                        <ProfilePhotoSection
+                          currentImage={profileImage}
+                          userName={user?.fullName || 'Médico'}
+                          userType="doctor"
+                          size="xl"
+                          onImageUpdate={(url) => {
+                            setProfileImage(url);
+                            // Invalidar cache para atualizar dados
+                            queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/doctors/user", user?.id] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                            // Forçar refetch para garantir atualização
+                            setTimeout(() => {
+                              queryClient.refetchQueries({ queryKey: ["/api/user"] });
+                            }, 300);
+                          }}
+                        />
+                      </div>
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                           control={doctorForm.control as Control<DoctorProfileFormValues>}
