@@ -78,7 +78,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
     // Professional info
     specialization: doctor.specialization || "",
     licenseNumber: doctor.licenseNumber || "",
-    rqe: doctor.rqe || "",
+    // rqe: doctor.rqe || "", // TEMPORARILY COMMENTED OUT - MIGRATION PENDING
     education: doctor.education || "",
     experienceYears: doctor.experienceYears || 0,
     fullBio: doctor.fullBio || doctor.biography || "",
@@ -154,7 +154,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
       await updateDoctorMutation.mutateAsync({
         specialization: formData.specialization,
         licenseNumber: formData.licenseNumber,
-        rqe: formData.rqe,
+        // rqe: formData.rqe, // TEMPORARILY COMMENTED OUT - MIGRATION PENDING
         education: formData.education,
         experienceYears: parseInt(formData.experienceYears.toString()),
         biography: formData.fullBio, // Usar fullBio para ambos campos
@@ -360,6 +360,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
                           />
                         </div>
 
+                        {/* TEMPORARILY COMMENTED OUT - MIGRATION PENDING
                         <div className="space-y-2">
                           <Label htmlFor="rqe">RQE - Registro de Qualificação de Especialista</Label>
                           <Input
@@ -369,6 +370,7 @@ const DoctorEditModal: React.FC<DoctorEditModalProps> = ({
                             placeholder="Ex: RQE 12345 (Opcional)"
                           />
                         </div>
+                        */}
 
                         <div className="space-y-2">
                           <Label htmlFor="education">Formação</Label>
