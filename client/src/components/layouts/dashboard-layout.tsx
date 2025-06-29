@@ -29,12 +29,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState<any>(null);
   const [userWithProfileImage, setUserWithProfileImage] = useState(user);
   const [isIPadDevice, setIsIPadDevice] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(false);
   const [isIPhoneDevice, setIsIPhoneDevice] = useState(false);
+  
+  // Debug location changes
+  useEffect(() => {
+    console.log("Current location:", location);
+  }, [location]);
   
   // Use o hook para garantir dados frescos do usuário ao montar o componente
   useFreshUserData();
@@ -221,21 +227,27 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Link para Financeiro - apenas para médicos */}
               {user?.role === "doctor" && (
                 <>
-                  <Link href="/doctor/financeiro" key="doctor-financeiro-link">
+                  <Link href="/doctor/financeiro">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                      className={cn(
+                        "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                        location === "/doctor/financeiro" && "bg-gray-100"
+                      )}
                       title="Financeiro"
                     >
                       <DollarSign className="h-5 w-5 text-gray-600" />
                     </Button>
                   </Link>
-                  <Link href="/doctor/settings" key="doctor-settings-link">
+                  <Link href="/doctor/settings">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                      className={cn(
+                        "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                        location === "/doctor/settings" && "bg-gray-100"
+                      )}
                       title="Configurações"
                     >
                       <Settings className="h-5 w-5 text-gray-600" />
@@ -248,39 +260,48 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Ícones de configurações e ajuda apenas para pacientes */}
               {user?.role === "patient" && (
                 <>
-                  <Link href="/settings" key="settings-link">
+                  <Link href="/settings">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                      className={cn(
+                        "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                        location === "/settings" ? "bg-gray-100" : ""
+                      )}
                       title="Configurações"
                     >
                       <Settings className="h-5 w-5 text-gray-600" />
                     </Button>
                   </Link>
-                  <Link href="/help" key="help-link">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
-                      title="Fale Conosco"
-                    >
-                      <HelpCircle className="h-5 w-5 text-gray-600" />
-                    </Button>
-                  </Link>
                   {/* Botão de Planos - apenas no iPhone */}
                   {isIPhoneDevice && (
-                    <Link href="/subscription" key="subscription-link">
+                    <Link href="/subscription">
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                        className={cn(
+                          "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                          location === "/subscription" ? "bg-gray-100" : ""
+                        )}
                         title="Planos"
                       >
                         <CreditCard className="h-5 w-5 text-gray-600" />
                       </Button>
                     </Link>
                   )}
+                  <Link href="/help">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className={cn(
+                        "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                        location === "/help" ? "bg-gray-100" : ""
+                      )}
+                      title="Fale Conosco"
+                    >
+                      <HelpCircle className="h-5 w-5 text-gray-600" />
+                    </Button>
+                  </Link>
                   <div className="w-px h-6 bg-gray-200 mx-1"></div>
                 </>
               )}
@@ -307,7 +328,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-all duration-300 ease-out"
+                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
                     title="Financeiro"
                   >
                     <DollarSign className="h-5 w-5 text-gray-700" />
@@ -332,7 +353,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-all duration-300 ease-out"
+                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
                   >
                     <HelpCircle className="h-5 w-5 text-gray-700" />
                   </Button>
