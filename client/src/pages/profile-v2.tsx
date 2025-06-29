@@ -636,30 +636,6 @@ const ProfileV2: React.FC = () => {
               {user?.role === "doctor" && doctorData && (
                 <Form {...doctorForm}>
                   <form onSubmit={doctorForm.handleSubmit(onDoctorSubmit)} className="space-y-6">
-                    {/* Upload de foto de perfil para médicos */}
-                    <div className="flex justify-center mb-6">
-                      <ProfilePhotoSection
-                        currentImage={doctorData?.profileImage || user?.profileImage}
-                        userName={user?.fullName || 'Médico'}
-                        userType="doctor"
-                        size="xl"
-                        onImageUpdate={(url) => {
-                          // Atualizar estado local
-                          if (doctorData) {
-                            doctorData.profileImage = url;
-                          }
-                          // Invalidar cache para atualizar dados
-                          queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-                          queryClient.invalidateQueries({ queryKey: ["/api/doctors/user", user?.id] });
-                          queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
-                          // Forçar refetch para garantir atualização
-                          setTimeout(() => {
-                            queryClient.refetchQueries({ queryKey: ["/api/user"] });
-                          }, 300);
-                        }}
-                      />
-                    </div>
-                    
                     <ProfileCard
                       title="Informações Profissionais"
                       description="Seus dados médicos e credenciais"
@@ -685,7 +661,40 @@ const ProfileV2: React.FC = () => {
                         </Button>
                       }
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Foto de perfil do médico integrada */}
+                      <div className="flex items-center gap-4 pb-6 border-b">
+                        <ProfilePhotoSection
+                          currentImage={doctorData?.profileImage || user?.profileImage}
+                          userName={user?.fullName || 'Médico'}
+                          userType="doctor"
+                          onImageUpdate={(url) => {
+                            // Atualizar estado local
+                            if (doctorData) {
+                              doctorData.profileImage = url;
+                            }
+                            // Invalidar cache para atualizar dados
+                            queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/doctors/user", user?.id] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                            // Forçar refetch para garantir atualização
+                            setTimeout(() => {
+                              queryClient.refetchQueries({ queryKey: ["/api/user"] });
+                            }, 300);
+                          }}
+                          size="md"
+                          className="flex-shrink-0"
+                        />
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900">{user?.fullName || 'Médico'}</h3>
+                          <p className="text-sm text-gray-600">{doctorData?.specialization || 'Especialidade não informada'}</p>
+                          {doctorData?.licenseNumber && (
+                            <p className="text-sm text-gray-500">CRM: {doctorData.licenseNumber}</p>
+                          )}
+                          <p className="text-sm text-gray-500 mt-1">Foto do perfil profissional</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
                         <ProfileFormField
                           control={doctorForm.control}
                           name="specialization"
