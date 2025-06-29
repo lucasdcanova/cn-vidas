@@ -288,6 +288,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           
           <div className="hidden md:flex items-center justify-between px-6 py-4">
             <div className="flex-1 flex items-center gap-3">
+              {/* Logo CNVidas para iPad */}
+              {isIPadDevice && (
+                <img 
+                  src={cnvidasLogo} 
+                  alt="CN Vidas" 
+                  className="h-8 w-auto mr-2 drop-shadow-sm" 
+                />
+              )}
               <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
             </div>
             <div className="flex items-center ml-4 space-x-3">
