@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useFreshUserData } from "@/hooks/use-fresh-user-data";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu, X, Home, FileText, Users, Calendar, Stethoscope, Building2, Settings, CreditCard, Bell, User, Shield, Activity, Heart, Phone, MessageSquare, Briefcase, BarChart3, UserCheck, ClipboardList, DollarSign, MapPin, Clock, Star, HelpCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { LogOut, Menu, X, Home, FileText, Users, Calendar, Stethoscope, Building2, Settings, CreditCard, Bell, User, Shield, Activity, Heart, Phone, MessageSquare, Briefcase, BarChart3, UserCheck, ClipboardList, DollarSign, MapPin, Clock, Star, HelpCircle, ChevronDown, ChevronRight, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { UserProfile } from "@/components/shared/user-profile";
 import { PlanIndicator } from "@/components/shared/plan-indicator";
@@ -16,7 +16,7 @@ import { getUnreadNotificationsCount, markAllNotificationsAsRead, getDoctorByUse
 import { getPlanColor } from "@/components/shared/plan-indicator";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Capacitor } from "@capacitor/core";
-import { isNativeApp, isIPad, isIOS } from "@/utils/platform";
+import { isNativeApp, isIPad, isIOS, isIPhone } from "@/utils/platform";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -34,6 +34,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [userWithProfileImage, setUserWithProfileImage] = useState(user);
   const [isIPadDevice, setIsIPadDevice] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(false);
+  const [isIPhoneDevice, setIsIPhoneDevice] = useState(false);
   
   // Use o hook para garantir dados frescos do usuário ao montar o componente
   useFreshUserData();
@@ -42,6 +43,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   useEffect(() => {
     setIsIPadDevice(isIPad());
     setIsIOSDevice(isIOS());
+    setIsIPhoneDevice(isIPhone());
   }, []);
   
   // Configurar status bar para iOS
@@ -255,6 +257,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       <Settings className="h-5 w-5 text-gray-600" />
                     </Button>
                   </Link>
+                  {/* Botão de Planos - apenas no iPhone */}
+                  {isIPhoneDevice && (
+                    <Link to="/subscription">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-gray-100 hover:scale-110 transition-all duration-300 ease-out h-9 w-9"
+                        title="Planos"
+                      >
+                        <CreditCard className="h-5 w-5 text-gray-600" />
+                      </Button>
+                    </Link>
+                  )}
                   <Link to="/help">
                     <Button 
                       variant="ghost" 
