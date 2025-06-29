@@ -9,10 +9,12 @@ interface MobileNavigationProps {
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "patient" }) => {
   const [location] = useLocation();
   const [isIOSDevice, setIsIOSDevice] = useState(false);
+  const [isIPhoneDevice, setIsIPhoneDevice] = useState(false);
   
   useEffect(() => {
     // Detectar se é iPhone ou iPad
     setIsIOSDevice(isIPad() || isIPhone());
+    setIsIPhoneDevice(isIPhone());
   }, []);
   
   const isLinkActive = (path: string) => {
@@ -111,14 +113,17 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
             </div>
           </Link>
           
-          <Link href="/subscription">
-            <div className={`flex flex-col items-center py-3 px-3 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
-              isLinkActive("/subscription") ? activeClass : inactiveClass
-            }`}>
-              <span className="material-icons text-lg transition-transform duration-300">credit_card</span>
-              <span className="text-xs mt-1 font-medium">Planos</span>
-            </div>
-          </Link>
+          {/* Mostrar botão de Planos apenas se NÃO for iPhone */}
+          {!isIPhoneDevice && (
+            <Link href="/subscription">
+              <div className={`flex flex-col items-center py-3 px-3 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
+                isLinkActive("/subscription") ? activeClass : inactiveClass
+              }`}>
+                <span className="material-icons text-lg transition-transform duration-300">credit_card</span>
+                <span className="text-xs mt-1 font-medium">Planos</span>
+              </div>
+            </Link>
+          )}
         </>
       )}
       
