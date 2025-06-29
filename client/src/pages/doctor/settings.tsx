@@ -49,7 +49,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
-import { Bell, Shield, Clock, Mail, Phone, Lock, UserPlus, Eye, EyeOff, Mic, FileText, AlertCircle, Calendar } from "lucide-react";
+import ProfilePhotoSection from "@/components/profile/ProfilePhotoSection";
+import { getDoctorByUserId } from "@/lib/api";
+import { Bell, Shield, Clock, Mail, Phone, Lock, UserPlus, Eye, EyeOff, Mic, FileText, AlertCircle, Calendar, User, Camera } from "lucide-react";
 
 // Schema para validação de formulário de preferências de notificação
 const notificationSchema = z.object({
@@ -77,8 +79,15 @@ type PrivacySettings = z.infer<typeof privacySchema>;
 const DoctorSettings = () => {
   const { toast } = useToast();
   const { data: user, isLoading: isUserLoading } = useUser();
-  const [activeTab, setActiveTab] = useState("notifications");
+  const [activeTab, setActiveTab] = useState("profile");
   
+  // Buscar dados do médico
+  const { data: doctorData, isLoading: isDoctorLoading } = useQuery({
+    queryKey: ["/api/doctors/user", user?.id],
+    queryFn: () => getDoctorByUserId(user?.id || 0),
+    enabled: !!user?.id && user?.role === "doctor"
+  });
+
   // Carregar configurações atuais do usuário
   const { data: userSettings, isLoading: isSettingsLoading } = useQuery({
     queryKey: ["/api/users/settings"],
@@ -209,7 +218,7 @@ const DoctorSettings = () => {
     });
   };
 
-  if (isUserLoading || isSettingsLoading) {
+  if (isUserLoading || isSettingsLoading || isDoctorLoading) {
     return (
       <DashboardLayout>
         <div className="container mx-auto p-4 max-w-4xl animate-pulse">
@@ -250,7 +259,11 @@ const DoctorSettings = () => {
         </p>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="animate-slide-up">
-          <TabsList className="grid grid-cols-2 w-full max-w-md mb-6">
+          <TabsList className="grid grid-cols-3 w-full max-w-lg mb-6">
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              <span>Perfil</span>
+            </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="w-4 h-4" />
               <span>Notificações</span>
@@ -260,6 +273,82 @@ const DoctorSettings = () => {
               <span>Privacidade</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="profile" className="animate-fade-in">
+            <Card>
+              <CardHeader>
+                <CardTitle>Foto de Perfil</CardTitle>
+                <CardDescription>
+                  Adicione uma foto profissional para que seus pacientes possam reconhecê-lo facilmente.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center space-y-6">
+                  {/* Seção de upload de foto */}
+                  <div className="flex flex-col items-center space-y-4">
+                    <ProfilePhotoSection
+                      currentImage={doctorData?.profileImage}
+                      userName={user?.fullName || 'Médico'}
+                      userType="doctor"
+                      size="xl"
+                      onImageUpdate={(newImageUrl) => {
+                        // Invalidar queries para atualizar a imagem em outros componentes
+                        queryClient.invalidateQueries({ queryKey: ['/api/doctors/user'] });
+                        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+                      }}
+                    />
+                    
+                    <div className="text-center space-y-2">
+                      <h3 className="text-lg font-semibold">{user?.fullName}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {doctorData?.specialty || 'Especialidade não informada'}
+                      </p>
+                      {doctorData?.crm && (
+                        <p className="text-xs text-muted-foreground">
+                          CRM: {doctorData.crm}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Dicas para foto de perfil */}
+                  <div className="w-full max-w-md">
+                    <div className="rounded-lg bg-blue-50 p-4 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <Camera className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-blue-900">Dicas para uma boa foto de perfil:</p>
+                          <ul className="text-xs text-blue-800 space-y-1 list-disc list-inside">
+                            <li>Use uma foto profissional com boa iluminação</li>
+                            <li>Vista-se adequadamente (jaleco ou roupa social)</li>
+                            <li>Mantenha uma expressão amigável e profissional</li>
+                            <li>Evite fotos com outras pessoas ou objetos distrativos</li>
+                            <li>A imagem deve ter pelo menos 400x400 pixels</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Informações adicionais */}
+                  <div className="w-full pt-4 border-t">
+                    <div className="rounded-lg bg-amber-50 p-4">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-amber-900">Importante:</p>
+                          <p className="text-xs text-amber-800">
+                            Sua foto de perfil será visível para todos os pacientes que acessarem seu perfil. 
+                            Certifique-se de usar uma imagem profissional que transmita confiança e credibilidade.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="notifications" className="animate-fade-in">
             <Card>
