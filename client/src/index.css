@@ -752,6 +752,11 @@
       0 2px 8px rgba(0, 0, 0, 0.04),
       inset 0 0 0 0.5px rgba(255, 255, 255, 1),
       inset 0 -1px 0 rgba(255, 255, 255, 1) !important;
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   
   /* Forçar remoção do background branco no header iPad */
@@ -817,6 +822,33 @@
   .mobile-nav-bottom-ios > a > div:active {
     background: rgba(255, 255, 255, 0.2);
     transform: scale(0.95);
+  }
+  
+  /* Prevenir piscar durante navegação no iOS */
+  @supports (-webkit-touch-callout: none) {
+    header {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      will-change: auto;
+    }
+    
+    header * {
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+    
+    /* Desabilitar transições em elementos do header durante navegação */
+    header button,
+    header a {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Otimização para prevenir repaint */
+    .header-glassmorphism-ipad,
+    .statusbar-glassmorphism-ipad {
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+    }
   }
 
   .glass-sidebar {
