@@ -143,8 +143,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   const unreadCount = notificationsData?.count || 0;
   
-  // Determinar se deve mostrar a sidebar - esconder para pacientes e médicos no iOS
-  const shouldShowSidebar = !(isIOSDevice && (user?.role === "patient" || user?.role === "doctor"));
+  // Determinar se deve mostrar a sidebar - esconder completamente no iOS
+  const shouldShowSidebar = !isIOSDevice;
 
   return (
     <>
@@ -153,7 +153,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <div className="statusbar-glassmorphism-ipad" />
       )}
       
-    <div className="flex h-screen overflow-hidden bg-blue-50">{/* Fundo azul claro sólido que corresponde à identidade visual */}
+    <div className={cn(
+      "flex h-screen overflow-hidden bg-blue-50",
+      !shouldShowSidebar && "flex-col" // Use flex-col when no sidebar
+    )}>{/* Fundo azul claro sólido que corresponde à identidade visual */}
 
       {/* Overlay when sidebar is open on mobile - não mostrar para pacientes no iOS */}
       {shouldShowSidebar && sidebarOpen && (
@@ -197,7 +200,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       )}
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 overflow-hidden relative z-10">
+      <div className={cn(
+        "flex flex-col flex-1 overflow-hidden relative z-10",
+        !shouldShowSidebar && "w-full" // Ensure full width when no sidebar
+      )}>
         {/* Top navbar */}
         <header className={cn(
           "sticky top-0 z-10 shadow-sm",
