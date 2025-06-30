@@ -853,7 +853,39 @@ const ProfileV2: React.FC = () => {
                         </Button>
                       }
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Foto de perfil do parceiro integrada */}
+                      <div className="flex items-center gap-4 pb-6 border-b">
+                        <ProfilePhotoSection
+                          currentImage={partnerData?.profileImage || user?.profileImage}
+                          userName={partnerData?.businessName || user?.fullName || 'Parceiro'}
+                          userType="partner"
+                          onImageUpdate={(url) => {
+                            // Atualizar estado local
+                            if (partnerData) {
+                              partnerData.profileImage = url;
+                            }
+                            // Invalidar cache para atualizar dados
+                            queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/partners/me"] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                            // Forçar refetch para garantir atualização
+                            setTimeout(() => {
+                              queryClient.refetchQueries({ queryKey: ["/api/user"] });
+                            }, 300);
+                          }}
+                          size="md"
+                          className="flex-shrink-0"
+                        />
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900">{partnerData?.businessName || user?.fullName || 'Parceiro'}</h3>
+                          <p className="text-sm text-gray-600">{partnerData?.businessType || 'Tipo de negócio não informado'}</p>
+                          {partnerData?.phone && (
+                            <p className="text-sm text-gray-500 mt-1">{partnerData.phone}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                         <ProfileFormField
                           control={partnerForm.control}
                           name="businessName"

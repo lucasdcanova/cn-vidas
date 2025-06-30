@@ -243,7 +243,7 @@ router.post('/partner-profile-image', requireAuth, processBase64Upload, async (r
     );
 
     // Atualizar no banco
-    await storage.updatePartner(partner.id, { logo: url });
+    await storage.updatePartner(partner.id, { profileImage: url });
     
     // Registrar arquivo no banco
     await storage.createSecureFile({
@@ -354,6 +354,51 @@ router.delete('/doctor-profile-image', requireAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Erro ao remover imagem do médico:', error);
+    res.status(500).json({ error: 'Erro ao remover imagem' });
+  }
+});
+
+// Remover imagem de perfil (parceiro)
+router.delete('/partner-profile-image', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    const partner = await storage.getPartnerByUserId(userId);
+    
+    if (!partner) {
+      return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
+    }
+    
+    if (partner.profileImage) {
+      // Encontrar o arquivo no banco
+      const secureFile = await storage.getSecureFileByUrl(partner.profileImage);
+      
+      if (secureFile) {
+        // Deletar do S3
+        await SecureStorageService.deleteSecure(
+          secureFile.fileKey,
+          userId,
+          'profile',
+          {
+            ip: req.ip,
+            userAgent: req.headers['user-agent']
+          }
+        );
+        
+        // Marcar como deletado no banco
+        await storage.softDeleteSecureFile(secureFile.id);
+      }
+    }
+    
+    // Remover URL do perfil do parceiro e do usuário
+    await storage.updatePartner(partner.id, { profileImage: null });
+    await storage.updateUser(userId, { profileImage: null });
+    
+    res.json({ 
+      success: true,
+      message: 'Imagem de perfil do parceiro removida com sucesso'
+    });
+  } catch (error) {
+    console.error('Erro ao remover imagem do parceiro:', error);
     res.status(500).json({ error: 'Erro ao remover imagem' });
   }
 });
