@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { UseMutationResult, useMutation, useQuery } from "@tanstack/react-query";
-import { Loader2, Trash2, Edit, Plus, AlertCircle } from "lucide-react";
+import { Loader2, Trash2, Edit, Plus, AlertCircle, MapPin } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { deleteService } from "@/lib/api";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +21,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { PartnerService, Partner } from '@/shared/types';
+import { Checkbox } from "@/components/ui/checkbox";
+
+interface Address {
+  id: number;
+  name: string;
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  isPrimary: boolean;
+}
 
 interface ServiceFormData {
   name: string;
@@ -34,6 +48,7 @@ interface ServiceFormData {
   isNational: boolean;
   category: string;
   serviceImage?: string;
+  addressIds?: number[];
 }
 
 interface ServiceMutationVariables {
@@ -59,6 +74,7 @@ const serviceSchema = z.object({
   isNational: z.boolean().default(false),
   category: z.string().min(1, { message: "Selecione uma categoria" }),
   serviceImage: z.string().optional(),
+  addressIds: z.array(z.number()).optional(),
 });
 
 type ServiceFormValues = z.infer<typeof serviceSchema>;
@@ -71,6 +87,7 @@ const PartnerServicesPage: React.FC = () => {
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedAddresses, setSelectedAddresses] = useState<number[]>([]);
 
   // Handler para upload de imagem
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,16 +180,44 @@ const PartnerServicesPage: React.FC = () => {
     retry: 1,
   });
 
+  // Query to fetch partner addresses
+  const { data: addresses = [], isLoading: isLoadingAddresses } = useQuery<Address[]>({
+    queryKey: ["/api/partners/addresses"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/partners/addresses");
+      if (!res.ok) {
+        throw new Error("Failed to fetch addresses");
+      }
+      return await res.json();
+    },
+    enabled: !!user,
+  });
+
   // Create service mutation
   const createServiceMutation = useMutation<PartnerService, Error, ServiceFormData>({
     mutationFn: async (data) => {
       console.log("Creating new service with data:", data);
-      const res = await apiRequest("POST", "/api/partners/services", data);
+      const { addressIds, ...serviceData } = data;
+      
+      // Create service
+      const res = await apiRequest("POST", "/api/partners/services", serviceData);
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || `Error creating service: ${res.status}`);
       }
-      return await res.json();
+      const newService = await res.json();
+      
+      // Update service addresses if any were selected
+      if (addressIds && addressIds.length > 0) {
+        const addressRes = await apiRequest("PUT", `/api/partners/services/${newService.id}/addresses`, {
+          addressIds
+        });
+        if (!addressRes.ok) {
+          console.error("Failed to update service addresses");
+        }
+      }
+      
+      return newService;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/partners/my-services"] });
@@ -181,6 +226,7 @@ const PartnerServicesPage: React.FC = () => {
         description: "O serviço foi adicionado com sucesso",
       });
       setOpenDialog(false);
+      setSelectedAddresses([]);
     },
     onError: (error: Error) => {
       toast({
@@ -195,12 +241,27 @@ const PartnerServicesPage: React.FC = () => {
   const updateServiceMutation = useMutation<PartnerService, Error, ServiceMutationVariables>({
     mutationFn: async ({ id, data }) => {
       console.log(`Updating service with ID: ${id}, data:`, data);
-      const res = await apiRequest("PUT", `/api/partners/services/${id}`, data);
+      const { addressIds, ...serviceData } = data;
+      
+      // Update service
+      const res = await apiRequest("PUT", `/api/partners/services/${id}`, serviceData);
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || `Error updating service: ${res.status}`);
       }
-      return await res.json();
+      const updatedService = await res.json();
+      
+      // Update service addresses
+      if (addressIds !== undefined) {
+        const addressRes = await apiRequest("PUT", `/api/partners/services/${id}/addresses`, {
+          addressIds
+        });
+        if (!addressRes.ok) {
+          console.error("Failed to update service addresses");
+        }
+      }
+      
+      return updatedService;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/partners/my-services"] });
@@ -211,6 +272,7 @@ const PartnerServicesPage: React.FC = () => {
       setOpenDialog(false);
       setIsEditing(false);
       setCurrentService(null);
+      setSelectedAddresses([]);
     },
     onError: (error: Error) => {
       toast({
@@ -300,6 +362,7 @@ const PartnerServicesPage: React.FC = () => {
         isNational: data.isNational !== undefined ? data.isNational : false,
         discountPercentage: data.discountPercentage,
         serviceImage: uploadedImage || undefined,
+        addressIds: selectedAddresses.length > 0 ? selectedAddresses : undefined,
       };
       
       console.log("Formatted data after conversion:", formattedData);
@@ -318,6 +381,18 @@ const PartnerServicesPage: React.FC = () => {
       });
     }
   };
+
+  // Fetch service addresses when editing
+  useEffect(() => {
+    if (currentService && isEditing) {
+      apiRequest("GET", `/api/partners/services/${currentService.id}/addresses`)
+        .then(res => res.json())
+        .then(addresses => {
+          setSelectedAddresses(addresses.map((addr: Address) => addr.id));
+        })
+        .catch(err => console.error("Failed to fetch service addresses:", err));
+    }
+  }, [currentService, isEditing]);
 
   // Edit service
   const handleEdit = (service: PartnerService) => {
@@ -371,6 +446,7 @@ const PartnerServicesPage: React.FC = () => {
     setCurrentService(null);
     setImagePreview(null);
     setUploadedImage(null);
+    setSelectedAddresses([]);
     form.reset({
       name: "",
       description: "",
@@ -966,6 +1042,62 @@ const PartnerServicesPage: React.FC = () => {
                   </p>
                 </div>
                 <AlertCircle className="h-6 w-6 text-yellow-600" />
+              </div>
+
+              {/* Seleção de endereços */}
+              <div className="space-y-4">
+                <div>
+                  <FormLabel>Endereços de Atendimento</FormLabel>
+                  <FormDescription>
+                    Selecione os endereços onde este serviço será prestado
+                  </FormDescription>
+                </div>
+                
+                {isLoadingAddresses ? (
+                  <div className="text-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                    <p className="text-sm text-gray-500 mt-2">Carregando endereços...</p>
+                  </div>
+                ) : addresses.length === 0 ? (
+                  <div className="text-center py-6 border rounded-lg border-dashed">
+                    <MapPin className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">Nenhum endereço cadastrado</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Cadastre endereços primeiro para poder associá-los aos seus serviços
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-60 overflow-y-auto border rounded-lg p-4">
+                    {addresses.map((address) => (
+                      <div key={address.id} className="flex items-start space-x-3">
+                        <Checkbox
+                          id={`address-${address.id}`}
+                          checked={selectedAddresses.includes(address.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedAddresses([...selectedAddresses, address.id]);
+                            } else {
+                              setSelectedAddresses(selectedAddresses.filter(id => id !== address.id));
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`address-${address.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                        >
+                          <div className="font-medium">{address.name}</div>
+                          <div className="text-xs text-gray-600 mt-1">
+                            {address.logradouro}, {address.numero}
+                            {address.complemento && ` - ${address.complemento}`}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {address.bairro} - {address.cidade}/{address.estado}
+                          </div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               
               {/* Campo escondido para manter compatibilidade */}

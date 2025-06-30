@@ -569,12 +569,12 @@ partnerRouter.post('/addresses', requireAuth, requirePartner, async (req: Authen
     const {
       name,
       cep,
-      address,
-      number,
-      complement,
-      neighborhood,
-      city,
-      state,
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
       isPrimary,
       phone,
       email,
@@ -582,20 +582,21 @@ partnerRouter.post('/addresses', requireAuth, requirePartner, async (req: Authen
     } = req.body;
 
     // Validação básica
-    if (!name || !cep || !address || !number || !neighborhood || !city || !state) {
+    if (!name || !cep || !logradouro || !numero || !bairro || !cidade || !estado) {
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
     }
 
+    // Mapear campos do português para inglês para o banco de dados
     const addressData = {
       partnerId: partner.id,
       name,
       cep,
-      address,
-      number,
-      complement,
-      neighborhood,
-      city,
-      state,
+      address: logradouro,
+      number: numero,
+      complement: complemento,
+      neighborhood: bairro,
+      city: cidade,
+      state: estado,
       isPrimary: isPrimary || false,
       isActive: true,
       phone,
@@ -637,7 +638,24 @@ partnerRouter.put('/addresses/:id', requireAuth, requirePartner, async (req: Aut
       return res.status(403).json({ error: 'Você só pode editar seus próprios endereços' });
     }
 
-    const updatedAddress = await storage.updatePartnerAddress(addressId, req.body);
+    // Mapear campos do português para inglês se necessário
+    const updateData: any = {};
+    
+    if (req.body.name !== undefined) updateData.name = req.body.name;
+    if (req.body.cep !== undefined) updateData.cep = req.body.cep;
+    if (req.body.logradouro !== undefined) updateData.address = req.body.logradouro;
+    if (req.body.numero !== undefined) updateData.number = req.body.numero;
+    if (req.body.complemento !== undefined) updateData.complement = req.body.complemento;
+    if (req.body.bairro !== undefined) updateData.neighborhood = req.body.bairro;
+    if (req.body.cidade !== undefined) updateData.city = req.body.cidade;
+    if (req.body.estado !== undefined) updateData.state = req.body.estado;
+    if (req.body.isPrimary !== undefined) updateData.isPrimary = req.body.isPrimary;
+    if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
+    if (req.body.phone !== undefined) updateData.phone = req.body.phone;
+    if (req.body.email !== undefined) updateData.email = req.body.email;
+    if (req.body.openingHours !== undefined) updateData.openingHours = req.body.openingHours;
+
+    const updatedAddress = await storage.updatePartnerAddress(addressId, updateData);
     res.json(updatedAddress);
   } catch (error) {
     console.error('Erro ao atualizar endereço:', error);
@@ -715,6 +733,78 @@ partnerRouter.put('/addresses/:id/set-primary', requireAuth, requirePartner, asy
     res.json({ message: 'Endereço definido como principal' });
   } catch (error) {
     console.error('Erro ao definir endereço principal:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+/**
+ * Obter endereços associados a um serviço
+ * GET /api/partners/services/:serviceId/addresses
+ */
+partnerRouter.get('/services/:serviceId/addresses', requireAuth, requirePartner, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const serviceId = parseInt(req.params.serviceId);
+
+    const partner = await storage.getPartnerByUserId(userId);
+    if (!partner) {
+      return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
+    }
+
+    // Verificar se o serviço pertence ao parceiro
+    const service = await storage.getPartnerService(serviceId);
+    if (!service || service.partnerId !== partner.id) {
+      return res.status(404).json({ error: 'Serviço não encontrado' });
+    }
+
+    const addresses = await storage.getServiceAddresses(serviceId);
+    res.json(addresses);
+  } catch (error) {
+    console.error('Erro ao buscar endereços do serviço:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+/**
+ * Atualizar endereços associados a um serviço
+ * PUT /api/partners/services/:serviceId/addresses
+ */
+partnerRouter.put('/services/:serviceId/addresses', requireAuth, requirePartner, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const serviceId = parseInt(req.params.serviceId);
+    const { addressIds } = req.body;
+
+    if (!Array.isArray(addressIds)) {
+      return res.status(400).json({ error: 'addressIds deve ser um array' });
+    }
+
+    const partner = await storage.getPartnerByUserId(userId);
+    if (!partner) {
+      return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
+    }
+
+    // Verificar se o serviço pertence ao parceiro
+    const service = await storage.getPartnerService(serviceId);
+    if (!service || service.partnerId !== partner.id) {
+      return res.status(404).json({ error: 'Serviço não encontrado' });
+    }
+
+    // Verificar se todos os endereços pertencem ao parceiro
+    if (addressIds.length > 0) {
+      const partnerAddresses = await storage.getPartnerAddresses(partner.id);
+      const validAddressIds = partnerAddresses.map(addr => addr.id);
+      const invalidIds = addressIds.filter(id => !validAddressIds.includes(id));
+      
+      if (invalidIds.length > 0) {
+        return res.status(400).json({ error: 'Um ou mais endereços inválidos' });
+      }
+    }
+
+    await storage.updateServiceAddresses(serviceId, addressIds);
+    res.json({ message: 'Endereços do serviço atualizados com sucesso' });
+  } catch (error) {
+    console.error('Erro ao atualizar endereços do serviço:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

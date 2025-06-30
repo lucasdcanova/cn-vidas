@@ -20,7 +20,8 @@ import {
   History,
   Activity,
   FolderOpen,
-  Receipt
+  Receipt,
+  MapPin
 } from "lucide-react";
 import { isNativeApp } from "@/utils/platform";
 
@@ -258,6 +259,16 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
               }`}>
                 <Stethoscope className="w-5 h-5 mr-3" />
                 Meus Serviços
+            </Link>
+            
+            <Link href="/partner/addresses"
+              className={`${linkBaseClass} ${
+                isLinkActive("/partner/addresses") 
+                  ? linkActiveClass 
+                  : linkInactiveClass
+              }`}>
+                <MapPin className="w-5 h-5 mr-3" />
+                Endereços
             </Link>
             
             <Link href="/partner/verification"

@@ -243,7 +243,15 @@ router.post('/partner-profile-image', requireAuth, processBase64Upload, async (r
     );
 
     // Atualizar no banco
+    console.log(`📸 [Partner Profile Image] Atualizando parceiro ${partner.id} com URL: ${url}`);
+    console.log(`📸 [Partner Profile Image] URL length: ${url.length}`);
+    console.log(`📸 [Partner Profile Image] URL primeiros 100 chars: ${url.substring(0, 100)}`);
+    
     await storage.updatePartner(partner.id, { profileImage: url });
+    
+    // Verificar se foi salvo corretamente
+    const updatedPartner = await storage.getPartnerByUserId(userId);
+    console.log(`📸 [Partner Profile Image] Verificação após update - profileImage: ${updatedPartner?.profileImage?.substring(0, 100)}`);
     
     // Registrar arquivo no banco
     await storage.createSecureFile({
