@@ -78,7 +78,7 @@ const patientProfileSchema = z.object({
 const doctorProfileSchema = z.object({
   specialization: z.string().min(1, "Especialização é obrigatória"),
   licenseNumber: z.string().min(1, "CRM é obrigatório"),
-  // rqe: z.string().optional(), // TEMPORARILY COMMENTED OUT - MIGRATION PENDING
+  rqe: z.string().optional(),
   education: z.string().optional(),
   experienceYears: z.string().optional(),
   availableForEmergency: z.boolean().optional(),
@@ -233,7 +233,7 @@ const ProfileV2: React.FC = () => {
       doctorForm.reset({
         specialization: doctorData.specialization || "",
         licenseNumber: doctorData.licenseNumber || "",
-        // rqe: doctorData.rqe || "", // TEMPORARILY COMMENTED OUT - MIGRATION PENDING
+        rqe: doctorData.rqe || "",
         education: doctorData.education || "",
         experienceYears: doctorData.experienceYears?.toString() || "",
         availableForEmergency: doctorData.availableForEmergency || false,
@@ -713,7 +713,6 @@ const ProfileV2: React.FC = () => {
                           disabled={!isEditMode}
                         />
                         
-                        {/* TEMPORARILY COMMENTED OUT - MIGRATION PENDING
                         <ProfileFormField
                           control={doctorForm.control}
                           name="rqe"
@@ -723,7 +722,6 @@ const ProfileV2: React.FC = () => {
                           disabled={!isEditMode}
                           description="Registro de Qualificação de Especialista"
                         />
-                        */}
                         
                         <ProfileFormField
                           control={doctorForm.control}

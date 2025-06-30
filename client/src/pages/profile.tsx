@@ -91,7 +91,7 @@ const patientProfileSchema = z.object({
 const doctorProfileSchema = z.object({
   specialization: z.string().min(1, "Especialização é obrigatória"),
   licenseNumber: z.string().min(1, "Número de registro é obrigatório"),
-  // rqe: z.string().optional(), // TEMPORARILY COMMENTED OUT - MIGRATION PENDING
+  rqe: z.string().optional(),
   education: z.string().optional(),
   experienceYears: z.string().optional(), // Mantemos como string no form, mas convertemos na submissão
   availableForEmergency: z.boolean().optional(),
@@ -340,7 +340,7 @@ const Profile: React.FC = () => {
     defaultValues: {
       specialization: doctorData?.specialization || "",
       licenseNumber: doctorData?.licenseNumber || "",
-      // rqe: doctorData?.rqe || "", // TEMPORARILY COMMENTED OUT - MIGRATION PENDING
+      rqe: doctorData?.rqe || "",
       education: doctorData?.education || "",
       experienceYears: doctorData?.experienceYears?.toString() || "",
       availableForEmergency: doctorData?.availableForEmergency || false,
@@ -365,7 +365,7 @@ const Profile: React.FC = () => {
       doctorForm.reset({
         specialization: doctorData.specialization || "",
         licenseNumber: doctorData.licenseNumber || "",
-        // rqe: doctorData.rqe || "", // TEMPORARILY COMMENTED OUT - MIGRATION PENDING
+        rqe: doctorData.rqe || "",
         education: doctorData.education || "",
         experienceYears: doctorData.experienceYears?.toString() || "",
         availableForEmergency: doctorData.availableForEmergency || false,
@@ -702,7 +702,7 @@ const Profile: React.FC = () => {
       const doctorDataToSend = {
         specialization: formattedData.specialization,
         licenseNumber: formattedData.licenseNumber,
-        // rqe: formattedData.rqe, // TEMPORARILY COMMENTED OUT - MIGRATION PENDING
+        rqe: formattedData.rqe,
         education: formattedData.education,
         experienceYears: formattedData.experienceYears,
         availableForEmergency: formattedData.availableForEmergency,

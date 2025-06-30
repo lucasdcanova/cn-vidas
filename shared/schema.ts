@@ -95,7 +95,7 @@ export const doctors = pgTable("doctors", {
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   specialization: text("specialization").notNull(),
   licenseNumber: text("license_number").notNull().unique(),
-  // rqe: text("rqe"), // Registro de Qualificação de Especialista - TEMPORARILY COMMENTED OUT - MIGRATION PENDING
+  rqe: text("rqe"), // Registro de Qualificação de Especialista
   biography: text("biography"),
   education: text("education"),
   experienceYears: integer("experience_years"),
