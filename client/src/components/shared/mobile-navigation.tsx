@@ -128,14 +128,34 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
       )}
       
       {userRole === "partner" && (
-        <Link href="/partner/services">
-          <div className={`flex flex-col items-center py-3 px-3 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
-            isLinkActive("/partner/services") ? activeClass : inactiveClass
-          }`}>
-            <span className="material-icons text-lg transition-transform duration-300">medical_services</span>
-            <span className="text-xs mt-1 font-medium">Serviços</span>
-          </div>
-        </Link>
+        <>
+          <Link href="/partner/services">
+            <div className={`flex flex-col items-center py-3 px-3 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
+              isLinkActive("/partner/services") ? activeClass : inactiveClass
+            }`}>
+              <span className="material-icons text-lg transition-transform duration-300">medical_services</span>
+              <span className="text-xs mt-1 font-medium">Serviços</span>
+            </div>
+          </Link>
+          
+          <Link href="/partner/addresses">
+            <div className={`flex flex-col items-center py-3 px-3 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
+              isLinkActive("/partner/addresses") ? activeClass : inactiveClass
+            }`}>
+              <span className="material-icons text-lg transition-transform duration-300">location_on</span>
+              <span className="text-xs mt-1 font-medium">Endereços</span>
+            </div>
+          </Link>
+          
+          <Link href="/partner/verification">
+            <div className={`flex flex-col items-center py-3 px-3 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
+              isLinkActive("/partner/verification") ? activeClass : inactiveClass
+            }`}>
+              <span className="material-icons text-lg transition-transform duration-300">qr_code_scanner</span>
+              <span className="text-xs mt-1 font-medium">QR Code</span>
+            </div>
+          </Link>
+        </>
       )}
     </div>
   );

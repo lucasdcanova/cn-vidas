@@ -421,6 +421,8 @@ export default function ProfilePhotoUploader({
           queryClient.invalidateQueries({ queryKey: ['/api/partners/me'] });
           queryClient.invalidateQueries({ queryKey: ['/api/partners/profile'] });
           queryClient.invalidateQueries({ queryKey: ['/api/partners'] });
+          // Forçar refetch imediato dos dados do parceiro
+          queryClient.refetchQueries({ queryKey: ['/api/partners/me'] });
         }
 
         // Forçar refetch da query principal após um pequeno delay para garantir atualização

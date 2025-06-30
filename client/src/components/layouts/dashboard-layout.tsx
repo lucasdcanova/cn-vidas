@@ -13,6 +13,7 @@ import SidebarNavigation from "@/components/shared/sidebar-navigation";
 import MobileNavigation from "@/components/shared/mobile-navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getUnreadNotificationsCount, markAllNotificationsAsRead, getDoctorByUserId } from "@/lib/api";
+import { apiRequest } from "@/lib/queryClient";
 import { getPlanColor } from "@/components/shared/plan-indicator";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { Capacitor } from "@capacitor/core";
@@ -120,21 +121,42 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     queryFn: () => getDoctorByUserId(user?.id || 0),
     enabled: !!user?.id && user?.role === "doctor"
   });
+
+  // Buscar o perfil de parceiro se o usuário for um parceiro
+  const { data: partnerData } = useQuery({
+    queryKey: ["/api/partners/me"],
+    queryFn: async () => {
+      const response = await apiRequest('/api/partners/me');
+      console.log('🔍 DashboardLayout - Partner data:', response);
+      return response;
+    },
+    enabled: !!user?.id && user?.role === "partner",
+    staleTime: 0, // Sempre buscar dados frescos
+    cacheTime: 0  // Não manter cache
+  });
   
-  // Atualizar o objeto do usuário com a imagem de perfil do médico, se disponível
+  // Atualizar o objeto do usuário com a imagem de perfil do médico ou parceiro, se disponível
   useEffect(() => {
     if (user) {
       if (user.role === "doctor" && doctorData?.profileImage) {
+        console.log('🔍 DashboardLayout - Usando imagem do médico:', doctorData.profileImage);
         setUserWithProfileImage({
           ...user,
           profileImage: doctorData.profileImage
         });
+      } else if (user.role === "partner" && partnerData?.profileImage) {
+        console.log('🔍 DashboardLayout - Usando imagem do parceiro:', partnerData.profileImage);
+        setUserWithProfileImage({
+          ...user,
+          profileImage: partnerData.profileImage
+        });
       } else {
         // Para pacientes e outros tipos de usuário, usar a imagem do próprio user
+        console.log('🔍 DashboardLayout - Usando imagem do user:', user.profileImage);
         setUserWithProfileImage(user);
       }
     }
-  }, [user, doctorData]);
+  }, [user, doctorData, partnerData]);
   
   const { data: notificationsData } = useQuery({
     queryKey: ["/api/notifications/unread-count"],
