@@ -146,7 +146,6 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
               />
             </div>
 
-            {/* TEMPORARILY COMMENTED OUT - MIGRATION PENDING
             <div className="space-y-2">
               <Label htmlFor="rqe" className="flex items-center gap-2">
                 <Award className="h-4 w-4" />
@@ -163,7 +162,6 @@ export default function StepOne({ formData, updateFormData, onNext }: StepOnePro
                 Informe seu RQE se você possui título de especialista
               </p>
             </div>
-            */}
 
             <div className="space-y-2">
               <Label htmlFor="education" className="flex items-center gap-2">
