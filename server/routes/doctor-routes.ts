@@ -395,8 +395,18 @@ doctorRouter.get('/appointments', requireAuth, requireDoctorRole, async (req: Au
     
     // Filtrar consultas deste médico OU emergências aguardando (se médico disponível para emergências)
     const doctorAppointments = allAppointments.filter(app => {
-      // Sempre incluir consultas atribuídas a este médico
-      if (app.doctorId === doctor.id) return true;
+      // Para consultas atribuídas a este médico
+      if (app.doctorId === doctor.id) {
+        // Excluir emergências em in_progress há mais de 24 horas
+        if (app.isEmergency && app.status === 'in_progress' && app.createdAt) {
+          const hoursInProgress = (Date.now() - new Date(app.createdAt).getTime()) / (1000 * 60 * 60);
+          if (hoursInProgress > 24) {
+            console.log(`⏰ Excluindo emergência antiga em progresso - ID: ${app.id}, em progresso há ${hoursInProgress.toFixed(1)} horas`);
+            return false;
+          }
+        }
+        return true;
+      }
       
       // Para emergências, aplicar filtros adicionais
       if (app.isEmergency && doctor.availableForEmergency) {
@@ -1028,6 +1038,36 @@ doctorRouter.post('/appointments/:id/notes', requireAuth, requireDoctorRole, asy
     res.json({ message: 'Notas salvas com sucesso' });
   } catch (error) {
     console.error('❌ Erro ao salvar notas:', error);
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  }
+});
+
+/**
+ * Executar limpeza manual de emergências antigas
+ * POST /api/doctors/cleanup-emergencies
+ */
+doctorRouter.post('/cleanup-emergencies', requireAuth, requireDoctorRole, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    console.log('🧹 Doctor /cleanup-emergencies - Executando limpeza manual');
+    
+    // Importar função de limpeza
+    const { cleanupOldEmergencyAppointments } = await import('../utils/emergency-cleanup');
+    
+    // Executar limpeza
+    const result = await cleanupOldEmergencyAppointments();
+    
+    console.log('✅ Doctor /cleanup-emergencies - Limpeza concluída:', result);
+    res.json({ 
+      success: true, 
+      message: 'Limpeza de emergências antigas executada com sucesso',
+      ...result
+    });
+  } catch (error) {
+    console.error('❌ Erro ao executar limpeza de emergências:', error);
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ error: error.message });
     } else {

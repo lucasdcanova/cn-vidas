@@ -9,11 +9,12 @@ import { and, eq, lt, isNull } from 'drizzle-orm';
 export async function cleanupOldEmergencyAppointments() {
   try {
     const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     
     console.log('🧹 Iniciando limpeza de emergências antigas...');
     
-    // Buscar emergências antigas
-    const oldEmergencies = await db.select()
+    // Buscar emergências antigas em waiting sem médico
+    const oldWaitingEmergencies = await db.select()
       .from(appointments)
       .where(
         and(
@@ -24,29 +25,50 @@ export async function cleanupOldEmergencyAppointments() {
         )
       );
     
+    // Buscar emergências em in_progress há mais de 24 horas
+    const oldInProgressEmergencies = await db.select()
+      .from(appointments)
+      .where(
+        and(
+          eq(appointments.isEmergency, true),
+          eq(appointments.status, 'in_progress'),
+          lt(appointments.createdAt, twentyFourHoursAgo)
+        )
+      );
+    
+    const oldEmergencies = [...oldWaitingEmergencies, ...oldInProgressEmergencies];
+    
     console.log(`📊 Encontradas ${oldEmergencies.length} emergências antigas para cancelar`);
+    console.log(`📊 Waiting: ${oldWaitingEmergencies.length}, In Progress: ${oldInProgressEmergencies.length}`);
     
     // Cancelar cada uma
     for (const appointment of oldEmergencies) {
       try {
+        const isInProgress = appointment.status === 'in_progress';
+        const reason = isInProgress 
+          ? 'Consulta de emergência expirada após 24 horas em andamento'
+          : 'Tempo de espera excedido (12 horas)';
+        
         // Atualizar status para cancelled
         await db.update(appointments)
           .set({ 
             status: 'cancelled',
-            updatedAt: new Date(),
-            cancellationReason: 'Tempo de espera excedido (12 horas)'
+            updatedAt: new Date()
           })
           .where(eq(appointments.id, appointment.id));
         
-        console.log(`❌ Emergência ${appointment.id} cancelada por tempo excedido`);
+        console.log(`❌ Emergência ${appointment.id} (${appointment.status}) cancelada por tempo excedido`);
         
         // Criar notificação para o paciente
         if (appointment.userId) {
+          const isInProgress = appointment.status === 'in_progress';
           await storage.createNotification({
             userId: appointment.userId,
             type: 'appointment_cancelled',
             title: 'Consulta de emergência cancelada',
-            message: 'Sua consulta de emergência foi cancelada por exceder o tempo limite de espera de 12 horas.',
+            message: isInProgress 
+              ? 'Sua consulta de emergência foi cancelada por exceder o tempo limite de 24 horas em andamento.'
+              : 'Sua consulta de emergência foi cancelada por exceder o tempo limite de espera de 12 horas.',
             isRead: false,
             relatedId: appointment.id
           });
