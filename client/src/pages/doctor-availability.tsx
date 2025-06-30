@@ -156,40 +156,6 @@ export default function DoctorAvailabilityPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Como funcionam as emergências</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-semibold">1</div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium">Receba notificações</p>
-                    <p className="text-sm text-muted-foreground">Quando um paciente solicitar emergência, você será notificado imediatamente</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-semibold">2</div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium">Aceite ou recuse</p>
-                    <p className="text-sm text-muted-foreground">Você tem 2 minutos para aceitar a consulta de emergência</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-semibold">3</div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium">Atenda o paciente</p>
-                    <p className="text-sm text-muted-foreground">Consultas de emergência pagam R$ 50,00 após 5 minutos de atendimento</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           {/* Tab de Consultas Agendadas */}
