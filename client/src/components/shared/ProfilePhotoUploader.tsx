@@ -61,6 +61,24 @@ export default function ProfilePhotoUploader({
   const [previewImage, setPreviewImage] = useState<string | null>(currentImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
+  // Log inicial para debug
+  useEffect(() => {
+    console.log('[ProfilePhotoUploader] Componente montado com:', {
+      currentImage,
+      userName,
+      userType,
+      previewImage
+    });
+  }, []);
+  
+  // Atualizar previewImage quando currentImage mudar
+  useEffect(() => {
+    if (currentImage && currentImage !== previewImage) {
+      console.log('[ProfilePhotoUploader] Atualizando previewImage de', previewImage, 'para', currentImage);
+      setPreviewImage(currentImage);
+    }
+  }, [currentImage]);
 
   // Debug state changes
   useEffect(() => {
@@ -371,8 +389,18 @@ export default function ProfilePhotoUploader({
       
       console.log('Resultado do upload:', result);
       const imageUrl = result.imageUrl || result.profileImage || result.url;
+      
+      console.log('[ProfilePhotoUploader] URL da imagem recebida:', imageUrl);
+      console.log('[ProfilePhotoUploader] Tipo da URL:', typeof imageUrl);
+      console.log('[ProfilePhotoUploader] Comprimento da URL:', imageUrl?.length);
 
       if (imageUrl) {
+        // Verificar se a URL é válida (não é apenas um fragmento base64)
+        if (imageUrl.length < 10 || imageUrl === '9k=') {
+          console.error('[ProfilePhotoUploader] URL inválida recebida:', imageUrl);
+          throw new Error('URL da imagem inválida recebida do servidor');
+        }
+        
         setPreviewImage(imageUrl);
         onImageUpdate?.(imageUrl);
 

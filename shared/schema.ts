@@ -330,6 +330,14 @@ export const partnerAddresses = pgTable("partner_addresses", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Partner service addresses table (many-to-many relationship)
+export const partnerServiceAddresses = pgTable("partner_service_addresses", {
+  id: serial("id").primaryKey(),
+  serviceId: integer("service_id").notNull().references(() => partnerServices.id, { onDelete: "cascade" }),
+  addressId: integer("address_id").notNull().references(() => partnerAddresses.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Tabela de prontuários médicos - simplificada para corresponder ao banco real
 export const medicalRecords = pgTable("medical_records", {
   id: serial("id").primaryKey(),

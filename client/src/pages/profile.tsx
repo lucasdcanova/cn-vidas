@@ -56,6 +56,7 @@ import Breadcrumb from "@/components/ui/breadcrumb";
 import { AddressFormOptimized as AddressForm, AddressFormValues } from "@/components/forms/address-form-optimized";
 import ImageCropper from "@/components/shared/ImageCropper";
 import ProfilePhotoSection from "@/components/profile/ProfilePhotoSection";
+import ProfilePhotoUploader from "@/components/shared/ProfilePhotoUploader";
 import {
   Dialog,
   DialogContent,
@@ -432,6 +433,13 @@ const Profile: React.FC = () => {
         cnpj: partnerData.cnpj || "",
         nationwideService: partnerData.nationwideService || false,
       });
+      
+      // Inicializar a imagem de perfil do parceiro
+      if (partnerData.profileImage && !profileImage) {
+        console.log("Imagem de perfil do parceiro encontrada:", partnerData.profileImage);
+        setProfileImage(partnerData.profileImage);
+      }
+      
       setIsPartnerFormInitialized(true);
     }
   }, [partnerData, isPartnerFormInitialized, user?.role]);
@@ -1609,11 +1617,12 @@ const Profile: React.FC = () => {
                       {/* Upload de foto de perfil para parceiros */}
                       <div className="flex justify-center mb-6">
                         <ProfilePhotoUploader
-                          currentImage={profileImage}
+                          currentImage={profileImage || partnerData?.profileImage}
                           userName={partnerData?.businessName || user?.fullName || 'Parceiro'}
                           userType="partner"
-                          size="md"
+                          size="xl"
                           onImageUpdate={(url) => {
+                            console.log("Imagem atualizada para parceiro:", url);
                             setProfileImage(url);
                             // Invalidar cache para atualizar dados
                             queryClient.invalidateQueries({ queryKey: ["/api/user"] }); // Query principal
@@ -1622,6 +1631,7 @@ const Profile: React.FC = () => {
                             // Forçar refetch para garantir atualização
                             setTimeout(() => {
                               queryClient.refetchQueries({ queryKey: ["/api/user"] });
+                              queryClient.refetchQueries({ queryKey: ["/api/partners/me"] });
                             }, 300);
                           }}
                           className="w-fit"

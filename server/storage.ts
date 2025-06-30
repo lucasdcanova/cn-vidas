@@ -1,4 +1,4 @@
-import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, medicalRecords, medicalRecordEntries } from '../shared/schema';
+import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, partnerServiceAddresses, medicalRecords, medicalRecordEntries } from '../shared/schema';
 // Import the actual Drizzle types from schema instead of generic types
 import type { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, Dependent, MedicalRecord, MedicalRecordEntry, MedicalRecordAccess, PartnerAddress, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, InsertDependent, InsertMedicalRecord, InsertMedicalRecordEntry, InsertMedicalRecordAccess, InsertPartnerAddress } from '../shared/schema';
 import { db, safeQuery } from "./db";
@@ -630,22 +630,64 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Partner Address methods
-  async getPartnerAddresses(partnerId: number): Promise<PartnerAddress[]> {
+  async getPartnerAddresses(partnerId: number): Promise<any[]> {
     const addresses = await this.db.select()
       .from(partnerAddresses)
       .where(eq(partnerAddresses.partnerId, partnerId))
       .orderBy(desc(partnerAddresses.isPrimary), asc(partnerAddresses.name));
-    return addresses as PartnerAddress[];
+    
+    // Mapear campos do inglês para português para manter compatibilidade com o frontend
+    return addresses.map(addr => ({
+      id: addr.id,
+      partnerId: addr.partnerId,
+      name: addr.name,
+      cep: addr.cep,
+      logradouro: addr.address,
+      numero: addr.number,
+      complemento: addr.complement,
+      bairro: addr.neighborhood,
+      cidade: addr.city,
+      estado: addr.state,
+      isPrimary: addr.isPrimary,
+      isActive: addr.isActive,
+      phone: addr.phone,
+      email: addr.email,
+      openingHours: addr.openingHours,
+      createdAt: addr.createdAt,
+      updatedAt: addr.updatedAt
+    }));
   }
 
-  async getPartnerAddress(id: number): Promise<PartnerAddress | undefined> {
+  async getPartnerAddress(id: number): Promise<any | undefined> {
     const [address] = await this.db.select()
       .from(partnerAddresses)
       .where(eq(partnerAddresses.id, id));
-    return address as PartnerAddress | undefined;
+    
+    if (!address) return undefined;
+    
+    // Mapear campos do inglês para português
+    return {
+      id: address.id,
+      partnerId: address.partnerId,
+      name: address.name,
+      cep: address.cep,
+      logradouro: address.address,
+      numero: address.number,
+      complemento: address.complement,
+      bairro: address.neighborhood,
+      cidade: address.city,
+      estado: address.state,
+      isPrimary: address.isPrimary,
+      isActive: address.isActive,
+      phone: address.phone,
+      email: address.email,
+      openingHours: address.openingHours,
+      createdAt: address.createdAt,
+      updatedAt: address.updatedAt
+    };
   }
 
-  async createPartnerAddress(addressData: InsertPartnerAddress): Promise<PartnerAddress> {
+  async createPartnerAddress(addressData: InsertPartnerAddress): Promise<any> {
     // Se este for o primeiro endereço ou marcado como principal, garantir que seja o único principal
     if (addressData.isPrimary) {
       await this.db.update(partnerAddresses)
@@ -656,10 +698,30 @@ export class DatabaseStorage implements IStorage {
     const [address] = await this.db.insert(partnerAddresses)
       .values(addressData)
       .returning();
-    return address as PartnerAddress;
+    
+    // Mapear campos do inglês para português
+    return {
+      id: address.id,
+      partnerId: address.partnerId,
+      name: address.name,
+      cep: address.cep,
+      logradouro: address.address,
+      numero: address.number,
+      complemento: address.complement,
+      bairro: address.neighborhood,
+      cidade: address.city,
+      estado: address.state,
+      isPrimary: address.isPrimary,
+      isActive: address.isActive,
+      phone: address.phone,
+      email: address.email,
+      openingHours: address.openingHours,
+      createdAt: address.createdAt,
+      updatedAt: address.updatedAt
+    };
   }
 
-  async updatePartnerAddress(id: number, data: Partial<InsertPartnerAddress>): Promise<PartnerAddress> {
+  async updatePartnerAddress(id: number, data: Partial<InsertPartnerAddress>): Promise<any> {
     // Se estiver atualizando para principal, garantir que seja o único
     if (data.isPrimary) {
       const [existingAddress] = await this.db.select()
@@ -680,7 +742,27 @@ export class DatabaseStorage implements IStorage {
       .set({ ...data, updatedAt: new Date() })
       .where(eq(partnerAddresses.id, id))
       .returning();
-    return address as PartnerAddress;
+    
+    // Mapear campos do inglês para português
+    return {
+      id: address.id,
+      partnerId: address.partnerId,
+      name: address.name,
+      cep: address.cep,
+      logradouro: address.address,
+      numero: address.number,
+      complemento: address.complement,
+      bairro: address.neighborhood,
+      cidade: address.city,
+      estado: address.state,
+      isPrimary: address.isPrimary,
+      isActive: address.isActive,
+      phone: address.phone,
+      email: address.email,
+      openingHours: address.openingHours,
+      createdAt: address.createdAt,
+      updatedAt: address.updatedAt
+    };
   }
 
   async deletePartnerAddress(id: number): Promise<void> {
@@ -697,6 +779,74 @@ export class DatabaseStorage implements IStorage {
     await this.db.update(partnerAddresses)
       .set({ isPrimary: true, updatedAt: new Date() })
       .where(eq(partnerAddresses.id, addressId));
+  }
+
+  // Partner Service Address methods (relação serviço-endereço)
+  async getServiceAddresses(serviceId: number): Promise<any[]> {
+    const result = await this.db
+      .select({
+        id: partnerAddresses.id,
+        partnerId: partnerAddresses.partnerId,
+        name: partnerAddresses.name,
+        cep: partnerAddresses.cep,
+        address: partnerAddresses.address,
+        number: partnerAddresses.number,
+        complement: partnerAddresses.complement,
+        neighborhood: partnerAddresses.neighborhood,
+        city: partnerAddresses.city,
+        state: partnerAddresses.state,
+        isPrimary: partnerAddresses.isPrimary,
+        isActive: partnerAddresses.isActive,
+        phone: partnerAddresses.phone,
+        email: partnerAddresses.email,
+        openingHours: partnerAddresses.openingHours,
+        createdAt: partnerAddresses.createdAt,
+        updatedAt: partnerAddresses.updatedAt
+      })
+      .from(partnerServiceAddresses)
+      .innerJoin(partnerAddresses, eq(partnerServiceAddresses.addressId, partnerAddresses.id))
+      .where(eq(partnerServiceAddresses.serviceId, serviceId))
+      .orderBy(desc(partnerAddresses.isPrimary), asc(partnerAddresses.name));
+    
+    // Mapear campos do inglês para português
+    return result.map(addr => ({
+      id: addr.id,
+      partnerId: addr.partnerId,
+      name: addr.name,
+      cep: addr.cep,
+      logradouro: addr.address,
+      numero: addr.number,
+      complemento: addr.complement,
+      bairro: addr.neighborhood,
+      cidade: addr.city,
+      estado: addr.state,
+      isPrimary: addr.isPrimary,
+      isActive: addr.isActive,
+      phone: addr.phone,
+      email: addr.email,
+      openingHours: addr.openingHours,
+      createdAt: addr.createdAt,
+      updatedAt: addr.updatedAt
+    }));
+  }
+
+  async updateServiceAddresses(serviceId: number, addressIds: number[]): Promise<void> {
+    // Usar transação para garantir consistência
+    await this.db.transaction(async (tx) => {
+      // Primeiro, remover todas as relações existentes
+      await tx.delete(partnerServiceAddresses)
+        .where(eq(partnerServiceAddresses.serviceId, serviceId));
+      
+      // Depois, inserir as novas relações
+      if (addressIds.length > 0) {
+        const relations = addressIds.map(addressId => ({
+          serviceId,
+          addressId
+        }));
+        
+        await tx.insert(partnerServiceAddresses).values(relations);
+      }
+    });
   }
 
   // Doctor methods
@@ -1736,7 +1886,7 @@ export class DatabaseStorage implements IStorage {
       .set({
         updatedAt: new Date()
       })
-      .where(eq(medicalRecords.id, data.record_id));
+      .where(eq(medicalRecords.id, data.recordId));
     
     return entry;
   }
