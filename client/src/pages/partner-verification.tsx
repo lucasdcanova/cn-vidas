@@ -7,7 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { QrCode, Camera, CheckCircle, XCircle, User, Sparkles, Shield } from 'lucide-react';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
-import { PartnerOnboardingGuard } from '@/components/partner/partner-onboarding-guard';
+// TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
+// import { PartnerOnboardingGuard } from '@/components/partner/partner-onboarding-guard';
 import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode';
 import { motion, AnimatePresence } from 'framer-motion';
 import cnvidasLogo from '@/assets/cnvidas-logo-transparent.png';
@@ -173,7 +174,8 @@ export default function PartnerVerification() {
   };
 
   return (
-    <PartnerOnboardingGuard>
+    // TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
+    // <PartnerOnboardingGuard>
       <DashboardLayout>
       {/* Animação de Sucesso */}
       <AnimatePresence>
@@ -468,6 +470,6 @@ export default function PartnerVerification() {
         </Card>
       </div>
     </DashboardLayout>
-    </PartnerOnboardingGuard>
+    // </PartnerOnboardingGuard>
   );
 }

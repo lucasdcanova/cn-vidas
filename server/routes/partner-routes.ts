@@ -41,15 +41,16 @@ partnerRouter.get('/test', (req: Request, res: Response) => {
 /**
  * Middleware para verificar se o usuário é um parceiro
  */
-const requirePartner = (req: AuthenticatedRequest, res: Response, next: Function) => {
-  console.log('🔐 [requirePartner] Verificando permissão - User:', req.user ? {
-    id: req.user.id,
-    email: req.user.email,
-    role: req.user.role
+const requirePartner = (req: Request, res: Response, next: Function) => {
+  const authReq = req as AuthenticatedRequest;
+  console.log('🔐 [requirePartner] Verificando permissão - User:', authReq.user ? {
+    id: authReq.user.id,
+    email: authReq.user.email,
+    role: authReq.user.role
   } : 'No user');
   
-  if (!req.user || req.user.role !== 'partner') {
-    console.log('❌ [requirePartner] Acesso negado - role:', req.user?.role);
+  if (!authReq.user || authReq.user.role !== 'partner') {
+    console.log('❌ [requirePartner] Acesso negado - role:', authReq.user?.role);
     return res.status(403).json({ error: 'Acesso negado. Apenas parceiros podem acessar esta funcionalidade.' });
   }
   
@@ -79,6 +80,39 @@ partnerRouter.get('/debug-auth', requireAuth, (req: AuthenticatedRequest, res: R
 });
 
 /**
+ * Debug endpoint sem requirePartner
+ * GET /api/partners/debug-me
+ */
+partnerRouter.get('/debug-me', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    console.log('🐛 [Partner /debug-me] Debug sem requirePartner');
+    console.log('🐛 [Partner /debug-me] User:', req.user);
+    
+    if (!req.user) {
+      return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+    
+    // Buscar parceiro
+    const partnerResult = await db.select().from(partners).where(eq(partners.userId, req.user.id));
+    console.log('🐛 [Partner /debug-me] Resultado da query:', partnerResult);
+    
+    res.json({
+      user: {
+        id: req.user.id,
+        email: req.user.email,
+        role: req.user.role,
+        fullName: req.user.fullName
+      },
+      partner: partnerResult[0] || null,
+      partnerCount: partnerResult.length
+    });
+  } catch (error) {
+    console.error('🐛 [Partner /debug-me] Erro:', error);
+    res.status(500).json({ error: 'Erro ao buscar dados', details: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
  * Obter parceiro pelo userId do usuário logado
  * GET /api/partners/me
  */
@@ -92,6 +126,10 @@ partnerRouter.get('/me', requireAuth, requirePartner, async (req: AuthenticatedR
       fullName: req.user!.fullName
     });
     
+    // Debug: Buscar diretamente do banco para verificar
+    const directPartnerQuery = await db.select().from(partners).where(eq(partners.userId, req.user!.id));
+    console.log('🔍 [Partner /me] Query direta do banco:', directPartnerQuery);
+    
     const partner = await storage.getPartnerByUserId(req.user!.id);
     
     console.log('📊 [Partner /me] Resultado da busca:', partner ? {
@@ -103,6 +141,14 @@ partnerRouter.get('/me', requireAuth, requirePartner, async (req: AuthenticatedR
     
     if (!partner) {
       console.log('❌ [Partner /me] Perfil de parceiro não encontrado para userId:', req.user!.id);
+      
+      // Se a query direta encontrou mas o storage não, há um problema
+      if (directPartnerQuery.length > 0) {
+        console.log('⚠️ [Partner /me] ATENÇÃO: Query direta encontrou parceiro mas storage não!');
+        console.log('⚠️ [Partner /me] Retornando dados da query direta:', directPartnerQuery[0]);
+        return res.json(directPartnerQuery[0]);
+      }
+      
       return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
     }
 
