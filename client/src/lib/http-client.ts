@@ -70,11 +70,16 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
         const entries = Array.from(data.entries());
         console.log('[Native HTTP] FormData entries:', entries.map(([k, v]) => `${k}: ${v instanceof Blob ? 'Blob' : typeof v}`));
         
-        const imageEntry = entries.find(([key]) => key === 'profileImage');
+        // Procurar por qualquer blob (profileImage ou audio)
+        const blobEntry = entries.find(([key, value]) => value instanceof Blob);
         
-        if (imageEntry && imageEntry[1] instanceof Blob) {
-          const blob = imageEntry[1] as Blob;
-          console.log('[Native HTTP] Blob encontrado:', { size: blob.size, type: blob.type });
+        if (blobEntry && blobEntry[1] instanceof Blob) {
+          const [fieldName, blob] = blobEntry;
+          console.log('[Native HTTP] Blob encontrado:', { 
+            fieldName, 
+            size: blob.size, 
+            type: blob.type 
+          });
           
           // Converter blob para base64
           const reader = new FileReader();
@@ -97,15 +102,22 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
             const base64Data = await base64Promise;
             console.log('[Native HTTP] Base64 criado com sucesso, primeiros 50 chars:', base64Data.substring(0, 50));
             
-            // Enviar como JSON com base64
-            requestData = {
-              profileImage: base64Data,
-              mimeType: blob.type || 'image/jpeg'
-            };
+            // Criar objeto com todos os campos do FormData
+            requestData = {};
+            entries.forEach(([key, value]) => {
+              if (value instanceof Blob) {
+                // Para o blob, enviar o base64
+                requestData[key] = base64Data;
+                requestData[`${key}MimeType`] = blob.type || 'application/octet-stream';
+              } else {
+                // Para outros valores, enviar como string
+                requestData[key] = value.toString();
+              }
+            });
             
             // Atualizar headers para JSON
             authHeaders['Content-Type'] = 'application/json';
-            console.log('[Native HTTP] Request data preparado para envio');
+            console.log('[Native HTTP] Request data preparado para envio:', Object.keys(requestData));
             
           } catch (error) {
             console.error('[Native HTTP] Erro ao converter para base64:', error);
@@ -113,7 +125,11 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
           }
         } else {
           console.log('[Native HTTP] Nenhum blob encontrado no FormData');
+          // Converter FormData para objeto simples
           requestData = {};
+          entries.forEach(([key, value]) => {
+            requestData[key] = value.toString();
+          });
         }
       }
       
