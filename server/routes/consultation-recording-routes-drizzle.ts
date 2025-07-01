@@ -41,6 +41,9 @@ router.post('/upload', authenticateToken, upload.single('audio'), async (req: Re
     console.log('📼 [Recording Upload] Headers:', req.headers);
     console.log('📼 [Recording Upload] Body:', req.body);
     console.log('📼 [Recording Upload] Usuário autenticado:', (req as any).user);
+    console.log('📼 [Recording Upload] Request files:', req.file ? 'Arquivo presente' : 'Nenhum arquivo');
+    console.log('📼 [Recording Upload] Request method:', req.method);
+    console.log('📼 [Recording Upload] Request URL:', req.url);
     
     const file = req.file;
     if (!file) {
