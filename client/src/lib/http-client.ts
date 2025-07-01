@@ -52,7 +52,20 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
   // Se estamos no iOS/Android, usar Http nativo
   if (Capacitor.isNativePlatform()) {
     try {
-      const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+      // Detectar se é upload de áudio para usar rota base64
+      let modifiedUrl = url;
+      if (isFormData) {
+        const entries = Array.from((data as FormData).entries());
+        const hasAudioBlob = entries.some(([key, value]) => key === 'audio' && value instanceof Blob);
+        
+        if (hasAudioBlob && url.includes('/consultation-recordings/upload')) {
+          // Mudar para a rota que aceita base64
+          modifiedUrl = url.replace('/upload', '/upload-base64');
+          console.log('[Native HTTP] Detectado upload de áudio, usando rota base64:', modifiedUrl);
+        }
+      }
+      
+      const fullUrl = modifiedUrl.startsWith('http') ? modifiedUrl : `${API_BASE_URL}${modifiedUrl}`;
       console.log(`[Native HTTP] ${method} ${fullUrl}`);
       console.log(`[Native HTTP] Headers:`, {
         ...authHeaders,
@@ -106,8 +119,9 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
             requestData = {};
             entries.forEach(([key, value]) => {
               if (value instanceof Blob) {
-                // Para o blob, enviar o base64
-                requestData[key] = base64Data;
+                // Para o blob, enviar o base64 com o prefixo data:
+                const dataPrefix = `data:${blob.type || 'application/octet-stream'};base64,`;
+                requestData[key] = dataPrefix + base64Data;
                 requestData[`${key}MimeType`] = blob.type || 'application/octet-stream';
               } else {
                 // Para outros valores, enviar como string
