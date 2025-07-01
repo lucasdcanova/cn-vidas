@@ -123,17 +123,36 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   });
 
   // Buscar o perfil de parceiro se o usuário for um parceiro
-  const { data: partnerData } = useQuery({
+  const { data: partnerData, error: partnerError } = useQuery({
     queryKey: ["/api/partners/me"],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/partners/me');
-      console.log('🔍 DashboardLayout - Partner data:', response);
-      return response;
+      try {
+        // Primeiro, fazer debug
+        const debugResponse = await apiRequest('GET', '/api/partners/debug-me');
+        const debugData = await debugResponse.json();
+        console.log('🔍 DashboardLayout - Debug data:', debugData);
+        
+        // Depois, buscar o parceiro real
+        const response = await apiRequest('GET', '/api/partners/me');
+        const data = await response.json();
+        console.log('🔍 DashboardLayout - Partner data:', data);
+        return data;
+      } catch (error) {
+        console.error('🔍 DashboardLayout - Error fetching partner:', error);
+        throw error;
+      }
     },
     enabled: !!user?.id && user?.role === "partner",
     staleTime: 0, // Sempre buscar dados frescos
     cacheTime: 0  // Não manter cache
   });
+  
+  // Log do erro se houver
+  useEffect(() => {
+    if (partnerError) {
+      console.error('🔍 DashboardLayout - Partner query error:', partnerError);
+    }
+  }, [partnerError]);
   
   // Atualizar o objeto do usuário com a imagem de perfil do médico ou parceiro, se disponível
   useEffect(() => {

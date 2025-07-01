@@ -13,7 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import AddressModal from './AddressModal';
 import { toast } from '@/hooks/use-toast';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
-import { PartnerOnboardingGuard } from '@/components/partner/partner-onboarding-guard';
+// TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
+// import { PartnerOnboardingGuard } from '@/components/partner/partner-onboarding-guard';
 
 interface Address {
   id: number;
@@ -135,7 +136,8 @@ export default function PartnerAddresses() {
 
   if (loading) {
     return (
-      <PartnerOnboardingGuard>
+      // TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
+      // <PartnerOnboardingGuard>
         <DashboardLayout title="Meus Endereços">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -144,12 +146,13 @@ export default function PartnerAddresses() {
             </div>
           </div>
         </DashboardLayout>
-      </PartnerOnboardingGuard>
+      // </PartnerOnboardingGuard>
     );
   }
 
   return (
-    <PartnerOnboardingGuard>
+    // TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
+    // <PartnerOnboardingGuard>
       <DashboardLayout title="Meus Endereços">
         <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6 flex justify-between items-center">
@@ -250,6 +253,6 @@ export default function PartnerAddresses() {
       />
     </div>
       </DashboardLayout>
-    </PartnerOnboardingGuard>
+    // </PartnerOnboardingGuard>
   );
 }
