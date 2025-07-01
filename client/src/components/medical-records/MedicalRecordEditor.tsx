@@ -22,7 +22,7 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+import { httpRequest } from '@/lib/http-client';
 import PrescriptionDisplay from './PrescriptionDisplay';
 
 interface Medication {
@@ -121,7 +121,9 @@ export default function MedicalRecordEditor({
         throw new Error('ID do prontuário não fornecido');
       }
       
-      const response = await axios.get(`/api/medical-records-ai/${recordIdToLoad}`);
+      const response = await httpRequest(`/api/medical-records-ai/${recordIdToLoad}`, {
+        method: 'GET'
+      });
       const recordData = response.data;
       setRecord(recordData);
       setEditedContent(recordData.content.data);
@@ -142,7 +144,9 @@ export default function MedicalRecordEditor({
       setLoading(true);
       console.log('🔍 [MedicalRecordEditor] Verificando prontuário existente para consulta:', appointmentId);
       
-      const response = await axios.get(`/api/medical-records-ai/by-appointment/${appointmentId}`);
+      const response = await httpRequest(`/api/medical-records-ai/by-appointment/${appointmentId}`, {
+        method: 'GET'
+      });
       
       if (response.data) {
         console.log('✅ [MedicalRecordEditor] Prontuário encontrado:', response.data);
@@ -180,7 +184,9 @@ export default function MedicalRecordEditor({
       
       try {
         // Buscar gravação da consulta
-        const recordingResponse = await axios.get(`/api/consultation-recordings/appointment/${appointmentId}`);
+        const recordingResponse = await httpRequest(`/api/consultation-recordings/appointment/${appointmentId}`, {
+          method: 'GET'
+        });
         
         if (recordingResponse.data?.recording) {
           const recording = recordingResponse.data.recording;
@@ -256,10 +262,16 @@ export default function MedicalRecordEditor({
       let response;
       if (record) {
         // Atualizar existente
-        response = await axios.put(`/api/medical-records-ai/${record.id}`, data);
+        response = await httpRequest(`/api/medical-records-ai/${record.id}`, {
+          method: 'PUT',
+          body: data
+        });
       } else {
         // Criar novo
-        response = await axios.post('/api/medical-records-ai', data);
+        response = await httpRequest('/api/medical-records-ai', {
+          method: 'POST',
+          body: data
+        });
       }
 
       setRecord(response.data);
@@ -298,7 +310,9 @@ export default function MedicalRecordEditor({
     try {
       setSigning(true);
 
-      const response = await axios.post(`/api/medical-records-ai/${record.id}/sign`);
+      const response = await httpRequest(`/api/medical-records-ai/${record.id}/sign`, {
+        method: 'POST'
+      });
       
       setRecord(response.data);
       
