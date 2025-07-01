@@ -51,7 +51,7 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
       case "register-keyboard":
         return 'h-0';
       case "login-no-keyboard":
-        return 'h-12'; // Reduzido para dar mais espaço ao formulário
+        return 'h-16'; // Aumentado para baixar mais a caixa
       case "login-keyboard":
         return 'h-3';
       default: // register-no-keyboard
