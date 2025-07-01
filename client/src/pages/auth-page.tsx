@@ -838,6 +838,63 @@ const AuthPage: React.FC = () => {
               <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
                 <FormField
                   control={registerForm.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 text-sm">Tipo de perfil</FormLabel>
+                      <div className="grid grid-cols-3 gap-2 mb-2"
+                        onFocus={(e) => activeTab === 'register' && scrollToCenter(e.currentTarget)}
+                        tabIndex={0}
+                      >
+                        <div 
+                          className={`flex flex-col items-center p-3 border ${
+                            field.value === "patient" 
+                              ? "border-blue-500 bg-blue-50 text-blue-700" 
+                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
+                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                          onClick={() => field.onChange("patient")}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          <span className="text-xs font-medium">Paciente</span>
+                        </div>
+                        
+                        <div 
+                          className={`flex flex-col items-center p-3 border ${
+                            field.value === "doctor" 
+                              ? "border-blue-500 bg-blue-50 text-blue-700" 
+                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
+                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                          onClick={() => field.onChange("doctor")}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                          </svg>
+                          <span className="text-xs font-medium">Médico</span>
+                        </div>
+                        
+                        <div 
+                          className={`flex flex-col items-center p-3 border ${
+                            field.value === "partner" 
+                              ? "border-blue-500 bg-blue-50 text-blue-700" 
+                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
+                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                          onClick={() => field.onChange("partner")}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          <span className="text-xs font-medium">Empresa</span>
+                        </div>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={registerForm.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
@@ -1042,63 +1099,6 @@ const AuthPage: React.FC = () => {
                   )}
                 />
                 
-                <FormField
-                  control={registerForm.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 text-sm">Tipo de perfil</FormLabel>
-                      <div className="grid grid-cols-3 gap-2 mb-2"
-                        onFocus={(e) => activeTab === 'register' && scrollToCenter(e.currentTarget)}
-                        tabIndex={0}
-                      >
-                        <div 
-                          className={`flex flex-col items-center p-3 border ${
-                            field.value === "patient" 
-                              ? "border-blue-500 bg-blue-50 text-blue-700" 
-                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
-                          onClick={() => field.onChange("patient")}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                          <span className="text-xs font-medium">Paciente</span>
-                        </div>
-                        
-                        <div 
-                          className={`flex flex-col items-center p-3 border ${
-                            field.value === "doctor" 
-                              ? "border-blue-500 bg-blue-50 text-blue-700" 
-                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
-                          onClick={() => field.onChange("doctor")}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                          </svg>
-                          <span className="text-xs font-medium">Médico</span>
-                        </div>
-                        
-                        <div 
-                          className={`flex flex-col items-center p-3 border ${
-                            field.value === "partner" 
-                              ? "border-blue-500 bg-blue-50 text-blue-700" 
-                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
-                          onClick={() => field.onChange("partner")}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                          </svg>
-                          <span className="text-xs font-medium">Empresa</span>
-                        </div>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 {/* Seção de Aceitação de Termos */}
                 <div className="border-t border-gray-200 pt-6 mt-6">
                   <h3 className="text-sm font-medium text-gray-900 mb-4">
