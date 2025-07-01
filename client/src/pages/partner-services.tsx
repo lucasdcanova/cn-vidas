@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
-import { PartnerOnboardingGuard } from "@/components/partner/partner-onboarding-guard";
+// TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
+// import { PartnerOnboardingGuard } from "@/components/partner/partner-onboarding-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -464,7 +465,8 @@ const PartnerServicesPage: React.FC = () => {
   };
 
   return (
-    <PartnerOnboardingGuard>
+    // TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
+    // <PartnerOnboardingGuard>
       <DashboardLayout title="Gerenciamento de Serviços">
       <div className="mb-6 flex justify-between items-center">
         <div>
@@ -1159,7 +1161,7 @@ const PartnerServicesPage: React.FC = () => {
         </DialogContent>
       </Dialog>
     </DashboardLayout>
-    </PartnerOnboardingGuard>
+    // </PartnerOnboardingGuard>
   );
 };
 
