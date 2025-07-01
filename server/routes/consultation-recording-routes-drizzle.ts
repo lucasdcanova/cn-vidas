@@ -425,4 +425,114 @@ async function createMedicalRecordFromRecording(appointmentId: number, doctorId:
   }
 }
 
+// Nova rota para upload via base64 (para iOS/Capacitor)
+router.post('/upload-base64', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    console.log('📼 [Recording Upload Base64] Iniciando upload de gravação base64...');
+    console.log('📼 [Recording Upload Base64] Headers:', req.headers);
+    console.log('📼 [Recording Upload Base64] Body keys:', Object.keys(req.body));
+    console.log('📼 [Recording Upload Base64] Usuário autenticado:', (req as any).user);
+    
+    const { audio, audioMimeType, appointmentId } = req.body;
+    
+    if (!audio) {
+      console.error('❌ [Recording Upload Base64] Dados de áudio não encontrados');
+      return res.status(400).json({ success: false, error: 'Dados de áudio não encontrados' });
+    }
+    
+    if (!appointmentId) {
+      console.error('❌ [Recording Upload Base64] ID da consulta não fornecido');
+      return res.status(400).json({ success: false, error: 'ID da consulta é obrigatório' });
+    }
+    
+    const appointmentIdNum = parseInt(appointmentId);
+    
+    console.log(`📋 [Recording Upload Base64] Dados recebidos:`, {
+      appointmentId: appointmentIdNum,
+      mimeType: audioMimeType || 'audio/webm',
+      audioLength: audio.length,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Verificar se a consulta existe e obter o médico
+    const [appointment] = await db.select()
+      .from(appointments)
+      .where(eq(appointments.id, appointmentIdNum))
+      .limit(1);
+      
+    if (!appointment) {
+      return res.status(404).json({ success: false, error: 'Consulta não encontrada' });
+    }
+    
+    // Obter o doctorId da consulta
+    const doctorId = appointment.doctorId;
+    if (!doctorId) {
+      return res.status(400).json({ success: false, error: 'Médico não encontrado para esta consulta' });
+    }
+    
+    console.log(`📋 [Recording Upload Base64] Médico: ${doctorId}`);
+    
+    // Verificar se já existe gravação para esta consulta
+    const [existingRecording] = await db.select()
+      .from(consultationRecordings)
+      .where(eq(consultationRecordings.appointmentId, appointmentIdNum))
+      .limit(1);
+      
+    if (existingRecording) {
+      return res.status(400).json({ success: false, error: 'Já existe uma gravação para esta consulta' });
+    }
+    
+    // Converter base64 para buffer
+    console.log('🔄 [Recording Upload Base64] Convertendo base64 para buffer...');
+    const audioBuffer = Buffer.from(audio.split(',').pop() || audio, 'base64');
+    const fileSize = audioBuffer.length;
+    
+    console.log(`📊 [Recording Upload Base64] Tamanho do arquivo: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+    
+    // Salvar arquivo localmente
+    const localDir = path.join(process.cwd(), 'uploads', 'recordings', appointmentIdNum.toString());
+    console.log(`📁 [Recording Upload Base64] Criando diretório: ${localDir}`);
+    await fs.mkdir(localDir, { recursive: true });
+    
+    const fileName = `recording-${Date.now()}.webm`;
+    const localPath = path.join(localDir, fileName);
+    console.log(`💾 [Recording Upload Base64] Salvando arquivo: ${localPath}`);
+    
+    await fs.writeFile(localPath, audioBuffer);
+    const audioUrl = `/uploads/recordings/${appointmentIdNum}/${fileName}`;
+    
+    console.log(`✅ [Recording Upload Base64] Arquivo salvo. Tamanho: ${fileSize} bytes`);
+    
+    // Criar registro no banco
+    const [recording] = await db.insert(consultationRecordings)
+      .values({
+        appointmentId: appointmentIdNum,
+        doctorId,
+        audioUrl,
+        fileSize,
+        transcriptionStatus: 'pending',
+        aiProcessingStatus: 'pending',
+        processingStartedAt: new Date(),
+      })
+      .returning();
+      
+    console.log(`✅ [Recording Upload Base64] Registro criado no banco. ID: ${recording.id}`);
+    
+    // Iniciar processamento assíncrono
+    processRecording(recording.id).catch(error => {
+      console.error('❌ [Recording Process] Erro no processamento:', error);
+    });
+    
+    res.json({
+      success: true,
+      recordingId: recording.id,
+      message: 'Gravação enviada com sucesso. Processamento iniciado.',
+    });
+    
+  } catch (error) {
+    console.error('❌ [Recording Upload Base64] Erro:', error);
+    res.status(500).json({ success: false, error: 'Erro ao processar gravação' });
+  }
+});
+
 export default router;
