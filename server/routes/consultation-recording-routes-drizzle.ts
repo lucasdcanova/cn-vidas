@@ -432,6 +432,8 @@ router.post('/upload-base64', authenticateToken, async (req: Request, res: Respo
     console.log('📼 [Recording Upload Base64] Headers:', req.headers);
     console.log('📼 [Recording Upload Base64] Body keys:', Object.keys(req.body));
     console.log('📼 [Recording Upload Base64] Usuário autenticado:', (req as any).user);
+    console.log('📼 [Recording Upload Base64] Audio data length:', req.body.audio?.length || 0);
+    console.log('📼 [Recording Upload Base64] Audio first 100 chars:', req.body.audio?.substring(0, 100));
     
     const { audio, audioMimeType, appointmentId } = req.body;
     
@@ -484,10 +486,33 @@ router.post('/upload-base64', authenticateToken, async (req: Request, res: Respo
     
     // Converter base64 para buffer
     console.log('🔄 [Recording Upload Base64] Convertendo base64 para buffer...');
-    const audioBuffer = Buffer.from(audio.split(',').pop() || audio, 'base64');
-    const fileSize = audioBuffer.length;
     
-    console.log(`📊 [Recording Upload Base64] Tamanho do arquivo: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+    let audioBuffer: Buffer;
+    let fileSize: number;
+    
+    try {
+      // Remover o prefixo data: se existir
+      let base64Data = audio;
+      if (audio.includes(',')) {
+        base64Data = audio.split(',').pop() || audio;
+      }
+      
+      audioBuffer = Buffer.from(base64Data, 'base64');
+      fileSize = audioBuffer.length;
+      
+      console.log(`📊 [Recording Upload Base64] Tamanho do arquivo: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+      
+      if (fileSize === 0) {
+        throw new Error('Arquivo de áudio vazio após conversão');
+      }
+    } catch (bufferError) {
+      console.error('❌ [Recording Upload Base64] Erro ao converter base64:', bufferError);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Erro ao processar dados de áudio base64',
+        details: bufferError instanceof Error ? bufferError.message : 'Erro desconhecido'
+      });
+    }
     
     // Salvar arquivo localmente
     const localDir = path.join(process.cwd(), 'uploads', 'recordings', appointmentIdNum.toString());
