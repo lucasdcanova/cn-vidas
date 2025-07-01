@@ -24,6 +24,14 @@ export default function RecordingControls({
 }: RecordingControlsProps) {
   const { toast } = useToast();
   const { state, startRecording, stopRecording, pauseRecording, resumeRecording } = useAudioRecording();
+  
+  console.log('🎯 [RecordingControls] Componente renderizado com props:', {
+    appointmentId,
+    autoStart,
+    patientConsent,
+    className,
+    timestamp: new Date().toISOString()
+  });
   const [isUploading, setIsUploading] = useState(false);
   const [hasConsent, setHasConsent] = useState(patientConsent);
   const [hasStarted, setHasStarted] = useState(false);
@@ -191,17 +199,34 @@ export default function RecordingControls({
 
   // Iniciar gravação
   const handleStartRecording = async () => {
-    console.log('🎙️ [RecordingControls] Iniciando gravação...');
+    console.log('🎙️ [RecordingControls] Iniciando gravação...', {
+      appointmentId,
+      hasConsent,
+      autoStart,
+      timestamp: new Date().toISOString()
+    });
+    
     try {
+      // Verificar se temos permissão do navegador
+      console.log('🔐 [RecordingControls] Verificando permissões do navegador...');
+      const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      console.log('🔐 [RecordingControls] Status da permissão:', permission.state);
+      
       await startRecording();
       console.log('✅ [RecordingControls] Gravação iniciada com sucesso');
       setManualStart(true);
       onRecordingStart?.();
-    } catch (error) {
-      console.error('❌ [RecordingControls] Erro ao iniciar gravação:', error);
+    } catch (error: any) {
+      console.error('❌ [RecordingControls] Erro ao iniciar gravação:', {
+        error: error.message,
+        stack: error.stack,
+        appointmentId,
+        timestamp: new Date().toISOString()
+      });
+      
       toast({
         title: 'Erro ao iniciar gravação',
-        description: 'Não foi possível iniciar a gravação. Verifique as permissões do microfone.',
+        description: error.message || 'Não foi possível iniciar a gravação. Verifique as permissões do microfone.',
         variant: 'destructive'
       });
     }
