@@ -907,6 +907,29 @@ export default function MinimalistVideoCall({
       const cleanup = async () => {
         console.log('🧹 [MinimalistVideoCall] Limpando ao desmontar componente...');
         
+        // Parar gravação se estiver gravando
+        if (window.recordingControlsRef && !window.recordingControlsStopping) {
+          console.log('⏹️ [MinimalistVideoCall] Parando gravação no cleanup...');
+          
+          // Verificar se realmente está gravando
+          const isRecording = window.recordingControlsRef.isRecording ? window.recordingControlsRef.isRecording() : false;
+          console.log('🎙️ [MinimalistVideoCall] Estado da gravação no cleanup:', isRecording);
+          
+          if (isRecording || window.recordingControlsRef.stopRecording) {
+            window.recordingControlsStopping = true; // Flag para evitar dupla chamada
+            try {
+              await window.recordingControlsRef.stopRecording();
+              console.log('✅ [MinimalistVideoCall] Gravação parada com sucesso no cleanup');
+              
+              // Aguardar um momento para garantir que o upload seja concluído
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } catch (recordingError) {
+              console.error('❌ [MinimalistVideoCall] Erro ao parar gravação no cleanup:', recordingError);
+            }
+            window.recordingControlsStopping = false;
+          }
+        }
+        
         if (callRef.current) {
           try {
             await callRef.current.leave();
