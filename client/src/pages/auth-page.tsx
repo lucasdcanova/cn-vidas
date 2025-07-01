@@ -702,11 +702,11 @@ const AuthPage: React.FC = () => {
             <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
             
             <div className="relative z-10">
-              <div className="mb-6 text-center">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <div className="mb-4 text-center">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   Bem-vindo de volta
                 </h1>
-                <p className="text-gray-500 mt-2 text-sm font-light">
+                <p className="text-gray-500 mt-1 text-xs font-light">
                   Acesse sua conta para continuar
                 </p>
               </div>
@@ -798,7 +798,7 @@ const AuthPage: React.FC = () => {
                   )}
                 />
                 
-                <div className="space-y-3 my-6">
+                <div className="space-y-2 my-4">
                   <label className="flex items-center cursor-pointer group">
                     <div className="relative">
                       <input 
@@ -842,7 +842,7 @@ const AuthPage: React.FC = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 rounded-xl text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
+                  className="w-full h-11 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
                   style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   disabled={isLoggingIn || isAuthenticating}
                 >
@@ -870,66 +870,85 @@ const AuthPage: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="register">
-          <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/10 border border-white/50">
-            <div className="mb-4 text-center">
-              <h1 className="text-xl font-semibold text-gray-800">Crie sua conta</h1>
-              <p className="text-gray-500 mt-2 text-xs">
-                Preencha os dados para criar seu perfil na CN Vidas
-              </p>
-            </div>
+          <div className="relative p-6 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/10 border border-white/60 overflow-hidden">
+            {/* Gradient orbs para efeito de profundidade */}
+            <div className="absolute -top-24 -left-24 w-48 h-48 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            
+            <div className="relative z-10">
+              <div className="mb-4 text-center">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Crie sua conta
+                </h1>
+                <p className="text-gray-500 mt-1 text-xs font-light">
+                  Preencha os dados para criar seu perfil na CN Vidas
+                </p>
+              </div>
             
             <Form {...registerForm}>
-              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-3">
                 <FormField
                   control={registerForm.control}
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-sm">Tipo de perfil</FormLabel>
-                      <div className="grid grid-cols-3 gap-2 mb-2"
+                      <FormLabel className="text-gray-700 text-xs font-medium mb-2 block">Tipo de perfil</FormLabel>
+                      <div className="grid grid-cols-3 gap-2"
                         onFocus={(e) => activeTab === 'register' && scrollToCenter(e.currentTarget)}
                         tabIndex={0}
                       >
                         <div 
-                          className={`flex flex-col items-center p-3 border ${
+                          className={`relative flex flex-col items-center p-2.5 border-2 ${
                             field.value === "patient" 
-                              ? "border-blue-500 bg-blue-50 text-blue-700" 
-                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                              ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-700" 
+                              : "border-gray-200/50 text-gray-600 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-blue-100/20"
+                          } rounded-xl cursor-pointer shadow-md hover:shadow-lg overflow-hidden group`} 
+                          style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                           onClick={() => field.onChange("patient")}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          {field.value === "patient" && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-blue-600/10 animate-pulse" />
+                          )}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mb-1 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                          <span className="text-xs font-medium">Paciente</span>
+                          <span className="text-[10px] font-medium relative z-10">Paciente</span>
                         </div>
                         
                         <div 
-                          className={`flex flex-col items-center p-3 border ${
+                          className={`relative flex flex-col items-center p-2.5 border-2 ${
                             field.value === "doctor" 
-                              ? "border-blue-500 bg-blue-50 text-blue-700" 
-                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                              ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-700" 
+                              : "border-gray-200/50 text-gray-600 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-blue-100/20"
+                          } rounded-xl cursor-pointer shadow-md hover:shadow-lg overflow-hidden group`} 
+                          style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                           onClick={() => field.onChange("doctor")}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          {field.value === "doctor" && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-blue-600/10 animate-pulse" />
+                          )}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mb-1 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                           </svg>
-                          <span className="text-xs font-medium">Médico</span>
+                          <span className="text-[10px] font-medium relative z-10">Médico</span>
                         </div>
                         
                         <div 
-                          className={`flex flex-col items-center p-3 border ${
+                          className={`relative flex flex-col items-center p-2.5 border-2 ${
                             field.value === "partner" 
-                              ? "border-blue-500 bg-blue-50 text-blue-700" 
-                              : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                              ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-700" 
+                              : "border-gray-200/50 text-gray-600 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-blue-100/20"
+                          } rounded-xl cursor-pointer shadow-md hover:shadow-lg overflow-hidden group`} 
+                          style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                           onClick={() => field.onChange("partner")}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          {field.value === "partner" && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-blue-600/10 animate-pulse" />
+                          )}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mb-1 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
-                          <span className="text-xs font-medium">Empresa</span>
+                          <span className="text-[10px] font-medium relative z-10">Empresa</span>
                         </div>
                       </div>
                       <FormMessage />
@@ -942,37 +961,50 @@ const AuthPage: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-sm">E-mail</FormLabel>
+                      <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">E-mail</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="seu@email.com" 
-                          type="email" 
-                          disabled={isRegistering}
-                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-md"
-                          onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                          {...field} 
-                        />
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                              <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            </svg>
+                          </div>
+                          <Input 
+                            placeholder="seu@email.com" 
+                            type="email" 
+                            disabled={isRegistering}
+                            className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                            {...field} 
+                          />
+                        </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px]" />
                     </FormItem>
                   )}
                 />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {registerForm.watch("role") === "patient" ? (
                     <FormField
                       control={registerForm.control}
                       name="cpf"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700 text-sm">CPF</FormLabel>
+                          <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">CPF</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="000.000.000-00" 
-                              disabled={isRegistering}
-                              className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-md"
-                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                              onChange={(e) => {
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                                </svg>
+                              </div>
+                              <Input 
+                                placeholder="000.000.000-00" 
+                                disabled={isRegistering}
+                                className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                                onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                onChange={(e) => {
                                 // Formata o CPF enquanto o usuário digita
                                 let value = e.target.value.replace(/\D/g, '');
                                 if (value.length <= 11) {
@@ -989,8 +1021,9 @@ const AuthPage: React.FC = () => {
                               }}
                               value={field.value || ''}
                             />
+                            </div>
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[10px]" />
                         </FormItem>
                       )}
                     />
@@ -1106,18 +1139,25 @@ const AuthPage: React.FC = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 text-sm">Senha</FormLabel>
+                        <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">Senha</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Mínimo de 6 caracteres" 
-                            type="password" 
-                            disabled={isRegistering}
-                            className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-md"
-                            onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                            {...field} 
-                          />
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                            </div>
+                            <Input 
+                              placeholder="••••••••" 
+                              type="password" 
+                              disabled={isRegistering}
+                              className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                              {...field} 
+                            />
+                          </div>
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-[10px]" />
                       </FormItem>
                     )}
                   />
@@ -1128,24 +1168,31 @@ const AuthPage: React.FC = () => {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-sm">Nome completo</FormLabel>
+                      <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">Nome completo</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Seu Nome Completo" 
-                          disabled={isRegistering}
-                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-md"
-                          onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                          {...field} 
-                        />
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                              <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                          <Input 
+                            placeholder="Seu Nome Completo" 
+                            disabled={isRegistering}
+                            className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                            {...field} 
+                          />
+                        </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px]" />
                     </FormItem>
                   )}
                 />
                 
                 {/* Seção de Aceitação de Termos */}
-                <div className="border-t border-gray-200 pt-6 mt-6">
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">
+                <div className="border-t border-gray-100/50 pt-4 mt-4">
+                  <h3 className="text-xs font-medium text-gray-700 mb-3">
                     Documentos Legais (Obrigatório)
                   </h3>
                   
@@ -1343,23 +1390,34 @@ const AuthPage: React.FC = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-xl hover:shadow-2xl mt-4"
-                  style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                  className="w-full h-11 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group mt-4"
+                  style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   disabled={isRegistering}
                 >
-                  {isRegistering ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Cadastrando...
-                    </>
-                  ) : "Criar conta"}
+                  <div className="absolute inset-0 -top-[200%] bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:top-0" />
+                  <span className="relative flex items-center justify-center">
+                    {isRegistering ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Cadastrando...
+                      </>
+                    ) : (
+                      <>
+                        Criar conta
+                        <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </>
+                    )}
+                  </span>
                 </Button>
                 
-                <p className="text-center text-xs text-gray-500 mt-4">
+                <p className="text-center text-[10px] text-gray-400 mt-3 font-light">
                   Ao criar uma conta, você confirma ter lido e aceito todos os documentos legais acima.
                 </p>
               </form>
             </Form>
+            </div>
           </div>
         </TabsContent>
         
