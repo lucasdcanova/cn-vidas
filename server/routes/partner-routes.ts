@@ -96,6 +96,20 @@ partnerRouter.get('/debug-me', requireAuth, async (req: AuthenticatedRequest, re
     const partnerResult = await db.select().from(partners).where(eq(partners.userId, req.user.id));
     console.log('🐛 [Partner /debug-me] Resultado da query:', partnerResult);
     
+    // Log address fields specifically
+    if (partnerResult[0]) {
+      console.log('🏠 [Partner /debug-me] Address fields:');
+      console.log('  - street:', partnerResult[0].street);
+      console.log('  - number:', partnerResult[0].number);
+      console.log('  - complement:', partnerResult[0].complement);
+      console.log('  - neighborhood:', partnerResult[0].neighborhood);
+      console.log('  - city:', partnerResult[0].city);
+      console.log('  - state:', partnerResult[0].state);
+      console.log('  - zipcode:', partnerResult[0].zipcode);
+      console.log('  - postalCode:', partnerResult[0].postalCode);
+      console.log('  - address:', partnerResult[0].address);
+    }
+    
     res.json({
       user: {
         id: req.user.id,
@@ -104,7 +118,18 @@ partnerRouter.get('/debug-me', requireAuth, async (req: AuthenticatedRequest, re
         fullName: req.user.fullName
       },
       partner: partnerResult[0] || null,
-      partnerCount: partnerResult.length
+      partnerCount: partnerResult.length,
+      addressFields: partnerResult[0] ? {
+        street: partnerResult[0].street,
+        number: partnerResult[0].number,
+        complement: partnerResult[0].complement,
+        neighborhood: partnerResult[0].neighborhood,
+        city: partnerResult[0].city,
+        state: partnerResult[0].state,
+        zipcode: partnerResult[0].zipcode,
+        postalCode: partnerResult[0].postalCode,
+        address: partnerResult[0].address
+      } : null
     });
   } catch (error) {
     console.error('🐛 [Partner /debug-me] Erro:', error);
@@ -136,8 +161,23 @@ partnerRouter.get('/me', requireAuth, requirePartner, async (req: AuthenticatedR
       id: partner.id,
       userId: partner.userId,
       businessName: partner.businessName,
-      tradingName: partner.tradingName
+      tradingName: partner.tradingName,
+      // Log all address fields
+      street: partner.street,
+      number: partner.number,
+      complement: partner.complement,
+      neighborhood: partner.neighborhood,
+      city: partner.city,
+      state: partner.state,
+      zipcode: partner.zipcode,
+      postalCode: partner.postalCode,
+      address: partner.address
     } : 'Parceiro não encontrado');
+    
+    // Log the complete partner object
+    if (partner) {
+      console.log('🔍 [Partner /me] Dados completos do parceiro:', JSON.stringify(partner, null, 2));
+    }
     
     if (!partner) {
       console.log('❌ [Partner /me] Perfil de parceiro não encontrado para userId:', req.user!.id);
