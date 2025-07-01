@@ -672,6 +672,22 @@
     min-height: 80px;
   }
 
+  /* Ajuste para quando há muitos itens no menu (ex: parceiros) */
+  .mobile-nav-bottom > a > div {
+    min-width: 60px;
+  }
+  
+  /* Ajuste específico para textos menores em menus com muitos itens */
+  @media (max-width: 380px) {
+    .mobile-nav-bottom .text-xs {
+      font-size: 0.65rem;
+    }
+    .mobile-nav-bottom > a > div {
+      padding-left: 0.375rem;
+      padding-right: 0.375rem;
+    }
+  }
+
   /* Estilos para iOS (iPhone e iPad) - Barra flutuante com glassmorphism agressivo */
   .glass-nav-ios {
     background: rgba(255, 255, 255, 0.60); /* Opacidade reduzida para 60% */
@@ -728,6 +744,17 @@
       height: 60px;
       min-height: 60px;
       bottom: 16px;
+    }
+    
+    /* Ajuste de espaçamento para múltiplos itens */
+    .mobile-nav-bottom-ios > a > div {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    
+    /* Texto menor quando há muitos itens */
+    .mobile-nav-bottom-ios .text-xs {
+      font-size: 0.65rem;
     }
   }
   
