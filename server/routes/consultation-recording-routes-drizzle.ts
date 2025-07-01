@@ -567,13 +567,41 @@ router.post('/upload-base64', authenticateToken, async (req: Request, res: Respo
     // Salvar arquivo localmente
     const localDir = path.join(process.cwd(), 'uploads', 'recordings', appointmentIdNum.toString());
     console.log(`📁 [Recording Upload Base64] Criando diretório: ${localDir}`);
-    await fs.mkdir(localDir, { recursive: true });
+    
+    try {
+      await fs.mkdir(localDir, { recursive: true });
+      console.log(`✅ [Recording Upload Base64] Diretório criado ou já existe: ${localDir}`);
+    } catch (dirError: any) {
+      console.error('❌ [Recording Upload Base64] Erro ao criar diretório:', dirError);
+      console.error('- Erro:', dirError.message);
+      console.error('- Código:', dirError.code);
+      console.error('- Path:', localDir);
+      throw new Error(`Falha ao criar diretório de uploads: ${dirError.message}`);
+    }
     
     const fileName = `recording-${Date.now()}.webm`;
     const localPath = path.join(localDir, fileName);
     console.log(`💾 [Recording Upload Base64] Salvando arquivo: ${localPath}`);
     
-    await fs.writeFile(localPath, audioBuffer);
+    try {
+      await fs.writeFile(localPath, audioBuffer);
+      console.log(`✅ [Recording Upload Base64] Arquivo escrito com sucesso`);
+      
+      // Verificar se o arquivo foi realmente salvo
+      const stats = await fs.stat(localPath);
+      console.log(`📊 [Recording Upload Base64] Arquivo verificado - Tamanho: ${stats.size} bytes`);
+      
+      if (stats.size !== fileSize) {
+        console.warn(`⚠️ [Recording Upload Base64] Tamanho do arquivo salvo (${stats.size}) diferente do esperado (${fileSize})`);
+      }
+    } catch (writeError: any) {
+      console.error('❌ [Recording Upload Base64] Erro ao escrever arquivo:', writeError);
+      console.error('- Erro:', writeError.message);
+      console.error('- Código:', writeError.code);
+      console.error('- Path:', localPath);
+      throw new Error(`Falha ao salvar arquivo de áudio: ${writeError.message}`);
+    }
+    
     const audioUrl = `/uploads/recordings/${appointmentIdNum}/${fileName}`;
     
     console.log(`✅ [Recording Upload Base64] Arquivo salvo. Tamanho: ${fileSize} bytes`);
@@ -604,7 +632,7 @@ router.post('/upload-base64', authenticateToken, async (req: Request, res: Respo
       message: 'Gravação enviada com sucesso. Processamento iniciado.',
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ [Recording Upload Base64] Erro geral:', error);
     console.error('Stack trace:', error.stack);
     
@@ -613,6 +641,21 @@ router.post('/upload-base64', authenticateToken, async (req: Request, res: Respo
     console.log('- Tipo do erro:', error.constructor.name);
     console.log('- Mensagem:', error.message);
     console.log('- Código:', error.code);
+    console.log('- Nome:', error.name);
+    
+    // Log adicional para debug em produção
+    console.error('🚨 [Recording Upload Base64] Erro completo:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      requestBody: {
+        hasAudio: !!req.body.audio,
+        audioLength: req.body.audio?.length || 0,
+        appointmentId: req.body.appointmentId,
+        audioMimeType: req.body.audioMimeType
+      }
+    });
     
     // Verificar se é erro de payload muito grande
     if (error.message && error.message.includes('PayloadTooLargeError')) {
@@ -632,15 +675,12 @@ router.post('/upload-base64', authenticateToken, async (req: Request, res: Respo
       });
     }
     
+    // Sempre retornar alguma informação útil, mesmo em produção
     res.status(500).json({ 
       success: false, 
       error: 'Erro ao processar gravação',
-      details: process.env.NODE_ENV !== 'production' ? error.message : 'Erro interno do servidor',
-      debug: process.env.NODE_ENV !== 'production' ? {
-        errorType: error.constructor.name,
-        errorMessage: error.message,
-        errorCode: error.code
-      } : undefined
+      details: error.message || 'Erro interno do servidor',
+      errorType: error.name || 'UnknownError'
     });
   }
 });
