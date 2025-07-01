@@ -51,7 +51,8 @@ export default function PartnerAddresses() {
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao buscar perfil do parceiro');
+        console.error('Erro na resposta:', response.status);
+        return;
       }
 
       const partner = await response.json();
@@ -100,7 +101,7 @@ export default function PartnerAddresses() {
         console.log('No address data found in partner profile');
       }
     } catch (error) {
-      console.error('Erro ao buscar perfil do parceiro:', error);
+      console.error('Erro ao buscar perfil do parceiro - detalhes:', error);
     }
   };
 
@@ -111,18 +112,41 @@ export default function PartnerAddresses() {
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao buscar endereços');
+        console.error('Erro na resposta de endereços:', response.status);
+        // Ainda assim vamos tentar processar a resposta
       }
 
-      const data = await response.json();
-      setAddresses(data);
+      // Tentar processar a resposta com tratamento de erro específico para iOS
+      let data;
+      try {
+        const text = await response.text();
+        console.log('Resposta raw:', text);
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Erro ao fazer parse JSON:', parseError);
+        data = [];
+      }
+      
+      console.log('Endereços processados:', data);
+      
+      if (Array.isArray(data)) {
+        setAddresses(data);
+      } else {
+        console.error('Resposta não é um array:', data);
+        setAddresses([]);
+      }
     } catch (error) {
-      console.error('Erro ao buscar endereços:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar os endereços',
-        variant: 'destructive',
-      });
+      console.error('Erro ao buscar endereços - detalhes:', error);
+      // Não mostrar toast se for erro de parsing ou similar
+      if (error instanceof Error && error.message.includes('JSON')) {
+        console.error('Erro ao processar resposta JSON');
+      } else {
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar os endereços',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
