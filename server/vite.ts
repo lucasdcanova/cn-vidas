@@ -55,6 +55,11 @@ export async function setupVite(app: Express, server: Server) {
     if (url.startsWith('/api/')) {
       return next();
     }
+    
+    // Se já foi respondido, não fazer nada
+    if (res.headersSent) {
+      return;
+    }
 
     try {
       const clientTemplate = path.resolve(
@@ -95,6 +100,10 @@ export function serveStatic(app: Express) {
       if (req.originalUrl.startsWith('/api/')) {
         return next();
       }
+      // Se já foi respondido, não fazer nada
+      if (res.headersSent) {
+        return;
+      }
       res.sendFile(path.resolve(publicPath, "index.html"));
     });
   } 
@@ -106,6 +115,10 @@ export function serveStatic(app: Express) {
       // Não interceptar rotas da API
       if (req.originalUrl.startsWith('/api/')) {
         return next();
+      }
+      // Se já foi respondido, não fazer nada
+      if (res.headersSent) {
+        return;
       }
       res.sendFile(path.resolve(clientPath, "index.html"));
     });
