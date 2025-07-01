@@ -31,7 +31,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
 
   return (
     <div className={navigationClasses}>
-      {userRole !== "doctor" && (
+      {userRole !== "doctor" && userRole !== "partner" && (
         <Link href="/dashboard">
           <div className={`flex flex-col items-center py-3 px-3 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
             isLinkActive("/dashboard") ? activeClass : inactiveClass
@@ -129,9 +129,9 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
       
       {userRole === "partner" && (
         <>
-          <Link href="/dashboard">
+          <Link href="/partner/dashboard">
             <div className={`flex flex-col items-center py-3 px-2 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
-              isLinkActive("/dashboard") ? activeClass : inactiveClass
+              isLinkActive("/partner/dashboard") ? activeClass : inactiveClass
             }`}>
               <span className="material-icons text-lg transition-transform duration-300">dashboard</span>
               <span className="text-xs mt-1 font-medium">Dashboard</span>
