@@ -434,11 +434,29 @@ const AuthPage: React.FC = () => {
       // Posição desejada: centro da tela
       const targetScrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
       
-      // Fazer scroll suave
-      container.scrollTo({
-        top: targetScrollTop,
-        behavior: 'smooth'
-      });
+      // Fazer scroll suave com requestAnimationFrame para melhor performance
+      const startScrollTop = container.scrollTop;
+      const distance = targetScrollTop - startScrollTop;
+      const duration = 300;
+      let start: number | null = null;
+      
+      const animateScroll = (timestamp: number) => {
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / duration, 1);
+        
+        // Easing function para movimento suave
+        const easeInOutCubic = progress < 0.5 
+          ? 4 * progress * progress * progress 
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        
+        container.scrollTop = startScrollTop + (distance * easeInOutCubic);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+      
+      requestAnimationFrame(animateScroll);
     }, 300); // Aguardar 300ms para o teclado abrir
   };
   
@@ -663,13 +681,13 @@ const AuthPage: React.FC = () => {
         }}>
         <Tabs defaultValue="register" value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-2 mb-4 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg shadow-lg">
-            <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-blue-600 transition-all duration-300">
+            <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-blue-600" style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
               Login
             </TabsTrigger>
-            <TabsTrigger value="register" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-blue-600 transition-all duration-300">
+            <TabsTrigger value="register" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-blue-600" style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
@@ -678,7 +696,7 @@ const AuthPage: React.FC = () => {
           </TabsList>
         
         <TabsContent value="login">
-          <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl shadow-black/20 border border-white/50">
+          <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/10 border border-white/50">
             <div className="mb-4 text-center">
               <h1 className="text-xl font-semibold text-gray-800">Bem-vindo de volta</h1>
               <p className="text-gray-500 mt-2 text-xs">
@@ -791,7 +809,8 @@ const AuthPage: React.FC = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-xl hover:shadow-2xl"
+                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-xl hover:shadow-2xl"
+                  style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   disabled={isLoggingIn || isAuthenticating}
                 >
                   {isLoggingIn ? (
@@ -807,7 +826,7 @@ const AuthPage: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="register">
-          <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl shadow-black/20 border border-white/50">
+          <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/10 border border-white/50">
             <div className="mb-4 text-center">
               <h1 className="text-xl font-semibold text-gray-800">Crie sua conta</h1>
               <p className="text-gray-500 mt-2 text-xs">
@@ -1038,7 +1057,7 @@ const AuthPage: React.FC = () => {
                             field.value === "patient" 
                               ? "border-blue-500 bg-blue-50 text-blue-700" 
                               : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer transition-all duration-200 shadow-lg hover:shadow-xl`}
+                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                           onClick={() => field.onChange("patient")}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1052,7 +1071,7 @@ const AuthPage: React.FC = () => {
                             field.value === "doctor" 
                               ? "border-blue-500 bg-blue-50 text-blue-700" 
                               : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer transition-all duration-200 shadow-lg hover:shadow-xl`}
+                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                           onClick={() => field.onChange("doctor")}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1066,7 +1085,7 @@ const AuthPage: React.FC = () => {
                             field.value === "partner" 
                               ? "border-blue-500 bg-blue-50 text-blue-700" 
                               : "border-gray-200 text-gray-600 hover:border-blue-200 hover:bg-blue-50/30"
-                          } rounded-lg cursor-pointer transition-all duration-200 shadow-lg hover:shadow-xl`}
+                          } rounded-lg cursor-pointer shadow-lg hover:shadow-xl`} style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                           onClick={() => field.onChange("partner")}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1280,7 +1299,8 @@ const AuthPage: React.FC = () => {
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-white font-medium shadow-xl hover:shadow-2xl mt-4"
+                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-xl hover:shadow-2xl mt-4"
+                  style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   disabled={isRegistering}
                 >
                   {isRegistering ? (
