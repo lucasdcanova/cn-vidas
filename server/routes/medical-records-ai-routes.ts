@@ -8,6 +8,9 @@ import { requireAuth, requireDoctor, AuthRequest } from '../middleware/auth-unif
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Log para confirmar que o router foi carregado
+console.log('🏥 [Medical Records AI Router] Carregado com sucesso');
+
 // Middleware para verificar se o usuário é médico
 const isDoctorMiddleware = async (req: any, res: any, next: any) => {
   try {
@@ -157,6 +160,10 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 // Obter prontuário por consulta
 router.get('/by-appointment/:appointmentId', isAuthenticated, async (req, res) => {
   try {
+    console.log('🎯 [Medical Records AI] Rota /by-appointment/:appointmentId chamada');
+    console.log('🎯 [Medical Records AI] Params:', req.params);
+    console.log('🎯 [Medical Records AI] User:', req.user);
+    
     const { appointmentId } = req.params;
     const userId = req.user?.id;
 

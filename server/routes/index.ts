@@ -303,6 +303,16 @@ export default async function setupRoutes(app: express.Express) {
   // IMPORTANTE: Deve ser o último middleware antes de retornar o app
   app.use('/api/*', (req, res) => {
     console.error(`❌ Rota de API não encontrada: ${req.method} ${req.originalUrl}`);
+    console.error(`❌ Path completo: ${req.path}`);
+    console.error(`❌ Base URL: ${req.baseUrl}`);
+    console.error(`❌ Headers:`, req.headers);
+    
+    // Debug específico para medical-records-ai
+    if (req.originalUrl.includes('medical-records-ai')) {
+      console.error('🚨 [404 Debug] Tentativa de acesso a medical-records-ai');
+      console.error('🚨 [404 Debug] URL solicitada:', req.originalUrl);
+    }
+    
     res.status(404).json({
       error: 'Endpoint não encontrado',
       message: `A rota ${req.originalUrl} não existe`,
