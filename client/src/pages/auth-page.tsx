@@ -696,13 +696,13 @@ const AuthPage: React.FC = () => {
             </TabsTrigger>
           </TabsList>
         
-        <TabsContent value="login" className={activeTab === 'login' ? 'flex-1 flex flex-col' : ''}>
-          <div className={`relative p-4 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/10 border border-white/60 overflow-hidden ${activeTab === 'login' ? 'flex-1 flex flex-col' : ''}`}>
+        <TabsContent value="login">
+          <div className="relative p-4 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/10 border border-white/60 overflow-hidden">
             {/* Gradient orbs para efeito de profundidade */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse" />
             <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
             
-            <div className="relative z-10 flex-1 flex flex-col">
+            <div className="relative z-10">
               <div className="mb-3 text-center">
                 <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   Bem-vindo de volta
@@ -715,7 +715,7 @@ const AuthPage: React.FC = () => {
             <Form {...loginForm}>
               <form 
                 onSubmit={loginForm.handleSubmit(onLoginSubmit)} 
-                className="space-y-3 flex-1 flex flex-col"
+                className="space-y-3"
                 onKeyDown={(e) => {
                   // Navegar entre campos com Tab ou tecla de próximo do iOS
                   if (e.key === 'Tab' && !e.shiftKey && document.activeElement === emailLoginRef.current) {
@@ -841,11 +841,9 @@ const AuthPage: React.FC = () => {
                   )}
                 </div>
                 
-                <div className="flex-1" />
-                
                 <Button 
                   type="submit" 
-                  className="w-full h-9 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
+                  className="w-full h-9 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group mt-3"
                   style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   disabled={isLoggingIn || isAuthenticating}
                 >
