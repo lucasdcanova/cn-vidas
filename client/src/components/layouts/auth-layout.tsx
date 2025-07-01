@@ -79,7 +79,7 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
             alt="CN Vidas" 
             className={`w-auto transition-all duration-400 ease-out ${logoConfig.logoSize}`}
             style={{
-              filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06))'
+              filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.25)) drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1))'
             }}
           />
         </div>
