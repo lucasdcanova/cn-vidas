@@ -491,26 +491,76 @@ router.post('/upload-base64', authenticateToken, async (req: Request, res: Respo
     let fileSize: number;
     
     try {
+      // Log detalhado do tipo de dados recebido
+      console.log('🔍 [Recording Upload Base64] Tipo de dados audio:', typeof audio);
+      console.log('🔍 [Recording Upload Base64] Primeiros 200 chars:', audio.substring(0, 200));
+      
       // Remover o prefixo data: se existir
       let base64Data = audio;
       if (audio.includes(',')) {
-        base64Data = audio.split(',').pop() || audio;
+        console.log('🔍 [Recording Upload Base64] Detectado prefixo data:, removendo...');
+        const parts = audio.split(',');
+        console.log('🔍 [Recording Upload Base64] Prefixo:', parts[0]);
+        base64Data = parts[1] || audio;
       }
       
-      audioBuffer = Buffer.from(base64Data, 'base64');
-      fileSize = audioBuffer.length;
-      
-      console.log(`📊 [Recording Upload Base64] Tamanho do arquivo: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
-      
-      if (fileSize === 0) {
-        throw new Error('Arquivo de áudio vazio após conversão');
+      // Validar se é base64 válido
+      const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+      if (!base64Regex.test(base64Data.replace(/\s/g, ''))) {
+        console.error('❌ [Recording Upload Base64] String base64 inválida');
+        console.log('🔍 [Recording Upload Base64] Primeiros 100 chars do base64:', base64Data.substring(0, 100));
+        console.log('🔍 [Recording Upload Base64] Últimos 100 chars do base64:', base64Data.substring(base64Data.length - 100));
+        throw new Error('String base64 contém caracteres inválidos');
       }
+      
+      // Remover espaços em branco se houver
+      base64Data = base64Data.replace(/\s/g, '');
+      console.log('🔍 [Recording Upload Base64] Tamanho do base64 limpo:', base64Data.length);
+      
+      // Tentar converter em blocos menores para evitar problemas de memória
+      console.log('🔄 [Recording Upload Base64] Convertendo base64 para buffer...');
+      
+      try {
+        audioBuffer = Buffer.from(base64Data, 'base64');
+        fileSize = audioBuffer.length;
+        
+        console.log(`📊 [Recording Upload Base64] Conversão bem-sucedida! Tamanho do arquivo: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+        
+        if (fileSize === 0) {
+          throw new Error('Arquivo de áudio vazio após conversão');
+        }
+        
+        // Verificar se o buffer parece ser um arquivo de áudio válido
+        const header = audioBuffer.slice(0, 4).toString('hex');
+        console.log('🔍 [Recording Upload Base64] Header do arquivo (hex):', header);
+        
+      } catch (conversionError) {
+        console.error('❌ [Recording Upload Base64] Erro específico na conversão Buffer.from:', conversionError);
+        console.error('Stack trace:', conversionError.stack);
+        throw conversionError;
+      }
+      
     } catch (bufferError) {
       console.error('❌ [Recording Upload Base64] Erro ao converter base64:', bufferError);
+      console.error('Stack trace completo:', bufferError.stack);
+      
+      // Log adicional para debug
+      console.log('🔍 [Recording Upload Base64] Informações de debug:');
+      console.log('- Tamanho do audio recebido:', audio?.length || 0);
+      console.log('- Tipo do audio:', typeof audio);
+      console.log('- Audio é string?:', typeof audio === 'string');
+      console.log('- Audio está vazio?:', !audio || audio.length === 0);
+      
       return res.status(400).json({ 
         success: false, 
         error: 'Erro ao processar dados de áudio base64',
-        details: bufferError instanceof Error ? bufferError.message : 'Erro desconhecido'
+        details: bufferError instanceof Error ? bufferError.message : 'Erro desconhecido',
+        debug: {
+          audioLength: audio?.length || 0,
+          audioType: typeof audio,
+          errorMessage: bufferError.message,
+          errorStack: process.env.NODE_ENV !== 'production' ? bufferError.stack : undefined
+        }
       });
     }
     
@@ -555,8 +605,43 @@ router.post('/upload-base64', authenticateToken, async (req: Request, res: Respo
     });
     
   } catch (error) {
-    console.error('❌ [Recording Upload Base64] Erro:', error);
-    res.status(500).json({ success: false, error: 'Erro ao processar gravação' });
+    console.error('❌ [Recording Upload Base64] Erro geral:', error);
+    console.error('Stack trace:', error.stack);
+    
+    // Log detalhado do erro
+    console.log('🔍 [Recording Upload Base64] Detalhes do erro:');
+    console.log('- Tipo do erro:', error.constructor.name);
+    console.log('- Mensagem:', error.message);
+    console.log('- Código:', error.code);
+    
+    // Verificar se é erro de payload muito grande
+    if (error.message && error.message.includes('PayloadTooLargeError')) {
+      return res.status(413).json({ 
+        success: false, 
+        error: 'Arquivo muito grande',
+        details: 'O arquivo de áudio excede o tamanho máximo permitido'
+      });
+    }
+    
+    // Verificar se é erro de JSON parsing
+    if (error instanceof SyntaxError && error.message.includes('JSON')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Erro ao processar dados JSON',
+        details: 'Os dados enviados não estão em formato JSON válido'
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      error: 'Erro ao processar gravação',
+      details: process.env.NODE_ENV !== 'production' ? error.message : 'Erro interno do servidor',
+      debug: process.env.NODE_ENV !== 'production' ? {
+        errorType: error.constructor.name,
+        errorMessage: error.message,
+        errorCode: error.code
+      } : undefined
+    });
   }
 });
 
