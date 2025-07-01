@@ -672,15 +672,16 @@ const AuthPage: React.FC = () => {
         className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
           activeTab === 'register' && isKeyboardVisible ? 'py-1' : 
           isKeyboardVisible ? 'py-2' : 
-          activeTab === 'login' ? 'py-8' : 'py-6'
-        } overflow-y-auto`} 
+          activeTab === 'login' ? 'py-4' : 'py-6'
+        } ${activeTab === 'login' ? '' : 'overflow-y-auto'}`} 
         style={{
           maxHeight: isKeyboardVisible ? '100%' : 'auto',
           paddingBottom: isKeyboardVisible ? '0' : undefined,
-          scrollBehavior: 'smooth'
+          scrollBehavior: 'smooth',
+          overflow: activeTab === 'login' && !isKeyboardVisible ? 'hidden' : undefined
         }}>
         <Tabs defaultValue="register" value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mb-4 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg shadow-lg">
+          <TabsList className={`grid w-full grid-cols-2 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg shadow-lg ${activeTab === 'login' ? 'mb-3' : 'mb-4'}`}>
             <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-blue-600" style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -695,18 +696,18 @@ const AuthPage: React.FC = () => {
             </TabsTrigger>
           </TabsList>
         
-        <TabsContent value="login">
-          <div className="relative p-6 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/10 border border-white/60 overflow-hidden">
+        <TabsContent value="login" className={activeTab === 'login' ? 'flex-1 flex flex-col' : ''}>
+          <div className={`relative p-4 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/10 border border-white/60 overflow-hidden ${activeTab === 'login' ? 'flex-1 flex flex-col' : ''}`}>
             {/* Gradient orbs para efeito de profundidade */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse" />
             <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
             
-            <div className="relative z-10">
-              <div className="mb-4 text-center">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            <div className="relative z-10 flex-1 flex flex-col">
+              <div className="mb-3 text-center">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   Bem-vindo de volta
                 </h1>
-                <p className="text-gray-500 mt-1 text-xs font-light">
+                <p className="text-gray-500 mt-0.5 text-xs font-light">
                   Acesse sua conta para continuar
                 </p>
               </div>
@@ -714,7 +715,7 @@ const AuthPage: React.FC = () => {
             <Form {...loginForm}>
               <form 
                 onSubmit={loginForm.handleSubmit(onLoginSubmit)} 
-                className="space-y-4"
+                className="space-y-3 flex-1 flex flex-col"
                 onKeyDown={(e) => {
                   // Navegar entre campos com Tab ou tecla de próximo do iOS
                   if (e.key === 'Tab' && !e.shiftKey && document.activeElement === emailLoginRef.current) {
@@ -728,11 +729,11 @@ const AuthPage: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-sm font-medium mb-2 block">E-mail</FormLabel>
+                      <FormLabel className="text-gray-700 text-xs font-medium mb-1.5 block">E-mail</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-5 w-5 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                               <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                             </svg>
                           </div>
@@ -741,7 +742,7 @@ const AuthPage: React.FC = () => {
                             placeholder="seu@email.com" 
                             type="email" 
                             disabled={isLoggingIn}
-                            className="pl-10 pr-3 py-3 rounded-xl h-12 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            className="pl-9 pr-3 py-2.5 rounded-xl h-10 text-xs bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
                             autoComplete="email"
                             autoCapitalize="off"
                             autoCorrect="off"
@@ -752,7 +753,7 @@ const AuthPage: React.FC = () => {
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px] mt-1" />
                     </FormItem>
                   )}
                 />
@@ -762,16 +763,16 @@ const AuthPage: React.FC = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex justify-between items-center mb-2">
-                        <FormLabel className="text-gray-700 text-sm font-medium">Senha</FormLabel>
-                        <a href="/esqueci-senha" className="text-xs font-medium text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
+                      <div className="flex justify-between items-center mb-1.5">
+                        <FormLabel className="text-gray-700 text-xs font-medium">Senha</FormLabel>
+                        <a href="/esqueci-senha" className="text-[10px] font-medium text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
                           Esqueceu a senha?
                         </a>
                       </div>
                       <FormControl>
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-5 w-5 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                               <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                           </div>
@@ -780,7 +781,7 @@ const AuthPage: React.FC = () => {
                             placeholder="••••••••" 
                             type="password"
                             disabled={isLoggingIn}
-                            className="pl-10 pr-3 py-3 rounded-xl h-12 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            className="pl-9 pr-3 py-2.5 rounded-xl h-10 text-xs bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
                             autoComplete="current-password"
                             enterKeyHint="go"
                             onKeyDown={(e) => {
@@ -793,12 +794,12 @@ const AuthPage: React.FC = () => {
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[10px] mt-1" />
                     </FormItem>
                   )}
                 />
                 
-                <div className="space-y-2 my-4">
+                <div className="space-y-1.5 my-2">
                   <label className="flex items-center cursor-pointer group">
                     <div className="relative">
                       <input 
@@ -807,12 +808,12 @@ const AuthPage: React.FC = () => {
                         type="checkbox" 
                         className="sr-only peer" 
                       />
-                      <div className="w-5 h-5 bg-gray-100 rounded-md peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-200"></div>
-                      <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="w-3.5 h-3.5 bg-gray-100 rounded peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-200"></div>
+                      <svg className="absolute top-0 left-0 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 p-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <span className="ml-3 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                    <span className="ml-2 text-[11px] text-gray-600 group-hover:text-gray-800 transition-colors">
                       Lembrar-me
                     </span>
                   </label>
@@ -828,21 +829,23 @@ const AuthPage: React.FC = () => {
                           onChange={(e) => setEnableBiometric(e.target.checked)}
                           className="sr-only peer" 
                         />
-                        <div className="w-5 h-5 bg-gray-100 rounded-md peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-200"></div>
-                        <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-3.5 h-3.5 bg-gray-100 rounded peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-200"></div>
+                        <svg className="absolute top-0 left-0 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 p-0.5" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <span className="ml-3 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                      <span className="ml-2 text-[11px] text-gray-600 group-hover:text-gray-800 transition-colors">
                         Habilitar login com {biometryTypeName}
                       </span>
                     </label>
                   )}
                 </div>
                 
+                <div className="flex-1" />
+                
                 <Button 
                   type="submit" 
-                  className="w-full h-11 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
+                  className="w-full h-9 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
                   style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   disabled={isLoggingIn || isAuthenticating}
                 >
@@ -850,13 +853,13 @@ const AuthPage: React.FC = () => {
                   <span className="relative flex items-center justify-center">
                     {isLoggingIn ? (
                       <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                         Entrando...
                       </>
                     ) : (
                       <>
                         Entrar
-                        <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="ml-2 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
                       </>
