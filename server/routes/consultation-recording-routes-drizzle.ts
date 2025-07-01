@@ -209,11 +209,18 @@ router.get('/appointment/:appointmentId', authenticateToken, async (req: Request
     }
     
     // Buscar prontuário médico AI relacionado se existir
+    console.log('🔍 [Recording] Buscando prontuário médico para appointment:', appointmentId);
     const medicalRecord = await prisma.medical_records.findFirst({
       where: { 
         appointment_id: appointmentId
       }
     });
+    
+    if (medicalRecord) {
+      console.log('✅ [Recording] Prontuário médico encontrado:', medicalRecord.id);
+    } else {
+      console.log('❌ [Recording] Nenhum prontuário médico encontrado para esta consulta');
+    }
     
     // Determinar status baseado no processamento
     let status = 'pending';
@@ -362,7 +369,14 @@ async function processRecording(recordingId: number) {
       .where(eq(consultationRecordings.id, recordingId));
 
     // Criar prontuário médico automaticamente
-    await createMedicalRecordFromRecording(recording.appointmentId, recording.doctorId, aiContent);
+    console.log('🎯 [Recording Process] Iniciando criação do prontuário médico...');
+    const medicalRecord = await createMedicalRecordFromRecording(recording.appointmentId, recording.doctorId, aiContent);
+    
+    if (medicalRecord) {
+      console.log(`✅ [Recording Process] Prontuário médico criado com ID: ${medicalRecord.id}`);
+    } else {
+      console.log('⚠️ [Recording Process] Prontuário médico não foi criado (pode já existir)');
+    }
     
     console.log(`✅ [Recording Process] Processamento concluído para gravação ${recordingId}`);
     
@@ -385,6 +399,7 @@ async function createMedicalRecordFromRecording(appointmentId: number, doctorId:
   try {
     console.log('📋 [Medical Record] Criando prontuário médico com IA a partir da gravação...');
     console.log('📋 [Medical Record] Dados:', { appointmentId, doctorId });
+    console.log('📋 [Medical Record] AI Content recebido:', JSON.stringify(aiContent, null, 2));
     
     // Buscar informações da consulta e do médico
     const [appointment] = await db.select()
@@ -393,8 +408,16 @@ async function createMedicalRecordFromRecording(appointmentId: number, doctorId:
       .limit(1);
 
     if (!appointment) {
+      console.error('❌ [Medical Record] Consulta não encontrada para ID:', appointmentId);
       throw new Error('Consulta não encontrada');
     }
+
+    console.log('📋 [Medical Record] Consulta encontrada:', { 
+      id: appointment.id, 
+      userId: appointment.userId,
+      doctorId: appointment.doctorId,
+      date: appointment.date
+    });
 
     // Buscar o userId do médico
     const [doctor] = await db.select()
@@ -404,12 +427,15 @@ async function createMedicalRecordFromRecording(appointmentId: number, doctorId:
       .limit(1);
 
     if (!doctor) {
+      console.error('❌ [Medical Record] Médico não encontrado para ID:', doctorId);
       throw new Error('Médico não encontrado');
     }
 
     const doctorUserId = doctor.users.id;
+    console.log('📋 [Medical Record] Médico encontrado - userId:', doctorUserId);
 
     // Verificar se já existe prontuário AI para esta consulta
+    console.log('📋 [Medical Record] Verificando prontuários existentes...');
     const existingRecords = await prisma.medical_records.findFirst({
       where: { 
         appointment_id: appointmentId
@@ -417,8 +443,8 @@ async function createMedicalRecordFromRecording(appointmentId: number, doctorId:
     });
 
     if (existingRecords) {
-      console.log('⚠️ [Medical Record] Prontuário já existe para esta consulta');
-      return;
+      console.log('⚠️ [Medical Record] Prontuário já existe para esta consulta:', existingRecords.id);
+      return existingRecords;
     }
 
     // Formatar conteúdo SOAP
@@ -460,12 +486,24 @@ async function createMedicalRecordFromRecording(appointmentId: number, doctorId:
     });
 
     console.log('✅ [Medical Record] Prontuário AI criado com sucesso:', newRecord.id);
+    console.log('📋 [Medical Record] Detalhes do prontuário criado:', {
+      id: newRecord.id,
+      patient_id: newRecord.patient_id,
+      doctor_id: newRecord.doctor_id,
+      appointment_id: newRecord.appointment_id,
+      status: newRecord.status,
+      ai_generated: newRecord.ai_generated
+    });
 
     // Log do prontuário criado - removido update pois não há coluna medicalRecordId
     console.log('✅ [Medical Record] Prontuário vinculado à consulta:', appointmentId);
     
+    // Retornar o prontuário criado
+    return newRecord;
+    
   } catch (error) {
     console.error('❌ [Medical Record] Erro ao criar prontuário:', error);
+    console.error('❌ [Medical Record] Stack trace:', error.stack);
     throw error;
   }
 }
