@@ -55,14 +55,35 @@ export default function PartnerAddresses() {
       }
 
       const partner = await response.json();
+      console.log('Partner profile data:', partner);
+      console.log('Address fields:', {
+        street: partner.street,
+        address: partner.address,
+        number: partner.number,
+        neighborhood: partner.neighborhood,
+        city: partner.city,
+        state: partner.state,
+        zipcode: partner.zipcode,
+        postalCode: partner.postalCode
+      });
       
       // Criar endereço principal a partir dos dados do perfil
-      if (partner && partner.street) {
+      // Verificar se existe algum campo de endereço preenchido
+      const hasAddress = partner && (
+        partner.street || 
+        partner.address || 
+        partner.zipcode || 
+        partner.postalCode ||
+        partner.city ||
+        partner.state
+      );
+      
+      if (hasAddress) {
         const profileAddr: Address = {
           id: -1, // ID especial para o endereço do perfil
           name: 'Endereço do Perfil',
           cep: partner.zipcode || partner.postalCode || '',
-          logradouro: partner.street || '',
+          logradouro: partner.street || partner.address || '',
           numero: partner.number || '',
           complemento: partner.complement || '',
           bairro: partner.neighborhood || '',
@@ -73,7 +94,10 @@ export default function PartnerAddresses() {
           createdAt: partner.createdAt || new Date().toISOString(),
           updatedAt: partner.updatedAt || new Date().toISOString(),
         };
+        console.log('Profile address created:', profileAddr);
         setProfileAddress(profileAddr);
+      } else {
+        console.log('No address data found in partner profile');
       }
     } catch (error) {
       console.error('Erro ao buscar perfil do parceiro:', error);
