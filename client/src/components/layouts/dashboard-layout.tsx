@@ -126,7 +126,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const { data: partnerData } = useQuery({
     queryKey: ["/api/partners/me"],
     queryFn: async () => {
-      const response = await apiRequest('/api/partners/me');
+      const response = await apiRequest('GET', '/api/partners/me');
       console.log('🔍 DashboardLayout - Partner data:', response);
       return response;
     },
