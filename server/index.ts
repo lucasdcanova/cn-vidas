@@ -50,6 +50,13 @@ import { tokenBlacklist } from "./utils/token-blacklist";
     res.setTimeout(120000);
     next();
   });
+  
+  // Configurar timeout para upload de gravações
+  app.use('/api/consultation-recordings/upload*', (req, res, next) => {
+    req.setTimeout(300000); // 5 minutos para uploads de áudio
+    res.setTimeout(300000);
+    next();
+  });
 
   app.use('/api/profile/upload-image', (req, res, next) => {
     req.setTimeout(120000); // 2 minutos para uploads
