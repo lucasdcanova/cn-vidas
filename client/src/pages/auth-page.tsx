@@ -411,6 +411,36 @@ const AuthPage: React.FC = () => {
   // Refs para os campos de input
   const emailLoginRef = useRef<HTMLInputElement>(null);
   const passwordLoginRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Função para fazer scroll automático
+  const scrollToCenter = (element: HTMLElement) => {
+    if (!scrollContainerRef.current || !element) return;
+    
+    // Aguardar um pouco para o teclado abrir completamente
+    setTimeout(() => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      
+      // Calcular a posição para centralizar o elemento
+      const scrollTop = container.scrollTop;
+      const elementTop = elementRect.top - containerRect.top + scrollTop;
+      const containerHeight = containerRect.height;
+      const elementHeight = elementRect.height;
+      
+      // Posição desejada: centro da tela
+      const targetScrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
+      
+      // Fazer scroll suave
+      container.scrollTo({
+        top: targetScrollTop,
+        behavior: 'smooth'
+      });
+    }, 300); // Aguardar 300ms para o teclado abrir
+  };
   
   // Configurar o teclado do iOS
   useEffect(() => {
@@ -619,14 +649,18 @@ const AuthPage: React.FC = () => {
   
   return (
     <AuthLayout activeTab={activeTab}>
-      <div className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
-        activeTab === 'register' && isKeyboardVisible ? 'py-1' : 
-        isKeyboardVisible ? 'py-2' : 
-        activeTab === 'login' ? 'py-8' : 'py-6'
-      } overflow-y-auto`} style={{
-        maxHeight: isKeyboardVisible ? '100%' : 'auto',
-        paddingBottom: isKeyboardVisible ? '0' : undefined
-      }}>
+      <div 
+        ref={scrollContainerRef}
+        className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
+          activeTab === 'register' && isKeyboardVisible ? 'py-1' : 
+          isKeyboardVisible ? 'py-2' : 
+          activeTab === 'login' ? 'py-8' : 'py-6'
+        } overflow-y-auto`} 
+        style={{
+          maxHeight: isKeyboardVisible ? '100%' : 'auto',
+          paddingBottom: isKeyboardVisible ? '0' : undefined,
+          scrollBehavior: 'smooth'
+        }}>
         <Tabs defaultValue="register" value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-2 mb-4 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg">
             <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all duration-300">
@@ -795,6 +829,7 @@ const AuthPage: React.FC = () => {
                           type="email" 
                           disabled={isRegistering}
                           className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                           {...field} 
                         />
                       </FormControl>
@@ -816,6 +851,7 @@ const AuthPage: React.FC = () => {
                               placeholder="000.000.000-00" 
                               disabled={isRegistering}
                               className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                               onChange={(e) => {
                                 // Formata o CPF enquanto o usuário digita
                                 let value = e.target.value.replace(/\D/g, '');
@@ -870,6 +906,7 @@ const AuthPage: React.FC = () => {
                                     placeholder="12345" 
                                     disabled={isRegistering}
                                     className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                                    onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                                     {...field}
                                     value={field.value?.replace(/CRM[A-Z]{2}/i, '') || ''}
                                     onChange={(e) => {
@@ -897,6 +934,7 @@ const AuthPage: React.FC = () => {
                               placeholder="00.000.000/0000-00" 
                               disabled={isRegistering}
                               className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                               onChange={(e) => {
                                 // Formatação do CNPJ
                                 let value = e.target.value.replace(/\D/g, '');
@@ -933,6 +971,7 @@ const AuthPage: React.FC = () => {
                               placeholder="seunome123" 
                               disabled={isRegistering}
                               className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                               {...field} 
                             />
                           </FormControl>
@@ -954,6 +993,7 @@ const AuthPage: React.FC = () => {
                             type="password" 
                             disabled={isRegistering}
                             className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                            onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                             {...field} 
                           />
                         </FormControl>
@@ -974,6 +1014,7 @@ const AuthPage: React.FC = () => {
                           placeholder="Seu Nome Completo" 
                           disabled={isRegistering}
                           className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                          onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                           {...field} 
                         />
                       </FormControl>
@@ -988,7 +1029,10 @@ const AuthPage: React.FC = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-gray-700 text-sm">Tipo de perfil</FormLabel>
-                      <div className="grid grid-cols-3 gap-2 mb-2">
+                      <div className="grid grid-cols-3 gap-2 mb-2"
+                        onFocus={(e) => activeTab === 'register' && scrollToCenter(e.currentTarget)}
+                        tabIndex={0}
+                      >
                         <div 
                           className={`flex flex-col items-center p-3 border ${
                             field.value === "patient" 
@@ -1052,6 +1096,7 @@ const AuthPage: React.FC = () => {
                             checked={field.value}
                             onCheckedChange={field.onChange}
                             disabled={isRegistering}
+                            onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
