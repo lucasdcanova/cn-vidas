@@ -696,13 +696,20 @@ const AuthPage: React.FC = () => {
           </TabsList>
         
         <TabsContent value="login">
-          <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/10 border border-white/50">
-            <div className="mb-4 text-center">
-              <h1 className="text-xl font-semibold text-gray-800">Bem-vindo de volta</h1>
-              <p className="text-gray-500 mt-2 text-xs">
-                Acesse sua conta para continuar
-              </p>
-            </div>
+          <div className="relative p-6 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/10 border border-white/60 overflow-hidden">
+            {/* Gradient orbs para efeito de profundidade */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            
+            <div className="relative z-10">
+              <div className="mb-6 text-center">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Bem-vindo de volta
+                </h1>
+                <p className="text-gray-500 mt-2 text-sm font-light">
+                  Acesse sua conta para continuar
+                </p>
+              </div>
             
             <Form {...loginForm}>
               <form 
@@ -721,22 +728,29 @@ const AuthPage: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-sm">E-mail</FormLabel>
+                      <FormLabel className="text-gray-700 text-sm font-medium mb-2 block">E-mail</FormLabel>
                       <FormControl>
-                        <input 
-                          ref={emailLoginRef}
-                          placeholder="seu@email.com" 
-                          type="email" 
-                          disabled={isLoggingIn}
-                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-blue-500 flex w-full px-3 py-2 focus:outline-none focus:ring-2 shadow-md"
-                          autoComplete="email"
-                          autoCapitalize="off"
-                          autoCorrect="off"
-                          spellCheck="false"
-                          inputMode="email"
-                          enterKeyHint="next"
-                          {...field} 
-                        />
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                              <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            </svg>
+                          </div>
+                          <input 
+                            ref={emailLoginRef}
+                            placeholder="seu@email.com" 
+                            type="email" 
+                            disabled={isLoggingIn}
+                            className="pl-10 pr-3 py-3 rounded-xl h-12 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            autoComplete="email"
+                            autoCapitalize="off"
+                            autoCorrect="off"
+                            spellCheck="false"
+                            inputMode="email"
+                            enterKeyHint="next"
+                            {...field} 
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -748,80 +762,110 @@ const AuthPage: React.FC = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex justify-between items-center">
-                        <FormLabel className="text-gray-700 text-sm">Senha</FormLabel>
-                        <a href="/esqueci-senha" className="text-xs font-medium text-blue-600 hover:text-blue-700">
+                      <div className="flex justify-between items-center mb-2">
+                        <FormLabel className="text-gray-700 text-sm font-medium">Senha</FormLabel>
+                        <a href="/esqueci-senha" className="text-xs font-medium text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
                           Esqueceu a senha?
                         </a>
                       </div>
                       <FormControl>
-                        <input 
-                          ref={passwordLoginRef}
-                          placeholder="Sua senha" 
-                          type="password"
-                          disabled={isLoggingIn}
-                          className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border border-gray-200 focus:border-blue-500 focus:ring-blue-500 flex w-full px-3 py-2 focus:outline-none focus:ring-2 shadow-md"
-                          autoComplete="current-password"
-                          enterKeyHint="go"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              loginForm.handleSubmit(onLoginSubmit)();
-                            }
-                          }}
-                          {...field} 
-                        />
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                              <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                          </div>
+                          <input 
+                            ref={passwordLoginRef}
+                            placeholder="••••••••" 
+                            type="password"
+                            disabled={isLoggingIn}
+                            className="pl-10 pr-3 py-3 rounded-xl h-12 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            autoComplete="current-password"
+                            enterKeyHint="go"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                loginForm.handleSubmit(onLoginSubmit)();
+                              }
+                            }}
+                            {...field} 
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <input 
-                      id="remember-me" 
-                      name="remember-me" 
-                      type="checkbox" 
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
-                    />
-                    <label htmlFor="remember-me" className="ml-2 block text-xs text-gray-700">
+                <div className="space-y-3 my-6">
+                  <label className="flex items-center cursor-pointer group">
+                    <div className="relative">
+                      <input 
+                        id="remember-me" 
+                        name="remember-me" 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                      />
+                      <div className="w-5 h-5 bg-gray-100 rounded-md peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-200"></div>
+                      <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="ml-3 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
                       Lembrar-me
-                    </label>
-                  </div>
+                    </span>
+                  </label>
                   
                   {isBiometricAvailable && (
-                    <div className="flex items-center">
-                      <input 
-                        id="enable-biometric" 
-                        name="enable-biometric" 
-                        type="checkbox"
-                        checked={enableBiometric}
-                        onChange={(e) => setEnableBiometric(e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
-                      />
-                      <label htmlFor="enable-biometric" className="ml-2 block text-xs text-gray-700">
+                    <label className="flex items-center cursor-pointer group">
+                      <div className="relative">
+                        <input 
+                          id="enable-biometric" 
+                          name="enable-biometric" 
+                          type="checkbox"
+                          checked={enableBiometric}
+                          onChange={(e) => setEnableBiometric(e.target.checked)}
+                          className="sr-only peer" 
+                        />
+                        <div className="w-5 h-5 bg-gray-100 rounded-md peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-200"></div>
+                        <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <span className="ml-3 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
                         Habilitar login com {biometryTypeName}
-                      </label>
-                    </div>
+                      </span>
+                    </label>
                   )}
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full h-10 rounded-lg text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-xl hover:shadow-2xl"
-                  style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                  className="w-full h-12 rounded-xl text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
+                  style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
                   disabled={isLoggingIn || isAuthenticating}
                 >
-                  {isLoggingIn ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Entrando...
-                    </>
-                  ) : "Entrar"}
+                  <div className="absolute inset-0 -top-[200%] bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:top-0" />
+                  <span className="relative flex items-center justify-center">
+                    {isLoggingIn ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Entrando...
+                      </>
+                    ) : (
+                      <>
+                        Entrar
+                        <svg className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </>
+                    )}
+                  </span>
                 </Button>
               </form>
             </Form>
+            </div>
           </div>
         </TabsContent>
         
