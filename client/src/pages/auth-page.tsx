@@ -618,9 +618,11 @@ const AuthPage: React.FC = () => {
   };
   
   return (
-    <AuthLayout>
+    <AuthLayout activeTab={activeTab}>
       <div className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
-        isKeyboardVisible ? 'py-2' : 'py-6'
+        activeTab === 'register' && isKeyboardVisible ? 'py-1' : 
+        isKeyboardVisible ? 'py-2' : 
+        activeTab === 'login' ? 'py-8' : 'py-6'
       } overflow-y-auto`} style={{
         maxHeight: isKeyboardVisible ? '100%' : 'auto',
         paddingBottom: isKeyboardVisible ? '0' : undefined
