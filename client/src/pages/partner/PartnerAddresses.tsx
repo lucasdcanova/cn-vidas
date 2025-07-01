@@ -26,6 +26,7 @@ interface Address {
   cidade: string;
   estado: string;
   isPrimary: boolean;
+  isProfileAddress?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -33,13 +34,51 @@ interface Address {
 export default function PartnerAddresses() {
   const { user } = useAuth();
   const [addresses, setAddresses] = useState<Address[]>([]);
+  const [profileAddress, setProfileAddress] = useState<Address | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
 
   useEffect(() => {
     fetchAddresses();
+    fetchPartnerProfile();
   }, []);
+
+  const fetchPartnerProfile = async () => {
+    try {
+      const response = await fetch('/api/partners/me', {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar perfil do parceiro');
+      }
+
+      const partner = await response.json();
+      
+      // Criar endereço principal a partir dos dados do perfil
+      if (partner && partner.street) {
+        const profileAddr: Address = {
+          id: -1, // ID especial para o endereço do perfil
+          name: 'Endereço do Perfil',
+          cep: partner.zipcode || partner.postalCode || '',
+          logradouro: partner.street || '',
+          numero: partner.number || '',
+          complemento: partner.complement || '',
+          bairro: partner.neighborhood || '',
+          cidade: partner.city || '',
+          estado: partner.state || '',
+          isPrimary: true,
+          isProfileAddress: true,
+          createdAt: partner.createdAt || new Date().toISOString(),
+          updatedAt: partner.updatedAt || new Date().toISOString(),
+        };
+        setProfileAddress(profileAddr);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar perfil do parceiro:', error);
+    }
+  };
 
   const fetchAddresses = async () => {
     try {
@@ -131,6 +170,10 @@ export default function PartnerAddresses() {
   const handleModalSuccess = () => {
     handleModalClose();
     fetchAddresses();
+    // Também atualizar o endereço do perfil se necessário
+    if (editingAddress?.isProfileAddress) {
+      fetchPartnerProfile();
+    }
   };
 
   if (loading) {
@@ -165,7 +208,7 @@ export default function PartnerAddresses() {
         </Button>
       </div>
 
-      {addresses.length === 0 ? (
+      {addresses.length === 0 && !profileAddress ? (
         <Card className="p-12 text-center">
           <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -181,6 +224,55 @@ export default function PartnerAddresses() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Mostrar endereço do perfil primeiro se existir */}
+          {profileAddress && (
+            <Card key="profile-address" className="p-6 border-primary/20 bg-primary/5">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">{profileAddress.name}</h3>
+                  <Badge variant="default" className="mt-1">
+                    Principal
+                  </Badge>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        // Redirecionar para página de perfil para editar
+                        window.location.href = '/profile#address';
+                      }}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Editar no Perfil
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="space-y-2 text-sm text-gray-600">
+                <p>
+                  {profileAddress.logradouro}, {profileAddress.numero}
+                  {profileAddress.complemento && ` - ${profileAddress.complemento}`}
+                </p>
+                <p>
+                  {profileAddress.bairro} - {profileAddress.cidade}/{profileAddress.estado}
+                </p>
+                <p>CEP: {profileAddress.cep}</p>
+              </div>
+              <div className="mt-3">
+                <p className="text-xs text-gray-500 italic">
+                  Este é o endereço cadastrado no seu perfil
+                </p>
+              </div>
+            </Card>
+          )}
+          
+          {/* Mostrar outros endereços */}
           {addresses.map((address) => (
             <Card key={address.id} className="p-6">
               <div className="flex justify-between items-start mb-4">
