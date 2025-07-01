@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/use-auth';
@@ -12,6 +12,11 @@ interface PartnerOnboardingGuardProps {
 export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps) {
   const { user } = useAuth();
   const [location, navigate] = useLocation();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  
+  // Lista de rotas que não devem ter o guard ativo
+  const exemptRoutes = ['/partner-onboarding', '/partner-verification'];
+  const isExemptRoute = exemptRoutes.includes(location);
   
   // Get partner profile
   const { data: partnerProfile, isLoading: loadingProfile } = useQuery({
@@ -24,7 +29,7 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
         throw error;
       }
     },
-    enabled: !!user && user.role === 'partner',
+    enabled: !!user && user.role === 'partner' && !isExemptRoute,
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true
@@ -42,7 +47,7 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
         return [];
       }
     },
-    enabled: !!partnerProfile,
+    enabled: !!partnerProfile && !isExemptRoute,
     staleTime: 0,
     gcTime: 0,
     retry: 1
@@ -60,13 +65,19 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
         return [];
       }
     },
-    enabled: !!partnerProfile,
+    enabled: !!partnerProfile && !isExemptRoute,
     staleTime: 0,
     gcTime: 0,
     retry: 1
   });
 
   useEffect(() => {
+    // Skip if on exempt routes
+    if (isExemptRoute) {
+      console.log('🔍 [PartnerOnboardingGuard] On exempt route:', location);
+      return;
+    }
+    
     // Skip if not a partner or still loading
     if (!user || user.role !== 'partner' || loadingProfile || loadingAddresses || loadingServices) {
       console.log('🔍 [PartnerOnboardingGuard] Skipping check:', {
@@ -76,12 +87,6 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
         loadingAddresses,
         loadingServices
       });
-      return;
-    }
-    
-    // Skip if already on onboarding page
-    if (location === '/partner-onboarding') {
-      console.log('🔍 [PartnerOnboardingGuard] Already on onboarding page');
       return;
     }
     
@@ -118,18 +123,21 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
       });
       
       if (!partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses || hasNoActiveServices)) {
-        console.log('❌ [PartnerOnboardingGuard] Redirecting to onboarding');
-        navigate('/partner-onboarding');
+        if (!isRedirecting) {
+          console.log('❌ [PartnerOnboardingGuard] Redirecting to onboarding');
+          setIsRedirecting(true);
+          navigate('/partner-onboarding');
+        }
       } else {
         console.log('✅ [PartnerOnboardingGuard] Onboarding complete, no redirect needed');
       }
     } else {
       console.log('❌ [PartnerOnboardingGuard] No partner profile found');
     }
-  }, [user, partnerProfile, addresses, services, loadingProfile, loadingAddresses, loadingServices, location, navigate]);
+  }, [user, partnerProfile, addresses, services, loadingProfile, loadingAddresses, loadingServices, location, navigate, isExemptRoute, isRedirecting]);
 
-  // Show loading while checking profile
-  if (user && user.role === 'partner' && (loadingProfile || loadingAddresses || loadingServices)) {
+  // Show loading while checking profile (but not on exempt routes)
+  if (!isExemptRoute && user && user.role === 'partner' && (loadingProfile || loadingAddresses || loadingServices)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
