@@ -117,7 +117,7 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
           
           {/* Copyright */}
           {!isKeyboardVisible && layoutState !== 'register-keyboard' && (
-            <div className="text-center py-4 text-gray-500 text-xs border-t border-gray-100/30 shrink-0">
+            <div className="text-center py-8 text-gray-500 text-xs border-t border-gray-100/30 shrink-0">
               &copy; {new Date().getFullYear()} CN Vidas. Todos os direitos reservados.
             </div>
           )}
