@@ -67,25 +67,28 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
       <div className="h-full flex flex-col" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         {/* Logo com posição fixa */}
         <div 
-          className={`flex items-center justify-center shrink-0 transition-all duration-400 ease-out ${logoConfig.height} ${logoConfig.opacity}`}
+          className={`flex items-center justify-center shrink-0 ${logoConfig.height} ${logoConfig.opacity}`}
           style={{ 
             marginTop: logoConfig.marginTop,
             transform: 'translateZ(0)',
-            willChange: 'height, margin-top, opacity'
+            willChange: 'transform',
+            transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
           <img 
             src={cnvidasLogo} 
             alt="CN Vidas" 
-            className={`w-auto transition-all duration-400 ease-out ${logoConfig.logoSize}`}
+            className={`w-auto ${logoConfig.logoSize}`}
             style={{
-              filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.25)) drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1))'
+              filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.25)) drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1))',
+              transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+              willChange: 'transform'
             }}
           />
         </div>
         
         {/* Spacer dinâmico */}
-        <div className={`transition-all duration-400 ease-out ${spacerHeight}`} />
+        <div className={`${spacerHeight}`} style={{ transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' }} />
         
         {/* Container principal */}
         <div 
@@ -103,7 +106,7 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
             border: layoutState === 'register-keyboard' 
               ? 'none' 
               : '1px solid rgba(255, 255, 255, 0.18)',
-            transition: 'all 400ms ease-out',
+            transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
             marginTop: layoutState === 'register-keyboard' ? '20px' : '0' // Mudado de -20px para 20px para baixar da status bar
           }}
         >
@@ -117,7 +120,7 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
           
           {/* Copyright */}
           {!isKeyboardVisible && layoutState !== 'register-keyboard' && (
-            <div className="text-center py-8 text-gray-500 text-xs border-t border-gray-100/30 shrink-0">
+            <div className="text-center py-3 pb-1 text-gray-500 text-xs border-t border-gray-100/30 shrink-0">
               &copy; {new Date().getFullYear()} CN Vidas. Todos os direitos reservados.
             </div>
           )}
