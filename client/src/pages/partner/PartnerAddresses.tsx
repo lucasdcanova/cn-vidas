@@ -14,6 +14,7 @@ import AddressModal from './AddressModal';
 import { toast } from '@/hooks/use-toast';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { PartnerOnboardingGuard } from '@/components/partner/partner-onboarding-guard';
+import { apiRequest } from '@/lib/queryClient';
 
 interface Address {
   id: number;
@@ -46,16 +47,10 @@ export default function PartnerAddresses() {
 
   const fetchPartnerProfile = async () => {
     try {
-      const response = await fetch('/api/partners/me', {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        console.error('Erro na resposta:', response.status);
-        return;
-      }
-
+      console.log('Buscando perfil do parceiro...');
+      const response = await apiRequest('GET', '/api/partners/me');
       const partner = await response.json();
+      
       console.log('Partner profile data:', partner);
       console.log('Address fields:', {
         street: partner.street,
@@ -78,6 +73,8 @@ export default function PartnerAddresses() {
         partner.city ||
         partner.state
       );
+      
+      console.log('Has address?', hasAddress);
       
       if (hasAddress) {
         const profileAddr: Address = {
@@ -107,27 +104,11 @@ export default function PartnerAddresses() {
 
   const fetchAddresses = async () => {
     try {
-      const response = await fetch('/api/partners/addresses', {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        console.error('Erro na resposta de endereços:', response.status);
-        // Ainda assim vamos tentar processar a resposta
-      }
-
-      // Tentar processar a resposta com tratamento de erro específico para iOS
-      let data;
-      try {
-        const text = await response.text();
-        console.log('Resposta raw:', text);
-        data = JSON.parse(text);
-      } catch (parseError) {
-        console.error('Erro ao fazer parse JSON:', parseError);
-        data = [];
-      }
+      console.log('Buscando endereços adicionais...');
+      const response = await apiRequest('GET', '/api/partners/addresses');
+      const data = await response.json();
       
-      console.log('Endereços processados:', data);
+      console.log('Endereços recebidos:', data);
       
       if (Array.isArray(data)) {
         setAddresses(data);
@@ -137,16 +118,7 @@ export default function PartnerAddresses() {
       }
     } catch (error) {
       console.error('Erro ao buscar endereços - detalhes:', error);
-      // Não mostrar toast se for erro de parsing ou similar
-      if (error instanceof Error && error.message.includes('JSON')) {
-        console.error('Erro ao processar resposta JSON');
-      } else {
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar os endereços',
-          variant: 'destructive',
-        });
-      }
+      setAddresses([]); // Definir array vazio em caso de erro
     } finally {
       setLoading(false);
     }
@@ -238,6 +210,13 @@ export default function PartnerAddresses() {
       </PartnerOnboardingGuard>
     );
   }
+
+  // Log para debug
+  console.log('Estado atual:', {
+    profileAddress,
+    addresses,
+    loading
+  });
 
   return (
     <PartnerOnboardingGuard>
