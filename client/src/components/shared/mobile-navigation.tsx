@@ -164,15 +164,6 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
               <span className="text-xs mt-1 font-medium">Verificar</span>
             </div>
           </Link>
-
-          <Link href="/profile">
-            <div className={`flex flex-col items-center py-3 px-2 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
-              isLinkActive("/profile") ? activeClass : inactiveClass
-            }`}>
-              <span className="material-icons text-lg transition-transform duration-300">person</span>
-              <span className="text-xs mt-1 font-medium">Perfil</span>
-            </div>
-          </Link>
         </>
       )}
     </div>
