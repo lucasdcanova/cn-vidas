@@ -38,11 +38,11 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
       case "register-keyboard":
         return { height: 'h-0', marginTop: '0px', logoSize: 'h-0', opacity: 'opacity-0' };
       case "login-no-keyboard":
-        return { height: 'h-24', marginTop: '60px', logoSize: 'h-20', opacity: 'opacity-100' }; // Reduzido para dar mais espaço ao formulário
+        return { height: 'h-24', marginTop: '60px', logoSize: 'h-20', opacity: 'opacity-100' };
       case "login-keyboard":
         return { height: 'h-14', marginTop: '20px', logoSize: 'h-10', opacity: 'opacity-100' };
       default: // register-no-keyboard
-        return { height: 'h-20', marginTop: '100px', logoSize: 'h-16', opacity: 'opacity-100' };
+        return { height: 'h-24', marginTop: '60px', logoSize: 'h-20', opacity: 'opacity-100' }; // Mesmo tamanho do login-no-keyboard
     }
   };
 
@@ -51,11 +51,11 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
       case "register-keyboard":
         return 'h-0';
       case "login-no-keyboard":
-        return 'h-16'; // Aumentado para baixar mais a caixa
+        return 'h-16';
       case "login-keyboard":
         return 'h-3';
       default: // register-no-keyboard
-        return 'h-10';
+        return 'h-16'; // Mesmo tamanho do login-no-keyboard
     }
   };
 
