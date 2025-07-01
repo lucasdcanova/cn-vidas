@@ -1,7 +1,9 @@
 # Debug - Problema de Gravação Não Criada Automaticamente
 
-## Resumo do Problema
-Após encerrar consultas de emergência, o prontuário médico não está sendo criado automaticamente porque a gravação da consulta não está sendo salva.
+## ✅ PROBLEMA RESOLVIDO
+
+### Resumo do Problema
+Após encerrar consultas de emergência, o prontuário médico não estava sendo criado automaticamente porque o upload da gravação estava falhando.
 
 ## Análise Realizada
 
