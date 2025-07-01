@@ -299,5 +299,17 @@ export default async function setupRoutes(app: express.Express) {
   console.log('Registrando uploadDiagnosticsRouter em /api/uploads');
   app.use('/api/uploads', uploadDiagnosticsRouter);
   
+  // Middleware catch-all para rotas de API não encontradas
+  // IMPORTANTE: Deve ser o último middleware antes de retornar o app
+  app.use('/api/*', (req, res) => {
+    console.error(`❌ Rota de API não encontrada: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({
+      error: 'Endpoint não encontrado',
+      message: `A rota ${req.originalUrl} não existe`,
+      method: req.method,
+      timestamp: new Date().toISOString()
+    });
+  });
+  
   return app;
 } 

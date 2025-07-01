@@ -153,14 +153,9 @@ export default function MedicalRecordEditor({
     } catch (error: any) {
       console.error('❌ [MedicalRecordEditor] Erro ao buscar prontuário:', error);
       
-      // Se receber HTML no retorno, significa que a rota não foi encontrada
-      if (error.response?.data && typeof error.response.data === 'string' && error.response.data.includes('<!DOCTYPE html>')) {
-        console.error('❌ Erro: API retornou HTML em vez de JSON. Possível problema de roteamento.');
-        setLoading(false);
-        // Tratar como se não existisse prontuário
-        console.log('📄 Iniciando novo prontuário para consulta de emergência.');
-        setEditedContent('');
-      } else if (error.response?.status === 404) {
+      // Se receber 404 ou HTML no retorno
+      if (error.response?.status === 404 || 
+          (error.response?.data && typeof error.response.data === 'string' && error.response.data.includes('<!DOCTYPE html>'))) {
         // Se não existir prontuário, verificar se há gravação sendo processada
         console.log('ℹ️ [MedicalRecordEditor] Nenhum prontuário existente, verificando gravação...');
         checkRecordingStatus();
