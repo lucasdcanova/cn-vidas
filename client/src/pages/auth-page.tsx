@@ -1029,49 +1029,56 @@ const AuthPage: React.FC = () => {
                     />
                   ) : registerForm.watch("role") === "doctor" ? (
                     <div className="space-y-2">
-                      <FormLabel className="text-gray-700 text-sm">Registro no CRM</FormLabel>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-1/3">
-                          <Select 
-                            defaultValue={estadoSelecionado}
-                            onValueChange={setEstadoSelecionado}
-                          >
-                            <SelectTrigger className="rounded-xl h-12 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-md">
-                              <SelectValue placeholder="UF" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {estadosBrasileiros.map((estado) => (
-                                <SelectItem key={estado.value} value={estado.value}>
-                                  {estado.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                      <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">Registro no CRM</FormLabel>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                          <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
                         </div>
-                        <div className="w-2/3">
-                          <FormField
-                            control={registerForm.control}
-                            name="username"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input 
-                                    placeholder="12345" 
-                                    disabled={isRegistering}
-                                    className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-md"
-                                    onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                                    {...field}
-                                    value={field.value?.replace(/CRM[A-Z]{2}/i, '') || ''}
-                                    onChange={(e) => {
-                                      const value = e.target.value.replace(/\D/g, '');
-                                      field.onChange(`CRM${estadoSelecionado}${value}`);
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <div className="flex items-center space-x-2">
+                          <div className="w-1/3 pl-10">
+                            <Select 
+                              defaultValue={estadoSelecionado}
+                              onValueChange={setEstadoSelecionado}
+                            >
+                              <SelectTrigger className="rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 hover:bg-white/60">
+                                <SelectValue placeholder="UF" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {estadosBrasileiros.map((estado) => (
+                                  <SelectItem key={estado.value} value={estado.value}>
+                                    {estado.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="w-2/3">
+                            <FormField
+                              control={registerForm.control}
+                              name="username"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="12345" 
+                                      disabled={isRegistering}
+                                      className="rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                                      onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                      {...field}
+                                      value={field.value?.replace(/CRM[A-Z]{2}/i, '') || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/\D/g, '');
+                                        field.onChange(`CRM${estadoSelecionado}${value}`);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage className="text-[10px]" />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1081,34 +1088,41 @@ const AuthPage: React.FC = () => {
                       name="cnpj"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700 text-sm">CNPJ da Empresa</FormLabel>
+                          <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">CNPJ da Empresa</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="00.000.000/0000-00" 
-                              disabled={isRegistering}
-                              className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-md"
-                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                              onChange={(e) => {
-                                // Formatação do CNPJ
-                                let value = e.target.value.replace(/\D/g, '');
-                                if (value.length <= 14) {
-                                  // Formata conforme o usuário digita
-                                  if (value.length > 12) {
-                                    value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
-                                  } else if (value.length > 8) {
-                                    value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
-                                  } else if (value.length > 5) {
-                                    value = value.replace(/^(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
-                                  } else if (value.length > 2) {
-                                    value = value.replace(/^(\d{2})(\d{0,3})/, '$1.$2');
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                              </div>
+                              <Input 
+                                placeholder="00.000.000/0000-00" 
+                                disabled={isRegistering}
+                                className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                                onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                onChange={(e) => {
+                                  // Formatação do CNPJ
+                                  let value = e.target.value.replace(/\D/g, '');
+                                  if (value.length <= 14) {
+                                    // Formata conforme o usuário digita
+                                    if (value.length > 12) {
+                                      value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+                                    } else if (value.length > 8) {
+                                      value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
+                                    } else if (value.length > 5) {
+                                      value = value.replace(/^(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
+                                    } else if (value.length > 2) {
+                                      value = value.replace(/^(\d{2})(\d{0,3})/, '$1.$2');
+                                    }
+                                    field.onChange(value);
                                   }
-                                  field.onChange(value);
-                                }
-                              }}
-                              value={field.value || ''}
-                            />
+                                }}
+                                value={field.value || ''}
+                              />
+                            </div>
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-[10px]" />
                         </FormItem>
                       )}
                     />
