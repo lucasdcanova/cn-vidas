@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
-import { consultationRecordings, appointments, doctors, medicalRecords, medicalRecordEntries } from '../../shared/schema.js';
+import { consultationRecordings, appointments, doctors, users } from '../../shared/schema.js';
 import { eq, and, desc } from 'drizzle-orm';
 import { authenticateToken, requireAuth } from '../middleware/auth.js';
 import multer from 'multer';
@@ -10,6 +10,9 @@ import FormData from 'form-data';
 import fetch from 'node-fetch';
 import OpenAI from 'openai';
 import { storage } from '../storage.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const router = Router();
 
@@ -205,28 +208,42 @@ router.get('/appointment/:appointmentId', authenticateToken, async (req: Request
       return res.status(404).json({ success: false, error: 'Gravação não encontrada' });
     }
     
-    // Buscar prontuário médico relacionado se existir
-    const [medicalRecordEntry] = await db.select()
-      .from(medicalRecordEntries)
-      .where(eq(medicalRecordEntries.appointmentId, appointmentId))
-      .orderBy(desc(medicalRecordEntries.createdAt))
-      .limit(1);
+    // Buscar prontuário médico AI relacionado se existir
+    const medicalRecord = await prisma.medical_records.findFirst({
+      where: { 
+        appointment_id: appointmentId
+      }
+    });
+    
+    // Determinar status baseado no processamento
+    let status = 'pending';
+    if (recording.transcriptionStatus === 'failed' || recording.aiProcessingStatus === 'failed') {
+      status = 'error';
+    } else if (recording.aiProcessingStatus === 'completed' && medicalRecord) {
+      status = 'completed';
+    } else if (recording.transcriptionStatus === 'completed') {
+      status = 'transcribed';
+    } else if (recording.transcriptionStatus === 'processing' || recording.aiProcessingStatus === 'processing') {
+      status = 'processing';
+    }
     
     console.log('✅ [Recording] Gravação encontrada:', {
       id: recording.id,
-      status: recording.transcriptionStatus,
-      medicalRecordId: medicalRecordEntry?.id
+      transcriptionStatus: recording.transcriptionStatus,
+      aiProcessingStatus: recording.aiProcessingStatus,
+      medicalRecordId: medicalRecord?.id,
+      status
     });
 
     res.json({
       success: true,
       recording: {
         id: recording.id,
-        status: recording.transcriptionStatus,
+        status,
         hasTranscription: !!recording.transcription,
         hasAiNotes: !!recording.soapNote,
-        medicalRecordId: medicalRecordEntry?.recordId,
-        error: recording.transcriptionError,
+        medicalRecordId: medicalRecord?.id,
+        error: recording.transcriptionError || recording.aiProcessingError,
         createdAt: recording.createdAt,
         completedAt: recording.processingCompletedAt
       }
@@ -366,9 +383,10 @@ async function processRecording(recordingId: number) {
 // Criar prontuário médico a partir da gravação
 async function createMedicalRecordFromRecording(appointmentId: number, doctorId: number, aiContent: any) {
   try {
-    console.log('📋 [Medical Record] Criando prontuário a partir da gravação...');
+    console.log('📋 [Medical Record] Criando prontuário médico com IA a partir da gravação...');
+    console.log('📋 [Medical Record] Dados:', { appointmentId, doctorId });
     
-    // Buscar informações da consulta
+    // Buscar informações da consulta e do médico
     const [appointment] = await db.select()
       .from(appointments)
       .where(eq(appointments.id, appointmentId))
@@ -378,50 +396,77 @@ async function createMedicalRecordFromRecording(appointmentId: number, doctorId:
       throw new Error('Consulta não encontrada');
     }
 
-    // Verificar se já existe prontuário
-    const [existingRecord] = await db.select()
-      .from(medicalRecords)
-      .where(eq(medicalRecords.patientId, appointment.userId))
+    // Buscar o userId do médico
+    const [doctor] = await db.select()
+      .from(doctors)
+      .innerJoin(users, eq(doctors.userId, users.id))
+      .where(eq(doctors.id, doctorId))
       .limit(1);
 
-    let recordId: number;
-
-    if (existingRecord) {
-      recordId = existingRecord.id;
-    } else {
-      // Criar novo prontuário
-      const [newRecord] = await db.insert(medicalRecords)
-        .values({
-          patientId: appointment.userId,
-          primaryDoctorId: doctorId,
-          emergencyContact: '',
-        })
-        .returning();
-      
-      recordId = newRecord.id;
+    if (!doctor) {
+      throw new Error('Médico não encontrado');
     }
 
-    // Criar entrada no prontuário
-    const soap = aiContent.soap_note || {};
-    await db.insert(medicalRecordEntries)
-      .values({
-        recordId,
-        appointmentId,
-        authorId: appointment.userId, // Usar o userId do médico
-        entryType: 'consultation',
-        content: aiContent.resumo || 'Consulta realizada',
-        subjective: soap.subjetivo || '',
-        objective: soap.objetivo || '',
-        assessment: soap.avaliacao || '',
-        plan: soap.plano || '',
-        prescriptions: aiContent.prescricoes || [],
-        signedAt: new Date(),
-      });
+    const doctorUserId = doctor.users.id;
 
-    console.log('✅ [Medical Record] Prontuário criado com sucesso');
+    // Verificar se já existe prontuário AI para esta consulta
+    const existingRecords = await prisma.medical_records.findFirst({
+      where: { 
+        appointment_id: appointmentId
+      }
+    });
+
+    if (existingRecords) {
+      console.log('⚠️ [Medical Record] Prontuário já existe para esta consulta');
+      return;
+    }
+
+    // Formatar conteúdo SOAP
+    const soap = aiContent.soap_note || {};
+    const soapContent = `SUBJETIVO:\n${soap.subjetivo || 'Não informado'}\n\n` +
+                       `OBJETIVO:\n${soap.objetivo || 'Não informado'}\n\n` +
+                       `AVALIAÇÃO:\n${soap.avaliacao || 'Não informado'}\n\n` +
+                       `PLANO:\n${soap.plano || 'Não informado'}`;
+
+    // Formatar prescrições
+    const prescriptionData = aiContent.prescricoes?.map((med: any) => ({
+      nome: med.medicamento || med.nome,
+      dosagem: med.dosagem,
+      via: med.via || 'Oral',
+      frequencia: med.posologia || med.frequencia,
+      duracao: med.duracao,
+      quantidade: med.quantidade || '1 caixa',
+      instrucoes: med.orientacoes || med.instrucoes
+    })) || [];
+
+    // Criar prontuário no sistema de IA
+    const newRecord = await prisma.medical_records.create({
+      data: {
+        patient_id: appointment.userId,
+        doctor_id: doctorUserId,
+        appointment_id: appointmentId,
+        content: {
+          type: 'SOAP',
+          data: soapContent,
+          transcription: aiContent.transcricao,
+          prescription: {
+            medicamentos: prescriptionData,
+            observacoes: aiContent.observacoes_prescricao || ''
+          }
+        },
+        status: 'draft',
+        ai_generated: true
+      }
+    });
+
+    console.log('✅ [Medical Record] Prontuário AI criado com sucesso:', newRecord.id);
+
+    // Log do prontuário criado - removido update pois não há coluna medicalRecordId
+    console.log('✅ [Medical Record] Prontuário vinculado à consulta:', appointmentId);
     
   } catch (error) {
     console.error('❌ [Medical Record] Erro ao criar prontuário:', error);
+    throw error;
   }
 }
 
