@@ -53,6 +53,9 @@ const upload = multer({
 router.post('/upload', requireAuth, upload.single('audio'), async (req: AuthRequest, res) => {
   try {
     console.log('📥 [Recording Upload] Recebendo upload de gravação de consulta...');
+    console.log('📥 [Recording Upload] Headers:', req.headers);
+    console.log('📥 [Recording Upload] Body:', req.body);
+    
     const { appointmentId } = req.body;
     const userId = req.user?.id;
     const file = req.file;
@@ -62,7 +65,8 @@ router.post('/upload', requireAuth, upload.single('audio'), async (req: AuthRequ
       appointmentId,
       fileSize: file?.size ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'N/A',
       mimeType: file?.mimetype,
-      filename: file?.filename
+      filename: file?.filename,
+      timestamp: new Date().toISOString()
     });
 
     if (!userId) {

@@ -38,20 +38,32 @@ const openai = new OpenAI({
 router.post('/upload', authenticateToken, upload.single('audio'), async (req: Request, res: Response) => {
   try {
     console.log('📼 [Recording Upload] Iniciando upload de gravação...');
+    console.log('📼 [Recording Upload] Headers:', req.headers);
+    console.log('📼 [Recording Upload] Body:', req.body);
+    console.log('📼 [Recording Upload] Usuário autenticado:', (req as any).user);
     
     const file = req.file;
     if (!file) {
+      console.error('❌ [Recording Upload] Arquivo não encontrado no request');
       return res.status(400).json({ success: false, error: 'Arquivo não encontrado' });
     }
 
     const appointmentId = parseInt(req.body.appointmentId);
 
     if (!appointmentId) {
+      console.error('❌ [Recording Upload] ID da consulta não fornecido');
       await fs.unlink(file.path);
       return res.status(400).json({ success: false, error: 'ID da consulta é obrigatório' });
     }
 
-    console.log(`📋 [Recording Upload] Consulta: ${appointmentId}`);
+    console.log(`📋 [Recording Upload] Dados recebidos:`, {
+      appointmentId,
+      fileSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      mimeType: file.mimetype,
+      filename: file.filename,
+      originalName: file.originalname,
+      timestamp: new Date().toISOString()
+    });
 
     // Verificar se a consulta existe e obter o médico
     const [appointment] = await db.select()

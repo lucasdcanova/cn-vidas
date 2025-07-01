@@ -714,37 +714,21 @@
 
   /* Estilos para iOS (iPhone e iPad) - Barra flutuante com glassmorphism agressivo */
   .glass-nav-ios {
-    background: rgba(255, 255, 255, 0.60); /* Opacidade reduzida para 60% */
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 1); /* Branco sólido */
+    /* backdrop-filter removido para eliminar glassmorphism */
+    /* -webkit-backdrop-filter removido para eliminar glassmorphism */
+    border: 1px solid rgba(229, 231, 235, 1); /* Borda cinza clara */
     box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.1),
-      0 8px 24px rgba(0, 0, 0, 0.06),
-      0 1px 2px rgba(0, 0, 0, 0.05),
-      inset 0 0 0 0.5px rgba(255, 255, 255, 1),
-      inset 0 1px 0 rgba(255, 255, 255, 1);
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
     border-radius: 24px;
     overflow: hidden;
     position: relative;
   }
   
-  /* Efeito de brilho adicional para glassmorphism mais agressivo */
+  /* Efeito de brilho removido - sem glassmorphism */
   .glass-nav-ios::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.3) 0%,
-      rgba(255, 255, 255, 0) 30%,
-      rgba(255, 255, 255, 0) 70%,
-      rgba(255, 255, 255, 0.1) 100%
-    );
-    pointer-events: none;
+    display: none; /* Desabilita o overlay de gradiente */
   }
 
   /* Posicionamento da barra flutuante no iOS */
