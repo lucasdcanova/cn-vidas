@@ -4,7 +4,7 @@ import { Mic, MicOff, Video, VideoOff, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import RecordingControls from './RecordingControls';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { httpRequest } from '@/lib/http-client';
 
 // Global para rastrear instâncias Daily
 declare global {
@@ -96,10 +96,10 @@ export default function MinimalistVideoCall({
       if (!isDoctor || !appointmentId) return null;
       
       try {
-        const appointmentResponse = await axios.get(`/api/appointments/${appointmentId}`);
-        const patientId = appointmentResponse.data.user_id;
-        const settingsResponse = await axios.get(`/api/users/${patientId}/settings`);
-        return settingsResponse.data;
+        const appointmentResponse = await httpRequest(`/api/appointments/${appointmentId}`);
+        const patientId = appointmentResponse.user_id;
+        const settingsResponse = await httpRequest(`/api/users/${patientId}/settings`);
+        return settingsResponse;
       } catch (error: any) {
         // Se erro 404, assumir configurações padrão
         if (error.response?.status === 404) {
@@ -124,8 +124,8 @@ export default function MinimalistVideoCall({
       if (!isDoctor) return null;
       
       try {
-        const response = await axios.get('/api/users/settings');
-        return response.data;
+        const response = await httpRequest('/api/users/settings');
+        return response;
       } catch (error: any) {
         // Se erro 404, assumir configurações padrão
         if (error.response?.status === 404) {
