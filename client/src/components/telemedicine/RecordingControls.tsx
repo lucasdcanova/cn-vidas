@@ -3,7 +3,7 @@ import { Circle, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAudioRecording } from '@/hooks/use-audio-recording';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+import { httpRequest } from '@/lib/http-client';
 
 interface RecordingControlsProps {
   appointmentId: number;
@@ -82,49 +82,38 @@ export default function RecordingControls({
       console.log(`🆔 [RecordingControls] Appointment ID: ${appointmentId}`);
       
       // Fazer upload
-      const response = await axios.post(
-        `/api/consultation-recordings/upload`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / (progressEvent.total || 1)
-            );
-            console.log(`📈 [RecordingControls] Progresso do upload: ${percentCompleted}%`);
-          }
-        }
-      );
+      const response = await httpRequest(`/api/consultation-recordings/upload`, {
+        method: 'POST',
+        body: formData,
+        // Não definir Content-Type para FormData - o navegador define automaticamente com boundary
+        headers: {}
+      });
 
-      console.log('📥 [RecordingControls] Resposta do servidor:', response.data);
+      console.log('📥 [RecordingControls] Resposta do servidor:', response);
       
-      if (response.data.success) {
+      if (response.success) {
         console.log('✅ [RecordingControls] Upload concluído com sucesso!');
-        console.log(`🆔 [RecordingControls] Recording ID: ${response.data.recordingId}`);
+        console.log(`🆔 [RecordingControls] Recording ID: ${response.recordingId}`);
         console.log('📄 [RecordingControls] Prontuário será gerado automaticamente');
         
         toast({
           title: 'Gravação salva',
           description: 'A gravação foi processada e o prontuário será gerado automaticamente.',
         });
-        onRecordingStop?.(response.data.recordingId);
+        onRecordingStop?.(response.recordingId);
       } else {
-        console.error('❌ [RecordingControls] Resposta do servidor indica falha:', response.data);
+        console.error('❌ [RecordingControls] Resposta do servidor indica falha:', response);
       }
     } catch (error: any) {
       console.error('❌ [RecordingControls] Erro ao fazer upload:', error);
       console.error('📋 [RecordingControls] Detalhes do erro:', {
-        status: error.response?.status,
-        data: error.response?.data,
         message: error.message,
         stack: error.stack
       });
       
       toast({
         title: 'Erro no upload',
-        description: error.response?.data?.error || 'Falha ao enviar gravação.',
+        description: error.message || 'Falha ao enviar gravação.',
         variant: 'destructive'
       });
     } finally {
