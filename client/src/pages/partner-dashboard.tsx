@@ -2,8 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import { Loader2 } from "lucide-react";
 import PartnerDashboard from "@/components/dashboards/partner-dashboard";
-// TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
-// import { PartnerOnboardingGuard } from "@/components/partner/partner-onboarding-guard";
+import { PartnerOnboardingGuard } from "@/components/partner/partner-onboarding-guard";
 
 export default function PartnerDashboardPage() {
   const { user, isLoading } = useAuth();
@@ -32,11 +31,10 @@ export default function PartnerDashboardPage() {
   }
 
   return (
-    // TODO: Reabilitar PartnerOnboardingGuard após corrigir o problema de loop infinito
-    // <PartnerOnboardingGuard>
+    <PartnerOnboardingGuard>
       <DashboardLayout>
         <PartnerDashboard />
       </DashboardLayout>
-    // </PartnerOnboardingGuard>
+    </PartnerOnboardingGuard>
   );
 }
