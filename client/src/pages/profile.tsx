@@ -33,7 +33,7 @@ import {
 } from "@/lib/api";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut } from "lucide-react";
+import { LogOut, Edit } from "lucide-react";
 import { Capacitor } from '@capacitor/core';
 import { useFreshUserData } from "@/hooks/use-fresh-user-data";
 import { useBiometricAuth } from "@/hooks/use-biometric-auth";
@@ -1149,6 +1149,17 @@ const Profile: React.FC = () => {
                       Atualize seus dados pessoais e informações de contato
                     </CardDescription>
                   </div>
+                  {!isEditMode && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditMode(true)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Editar
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               
@@ -1648,7 +1659,7 @@ const Profile: React.FC = () => {
                               <FormControl>
                                 <Input 
                                   placeholder="Sua Empresa Ltda." 
-                                  disabled={isUpdatingProfile}
+                                  disabled={!isEditMode || isUpdatingProfile}
                                   {...field} 
                                 />
                               </FormControl>
@@ -1666,7 +1677,7 @@ const Profile: React.FC = () => {
                               <FormControl>
                                 <Input 
                                   placeholder="Clínica, Hospital, etc." 
-                                  disabled={isUpdatingProfile}
+                                  disabled={!isEditMode || isUpdatingProfile}
                                   {...field} 
                                 />
                               </FormControl>
@@ -1705,7 +1716,7 @@ const Profile: React.FC = () => {
                               <FormControl>
                                 <Input 
                                   placeholder="https://www.seusite.com.br" 
-                                  disabled={isUpdatingProfile}
+                                  disabled={!isEditMode || isUpdatingProfile}
                                   {...field} 
                                 />
                               </FormControl>
@@ -1723,7 +1734,7 @@ const Profile: React.FC = () => {
                               <FormControl>
                                 <Input 
                                   placeholder="(00) 0000-0000" 
-                                  disabled={isUpdatingProfile}
+                                  disabled={!isEditMode || isUpdatingProfile}
                                   {...field} 
                                 />
                               </FormControl>
@@ -1825,19 +1836,48 @@ const Profile: React.FC = () => {
                         </div>
                       </div>
                       
-                      <div className="flex justify-end">
-                        <Button 
-                          type="submit" 
-                          disabled={isUpdatingProfile}
-                        >
-                          {isUpdatingProfile ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Salvando...
-                            </>
-                          ) : "Salvar Alterações"}
-                        </Button>
-                      </div>
+                      {isEditMode && (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setIsEditMode(false);
+                              // Resetar o formulário para os valores originais
+                              partnerForm.reset({
+                                businessName: partnerData?.businessName || "",
+                                businessType: partnerData?.businessType || "",
+                                description: partnerData?.description || "",
+                                website: partnerData?.website || "",
+                                address: partnerData?.address || "",
+                                zipcode: partnerData?.zipcode || "",
+                                street: partnerData?.street || "",
+                                number: partnerData?.number || "",
+                                complement: partnerData?.complement || "",
+                                neighborhood: partnerData?.neighborhood || "",
+                                city: partnerData?.city || "",
+                                state: partnerData?.state || "",
+                                phone: partnerData?.phone || "",
+                                cnpj: partnerData?.cnpj || "",
+                                nationwideService: partnerData?.nationwideService || false,
+                              });
+                            }}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            disabled={isUpdatingProfile}
+                          >
+                            {isUpdatingProfile ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Salvando...
+                              </>
+                            ) : "Salvar Alterações"}
+                          </Button>
+                        </div>
+                      )}
                     </form>
                   </Form>
                 )}
