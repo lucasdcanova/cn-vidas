@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
-import { InstallPWA } from "@/components/InstallPWA";
 import { PushNotificationService } from "@/services/push-notifications";
 import { isNativeApp } from "@/utils/platform";
 import { useThemeColor } from "@/hooks/use-theme-color";
@@ -267,7 +266,6 @@ function App() {
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
-            <InstallPWA />
             <IOSSessionGuard />
             <Router />
           </TooltipProvider>
