@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Circle, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAudioRecording } from '@/hooks/use-audio-recording';
@@ -36,6 +36,16 @@ export default function RecordingControls({
   const [hasConsent, setHasConsent] = useState(patientConsent);
   const [hasStarted, setHasStarted] = useState(false);
   const [manualStart, setManualStart] = useState(false);
+  
+  // Atualizar hasConsent quando patientConsent mudar
+  useEffect(() => {
+    console.log('🔄 [RecordingControls] Atualizando hasConsent:', {
+      patientConsent,
+      hasConsentAnterior: hasConsent,
+      hasConsentNovo: patientConsent
+    });
+    setHasConsent(patientConsent);
+  }, [patientConsent]);
 
   // Formatador de duração
   const formatDuration = (seconds: number) => {
@@ -155,39 +165,8 @@ export default function RecordingControls({
     });
   }, [appointmentId, autoStart, patientConsent, hasConsent, hasStarted, state.isRecording, isUploading]);
   
-  // Log inicial quando o componente monta
-  useEffect(() => {
-    console.log('🚀 [RecordingControls] Componente montado com props:', {
-      appointmentId,
-      autoStart,
-      patientConsent,
-      className
-    });
-  }, []);
-
-  // Iniciar gravação automaticamente se configurado
-  useEffect(() => {
-    console.log('🔄 [RecordingControls] Verificando condições para auto-start:', {
-      autoStart,
-      hasConsent,
-      hasStarted,
-      isRecording: state.isRecording,
-      condicoesAtendidas: autoStart && hasConsent && !hasStarted && !state.isRecording
-    });
-    
-    if (autoStart && hasConsent && !hasStarted && !state.isRecording) {
-      setHasStarted(true);
-      // Aguardar 5 segundos para garantir que a chamada está estável
-      console.log('⏱️ [RecordingControls] Aguardando 5 segundos para iniciar gravação automática...');
-      setTimeout(() => {
-        console.log('🎙️ [RecordingControls] Iniciando gravação automática após 5 segundos');
-        handleStartRecording();
-      }, 5000);
-    }
-  }, [autoStart, hasConsent, hasStarted, state.isRecording]);
-
   // Iniciar gravação
-  const handleStartRecording = async () => {
+  const handleStartRecording = useCallback(async () => {
     console.log('🎙️ [RecordingControls] Iniciando gravação...', {
       appointmentId,
       hasConsent,
@@ -219,7 +198,38 @@ export default function RecordingControls({
         variant: 'destructive'
       });
     }
-  };
+  }, [appointmentId, hasConsent, autoStart, startRecording, onRecordingStart, toast]);
+
+  // Log inicial quando o componente monta
+  useEffect(() => {
+    console.log('🚀 [RecordingControls] Componente montado com props:', {
+      appointmentId,
+      autoStart,
+      patientConsent,
+      className
+    });
+  }, []);
+
+  // Iniciar gravação automaticamente se configurado
+  useEffect(() => {
+    console.log('🔄 [RecordingControls] Verificando condições para auto-start:', {
+      autoStart,
+      hasConsent,
+      hasStarted,
+      isRecording: state.isRecording,
+      condicoesAtendidas: autoStart && hasConsent && !hasStarted && !state.isRecording
+    });
+    
+    if (autoStart && hasConsent && !hasStarted && !state.isRecording) {
+      setHasStarted(true);
+      // Aguardar 5 segundos para garantir que a chamada está estável
+      console.log('⏱️ [RecordingControls] Aguardando 5 segundos para iniciar gravação automática...');
+      setTimeout(() => {
+        console.log('🎙️ [RecordingControls] Iniciando gravação automática após 5 segundos');
+        handleStartRecording();
+      }, 5000);
+    }
+  }, [autoStart, hasConsent, hasStarted, state.isRecording, handleStartRecording]);
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
