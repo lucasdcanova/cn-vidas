@@ -1938,13 +1938,13 @@ export class DatabaseStorage implements IStorage {
         const existing = patientMap.get(apt.userId);
         if (existing) {
           existing.totalAppointments++;
-          if (apt.appointmentDate && new Date(apt.appointmentDate) > existing.lastAppointmentDate) {
-            existing.lastAppointmentDate = new Date(apt.appointmentDate);
+          if (apt.date && new Date(apt.date) > existing.lastAppointmentDate) {
+            existing.lastAppointmentDate = new Date(apt.date);
           }
         } else {
           patientMap.set(apt.userId, {
             userId: apt.userId,
-            lastAppointmentDate: apt.appointmentDate ? new Date(apt.appointmentDate) : new Date(),
+            lastAppointmentDate: apt.date ? new Date(apt.date) : new Date(),
             totalAppointments: 1
           });
         }
