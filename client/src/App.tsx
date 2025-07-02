@@ -82,6 +82,7 @@ import AdminDoctors from "@/pages/admin/doctors";
 import DoctorMedicalRecords from "@/pages/doctor/medical-records";
 import DoctorMedicalRecordEdit from "@/pages/doctor/medical-record-edit";
 import TestHeadlessDaily from "@/pages/test-headless-daily";
+import { ProcessingWaitPage } from "@/pages/processing-wait";
 
 // Componente de erro boundary
 class ErrorBoundary extends React.Component<
@@ -179,6 +180,7 @@ function Router() {
       <ProtectedRoute path="/doctor/settings" component={DoctorSettings} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor/medical-records" component={DoctorMedicalRecords} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor/medical-records/edit" component={DoctorMedicalRecordEdit} allowedRoles={["doctor"]} />
+      <ProtectedRoute path="/doctor/processing-wait" component={ProcessingWaitPage} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-onboarding" component={DoctorOnboarding} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/onboarding/doctor" component={DoctorOnboardingFlow} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-telemedicine" component={DoctorTelemedicine} allowedRoles={["doctor"]} />

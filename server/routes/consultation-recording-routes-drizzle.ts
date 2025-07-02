@@ -152,6 +152,52 @@ router.post('/upload', authenticateToken, upload.single('audio'), async (req: Re
   }
 });
 
+// Verificar status do processamento
+router.get('/status/:appointmentId', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const appointmentId = parseInt(req.params.appointmentId);
+    
+    console.log('🔍 [Recording Status] Verificando status para appointment:', appointmentId);
+    
+    const [recording] = await db.select()
+      .from(consultationRecordings)
+      .where(eq(consultationRecordings.appointmentId, appointmentId))
+      .orderBy(desc(consultationRecordings.createdAt))
+      .limit(1);
+      
+    if (!recording) {
+      return res.json({
+        success: true,
+        status: 'not_found',
+        message: 'Nenhuma gravação encontrada'
+      });
+    }
+    
+    // Verificar se já existe prontuário
+    const medicalRecord = await prisma.medical_records.findFirst({
+      where: { appointment_id: appointmentId }
+    });
+    
+    res.json({
+      success: true,
+      status: recording.aiProcessingStatus || 'pending',
+      hasRecording: true,
+      hasTranscription: !!recording.transcription,
+      hasMedicalRecord: !!medicalRecord,
+      recordingId: recording.id,
+      medicalRecordId: medicalRecord?.id,
+      error: recording.aiProcessingError || recording.transcriptionError
+    });
+    
+  } catch (error) {
+    console.error('❌ [Recording Status] Erro:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Erro ao verificar status' 
+    });
+  }
+});
+
 // Buscar gravação por consulta
 router.get('/appointment/:appointmentId', authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -318,7 +364,7 @@ async function processRecording(recordingId: number) {
       .where(eq(consultationRecordings.id, recordingId));
 
     const aiResponse = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4-turbo-preview',
       messages: [
         {
           role: 'system',
@@ -340,7 +386,8 @@ async function processRecording(recordingId: number) {
           - duracao: tempo de tratamento
           - orientacoes: orientações especiais
           
-          Retorne em formato JSON com as chaves: 
+          IMPORTANTE: Retorne APENAS um JSON válido, sem texto adicional.
+          O JSON deve ter as chaves: 
           - soap_note (com subjetivo, objetivo, avaliacao, plano)
           - prescricoes (array de objetos com medicamento, dosagem, posologia, duracao, orientacoes)
           - resumo (texto resumindo a consulta)`
@@ -350,7 +397,6 @@ async function processRecording(recordingId: number) {
           content: `Transcrição da consulta:\n\n${transcription}`
         }
       ],
-      response_format: { type: "json_object" },
       temperature: 0.3,
     });
 
