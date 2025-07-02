@@ -161,8 +161,11 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 router.get('/by-appointment/:appointmentId', isAuthenticated, async (req, res) => {
   try {
     console.log('🎯 [Medical Records AI] Rota /by-appointment/:appointmentId chamada');
+    console.log('🎯 [Medical Records AI] URL completa:', req.originalUrl);
+    console.log('🎯 [Medical Records AI] Method:', req.method);
     console.log('🎯 [Medical Records AI] Params:', req.params);
     console.log('🎯 [Medical Records AI] User:', req.user);
+    console.log('🎯 [Medical Records AI] Headers:', req.headers);
     
     const { appointmentId } = req.params;
     const userId = req.user?.id;

@@ -382,6 +382,14 @@ async function processRecording(recordingId: number) {
     
   } catch (error) {
     console.error(`❌ [Recording Process] Erro no processamento:`, error);
+    console.error(`❌ [Recording Process] Stack trace:`, error.stack);
+    console.error(`❌ [Recording Process] Tipo do erro:`, error.constructor.name);
+    
+    // Log adicional para debug
+    if (error.response) {
+      console.error(`❌ [Recording Process] Response data:`, error.response.data);
+      console.error(`❌ [Recording Process] Response status:`, error.response.status);
+    }
     
     // Atualizar status de erro
     await db.update(consultationRecordings)
@@ -389,6 +397,7 @@ async function processRecording(recordingId: number) {
         transcriptionStatus: 'failed',
         aiProcessingStatus: 'failed',
         transcriptionError: error instanceof Error ? error.message : 'Erro desconhecido',
+        aiProcessingError: error instanceof Error ? error.message : 'Erro desconhecido',
       })
       .where(eq(consultationRecordings.id, recordingId));
   }
