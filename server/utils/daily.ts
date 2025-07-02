@@ -90,7 +90,7 @@ export async function createRoom(roomName: string, expiryMinutes = 60, waitForPr
           enable_knocking: false,  // Desabilitar "knocking" para acesso direto
           enable_network_ui: true, // Habilitar UI de rede
           enable_prejoin_ui: false, // Desabilitar tela de pre-join
-          enable_recording: 'local', // Permitir gravação local
+          enable_recording: 'cloud', // Permitir gravação em nuvem
           enable_advanced_chat: false,
           max_participants: 2,      // Limitar a 2 participantes (médico e paciente)
           exp: Math.floor(Date.now() / 1000) + expiryMinutes * 60 // expiração em timestamp unix

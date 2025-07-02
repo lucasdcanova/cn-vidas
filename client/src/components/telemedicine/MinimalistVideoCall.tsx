@@ -83,6 +83,9 @@ export default function MinimalistVideoCall({
   const callStartTimeRef = useRef<number>(0);
   const [hasJoinedCall, setHasJoinedCall] = useState(false);
   const [audioPermissionGranted, setAudioPermissionGranted] = useState(false);
+  const [mixedAudioStream, setMixedAudioStream] = useState<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioDestinationRef = useRef<MediaStreamAudioDestinationNode | null>(null);
   
   // Limpar instâncias ao montar
   useEffect(() => {
@@ -400,6 +403,11 @@ export default function MinimalistVideoCall({
             }
             
             onParticipantJoined?.(event.participant);
+            
+            // Criar stream mixado quando o segundo participante entrar
+            setTimeout(() => {
+              createMixedAudioStream();
+            }, 1000); // Aguardar 1 segundo para garantir que os tracks estejam prontos
           }
         })
         .on('participant-left', (event) => {
@@ -639,6 +647,62 @@ export default function MinimalistVideoCall({
     }
   }, [roomUrl, token, userName, isVideoEnabled, isAudioEnabled, onJoinCall, onLeaveCall, onParticipantJoined, onParticipantLeft, isCallActive, isConnecting, hasJoinedCall]);
 
+  // Função para criar stream de áudio mixado
+  const createMixedAudioStream = useCallback(async () => {
+    if (!callRef.current) {
+      console.warn('⚠️ [MinimalistVideoCall] Call object não disponível para criar stream mixado');
+      return;
+    }
+
+    try {
+      console.log('🎧 [MinimalistVideoCall] Criando stream de áudio mixado...');
+      
+      // Criar AudioContext se não existir
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+        audioDestinationRef.current = audioContextRef.current.createMediaStreamDestination();
+      }
+
+      const audioContext = audioContextRef.current;
+      const destination = audioDestinationRef.current!;
+      
+      // Obter todos os participantes
+      const participants = callRef.current.participants();
+      console.log(`🎤 [MinimalistVideoCall] Participantes encontrados: ${Object.keys(participants).length}`);
+      
+      // Conectar áudio de cada participante
+      for (const [id, participant] of Object.entries(participants)) {
+        console.log(`👤 [MinimalistVideoCall] Processando participante: ${participant.userName || id}`);
+        
+        if (participant.tracks?.audio?.persistentTrack) {
+          try {
+            const audioTrack = participant.tracks.audio.persistentTrack;
+            console.log(`🔊 [MinimalistVideoCall] Track de áudio encontrado para ${participant.userName}`);
+            
+            // Criar MediaStream a partir do track
+            const stream = new MediaStream([audioTrack]);
+            const source = audioContext.createMediaStreamSource(stream);
+            
+            // Conectar ao destino
+            source.connect(destination);
+            console.log(`✅ [MinimalistVideoCall] Áudio conectado para ${participant.userName}`);
+          } catch (error) {
+            console.error(`❌ [MinimalistVideoCall] Erro ao conectar áudio de ${participant.userName}:`, error);
+          }
+        } else {
+          console.log(`⚠️ [MinimalistVideoCall] Sem track de áudio para ${participant.userName}`);
+        }
+      }
+      
+      // Definir o stream mixado
+      setMixedAudioStream(destination.stream);
+      console.log('✅ [MinimalistVideoCall] Stream de áudio mixado criado com sucesso');
+      
+    } catch (error) {
+      console.error('❌ [MinimalistVideoCall] Erro ao criar stream mixado:', error);
+    }
+  }, []);
+
   // Função para lidar com tracks iniciados
   const handleTrackStarted = (event: any) => {
     const { participant, track } = event;
@@ -654,6 +718,14 @@ export default function MinimalistVideoCall({
     });
     
     if (track && track.readyState === 'live') {
+      // Se for track de áudio, recriar stream mixado
+      if (track.kind === 'audio') {
+        console.log('🎧 [MinimalistVideoCall] Track de áudio detectado, recriando stream mixado...');
+        setTimeout(() => {
+          createMixedAudioStream();
+        }, 500);
+      }
+      
       if (participant.local) {
         // Tracks locais
         if (track.kind === 'video' && localVideoRef.current) {
@@ -907,6 +979,18 @@ export default function MinimalistVideoCall({
       const cleanup = async () => {
         console.log('🧹 [MinimalistVideoCall] Limpando ao desmontar componente...');
         
+        // Limpar AudioContext
+        if (audioContextRef.current) {
+          try {
+            await audioContextRef.current.close();
+            audioContextRef.current = null;
+            audioDestinationRef.current = null;
+            console.log('✅ [MinimalistVideoCall] AudioContext fechado');
+          } catch (error) {
+            console.error('❌ [MinimalistVideoCall] Erro ao fechar AudioContext:', error);
+          }
+        }
+        
         // Parar gravação se estiver gravando
         if (window.recordingControlsRef && !window.recordingControlsStopping) {
           console.log('⏹️ [MinimalistVideoCall] Parando gravação no cleanup...');
@@ -1142,6 +1226,7 @@ export default function MinimalistVideoCall({
                         className="px-4 py-2"
                         autoStart={shouldRecord}
                         patientConsent={true}
+                        audioStream={mixedAudioStream || undefined}
                       />
                     );
                   })()}

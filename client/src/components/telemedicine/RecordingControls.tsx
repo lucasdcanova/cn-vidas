@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Circle, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAudioRecording } from '@/hooks/use-audio-recording';
+import { useAudioRecordingV2 } from '@/hooks/use-audio-recording-v2';
 import { useToast } from '@/hooks/use-toast';
 import { httpRequest } from '@/lib/http-client';
 
@@ -12,6 +12,7 @@ interface RecordingControlsProps {
   className?: string;
   autoStart?: boolean;
   patientConsent?: boolean;
+  audioStream?: MediaStream;
 }
 
 export default function RecordingControls({
@@ -20,10 +21,11 @@ export default function RecordingControls({
   onRecordingStop,
   className,
   autoStart = false,
-  patientConsent = false
+  patientConsent = false,
+  audioStream
 }: RecordingControlsProps) {
   const { toast } = useToast();
-  const { state, startRecording, stopRecording, pauseRecording, resumeRecording } = useAudioRecording();
+  const { state, startRecording, stopRecording, pauseRecording, resumeRecording } = useAudioRecordingV2();
   
   console.log('🎯 [RecordingControls] Componente renderizado com props:', {
     appointmentId,
@@ -180,8 +182,9 @@ export default function RecordingControls({
       const permission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
       console.log('🔐 [RecordingControls] Status da permissão:', permission.state);
       
-      await startRecording();
+      await startRecording(audioStream);
       console.log('✅ [RecordingControls] Gravação iniciada com sucesso');
+      console.log('🎙️ [RecordingControls] Usando stream:', audioStream ? 'Stream fornecida' : 'Microfone local');
       setManualStart(true);
       onRecordingStart?.();
     } catch (error: any) {
@@ -198,7 +201,7 @@ export default function RecordingControls({
         variant: 'destructive'
       });
     }
-  }, [appointmentId, hasConsent, autoStart, startRecording, onRecordingStart, toast]);
+  }, [appointmentId, hasConsent, autoStart, startRecording, onRecordingStart, toast, audioStream]);
 
   // Log inicial quando o componente monta
   useEffect(() => {
