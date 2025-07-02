@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useRoute } from 'wouter';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,11 @@ import { Progress } from '@/components/ui/progress';
 import { httpRequest } from '@/lib/http-client';
 
 export function ProcessingWaitPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [, navigate] = useLocation();
+  const [, params] = useRoute('/doctor/processing-wait');
+  
+  // Extrair appointmentId da query string
+  const searchParams = new URLSearchParams(window.location.search);
   const appointmentId = searchParams.get('appointmentId');
   
   const [status, setStatus] = useState<string>('checking');
