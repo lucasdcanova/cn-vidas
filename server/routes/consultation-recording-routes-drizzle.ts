@@ -335,26 +335,44 @@ async function processRecording(recordingId: number) {
     console.log(`📁 [Recording Process] Lendo arquivo: ${filePath}`);
     
     const audioFile = await fs.readFile(filePath);
+    console.log(`📊 [Recording Process] Arquivo lido: ${audioFile.length} bytes`);
     
     // Transcrever com OpenAI
     console.log('🎤 [Recording Process] Enviando para transcrição...');
     
-    const transcriptionResponse = await openai.audio.transcriptions.create({
-      file: new File([audioFile], 'audio.webm', { type: 'audio/webm' }),
-      model: 'whisper-1',
-      language: 'pt',
-    });
+    let transcription = '';
+    
+    try {
+      const transcriptionResponse = await openai.audio.transcriptions.create({
+        file: new File([audioFile], 'audio.webm', { type: 'audio/webm' }),
+        model: 'whisper-1',
+        language: 'pt',
+      });
 
-    const transcription = transcriptionResponse.text;
-    console.log(`✅ [Recording Process] Transcrição concluída. ${transcription.length} caracteres`);
+      transcription = transcriptionResponse.text || '';
+      console.log(`✅ [Recording Process] Transcrição concluída. ${transcription.length} caracteres`);
+      console.log(`📝 [Recording Process] Primeiros 200 caracteres: ${transcription.substring(0, 200)}`);
 
-    // Atualizar com transcrição
-    await db.update(consultationRecordings)
-      .set({ 
-        transcription,
-        transcriptionStatus: 'completed',
-      })
-      .where(eq(consultationRecordings.id, recordingId));
+      // Atualizar com transcrição
+      await db.update(consultationRecordings)
+        .set({ 
+          transcription,
+          transcriptionStatus: 'completed',
+        })
+        .where(eq(consultationRecordings.id, recordingId));
+    } catch (transcriptionError: any) {
+      console.error('❌ [Recording Process] Erro na transcrição:', transcriptionError);
+      console.error('Detalhes do erro:', transcriptionError.response?.data || transcriptionError.message);
+      
+      await db.update(consultationRecordings)
+        .set({ 
+          transcriptionStatus: 'failed',
+          transcriptionError: transcriptionError.message || 'Erro desconhecido na transcrição',
+        })
+        .where(eq(consultationRecordings.id, recordingId));
+      
+      throw transcriptionError;
+    }
 
     // Gerar prontuário com IA
     console.log('🤖 [Recording Process] Gerando prontuário com IA...');
