@@ -27,11 +27,19 @@ export default function RecordingControls({
   const { toast } = useToast();
   const { state, startRecording, stopRecording, pauseRecording, resumeRecording } = useAudioRecordingV2();
   
+  console.log('🎤 [RecordingControls] Estado do hook de gravação:', {
+    state,
+    hasStartRecording: !!startRecording,
+    hasStopRecording: !!stopRecording
+  });
+  
   console.log('🎯 [RecordingControls] Componente renderizado com props:', {
     appointmentId,
     autoStart,
     patientConsent,
     className,
+    hasAudioStream: !!audioStream,
+    audioStreamTracks: audioStream ? audioStream.getTracks().map(t => ({ kind: t.kind, enabled: t.enabled, readyState: t.readyState })) : null,
     timestamp: new Date().toISOString()
   });
   const [isUploading, setIsUploading] = useState(false);
@@ -230,6 +238,7 @@ export default function RecordingControls({
       hasConsent,
       hasStarted,
       isRecording: state?.isRecording || false,
+      audioStream: !!audioStream,
       condicoesAtendidas: autoStart && hasConsent && !hasStarted && !state?.isRecording
     });
     
@@ -237,15 +246,25 @@ export default function RecordingControls({
       setHasStarted(true);
       // Aguardar 5 segundos para garantir que a chamada está estável
       console.log('⏱️ [RecordingControls] Aguardando 5 segundos para iniciar gravação automática...');
+      console.log('🎯 [RecordingControls] Configuração de gravação automática:', {
+        appointmentId,
+        hasAudioStream: !!audioStream,
+        audioStreamType: audioStream ? 'Fornecida' : 'Usará microfone local'
+      });
+      
       const timer = setTimeout(() => {
         console.log('🎙️ [RecordingControls] Iniciando gravação automática após 5 segundos');
         console.log('🎤 [RecordingControls] Appointment ID para gravação:', appointmentId);
+        console.log('🔊 [RecordingControls] Audio stream disponível:', !!audioStream);
         handleStartRecording();
       }, 5000);
       
-      return () => clearTimeout(timer);
+      return () => {
+        console.log('🧹 [RecordingControls] Limpando timer de auto-start');
+        clearTimeout(timer);
+      };
     }
-  }, [autoStart, hasConsent, hasStarted, state?.isRecording, handleStartRecording, appointmentId]);
+  }, [autoStart, hasConsent, hasStarted, state?.isRecording, handleStartRecording, appointmentId, audioStream]);
 
   return (
     <div className={cn('flex items-center gap-2', className)}>

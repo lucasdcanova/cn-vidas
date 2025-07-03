@@ -148,6 +148,14 @@ export default function MinimalistVideoCall({
 
   // Determinar se deve gravar automaticamente
   const shouldAutoRecord = () => {
+    console.log('🔍 [MinimalistVideoCall] shouldAutoRecord chamado:', {
+      isDoctor,
+      hasPatientSettings: !!patientSettings,
+      hasDoctorSettings: !!doctorSettings,
+      patientUserId,
+      doctorUserId
+    });
+    
     // Se for médico em consulta de emergência, sempre gravar por padrão
     if (!isDoctor) return false;
     
@@ -165,6 +173,8 @@ export default function MinimalistVideoCall({
     console.log('🎙️ [MinimalistVideoCall] Verificação de gravação automática:', {
       patientAllows: patientAllowsRecording,
       doctorAllows: doctorAllowsRecording,
+      patientPrivacySetting: patientSettings?.privacy?.allowConsultationRecording,
+      doctorPrivacySetting: doctorSettings?.privacy?.allowConsultationRecording,
       resultado: patientAllowsRecording && doctorAllowsRecording
     });
     
