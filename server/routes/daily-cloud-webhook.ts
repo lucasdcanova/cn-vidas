@@ -182,11 +182,9 @@ async function handleRecordingReady(payload: any) {
     console.log('🤖 [Daily Webhook] Iniciando processamento com IA...');
     await processRecordingWithAI(appointmentId, finalPath);
     
-    // 6. Limpar arquivo temporário se foi movido para S3
-    if (finalPath !== tempPath) {
-      // Arquivo foi movido para local, não precisa limpar
-    } else {
-      // Arquivo foi para S3, limpar temp
+    // 6. Limpar arquivo temporário apenas se necessário
+    if (finalPath === tempPath && audioUrl.startsWith('https://')) {
+      // Arquivo foi enviado para S3 e ainda está no temp, pode limpar
       await fs.unlink(tempPath).catch(() => {});
     }
     
@@ -321,9 +319,17 @@ async function createMedicalRecord(appointmentId: number, aiContent: any, transc
       throw new Error('Consulta não encontrada');
     }
     
-    const doctorUser = await prisma.users.findUnique({
-      where: { id: appointment.doctor_id }
+    // Buscar o médico através da tabela doctors
+    const doctor = await prisma.doctors.findUnique({
+      where: { id: appointment.doctor_id },
+      include: { users: true }
     });
+    
+    if (!doctor || !doctor.users) {
+      throw new Error(`Médico não encontrado: doctorId ${appointment.doctor_id}`);
+    }
+    
+    const doctorUser = doctor.users;
     
     // Formatar conteúdo SOAP
     const soapContent = `
