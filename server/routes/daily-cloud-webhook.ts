@@ -67,13 +67,18 @@ async function handleRecordingStarted(payload: any) {
   const { id: recordingId, room_name, start_ts } = payload;
   
   // Extrair appointmentId do nome da sala (ex: emergency-58-1751574517329)
-  const appointmentIdMatch = room_name.match(/emergency-\d+-(\d+)/);
-  if (!appointmentIdMatch) {
-    console.error('❌ [Daily Webhook] Não foi possível extrair appointmentId do room_name:', room_name);
+  // O formato é emergency-{userId}-{timestamp}, mas precisamos buscar pelo nome da sala
+  const appointmentMatch = await db.select()
+    .from(consultationRecordings)
+    .where(eq(consultationRecordings.roomName, room_name))
+    .limit(1);
+  
+  if (!appointmentMatch || appointmentMatch.length === 0) {
+    console.error('❌ [Daily Webhook] Não foi possível encontrar consulta para room_name:', room_name);
     return;
   }
   
-  const appointmentId = parseInt(appointmentIdMatch[1]);
+  const appointmentId = appointmentMatch[0].appointmentId;
   
   // Atualizar registro de gravação
   await db.update(consultationRecordings)
@@ -94,11 +99,15 @@ async function handleRecordingStopped(payload: any) {
   
   const { id: recordingId, room_name, duration } = payload;
   
-  // Extrair appointmentId
-  const appointmentIdMatch = room_name.match(/emergency-\d+-(\d+)/);
-  if (!appointmentIdMatch) return;
+  // Buscar appointmentId pelo nome da sala
+  const appointmentMatch = await db.select()
+    .from(consultationRecordings)
+    .where(eq(consultationRecordings.roomName, room_name))
+    .limit(1);
   
-  const appointmentId = parseInt(appointmentIdMatch[1]);
+  if (!appointmentMatch || appointmentMatch.length === 0) return;
+  
+  const appointmentId = appointmentMatch[0].appointmentId;
   
   // Atualizar duração
   await db.update(consultationRecordings)
@@ -117,11 +126,15 @@ async function handleRecordingReady(payload: any) {
   
   const { id: recordingId, room_name, download_link, duration } = payload;
   
-  // Extrair appointmentId
-  const appointmentIdMatch = room_name.match(/emergency-\d+-(\d+)/);
-  if (!appointmentIdMatch) return;
+  // Buscar appointmentId pelo nome da sala
+  const appointmentMatch = await db.select()
+    .from(consultationRecordings)
+    .where(eq(consultationRecordings.roomName, room_name))
+    .limit(1);
   
-  const appointmentId = parseInt(appointmentIdMatch[1]);
+  if (!appointmentMatch || appointmentMatch.length === 0) return;
+  
+  const appointmentId = appointmentMatch[0].appointmentId;
   
   try {
     // 1. Baixar o arquivo de áudio
@@ -190,11 +203,15 @@ async function handleRecordingError(payload: any) {
   
   const { room_name, error_msg } = payload;
   
-  // Extrair appointmentId
-  const appointmentIdMatch = room_name.match(/emergency-\d+-(\d+)/);
-  if (!appointmentIdMatch) return;
+  // Buscar appointmentId pelo nome da sala
+  const appointmentMatch = await db.select()
+    .from(consultationRecordings)
+    .where(eq(consultationRecordings.roomName, room_name))
+    .limit(1);
   
-  const appointmentId = parseInt(appointmentIdMatch[1]);
+  if (!appointmentMatch || appointmentMatch.length === 0) return;
+  
+  const appointmentId = appointmentMatch[0].appointmentId;
   
   await db.update(consultationRecordings)
     .set({

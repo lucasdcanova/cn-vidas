@@ -403,6 +403,7 @@ export const consultationRecordings = pgTable("consultation_recordings", {
   aiProcessingError: text("ai_processing_error"),
   
   // Daily.co Cloud Recording
+  roomName: varchar("room_name", { length: 255 }),
   cloudRecordingId: varchar("cloud_recording_id", { length: 255 }),
   cloudRecordingUrl: text("cloud_recording_url"),
   cloudRecordingStatus: varchar("cloud_recording_status", { length: 50 }).default('pending'),
