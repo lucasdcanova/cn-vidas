@@ -10,7 +10,7 @@ import { Loader2, AlertCircle, Clock, User, ShieldAlert } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import MinimalistVideoCall from '@/components/telemedicine/MinimalistVideoCall';
+import MinimalistVideoCallCloud from '@/components/telemedicine/MinimalistVideoCallCloud';
 
 interface ConsultationInfo {
   roomUrl: string | null;
@@ -172,29 +172,6 @@ export default function DoctorEmergencyRoom() {
   const handleLeaveCall = async () => {
     console.log('📞 Encerrando consulta de emergência');
     
-    // Aguardar a gravação ser enviada se estiver gravando
-    if ((window as any).recordingControlsRef && !(window as any).recordingControlsStopping) {
-      console.log('⏹️ [DoctorEmergencyRoom] Aguardando gravação ser enviada...');
-      
-      // Verificar se realmente está gravando
-      const isRecording = (window as any).recordingControlsRef.isRecording ? (window as any).recordingControlsRef.isRecording() : false;
-      console.log('🎙️ [DoctorEmergencyRoom] Estado da gravação:', isRecording);
-      
-      if (isRecording || (window as any).recordingControlsRef.stopRecording) {
-        (window as any).recordingControlsStopping = true; // Flag para evitar dupla chamada
-        try {
-          await (window as any).recordingControlsRef.stopRecording();
-          console.log('✅ [DoctorEmergencyRoom] Gravação parada e enviada com sucesso');
-          
-          // Aguardar um momento para garantir que o upload seja concluído
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (recordingError) {
-          console.error('❌ [DoctorEmergencyRoom] Erro ao parar gravação:', recordingError);
-        }
-        (window as any).recordingControlsStopping = false;
-      }
-    }
-    
     // Marcar consulta como concluída
     if (consultation.appointmentId) {
       try {
@@ -259,7 +236,7 @@ export default function DoctorEmergencyRoom() {
     return (
       <div className="fixed inset-0 z-50 bg-black">
         {/* Componente de vídeo minimalista em tela cheia */}
-        <MinimalistVideoCall
+        <MinimalistVideoCallCloud
           roomUrl={consultation.roomUrl!}
           token={consultation.token || undefined}
           onJoinCall={() => {

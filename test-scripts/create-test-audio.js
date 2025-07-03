@@ -1,0 +1,74 @@
+// Script para criar um arquivo de áudio de teste válido
+const fs = require('fs');
+const path = require('path');
+
+// Criar um arquivo WebM mais completo para teste
+function createTestWebM() {
+  // WebM header básico mas válido
+  const ebmlHeader = Buffer.from([
+    0x1a, 0x45, 0xdf, 0xa3, // EBML
+    0x9f, // tamanho
+    0x42, 0x86, 0x81, 0x01, // EBMLVersion
+    0x42, 0xf7, 0x81, 0x01, // EBMLReadVersion
+    0x42, 0xf2, 0x81, 0x04, // EBMLMaxIDLength
+    0x42, 0xf3, 0x81, 0x08, // EBMLMaxSizeLength
+    0x42, 0x82, 0x88, 0x77, 0x65, 0x62, 0x6d, 0x00, 0x00, 0x00, // DocType "webm"
+    0x42, 0x87, 0x81, 0x04, // DocTypeVersion
+    0x42, 0x85, 0x81, 0x02  // DocTypeReadVersion
+  ]);
+
+  // Segment
+  const segmentHeader = Buffer.from([
+    0x18, 0x53, 0x80, 0x67, // Segment
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // tamanho desconhecido
+  ]);
+
+  // Info
+  const infoHeader = Buffer.from([
+    0x15, 0x49, 0xa9, 0x66, // Info
+    0x88, // tamanho
+    0x2a, 0xd7, 0xb1, 0x83, 0x0f, 0x42, 0x40, // TimecodeScale (1000000)
+    0x4d, 0x80, 0x86, 0x77, 0x65, 0x62, 0x6d, 0x00, // MuxingApp "webm"
+    0x57, 0x41, 0x86, 0x77, 0x65, 0x62, 0x6d, 0x00  // WritingApp "webm"
+  ]);
+
+  // Tracks
+  const tracksHeader = Buffer.from([
+    0x16, 0x54, 0xae, 0x6b, // Tracks
+    0x80 // tamanho
+  ]);
+
+  // Audio track
+  const audioTrack = Buffer.from([
+    0xae, // TrackEntry
+    0x88, // tamanho
+    0xd7, 0x81, 0x01, // TrackNumber
+    0x73, 0xc5, 0x81, 0x01, // TrackUID
+    0x83, 0x81, 0x02, // TrackType (audio)
+    0x86, 0x85, 0x61, 0x75, 0x64, 0x69, 0x6f, // CodecID "audio"
+    0xe1, 0x88, // Audio settings
+    0xb5, 0x84, 0x44, 0xac, 0x00, 0x00, // SamplingFrequency (44100)
+    0x9f, 0x81, 0x02 // Channels
+  ]);
+
+  // Combinar todos os buffers
+  const webmFile = Buffer.concat([
+    ebmlHeader,
+    segmentHeader,
+    infoHeader,
+    tracksHeader,
+    audioTrack,
+    // Adicionar alguns dados fictícios para dar tamanho ao arquivo
+    Buffer.alloc(10000, 0)
+  ]);
+
+  return webmFile;
+}
+
+// Criar arquivo
+const audioPath = path.join(__dirname, 'test-audio.webm');
+const webmData = createTestWebM();
+fs.writeFileSync(audioPath, webmData);
+
+console.log(`✅ Arquivo de teste criado: ${audioPath}`);
+console.log(`📏 Tamanho: ${webmData.length} bytes`);
