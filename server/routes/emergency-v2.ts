@@ -3,6 +3,8 @@ import { storage } from '../storage.js';
 import { createRoom, createToken, getRoomDetails } from '../utils/daily.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { NotificationService } from '../utils/notification-service.js';
+import { db } from '../db.js';
+import { consultationRecordings } from '../../shared/schema.js';
 
 const emergencyV2Router = Router();
 
@@ -299,6 +301,24 @@ emergencyV2Router.post('/join/:appointmentId', authenticateToken, async (req: Re
           }
         }
       }
+    }
+
+    // Criar registro de gravação para cloud recording
+    try {
+      await db.insert(consultationRecordings)
+        .values({
+          appointmentId: appointmentId,
+          doctorId: doctor.id,
+          roomName: appointment.telemedRoomName!,
+          audioUrl: '', // Será preenchido pelo webhook
+          cloudRecordingStatus: 'pending',
+          transcriptionStatus: 'pending',
+          aiProcessingStatus: 'pending',
+        });
+      console.log('📼 Registro de gravação criado para cloud recording');
+    } catch (error) {
+      console.error('❌ Erro ao criar registro de gravação:', error);
+      // Não falhar a entrada do médico se o registro falhar
     }
 
     // Registrar início do atendimento

@@ -152,6 +152,8 @@ async function handleRecordingReady(payload: any) {
     
     // 3. Upload para S3
     let audioUrl = `/uploads/recordings/${appointmentId}/recording.mp4`;
+    let finalPath = tempPath; // Caminho do arquivo para processar
+    
     try {
       const s3Key = generateS3Key('recording', `consultation-${appointmentId}.mp4`);
       audioUrl = await uploadToS3WithRetry(tempPath, s3Key);
@@ -161,7 +163,8 @@ async function handleRecordingReady(payload: any) {
       // Mover para pasta local
       const localDir = path.join(process.cwd(), 'uploads', 'recordings', appointmentId.toString());
       await fs.mkdir(localDir, { recursive: true });
-      await fs.rename(tempPath, path.join(localDir, 'recording.mp4'));
+      finalPath = path.join(localDir, 'recording.mp4');
+      await fs.rename(tempPath, finalPath);
     }
     
     // 4. Atualizar registro
@@ -177,10 +180,15 @@ async function handleRecordingReady(payload: any) {
     
     // 5. Iniciar processamento de transcrição e IA
     console.log('🤖 [Daily Webhook] Iniciando processamento com IA...');
-    await processRecordingWithAI(appointmentId, tempPath);
+    await processRecordingWithAI(appointmentId, finalPath);
     
-    // 6. Limpar arquivo temporário
-    await fs.unlink(tempPath).catch(() => {});
+    // 6. Limpar arquivo temporário se foi movido para S3
+    if (finalPath !== tempPath) {
+      // Arquivo foi movido para local, não precisa limpar
+    } else {
+      // Arquivo foi para S3, limpar temp
+      await fs.unlink(tempPath).catch(() => {});
+    }
     
   } catch (error) {
     console.error('❌ [Daily Webhook] Erro ao processar gravação:', error);
