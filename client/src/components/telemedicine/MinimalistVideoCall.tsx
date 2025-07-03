@@ -152,8 +152,8 @@ export default function MinimalistVideoCall({
       isDoctor,
       hasPatientSettings: !!patientSettings,
       hasDoctorSettings: !!doctorSettings,
-      patientUserId,
-      doctorUserId
+      patientUserId: patientSettings?.userId,
+      doctorUserId: doctorSettings?.userId
     });
     
     // Se for médico em consulta de emergência, sempre gravar por padrão
