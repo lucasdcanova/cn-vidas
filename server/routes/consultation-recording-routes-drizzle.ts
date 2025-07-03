@@ -11,6 +11,7 @@ import fetch from 'node-fetch';
 import OpenAI from 'openai';
 import { storage } from '../storage.js';
 import { PrismaClient } from '@prisma/client';
+import { uploadToS3WithRetry, generateS3Key } from '../utils/s3-upload.js';
 
 const prisma = new PrismaClient();
 
@@ -112,13 +113,26 @@ router.post('/upload', authenticateToken, upload.single('audio'), async (req: Re
     console.log(`💾 [Recording Upload] Salvando arquivo: ${localPath}`);
     
     await fs.rename(file.path, localPath);
-    const audioUrl = `/uploads/recordings/${appointmentId}/${fileName}`;
     
     // Obter informações do arquivo
     const stats = await fs.stat(localPath);
     const fileSize = stats.size;
     
     console.log(`✅ [Recording Upload] Arquivo salvo. Tamanho: ${fileSize} bytes`);
+    
+    // Tentar fazer upload para S3
+    let audioUrl = `/uploads/recordings/${appointmentId}/${fileName}`;
+    let s3Url: string | null = null;
+    
+    try {
+      const s3Key = generateS3Key('recording', fileName);
+      s3Url = await uploadToS3WithRetry(localPath, s3Key);
+      console.log(`☁️ [Recording Upload] Upload para S3 concluído: ${s3Url}`);
+      audioUrl = s3Url; // Usar URL do S3 se o upload for bem-sucedido
+    } catch (s3Error) {
+      console.warn('⚠️ [Recording Upload] Falha no upload para S3, usando armazenamento local:', s3Error);
+      // Continuar com armazenamento local se S3 falhar
+    }
 
     // Criar registro no banco
     const [recording] = await db.insert(consultationRecordings)

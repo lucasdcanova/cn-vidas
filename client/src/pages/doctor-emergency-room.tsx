@@ -203,10 +203,10 @@ export default function DoctorEmergencyRoom() {
         console.error('Erro ao marcar consulta como concluída:', error);
       }
       
-      // Redirecionar para a página de processamento
-      console.log('🏥 Redirecionando para página de processamento');
+      // Redirecionar direto para o editor de prontuário
+      console.log('🏥 Redirecionando para editor de prontuário');
       console.log('🆔 AppointmentId para redirecionamento:', consultation.appointmentId);
-      const url = `/doctor/processing-wait?appointmentId=${consultation.appointmentId}`;
+      const url = `/doctor/medical-records/edit?appointmentId=${consultation.appointmentId}`;
       console.log('🔗 URL de redirecionamento:', url);
       navigate(url);
     } else {
