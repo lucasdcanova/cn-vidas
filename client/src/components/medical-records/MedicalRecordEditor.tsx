@@ -103,6 +103,8 @@ export default function MedicalRecordEditor({
   const [editedContent, setEditedContent] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
   const [activeTab, setActiveTab] = useState('editor');
+  const [processingStatus, setProcessingStatus] = useState<'idle' | 'transcribing' | 'generating' | 'completed'>('idle');
+  const [processingAttempts, setProcessingAttempts] = useState(0);
 
   // Carregar prontuário
   useEffect(() => {
@@ -176,10 +178,12 @@ export default function MedicalRecordEditor({
 
   const checkRecordingStatus = async () => {
     let attempts = 0;
-    const maxAttempts = 24; // 2 minutos no total (24 * 5 segundos)
+    const maxAttempts = 36; // 3 minutos no total (36 * 5 segundos)
+    setProcessingStatus('transcribing');
     
     const checkStatus = async () => {
       attempts++;
+      setProcessingAttempts(attempts);
       console.log(`🔄 [MedicalRecordEditor] Verificando status da gravação (tentativa ${attempts}/${maxAttempts})...`);
       
       try {
@@ -192,8 +196,16 @@ export default function MedicalRecordEditor({
           const recording = recordingResponse.data.recording;
           console.log('📼 [MedicalRecordEditor] Status da gravação:', recording.status);
           
+          // Atualizar status baseado no progresso
+          if (recording.status === 'transcribed') {
+            setProcessingStatus('generating');
+          } else if (recording.status === 'processing') {
+            setProcessingStatus('transcribing');
+          }
+          
           if (recording.status === 'completed' && recording.medicalRecordId) {
             console.log('✅ [MedicalRecordEditor] Prontuário gerado pela IA!');
+            setProcessingStatus('completed');
             // Carregar o prontuário gerado
             loadRecord(recording.medicalRecordId);
             return;
@@ -336,21 +348,99 @@ export default function MedicalRecordEditor({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <div className="space-y-2">
-            <h3 className="font-semibold text-lg">Processando prontuário...</h3>
-            <p className="text-muted-foreground max-w-md">
-              A gravação da consulta está sendo transcrita e o prontuário está sendo gerado pela IA. 
-              Isso pode levar alguns segundos.
-            </p>
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Bot className="h-4 w-4" />
-              <span>Gerando prontuário com IA</span>
+      <div className="max-w-2xl mx-auto p-8">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-6">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-xl">
+                    {processingStatus === 'transcribing' && 'Transcrevendo áudio da consulta...'}
+                    {processingStatus === 'generating' && 'Gerando prontuário com IA...'}
+                    {processingStatus === 'completed' && 'Carregando prontuário...'}
+                    {processingStatus === 'idle' && 'Processando prontuário...'}
+                  </h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    {processingStatus === 'transcribing' && 'O áudio da consulta está sendo convertido em texto. Isso pode levar alguns minutos.'}
+                    {processingStatus === 'generating' && 'A inteligência artificial está analisando a consulta e gerando o prontuário médico.'}
+                    {processingStatus === 'completed' && 'O prontuário foi gerado com sucesso. Carregando dados...'}
+                    {processingStatus === 'idle' && 'A gravação da consulta está sendo processada. Por favor, aguarde.'}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Indicadores de progresso */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    processingStatus !== 'idle' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}>
+                    {processingStatus !== 'idle' ? <CheckCircle className="h-5 w-5" /> : '1'}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-medium ${processingStatus !== 'idle' ? '' : 'text-muted-foreground'}`}>
+                      Transcrever áudio
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Converter a gravação em texto
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    processingStatus === 'generating' || processingStatus === 'completed' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}>
+                    {processingStatus === 'generating' || processingStatus === 'completed' ? <CheckCircle className="h-5 w-5" /> : '2'}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-medium ${
+                      processingStatus === 'generating' || processingStatus === 'completed' ? '' : 'text-muted-foreground'
+                    }`}>
+                      Gerar prontuário
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      IA analisando e criando o prontuário SOAP
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    processingStatus === 'completed' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  }`}>
+                    {processingStatus === 'completed' ? <CheckCircle className="h-5 w-5" /> : '3'}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-medium ${processingStatus === 'completed' ? '' : 'text-muted-foreground'}`}>
+                      Finalizar
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Prontuário pronto para revisão
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {processingAttempts > 0 && (
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">
+                    Tempo decorrido: {Math.floor(processingAttempts * 5 / 60)}:{String((processingAttempts * 5) % 60).padStart(2, '0')}
+                  </p>
+                </div>
+              )}
+              
+              <Alert>
+                <Lightbulb className="h-4 w-4" />
+                <AlertDescription>
+                  O prontuário será gerado automaticamente com base na gravação da consulta. 
+                  Você poderá revisar e editar o conteúdo antes de assinar.
+                </AlertDescription>
+              </Alert>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
