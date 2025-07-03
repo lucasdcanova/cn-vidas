@@ -64,6 +64,11 @@ export default function RecordingControls({
   // Parar gravação e fazer upload
   const handleStopRecording = async () => {
     console.log('🛑 [RecordingControls] Parando gravação...');
+    console.log('🔍 [RecordingControls] Estado atual:', {
+      isRecording: state?.isRecording,
+      appointmentId,
+      timestamp: new Date().toISOString()
+    });
     
     // Verificar se já está parando
     if (!state?.isRecording) {
@@ -82,6 +87,7 @@ export default function RecordingControls({
 
     console.log('📤 [RecordingControls] Iniciando upload da gravação...');
     console.log(`📊 [RecordingControls] Tamanho do arquivo: ${(audioBlob.size / 1024 / 1024).toFixed(2)} MB`);
+    console.log('🎯 [RecordingControls] Appointment ID para upload:', appointmentId);
     setIsUploading(true);
 
     try {
@@ -92,6 +98,7 @@ export default function RecordingControls({
 
       console.log('🚀 [RecordingControls] Enviando gravação para o servidor...');
       console.log(`🆔 [RecordingControls] Appointment ID: ${appointmentId}`);
+      console.log('📡 [RecordingControls] URL do endpoint:', '/api/consultation-recordings/upload');
       
       // Fazer upload
       const response = await httpRequest(`/api/consultation-recordings/upload`, {
@@ -107,6 +114,7 @@ export default function RecordingControls({
         console.log('✅ [RecordingControls] Upload concluído com sucesso!');
         console.log(`🆔 [RecordingControls] Recording ID: ${response.recordingId}`);
         console.log('📄 [RecordingControls] Prontuário será gerado automaticamente');
+        console.log('🎯 [RecordingControls] Appointment ID confirmado:', appointmentId);
         
         toast({
           title: 'Gravação salva',
@@ -115,12 +123,14 @@ export default function RecordingControls({
         onRecordingStop?.(response.recordingId);
       } else {
         console.error('❌ [RecordingControls] Resposta do servidor indica falha:', response);
+        console.error('🆔 [RecordingControls] Appointment ID na falha:', appointmentId);
       }
     } catch (error: any) {
       console.error('❌ [RecordingControls] Erro ao fazer upload:', error);
       console.error('📋 [RecordingControls] Detalhes do erro:', {
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
+        appointmentId
       });
       
       toast({
@@ -130,7 +140,7 @@ export default function RecordingControls({
       });
     } finally {
       setIsUploading(false);
-      console.log('🔄 [RecordingControls] Upload finalizado');
+      console.log('🔄 [RecordingControls] Upload finalizado para appointment:', appointmentId);
       
       // Limpar referência global após o upload
       if ((window as any).recordingControlsRef) {
@@ -227,12 +237,15 @@ export default function RecordingControls({
       setHasStarted(true);
       // Aguardar 5 segundos para garantir que a chamada está estável
       console.log('⏱️ [RecordingControls] Aguardando 5 segundos para iniciar gravação automática...');
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         console.log('🎙️ [RecordingControls] Iniciando gravação automática após 5 segundos');
+        console.log('🎤 [RecordingControls] Appointment ID para gravação:', appointmentId);
         handleStartRecording();
       }, 5000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [autoStart, hasConsent, hasStarted, state?.isRecording, handleStartRecording]);
+  }, [autoStart, hasConsent, hasStarted, state?.isRecording, handleStartRecording, appointmentId]);
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
