@@ -288,7 +288,15 @@ export async function createMeetingToken(
  * Função simplificada para criar token seguindo as práticas recomendadas do Daily.co
  * Usada para emergências e consultas rápidas
  */
-export async function createToken(roomName: string, userDetails: { user_id: string, user_name: string, is_owner: boolean }) {
+export async function createToken(roomName: string, userDetails: { 
+  user_id: string, 
+  user_name: string, 
+  is_owner: boolean,
+  enable_recording?: string,
+  start_cloud_recording?: boolean,
+  start_video_off?: boolean,
+  start_audio_off?: boolean 
+}) {
   try {
     console.log(`Criando token para sala ${roomName}`);
     
@@ -328,8 +336,11 @@ export async function createToken(roomName: string, userDetails: { user_id: stri
       exp,
       is_owner: userDetails.is_owner,
       enable_screenshare: true,
-      start_video_off: false,
-      start_audio_off: false
+      start_video_off: userDetails.start_video_off ?? false,
+      start_audio_off: userDetails.start_audio_off ?? false,
+      // Habilitar gravação na nuvem para médicos
+      enable_recording: userDetails.enable_recording || (userDetails.is_owner ? 'cloud' : undefined),
+      start_cloud_recording: userDetails.start_cloud_recording || (userDetails.is_owner ? true : false)
     };
     
     console.log(`Solicitando token com propriedades:`, tokenProperties);
