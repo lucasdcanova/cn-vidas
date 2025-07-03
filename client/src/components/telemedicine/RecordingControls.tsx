@@ -66,7 +66,7 @@ export default function RecordingControls({
     console.log('🛑 [RecordingControls] Parando gravação...');
     
     // Verificar se já está parando
-    if (!state.isRecording) {
+    if (!state?.isRecording) {
       console.warn('⚠️ [RecordingControls] Tentativa de parar gravação quando não está gravando');
       return;
     }
@@ -144,7 +144,7 @@ export default function RecordingControls({
     if (autoStart) {
       (window as any).recordingControlsRef = {
         stopRecording: handleStopRecording,
-        isRecording: () => state.isRecording
+        isRecording: () => state?.isRecording || false
       };
     }
     
@@ -152,7 +152,7 @@ export default function RecordingControls({
       // Não deletar imediatamente, pois pode estar sendo usado
       // Será limpo após o upload ser concluído
     };
-  }, [autoStart, handleStopRecording, state.isRecording]);
+  }, [autoStart, handleStopRecording, state?.isRecording]);
 
   // Logs para debug
   useEffect(() => {
@@ -162,10 +162,10 @@ export default function RecordingControls({
       patientConsent,
       hasConsent,
       hasStarted,
-      isRecording: state.isRecording,
+      isRecording: state?.isRecording || false,
       isUploading
     });
-  }, [appointmentId, autoStart, patientConsent, hasConsent, hasStarted, state.isRecording, isUploading]);
+  }, [appointmentId, autoStart, patientConsent, hasConsent, hasStarted, state?.isRecording, isUploading]);
   
   // Iniciar gravação
   const handleStartRecording = useCallback(async () => {
@@ -219,11 +219,11 @@ export default function RecordingControls({
       autoStart,
       hasConsent,
       hasStarted,
-      isRecording: state.isRecording,
-      condicoesAtendidas: autoStart && hasConsent && !hasStarted && !state.isRecording
+      isRecording: state?.isRecording || false,
+      condicoesAtendidas: autoStart && hasConsent && !hasStarted && !state?.isRecording
     });
     
-    if (autoStart && hasConsent && !hasStarted && !state.isRecording) {
+    if (autoStart && hasConsent && !hasStarted && !state?.isRecording) {
       setHasStarted(true);
       // Aguardar 5 segundos para garantir que a chamada está estável
       console.log('⏱️ [RecordingControls] Aguardando 5 segundos para iniciar gravação automática...');
@@ -232,12 +232,12 @@ export default function RecordingControls({
         handleStartRecording();
       }, 5000);
     }
-  }, [autoStart, hasConsent, hasStarted, state.isRecording, handleStartRecording]);
+  }, [autoStart, hasConsent, hasStarted, state?.isRecording, handleStartRecording]);
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
       {/* Botão para iniciar/parar gravação manualmente */}
-      {!state.isRecording && !hasStarted && !autoStart && (
+      {!state?.isRecording && !hasStarted && !autoStart && (
         <button
           onClick={handleStartRecording}
           className="flex items-center gap-2 px-3 py-1 text-xs bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
@@ -249,10 +249,10 @@ export default function RecordingControls({
       )}
 
       {/* Indicador de gravação */}
-      {state.isRecording && (
+      {state?.isRecording && (
         <div className="flex items-center gap-2 text-xs text-red-400">
           <Circle className="h-3 w-3 text-red-500 fill-red-500 animate-pulse" />
-          <span>{formatDuration(state.duration)}</span>
+          <span>{formatDuration(state?.duration || 0)}</span>
           {(manualStart || autoStart) && (
             <button
               onClick={handleStopRecording}
@@ -267,7 +267,7 @@ export default function RecordingControls({
       )}
 
       {/* Erro */}
-      {state.error && !state.isRecording && (
+      {state?.error && !state?.isRecording && (
         <div className="text-xs text-red-400">
           Erro na gravação
         </div>

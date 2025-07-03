@@ -523,12 +523,15 @@ export default function MinimalistVideoCall({
       
       // Garantir que o áudio e vídeo estão configurados corretamente
       console.log('🔊 [MinimalistVideoCall] Configurando mídia após entrar...');
-      await callObject.setLocalAudio(isAudioEnabled);
-      await callObject.setLocalVideo(isVideoEnabled);
+      if (callObject && !callObject.destroyed) {
+        await callObject.setLocalAudio(isAudioEnabled);
+        await callObject.setLocalVideo(isVideoEnabled);
+      }
       
       // Forçar inicialização do vídeo local após entrar
       setTimeout(async () => {
         console.log('🎥 [MinimalistVideoCall] Forçando inicialização do vídeo local...');
+        if (!callObject || callObject.destroyed) return;
         const localParticipant = callObject.participants()?.local;
         if (localParticipant && localParticipant.video && localVideoRef.current) {
           const videoTrack = localParticipant.tracks?.video?.track || localParticipant.videoTrack;
@@ -561,6 +564,7 @@ export default function MinimalistVideoCall({
       setTimeout(async () => {
         try {
           console.log('🔄 [MinimalistVideoCall] Forçando atualização de mídia...');
+          if (!callObject || callObject.destroyed) return;
           const localParticipant = callObject.participants().local;
           if (localParticipant) {
             // Apenas logar o estado do áudio, sem forçar reativação
@@ -570,12 +574,14 @@ export default function MinimalistVideoCall({
             // Se o vídeo não estiver ativo, tentar reativar
             if (!localParticipant.video) {
               console.log('⚠️ [MinimalistVideoCall] Vídeo local não detectado, reativando...');
-              await callObject.setLocalVideo(false);
-              await new Promise(resolve => setTimeout(resolve, 100));
-              await callObject.setLocalVideo(true);
+              if (callObject && !callObject.destroyed) {
+                await callObject.setLocalVideo(false);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                await callObject.setLocalVideo(true);
+              }
             }
             // Verificar e logar estado final
-            const updatedParticipant = callObject.participants().local;
+            const updatedParticipant = callObject && !callObject.destroyed ? callObject.participants().local : null;
             console.log('📊 [MinimalistVideoCall] Estado final da mídia local:', {
               audio: updatedParticipant?.audio,
               video: updatedParticipant?.video,
@@ -591,6 +597,7 @@ export default function MinimalistVideoCall({
       }, 1500);
       
       // Verificar status do áudio
+      if (!callObject || callObject.destroyed) return;
       const localParticipant = callObject.participants().local;
       console.log('🎤 [MinimalistVideoCall] Status do participante local:', {
         audio: localParticipant?.audio,
@@ -601,7 +608,7 @@ export default function MinimalistVideoCall({
       });
       
       // Verificar configurações de áudio/vídeo
-      const inputSettings = callObject.getInputSettings();
+      const inputSettings = callObject && !callObject.destroyed ? callObject.getInputSettings() : null;
       console.log('🎛️ [MinimalistVideoCall] Configurações de entrada:', {
         audio: inputSettings?.audio,
         video: inputSettings?.video
@@ -609,6 +616,7 @@ export default function MinimalistVideoCall({
       
       // Verificar todos os participantes periodicamente
       const checkParticipants = () => {
+        if (!callObject || callObject.destroyed) return;
         const participants = callObject.participants();
         console.log('👥 [MinimalistVideoCall] Participantes na sala:', {
           total: Object.keys(participants).length,
@@ -1050,7 +1058,7 @@ export default function MinimalistVideoCall({
         setCallDuration(duration);
         
         // Verificar status do áudio a cada 10 segundos
-        if (duration % 10 === 0 && callRef.current) {
+        if (duration % 10 === 0 && callRef.current && !callRef.current.destroyed) {
           const participants = callRef.current.participants();
           console.log('🔍 [MinimalistVideoCall] Verificação periódica de áudio:', {
             duracao: `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`,
