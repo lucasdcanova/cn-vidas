@@ -402,6 +402,11 @@ export const consultationRecordings = pgTable("consultation_recordings", {
   aiProcessingStatus: varchar("ai_processing_status", { length: 50 }).default('pending'),
   aiProcessingError: text("ai_processing_error"),
   
+  // Daily.co Cloud Recording
+  cloudRecordingId: varchar("cloud_recording_id", { length: 255 }),
+  cloudRecordingUrl: text("cloud_recording_url"),
+  cloudRecordingStatus: varchar("cloud_recording_status", { length: 50 }).default('pending'),
+  
   // Timestamps
   processingStartedAt: timestamp("processing_started_at"),
   processingCompletedAt: timestamp("processing_completed_at"),
