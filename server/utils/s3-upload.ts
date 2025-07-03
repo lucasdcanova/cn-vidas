@@ -50,12 +50,52 @@ export async function uploadToS3(filePath: string, key: string): Promise<string>
 
 function getContentType(extension: string): string {
   const types: { [key: string]: string } = {
+    // Áudio
     '.webm': 'audio/webm',
     '.mp3': 'audio/mpeg',
     '.wav': 'audio/wav',
     '.ogg': 'audio/ogg',
-    '.m4a': 'audio/mp4'
+    '.m4a': 'audio/mp4',
+    // Documentos
+    '.pdf': 'application/pdf',
+    '.json': 'application/json',
+    // Imagens
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp'
   };
   
   return types[extension.toLowerCase()] || 'application/octet-stream';
+}
+
+// Função para gerar chave única para uploads
+export function generateS3Key(type: 'recording' | 'medical-record' | 'profile', fileName: string): string {
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 15);
+  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+  
+  return `${type}/${timestamp}-${randomString}-${sanitizedFileName}`;
+}
+
+// Função para fazer upload com retry
+export async function uploadToS3WithRetry(filePath: string, key: string, maxRetries: number = 3): Promise<string> {
+  let lastError: any;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await uploadToS3(filePath, key);
+    } catch (error) {
+      lastError = error;
+      console.log(`⚠️ Tentativa ${attempt}/${maxRetries} falhou ao fazer upload para S3`);
+      
+      if (attempt < maxRetries) {
+        // Aguardar antes de tentar novamente (backoff exponencial)
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
+      }
+    }
+  }
+  
+  throw lastError;
 }
