@@ -184,9 +184,26 @@ export default function MedicalRecordEditor({
     const checkStatus = async () => {
       attempts++;
       setProcessingAttempts(attempts);
-      console.log(`🔄 [MedicalRecordEditor] Verificando status da gravação (tentativa ${attempts}/${maxAttempts})...`);
+      console.log(`🔄 [MedicalRecordEditor] Verificando status (tentativa ${attempts}/${maxAttempts})...`);
       
       try {
+        // Primeiro, verificar se o prontuário já foi criado
+        try {
+          const recordResponse = await httpRequest(`/api/medical-records-ai/by-appointment/${appointmentId}`, {
+            method: 'GET'
+          });
+          
+          if (recordResponse.data) {
+            console.log('✅ [MedicalRecordEditor] Prontuário encontrado!');
+            setRecord(recordResponse.data);
+            setEditedContent(recordResponse.data.content.data);
+            setProcessingStatus('completed');
+            setLoading(false);
+            return; // Prontuário encontrado, parar polling
+          }
+        } catch (err) {
+          // Prontuário ainda não existe, continuar verificando status da gravação
+        }
         // Buscar gravação da consulta
         const recordingResponse = await httpRequest(`/api/consultation-recordings/appointment/${appointmentId}`, {
           method: 'GET'
