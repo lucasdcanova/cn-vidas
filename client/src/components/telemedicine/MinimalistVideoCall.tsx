@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import DailyIframe, { DailyCall } from '@daily-co/daily-js';
 import { Mic, MicOff, Video, VideoOff, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import RecordingControls from './RecordingControls';
+// import RecordingControls from './RecordingControls'; // Removido - usando gravação na nuvem
 import { useQuery } from '@tanstack/react-query';
 import { httpRequest } from '@/lib/http-client';
 
@@ -1225,31 +1225,7 @@ export default function MinimalistVideoCall({
                 )}
               </div>
               
-              {isDoctor && enableRecording && appointmentId && (
-                <div className="bg-black/40 backdrop-blur-xl rounded-full">
-                  {(() => {
-                    const shouldRecord = shouldAutoRecord();
-                    console.log('🎙️ [MinimalistVideoCall] Renderizando RecordingControls:', {
-                      appointmentId,
-                      enableRecording,
-                      isDoctor,
-                      shouldAutoRecord: shouldRecord,
-                      patientConsent: true,
-                      patientSettings: patientSettings,
-                      doctorSettings: doctorSettings
-                    });
-                    return (
-                      <RecordingControls
-                        appointmentId={appointmentId}
-                        className="px-4 py-2"
-                        autoStart={shouldRecord}
-                        patientConsent={true}
-                        audioStream={mixedAudioStream || undefined}
-                      />
-                    );
-                  })()}
-                </div>
-              )}
+              {/* Gravação agora é feita na nuvem pelo Daily.co */}
             </div>
           </div>
 
