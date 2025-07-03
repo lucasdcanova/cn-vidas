@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import DailyIframe, { DailyCall, DailyEventObject, DailyParticipant } from '@daily-co/daily-js';
 import { Mic, MicOff, Video, VideoOff, Phone, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import RecordingControls from './RecordingControls';
+// import RecordingControls from './RecordingControls'; // Removido - usando gravação na nuvem
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -437,17 +437,7 @@ export default function DailyVideoCall({
   const leaveCall = useCallback(async () => {
     console.log('🔴 [DailyVideoCall] Ending call...');
     
-    // Stop recording if active
-    if (window.recordingControlsRef && !window.recordingControlsStopping) {
-      console.log('⏹️ [DailyVideoCall] Stopping recording...');
-      window.recordingControlsStopping = true;
-      try {
-        await window.recordingControlsRef.stopRecording();
-      } catch (error) {
-        console.error('❌ [DailyVideoCall] Error stopping recording:', error);
-      }
-      window.recordingControlsStopping = false;
-    }
+    // Recording is now handled by Daily.co cloud recording
     
     if (callRef.current) {
       try {

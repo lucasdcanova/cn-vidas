@@ -141,6 +141,7 @@ router.post('/upload', authenticateToken, upload.single('audio'), async (req: Re
         doctorId,
         audioUrl,
         fileSize,
+        roomName: appointment.telemedRoomName, // Adicionar roomName
         transcriptionStatus: 'pending',
         aiProcessingStatus: 'pending',
         processingStartedAt: new Date(),
