@@ -114,6 +114,7 @@ Este script faz o push para o GitHub e, se bem-sucedido, executa a sincroniza√ß√
 - sempre sincronizar o ios apos um push
 - lembre dos certificados antes de pedirmos a publicacao na app store
 - lembre de certificados apns para notificacoes antes de mandarmps para apple
+- sempre responda em portugues do brasil
 
 ## Deploy
 
