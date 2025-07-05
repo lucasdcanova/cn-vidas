@@ -92,14 +92,122 @@ yarn lint
 3. Testar funcionalidades afetadas
 4. Verificar console por erros
 
-## Sincronização com iOS
+## Desenvolvimento Mobile
 
-Para fazer push e sincronizar automaticamente com o iOS, use:
+### iOS
+
+Para fazer push e sincronizar automaticamente com o iOS:
 ```bash
 ./push-and-sync.sh
 ```
 
 Este script faz o push para o GitHub e, se bem-sucedido, executa a sincronização com o iOS automaticamente.
+
+### Android
+
+Para sincronizar com Android após mudanças:
+```bash
+./sync-android.sh
+```
+
+Ou manualmente:
+```bash
+npm run build
+npx cap sync android
+```
+
+### Estrutura Mobile
+```
+/
+├── ios/             # Projeto iOS (Xcode)
+├── android/         # Projeto Android (Android Studio)
+└── capacitor.config.ts  # Configuração do Capacitor
+```
+
+### Desenvolvimento Mobile sem Computador Local
+
+#### iOS - Xcode Cloud
+Já configurado no projeto. Builds automáticos após push.
+
+#### Android - GitHub Actions / CI/CD
+
+O projeto tem workflows configurados para build automático:
+
+1. **Build de Debug** (`.github/workflows/android-build.yml`)
+   - Ativado em push para `main`
+   - Gera APK de debug
+   - Download via GitHub Actions
+
+2. **Firebase App Distribution** (`.github/workflows/android-firebase-deploy.yml`)
+   - Distribui para testers
+   - Similar ao TestFlight
+
+3. **Deploy Play Store** (`.github/workflows/android-play-store.yml`)
+   - Ativado por tags `v*`
+   - Publica na Play Store
+
+#### Configurar CI/CD Android
+
+1. **Ativar GitHub Actions**
+   - Vá em Settings → Actions → Enable
+
+2. **Configurar Secrets** (Settings → Secrets → Actions):
+   ```
+   FIREBASE_APP_ID         # ID do app no Firebase
+   FIREBASE_CREDENTIALS    # JSON de credenciais Firebase
+   ANDROID_KEYSTORE       # Keystore base64 (para release)
+   KEYSTORE_PASSWORD      # Senha do keystore
+   KEY_ALIAS             # Alias da chave
+   KEY_PASSWORD          # Senha da chave
+   PLAY_STORE_CREDENTIALS # JSON para upload Play Store
+   ```
+
+3. **Firebase Setup**:
+   - Criar projeto no Firebase Console
+   - Baixar `google-services.json`
+   - Colocar em `/android/app/`
+
+### Comandos Úteis Mobile
+
+```bash
+# Verificar status
+npx cap doctor
+
+# Sincronizar ambas plataformas
+npx cap sync
+
+# Apenas copiar assets (mais rápido)
+npx cap copy ios
+npx cap copy android
+
+# Abrir IDEs
+npx cap open ios      # Abre Xcode
+npx cap open android  # Abre Android Studio
+
+# Adicionar plugins
+npm install @capacitor/[plugin-name]
+npx cap sync
+```
+
+### Permissões Android Configuradas
+
+O `AndroidManifest.xml` já inclui:
+- Internet e rede
+- Câmera e armazenamento
+- Notificações (push e locais)
+- Biometria
+- Áudio/vídeo (chamadas)
+- Localização (emergências)
+- Wake lock
+
+### Fluxo de Desenvolvimento Recomendado
+
+1. **Desenvolver no Codespaces**
+2. **Testar no navegador** (`npm run dev`)
+3. **Build e sync** (`npm run build && npx cap sync`)
+4. **Push para GitHub**
+5. **Build automático** via Xcode Cloud (iOS) ou GitHub Actions (Android)
+6. **Testar via TestFlight** (iOS) ou Firebase App Distribution (Android)
 
 ## Notas de desenvolvimento
 
