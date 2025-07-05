@@ -26,6 +26,14 @@ const config: CapacitorConfig = {
     backgroundColor: '#eff6ff',
     limitsNavigationsToAppBoundDomains: false,
     allowsLinkPreview: false
+  },
+  android: {
+    // Configurações específicas do Android
+    backgroundColor: '#eff6ff',
+    buildToolsVersion: '34.0.0',
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: true
   }
 };
 
