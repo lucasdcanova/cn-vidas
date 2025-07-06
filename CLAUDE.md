@@ -312,3 +312,7 @@ Nova tabela `doctor_digital_certificates`:
 ### Referências
 - [Documentação VIDaaS](https://www.digiforte.com.br/pt/docs/vidaas/vidaas)
 - [API PSC Valid](https://validcertificadora.com.br/pages/psc-integracao-via-api)
+
+## Workflow de Desenvolvimento
+
+- Entenda o workflow: estou programando no Codespaces WEB pelo ipad com o claude code no terminal do codespaces web no ipad. O deploy está sendo feito automaticamente para xcode claude e os teste estao sendo feito principalmente pelo test flight com testes interno.
