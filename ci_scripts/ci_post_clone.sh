@@ -58,6 +58,18 @@ else
     exit 1
 fi
 
+# Instalar dependências do Node.js
+echo "📦 Instalando dependências do Node.js..."
+npm ci || npm install
+
+# Verificar se node_modules foi criado
+if [ -d "node_modules" ]; then
+    echo "✅ Dependências instaladas com sucesso"
+else
+    echo "❌ Erro: Falha ao instalar dependências"
+    exit 1
+fi
+
 # Verificar se estamos no diretório correto
 echo "📂 Verificando estrutura do projeto..."
 if [ -d "ios/App" ]; then
