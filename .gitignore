@@ -1,5 +1,13 @@
 # Dependencies
 node_modules/
+# Exceto arquivos específicos do CapacitorKeyboard necessários para Xcode Cloud
+!node_modules/@capacitor/
+!node_modules/@capacitor/keyboard/
+!node_modules/@capacitor/keyboard/ios/
+!node_modules/@capacitor/keyboard/ios/Sources/
+!node_modules/@capacitor/keyboard/ios/Sources/KeyboardPlugin/
+!node_modules/@capacitor/keyboard/ios/Sources/KeyboardPlugin/include/
+!node_modules/@capacitor/keyboard/ios/Sources/KeyboardPlugin/include/*.h
 /.pnp
 .pnp.js
 
