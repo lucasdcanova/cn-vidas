@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { db } from '@db/client';
-import { remoteConsoleLogs } from '@db/schema';
+import { db } from '../db';
+import { remoteConsoleLogs } from '../../shared/schema';
 import { eq, desc, gte, sql } from 'drizzle-orm';
 import { z } from 'zod';
 

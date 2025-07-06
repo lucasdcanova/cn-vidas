@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { 
   User, LogOut, Home, Users, CreditCard, Briefcase, 
-  Activity, ClipboardList, QrCode, TrendingUp, Menu, X, ShoppingCart, Stethoscope
+  Activity, ClipboardList, QrCode, TrendingUp, Menu, X, ShoppingCart, Stethoscope, Terminal
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -51,6 +51,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
     { href: "/admin/qr-auth-logs", icon: QrCode, label: "Logs QR Code", description: "Logs de autenticação" },
     { href: "/admin/seller-stats", icon: TrendingUp, label: "Vendedores", description: "Estatísticas de vendas" },
     { href: "/admin/analytics", icon: CreditCard, label: "Relatórios", description: "Análises e relatórios" },
+    { href: "/admin/remote-console", icon: Terminal, label: "Console Remoto", description: "Logs do TestFlight/Produção" },
   ];
 
   const NavigationItem = ({ 
