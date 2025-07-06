@@ -30,16 +30,38 @@ class RemoteConsole {
   constructor() {
     if (this.shouldEnableRemoteLogging()) {
       this.interceptConsole();
+      this.originalConsole.log('[RemoteConsole] Ativado! Logs serão enviados para o servidor.');
+      
+      // Adicionar um log de teste inicial
+      setTimeout(() => {
+        console.log('[RemoteConsole] Log de teste - Console remoto funcionando!');
+      }, 1000);
+    } else {
+      this.originalConsole.log('[RemoteConsole] Não ativado. Condições não atendidas.');
     }
   }
 
   private shouldEnableRemoteLogging(): boolean {
-    // Ativa apenas em produção ou com flag específica
+    // Ativa em produção, TestFlight, ou com flag específica
     const isProduction = process.env.NODE_ENV === 'production';
     const hasRemoteLogFlag = localStorage.getItem('enableRemoteConsole') === 'true';
     const isTestFlight = navigator.userAgent.includes('TestFlight');
+    const isCapacitor = !!(window as any).Capacitor;
+    const isNativeApp = isCapacitor && (window as any).Capacitor.isNativePlatform();
     
-    return isProduction || hasRemoteLogFlag || isTestFlight;
+    // Log para debug
+    this.originalConsole.log('[RemoteConsole] Debug info:', {
+      isProduction,
+      hasRemoteLogFlag,
+      isTestFlight,
+      isCapacitor,
+      isNativeApp,
+      userAgent: navigator.userAgent,
+      nodeEnv: process.env.NODE_ENV
+    });
+    
+    // Ativa para qualquer app nativo ou com as outras condições
+    return isProduction || hasRemoteLogFlag || isTestFlight || isNativeApp;
   }
 
   private interceptConsole() {
