@@ -21,6 +21,13 @@ npm run build
 echo "Sincronizando com Capacitor iOS..."
 npx cap sync ios
 
+# Copiar arquivos do CapacitorKeyboard para evitar erro de build
+echo "Copiando arquivos do CapacitorKeyboard..."
+if [ -d "ios/App/CapacitorKeyboard" ]; then
+    mkdir -p "node_modules/@capacitor/keyboard/ios/Sources/KeyboardPlugin/include"
+    cp ios/App/CapacitorKeyboard/ios/Sources/KeyboardPlugin/include/*.h "node_modules/@capacitor/keyboard/ios/Sources/KeyboardPlugin/include/" || true
+fi
+
 # Voltar para o diretório iOS
 cd ios/App
 
