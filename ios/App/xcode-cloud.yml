@@ -1,0 +1,31 @@
+version: 1
+workflows:
+  - name: Build iOS App
+    environment:
+      xcode: latest-release
+    triggers:
+      - push:
+          branches:
+            - main
+    scripts:
+      post-clone: |
+        #!/bin/sh
+        set -e
+        
+        echo "🚀 Executando script post-clone..."
+        echo "📍 Diretório atual: $(pwd)"
+        
+        # Instalar CocoaPods
+        echo "📦 Instalando CocoaPods..."
+        export GEM_HOME=$HOME/.gem
+        export PATH=$GEM_HOME/bin:$PATH
+        gem install cocoapods --user-install
+        
+        # Navegar para o diretório do iOS
+        cd ios/App
+        
+        # Executar pod install
+        echo "🔧 Executando pod install..."
+        pod install --repo-update
+        
+        echo "✅ Script concluído!"
