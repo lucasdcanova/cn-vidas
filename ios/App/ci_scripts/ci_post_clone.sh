@@ -4,8 +4,12 @@
 
 echo "🚀 Iniciando script post-clone..."
 
-# Navegar para o diretório correto
-cd ios/App
+# Debug: mostrar diretório atual
+echo "📍 Diretório atual: $(pwd)"
+echo "📁 Conteúdo: $(ls -la)"
+
+# Navegar para o diretório correto - já estamos em ios/App no Xcode Cloud
+# cd ios/App
 
 # Instalar CocoaPods se necessário
 if ! command -v pod &> /dev/null; then
