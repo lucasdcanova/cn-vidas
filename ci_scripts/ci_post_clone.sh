@@ -11,6 +11,53 @@ echo "📍 Diretório atual: $(pwd)"
 echo "📁 Conteúdo da raiz:"
 ls -la
 
+# Criar arquivo .env a partir das variáveis de ambiente do Xcode Cloud
+echo "🔧 Criando arquivo .env..."
+cat > .env << EOF
+# Gerado automaticamente pelo Xcode Cloud
+SESSION_SECRET=$SESSION_SECRET
+JWT_SECRET=$JWT_SECRET
+
+# Stripe
+STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY
+STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET
+
+# Database
+DATABASE_URL=$DATABASE_URL
+
+# Email
+EMAIL_HOST=$EMAIL_HOST
+EMAIL_PORT=$EMAIL_PORT
+EMAIL_USERNAME=$EMAIL_USERNAME
+EMAIL_PASSWORD=$EMAIL_PASSWORD
+EMAIL_FROM="$EMAIL_FROM"
+
+# Daily.co
+DAILY_API_KEY=$DAILY_API_KEY
+
+# OpenAI
+OPENAI_API_KEY=$OPENAI_API_KEY
+
+# URLs
+FRONTEND_URL=$FRONTEND_URL
+BACKEND_URL=$BACKEND_URL
+
+# Environment
+NODE_ENV=production
+
+# WhatsApp (opcional)
+WHATSAPP_API_KEY=$WHATSAPP_API_KEY
+WHATSAPP_PHONE_NUMBER=$WHATSAPP_PHONE_NUMBER
+EOF
+
+if [ -f ".env" ]; then
+    echo "✅ Arquivo .env criado com sucesso"
+else
+    echo "❌ Erro: Arquivo .env não foi criado"
+    exit 1
+fi
+
 # Xcode Cloud executa da raiz do repositório
 # Precisamos navegar para ios/App
 echo "📂 Navegando para ios/App..."
