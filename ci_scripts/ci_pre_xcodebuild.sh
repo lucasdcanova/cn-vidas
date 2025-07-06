@@ -37,6 +37,53 @@ else
     npm run cap:sync
 fi
 
+# Criar estrutura do CapacitorKeyboard
+echo "🔧 Criando estrutura do CapacitorKeyboard..."
+KEYBOARD_PATH="$CI_PRIMARY_REPOSITORY_PATH/node_modules/@capacitor/keyboard"
+mkdir -p "${KEYBOARD_PATH}/ios/Sources/KeyboardPlugin/include"
+
+# Copiar arquivos do CapacitorKeyboard
+echo "📋 Copiando arquivos do CapacitorKeyboard..."
+if [ -d "$CI_PRIMARY_REPOSITORY_PATH/ios/App/CapacitorKeyboard/ios" ]; then
+    cp -R "$CI_PRIMARY_REPOSITORY_PATH/ios/App/CapacitorKeyboard/ios/"* "${KEYBOARD_PATH}/ios/" 2>/dev/null || true
+    echo "✅ Arquivos copiados com sucesso"
+else
+    echo "📝 Criando arquivos de header manualmente..."
+    
+    # Criar KeyboardPlugin.h
+    cat > "${KEYBOARD_PATH}/ios/Sources/KeyboardPlugin/include/KeyboardPlugin.h" << 'EOF'
+#import <UIKit/UIKit.h>
+
+//! Project version number for Plugin.
+FOUNDATION_EXPORT double PluginVersionNumber;
+
+//! Project version string for Plugin.
+FOUNDATION_EXPORT const unsigned char PluginVersionString[];
+
+// In this header, you should import all the public headers of your framework using statements like #import <Plugin/PublicHeader.h>
+EOF
+
+    # Criar Keyboard.h
+    cat > "${KEYBOARD_PATH}/ios/Sources/KeyboardPlugin/include/Keyboard.h" << 'EOF'
+#import <UIKit/UIKit.h>
+#import <Capacitor/CAPPlugin.h>
+#import <Capacitor/CAPBridgedPlugin.h>
+
+
+@class CAPPluginCall;
+
+@interface KeyboardPlugin : CAPPlugin <CAPBridgedPlugin>
+
+@end
+EOF
+    
+    echo "✅ Arquivos de header criados"
+fi
+
+# Verificar se os arquivos existem
+echo "🔍 Verificando arquivos do CapacitorKeyboard..."
+ls -la "${KEYBOARD_PATH}/ios/Sources/KeyboardPlugin/include/" || echo "Diretório não encontrado"
+
 # Navegar para o diretório iOS
 cd ios/App
 
