@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { RefreshCw, Search, Download, Trash2 } from 'lucide-react';
+import { RefreshCw, Search, Download, Copy, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import AdminLayout from '@/components/layouts/admin-layout';
 
 interface RemoteLog {
   id: number;
@@ -37,6 +38,7 @@ export default function RemoteConsole() {
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
   // Buscar sessões ativas
   const { data: sessions, refetch: refetchSessions } = useQuery({
@@ -99,8 +101,33 @@ export default function RemoteConsole() {
     linkElement.click();
   };
 
+  const copyAllLogs = async () => {
+    const logsText = filteredLogs.map(log => {
+      const timestamp = format(new Date(log.timestamp), "HH:mm:ss.SSS");
+      let text = `[${timestamp}] [${log.level.toUpperCase()}] ${log.message}`;
+      
+      if (log.stack) {
+        text += `\n${log.stack}`;
+      }
+      
+      if (log.metadata && Object.keys(log.metadata).length > 0) {
+        text += `\nMetadata: ${JSON.stringify(log.metadata, null, 2)}`;
+      }
+      
+      return text;
+    }).join('\n\n---\n\n');
+    
+    try {
+      await navigator.clipboard.writeText(logsText);
+      setCopiedToClipboard(true);
+      setTimeout(() => setCopiedToClipboard(false), 2000);
+    } catch (error) {
+      console.error('Erro ao copiar logs:', error);
+    }
+  };
+
   return (
-    <div className="container mx-auto p-4 space-y-4">
+    <AdminLayout title="Console Remoto">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -130,7 +157,7 @@ export default function RemoteConsole() {
         </CardHeader>
         <CardContent>
           {/* Controles */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             <Select value={selectedSession} onValueChange={setSelectedSession}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma sessão" />
@@ -175,6 +202,24 @@ export default function RemoteConsole() {
             >
               <Download className="h-4 w-4 mr-2" />
               Exportar
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={copyAllLogs}
+              disabled={!filteredLogs.length}
+            >
+              {copiedToClipboard ? (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                  Copiado!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copiar Todos
+                </>
+              )}
             </Button>
           </div>
 
@@ -253,6 +298,6 @@ export default function RemoteConsole() {
           </ScrollArea>
         </CardContent>
       </Card>
-    </div>
+    </AdminLayout>
   );
 }
