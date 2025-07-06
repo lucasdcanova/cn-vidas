@@ -308,7 +308,21 @@ router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => 
     });
   } catch (error) {
     console.error('Error deleting user:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    
+    // Verificar se é erro de constraint de chave estrangeira
+    if (error instanceof Error) {
+      if (error.message.includes('foreign key constraint') || error.message.includes('violates foreign key')) {
+        return res.status(400).json({ 
+          error: 'Cannot delete user: user has related records that must be removed first',
+          details: error.message 
+        });
+      }
+    }
+    
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
