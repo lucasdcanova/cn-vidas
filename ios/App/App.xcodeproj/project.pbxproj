@@ -101,6 +101,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
 			buildPhases = (
+				603DB8062E1AD39B00B13A82 /* ShellScript */,
 				6634F4EFEBD30273BCE97C65 /* [CP] Check Pods Manifest.lock */,
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
@@ -170,6 +171,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		603DB8062E1AD39B00B13A82 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\n  echo \"🚀 Verificando CocoaPods...\"\n\n  # Detectar se estamos no Xcode Cloud\n  if [ -n \"$CI_XCODE_CLOUD\" ]; then\n      echo \"📍 Executando no Xcode Cloud\"\n\n      # Configurar Ruby/Gems\n      export GEM_HOME=$HOME/.gem\n      export PATH=$GEM_HOME/bin:$PATH\n\n      # Instalar CocoaPods\n      if ! command -v pod &> /dev/null; then\n          echo \"📦 Instalando CocoaPods...\"\n          gem install cocoapods --user-install\n      fi\n\n      # Executar pod install\n      echo \"🔧 Executando pod install...\"\n      cd \"$SRCROOT\"\n      pod install || pod install --repo-update\n  else\n      echo \"✅ Ambiente local - pulando instalação\"\n  fi# Type a script or drag a script file from your workspace to insert its path.\n";
+		};
 		6634F4EFEBD30273BCE97C65 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
