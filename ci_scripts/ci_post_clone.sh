@@ -1,35 +1,61 @@
 #!/bin/sh
 
-# Script executado APÓS o clone do repositório pelo Xcode Cloud
-# Este script configura o ambiente inicial
+set -e
 
-echo "🔧 Configurando ambiente após clone..."
+# Script executado pelo Xcode Cloud após clonar o repositório
 
-# Definir variáveis de ambiente se necessário
-export NODE_ENV=production
+echo "🚀 Iniciando script post-clone..."
 
-# Verificar versão do Node.js
-echo "📌 Versão do Node.js:"
-node --version
+# Debug: mostrar ambiente
+echo "📍 Diretório atual: $(pwd)"
+echo "📁 Conteúdo da raiz:"
+ls -la
 
-# Verificar versão do npm/yarn
-echo "📌 Versão do npm:"
-npm --version
+# Xcode Cloud executa da raiz do repositório
+# Precisamos navegar para ios/App
+echo "📂 Navegando para ios/App..."
+cd ios/App
 
-if command -v yarn >/dev/null 2>&1; then
-    echo "📌 Versão do yarn:"
-    yarn --version
+# Verificar se o Podfile existe
+if [ ! -f "Podfile" ]; then
+    echo "❌ Erro: Podfile não encontrado em ios/App!"
+    echo "Estrutura do diretório:"
+    pwd
+    ls -la
+    exit 1
 fi
 
-# Criar arquivos de configuração se necessário
-# Por exemplo, criar arquivo .env se precisar
-if [ ! -f ".env" ] && [ ! -z "$CI_STRIPE_PUBLIC_KEY" ]; then
-    echo "🔐 Criando arquivo de configuração..."
-    cat > .env << EOF
-VITE_STRIPE_PUBLIC_KEY=$CI_STRIPE_PUBLIC_KEY
-VITE_API_URL=$CI_API_URL
-VITE_DAILY_API_KEY=$CI_DAILY_API_KEY
-EOF
+echo "✅ Podfile encontrado"
+
+# Instalar CocoaPods
+echo "📦 Instalando CocoaPods..."
+export GEM_HOME=$HOME/.gem
+export PATH=$GEM_HOME/bin:$PATH
+gem install cocoapods --user-install
+
+# Verificar instalação
+echo "🔍 Verificando CocoaPods..."
+which pod
+pod --version
+
+# Limpar cache se existir
+echo "🧹 Limpando cache do CocoaPods..."
+rm -rf ~/Library/Caches/CocoaPods
+rm -rf Pods
+rm -f Podfile.lock
+
+# Executar pod install
+echo "🔧 Executando pod install..."
+pod install --repo-update --verbose
+
+# Verificar resultado
+if [ -d "Pods" ] && [ -f "App.xcworkspace" ]; then
+    echo "✅ Pod install concluído com sucesso!"
+    echo "📁 Conteúdo após pod install:"
+    ls -la
+else
+    echo "❌ Erro: Pod install pode ter falhado"
+    exit 1
 fi
 
-echo "✅ Configuração inicial concluída!"
+echo "✅ Script post-clone concluído!"
