@@ -15,9 +15,11 @@ node_modules/
 !node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/
 !node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/*.h
 !node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/*.h
+!node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/*.xcprivacy
 !node_modules/@capacitor/ios/Capacitor/
 !node_modules/@capacitor/ios/Capacitor/Capacitor/
 !node_modules/@capacitor/ios/Capacitor/Capacitor/*.h
+!node_modules/@capacitor/ios/Capacitor/Capacitor/*.xcprivacy
 !node_modules/@aparajita/
 !node_modules/@aparajita/capacitor-secure-storage/
 !node_modules/@aparajita/capacitor-secure-storage/ios/
