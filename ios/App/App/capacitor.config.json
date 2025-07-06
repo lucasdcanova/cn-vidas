@@ -27,6 +27,13 @@
 		"limitsNavigationsToAppBoundDomains": false,
 		"allowsLinkPreview": false
 	},
+	"android": {
+		"backgroundColor": "#eff6ff",
+		"buildToolsVersion": "34.0.0",
+		"allowMixedContent": true,
+		"captureInput": true,
+		"webContentsDebuggingEnabled": true
+	},
 	"packageClassList": [
 		"BiometricAuthNative",
 		"SecureStorage",
