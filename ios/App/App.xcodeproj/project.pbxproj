@@ -187,7 +187,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\n  echo \"🚀 Verificando CocoaPods...\"\n\n  # Detectar se estamos no Xcode Cloud\n  if [ -n \"$CI_XCODE_CLOUD\" ]; then\n      echo \"📍 Executando no Xcode Cloud\"\n\n      # Configurar Ruby/Gems\n      export GEM_HOME=$HOME/.gem\n      export PATH=$GEM_HOME/bin:$PATH\n\n      # Instalar CocoaPods\n      if ! command -v pod &> /dev/null; then\n          echo \"📦 Instalando CocoaPods...\"\n          gem install cocoapods --user-install\n      fi\n\n      # Executar pod install\n      echo \"🔧 Executando pod install...\"\n      cd \"$SRCROOT\"\n      pod install || pod install --repo-update\n  else\n      echo \"✅ Ambiente local - pulando instalação\"\n  fi# Type a script or drag a script file from your workspace to insert its path.\n";
+			shellScript = "set -e\n\n  echo \"🚀 Verificando CocoaPods...\"\n\n  # Detectar se estamos no Xcode Cloud\n  if [ -n \"$CI_XCODE_CLOUD\" ]; then\n      echo \"📍 Executando no Xcode Cloud\"\n\n      # Configurar Ruby/Gems\n      export GEM_HOME=$HOME/.gem\n      export PATH=$GEM_HOME/bin:$PATH\n\n      # Instalar CocoaPods\n      if ! command -v pod &> /dev/null; then\n          echo \"📦 Instalando CocoaPods...\"\n          gem install cocoapods --user-install\n      fi\n\n      # Executar pod install\n      echo \"🔧 Executando pod install...\"\n      cd \"$SRCROOT\"\n      pod install || pod install --repo-update\n  else\n      echo \"✅ Ambiente local - pulando instalação\"\n  fi\n";
 		};
 		6634F4EFEBD30273BCE97C65 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
