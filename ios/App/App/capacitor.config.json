@@ -1,0 +1,41 @@
+{
+	"appId": "com.cnvidas.app",
+	"appName": "CN Vidas",
+	"webDir": "dist/client",
+	"version": "1.0.0",
+	"server": {
+		"cleartext": true
+	},
+	"plugins": {
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		},
+		"StatusBar": {
+			"visible": true,
+			"style": "LIGHT",
+			"backgroundColor": "#eff6ff",
+			"overlaysWebView": false
+		}
+	},
+	"ios": {
+		"contentInset": "never",
+		"backgroundColor": "#eff6ff",
+		"limitsNavigationsToAppBoundDomains": false,
+		"allowsLinkPreview": false
+	},
+	"packageClassList": [
+		"BiometricAuthNative",
+		"SecureStorage",
+		"AppPlugin",
+		"CAPCameraPlugin",
+		"HapticsPlugin",
+		"KeyboardPlugin",
+		"LocalNotificationsPlugin",
+		"PushNotificationsPlugin",
+		"StatusBarPlugin"
+	]
+}
