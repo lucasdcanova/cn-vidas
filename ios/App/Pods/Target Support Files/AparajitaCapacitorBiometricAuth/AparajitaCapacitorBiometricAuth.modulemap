@@ -1,0 +1,6 @@
+framework module AparajitaCapacitorBiometricAuth {
+  umbrella header "AparajitaCapacitorBiometricAuth-umbrella.h"
+
+  export *
+  module * { export * }
+}
