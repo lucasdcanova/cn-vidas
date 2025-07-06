@@ -91,3 +91,5 @@ certificates/
 *.pem
 *.cer
 AuthKey_*.p8
+!ios/App/Pods/README.md
+!ios/App/Pods/Target Support Files/Pods-App/*.xcconfig
