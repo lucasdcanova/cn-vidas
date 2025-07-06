@@ -44,6 +44,7 @@ import walletRouter from './wallet-routes-simplified';
 import uploadDiagnosticsRouter from './upload-diagnostics';
 import profileImageRouter from './profile-image-routes';
 import dailyCloudWebhookRouter from './daily-cloud-webhook';
+import remoteConsoleRouter from './remote-console-routes';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -78,6 +79,9 @@ export default async function setupRoutes(app: express.Express) {
   
   // Rotas de diagnóstico
   app.use('/api/diagnostics', diagnosticRouter);
+  
+  // Rotas de console remoto
+  app.use(remoteConsoleRouter);
   
   // Rotas de telemedicina
   app.use('/api/telemedicine', dailyRouter);
