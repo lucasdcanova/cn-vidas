@@ -237,7 +237,7 @@ export const qrTokens = pgTable("qr_tokens", {
 
 export const auditLogs = pgTable("audit_logs", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id),
+  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
   action: text("action").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
@@ -356,8 +356,8 @@ export const partnerServiceAddresses = pgTable("partner_service_addresses", {
 // Tabela de prontuários médicos - simplificada para corresponder ao banco real
 export const medicalRecords = pgTable("medical_records", {
   id: serial("id").primaryKey(),
-  patientId: integer("patient_id").notNull().references(() => users.id),
-  doctorId: integer("doctor_id").notNull().references(() => users.id),
+  patientId: integer("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  doctorId: integer("doctor_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   appointmentId: integer("appointment_id").references(() => appointments.id),
   recordingId: integer("recording_id"),
   content: json("content").notNull(),
@@ -374,7 +374,7 @@ export const medicalRecordEntries = pgTable("medical_record_entries", {
   id: serial("id").primaryKey(),
   recordId: integer("record_id").notNull().references(() => medicalRecords.id),
   appointmentId: integer("appointment_id").references(() => appointments.id), // Vincula à consulta se houver
-  authorId: integer("author_id").notNull().references(() => users.id), // Médico que fez a entrada
+  authorId: integer("author_id").notNull().references(() => users.id, { onDelete: "cascade" }), // Médico que fez a entrada
   entryType: varchar("entry_type", { length: 50 }).notNull(), // 'consultation', 'exam', 'prescription', etc
   // Conteúdo da entrada
   content: text("content").notNull(), // Conteúdo principal
@@ -434,7 +434,7 @@ export const consultationRecordings = pgTable("consultation_recordings", {
 export const medicalRecordAccess = pgTable("medical_record_access", {
   id: serial("id").primaryKey(),
   recordId: integer("record_id").notNull().references(() => medicalRecords.id),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   accessType: varchar("access_type", { length: 50 }).notNull(), // 'view', 'create_entry', 'print', 'export'
   accessReason: text("access_reason"), // Motivo do acesso
   accessedAt: timestamp("accessed_at").defaultNow().notNull(),
