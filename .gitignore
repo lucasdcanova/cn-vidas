@@ -18,6 +18,15 @@ node_modules/
 !node_modules/@capacitor/ios/Capacitor/
 !node_modules/@capacitor/ios/Capacitor/Capacitor/
 !node_modules/@capacitor/ios/Capacitor/Capacitor/*.h
+!node_modules/@aparajita/
+!node_modules/@aparajita/capacitor-secure-storage/
+!node_modules/@aparajita/capacitor-secure-storage/ios/
+!node_modules/@aparajita/capacitor-secure-storage/ios/Plugin/
+!node_modules/@aparajita/capacitor-secure-storage/ios/Plugin/*.h
+!node_modules/@aparajita/capacitor-biometric-auth/
+!node_modules/@aparajita/capacitor-biometric-auth/ios/
+!node_modules/@aparajita/capacitor-biometric-auth/ios/Plugin/
+!node_modules/@aparajita/capacitor-biometric-auth/ios/Plugin/*.h
 /.pnp
 .pnp.js
 
