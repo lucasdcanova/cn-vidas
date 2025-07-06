@@ -1,4 +1,4 @@
-import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, partnerServiceAddresses, medicalRecords, medicalRecordEntries } from '../shared/schema';
+import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, partnerServiceAddresses, medicalRecords, medicalRecordEntries, userSubscriptions } from '../shared/schema';
 // Import the actual Drizzle types from schema instead of generic types
 import type { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, Dependent, MedicalRecord, MedicalRecordEntry, MedicalRecordAccess, PartnerAddress, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, InsertDependent, InsertMedicalRecord, InsertMedicalRecordEntry, InsertMedicalRecordAccess, InsertPartnerAddress } from '../shared/schema';
 import { db, safeQuery } from "./db";
@@ -438,6 +438,62 @@ export class DatabaseStorage implements IStorage {
       .returning();
     if (!user) throw new AppError('Usuário não encontrado', 404);
     return user;
+  }
+
+  async getUserDependencies(id: number): Promise<string[]> {
+    const dependencies: string[] = [];
+    
+    try {
+      // Verificar appointments
+      const appointmentsCount = await this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(appointments)
+        .where(or(eq(appointments.patientId, id), eq(appointments.doctorId, id)));
+      if (appointmentsCount[0]?.count > 0) {
+        dependencies.push(`appointments (${appointmentsCount[0].count})`);
+      }
+      
+      // Verificar medical records
+      const medicalRecordsCount = await this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(medicalRecords)
+        .where(or(eq(medicalRecords.patientId, id), eq(medicalRecords.doctorId, id)));
+      if (medicalRecordsCount[0]?.count > 0) {
+        dependencies.push(`medical records (${medicalRecordsCount[0].count})`);
+      }
+      
+      // Verificar claims
+      const claimsCount = await this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(claims)
+        .where(eq(claims.userId, id));
+      if (claimsCount[0]?.count > 0) {
+        dependencies.push(`claims (${claimsCount[0].count})`);
+      }
+      
+      // Verificar subscriptions
+      const subscriptionsCount = await this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(userSubscriptions)
+        .where(eq(userSubscriptions.userId, id));
+      if (subscriptionsCount[0]?.count > 0) {
+        dependencies.push(`subscriptions (${subscriptionsCount[0].count})`);
+      }
+      
+      // Verificar dependents
+      const dependentsCount = await this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(dependents)
+        .where(eq(dependents.userId, id));
+      if (dependentsCount[0]?.count > 0) {
+        dependencies.push(`dependents (${dependentsCount[0].count})`);
+      }
+      
+    } catch (error) {
+      console.error('Error checking user dependencies:', error);
+    }
+    
+    return dependencies;
   }
 
   async deleteUser(id: number): Promise<boolean> {

@@ -299,6 +299,17 @@ router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => 
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
     
+    // Verificar dependências antes de deletar
+    const dependencies = await storage.getUserDependencies(parseInt(id));
+    if (dependencies.length > 0) {
+      console.log('User has dependencies:', dependencies);
+      return res.status(400).json({ 
+        error: 'Cannot delete user: user has related records',
+        dependencies: dependencies,
+        errorType: 'HAS_DEPENDENCIES'
+      });
+    }
+    
     // Deletar o usuário
     await storage.deleteUser(parseInt(id));
     
@@ -308,20 +319,29 @@ router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => 
     });
   } catch (error) {
     console.error('Error deleting user:', error);
+    console.error('Full error object:', JSON.stringify(error, null, 2));
     
     // Verificar se é erro de constraint de chave estrangeira
     if (error instanceof Error) {
-      if (error.message.includes('foreign key constraint') || error.message.includes('violates foreign key')) {
+      console.log('Error message:', error.message);
+      console.log('Error name:', error.name);
+      
+      if (error.message.includes('foreign key constraint') || 
+          error.message.includes('violates foreign key') ||
+          error.message.includes('constraint') ||
+          error.message.includes('FOREIGN KEY')) {
         return res.status(400).json({ 
           error: 'Cannot delete user: user has related records that must be removed first',
-          details: error.message 
+          details: error.message,
+          errorType: 'FOREIGN_KEY_CONSTRAINT'
         });
       }
     }
     
     res.status(500).json({ 
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      errorType: 'UNKNOWN_ERROR'
     });
   }
 });
