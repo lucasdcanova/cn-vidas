@@ -33,6 +33,9 @@ import {
   User
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { IOSScrollView } from '@/components/shared/IOSScrollView';
+import { IOSKeyboardAvoidingView } from '@/components/shared/IOSKeyboardAvoidingView';
+import { isIOS } from '@/utils/platform';
 
 interface DoctorProfileData {
   specialization: string;
@@ -237,41 +240,45 @@ export default function DoctorOnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">
-            Bem-vindo ao CNVidas, Dr(a). {user?.name}!
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Complete seu cadastro para começar a atender pacientes
-          </p>
-        </div>
+    <IOSKeyboardAvoidingView className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <IOSScrollView 
+        className="flex-1"
+        contentClassName="py-8"
+      >
+        <div className="max-w-3xl mx-auto px-4 pb-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold tracking-tight mb-2">
+              Bem-vindo ao CNVidas, Dr(a). {user?.name}!
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Complete seu cadastro para começar a atender pacientes
+            </p>
+          </div>
 
-        {/* Progress indicator */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="flex items-center space-x-4">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-              step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            }`}>
-              <Stethoscope className="h-5 w-5" />
-            </div>
-            <div className={`w-20 h-1 ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-              step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            }`}>
-              <DollarSign className="h-5 w-5" />
-            </div>
-            <div className={`w-20 h-1 ${step >= 3 ? 'bg-primary' : 'bg-muted'}`} />
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-              step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            }`}>
-              <CreditCard className="h-5 w-5" />
+          {/* Progress indicator */}
+          <div className="flex items-center justify-center mb-8">
+            <div className="flex items-center space-x-4">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                <Stethoscope className="h-5 w-5" />
+              </div>
+              <div className={`w-20 h-1 ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                <DollarSign className="h-5 w-5" />
+              </div>
+              <div className={`w-20 h-1 ${step >= 3 ? 'bg-primary' : 'bg-muted'}`} />
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                <CreditCard className="h-5 w-5" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <Card>
+          <Card>
           {/* Step 1: Professional Information */}
           {step === 1 && (
             <>
@@ -526,20 +533,21 @@ export default function DoctorOnboardingPage() {
           </CardFooter>
         </Card>
 
-        {/* Additional Information */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>
-            Ao completar seu cadastro, você concorda com nossos{' '}
-            <a href="/termos" className="underline hover:text-primary">
-              Termos de Uso
-            </a>{' '}
-            e{' '}
-            <a href="/privacidade" className="underline hover:text-primary">
-              Política de Privacidade
-            </a>
-          </p>
+          {/* Additional Information */}
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            <p>
+              Ao completar seu cadastro, você concorda com nossos{' '}
+              <a href="/termos" className="underline hover:text-primary">
+                Termos de Uso
+              </a>{' '}
+              e{' '}
+              <a href="/privacidade" className="underline hover:text-primary">
+                Política de Privacidade
+              </a>
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </IOSScrollView>
+    </IOSKeyboardAvoidingView>
   );
 }

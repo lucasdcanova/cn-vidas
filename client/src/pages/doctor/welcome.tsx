@@ -8,6 +8,8 @@ import { AirVent, AlertCircle, ArrowRight, Calendar, CheckCircle, CircleDollarSi
 import logoPath from '@assets/Logotipo_cnvidas_comprido_transparent_advanced_fuzz3.png';
 import { useAuth } from '@/hooks/use-auth';
 import { apiRequest } from '@/lib/queryClient';
+import { OnboardingLayout } from '@/components/shared/OnboardingLayout';
+import { isIOS } from '@/utils/platform';
 
 // Função para determinar se o nome é masculino ou feminino
 function determinaGenero(fullName?: string): string {
@@ -104,9 +106,12 @@ export const DoctorWelcome: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
+    <OnboardingLayout 
+      className="bg-gradient-to-b from-primary/5 to-background"
+      contentClassName="py-12 px-4 sm:px-6"
+    >
       <motion.div 
-        className="container max-w-5xl mx-auto py-12 px-4 sm:px-6"
+        className="container max-w-5xl mx-auto"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
@@ -389,7 +394,7 @@ export const DoctorWelcome: React.FC = () => {
           </TabsContent>
         </Tabs>
       </motion.div>
-    </div>
+    </OnboardingLayout>
   );
 };
 
