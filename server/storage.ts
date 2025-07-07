@@ -446,7 +446,7 @@ export class DatabaseStorage implements IStorage {
     try {
       // Verificar appointments
       const appointmentsResult = await this.db.execute(
-        sql`SELECT COUNT(*) as count FROM appointments WHERE patient_id = ${id} OR doctor_id = ${id}`
+        sql`SELECT COUNT(*) as count FROM appointments WHERE user_id = ${id}`
       );
       const appointmentsCount = Number(appointmentsResult.rows[0]?.count || 0);
       if (appointmentsCount > 0) {
@@ -489,6 +489,24 @@ export class DatabaseStorage implements IStorage {
         dependencies.push(`dependents (${dependentsCount})`);
       }
       
+      // Verificar se é médico
+      const doctorResult = await this.db.execute(
+        sql`SELECT COUNT(*) as count FROM doctors WHERE user_id = ${id}`
+      );
+      const doctorCount = Number(doctorResult.rows[0]?.count || 0);
+      if (doctorCount > 0) {
+        dependencies.push(`doctor profile`);
+        
+        // Verificar appointments como médico
+        const doctorAppointmentsResult = await this.db.execute(
+          sql`SELECT COUNT(*) as count FROM appointments WHERE doctor_id = (SELECT id FROM doctors WHERE user_id = ${id})`
+        );
+        const doctorAppointmentsCount = Number(doctorAppointmentsResult.rows[0]?.count || 0);
+        if (doctorAppointmentsCount > 0) {
+          dependencies.push(`appointments as doctor (${doctorAppointmentsCount})`);
+        }
+      }
+      
     } catch (error) {
       console.error('Error checking user dependencies:', error);
     }
@@ -509,33 +527,37 @@ export class DatabaseStorage implements IStorage {
       
       console.log(`✅ Usuário encontrado: ${existingUser.fullName} (${existingUser.email})`);
       
-      // Excluir registros relacionados em cascata
+      // Verificar se o usuário tem histórico importante (consultas realizadas ou pagamentos)
+      const hasAppointments = await this.db.execute(
+        sql`SELECT COUNT(*) as count FROM appointments WHERE user_id = ${id} AND status IN ('completed', 'in_progress')`
+      );
+      
+      const hasPayments = await this.db.execute(
+        sql`SELECT COUNT(*) as count FROM user_subscriptions WHERE user_id = ${id}`
+      );
+      
+      if (Number(hasAppointments.rows[0]?.count || 0) > 0 || Number(hasPayments.rows[0]?.count || 0) > 0) {
+        console.log(`❌ Usuário ID ${id} tem histórico importante e não pode ser excluído`);
+        throw new Error('User has important history and cannot be deleted');
+      }
+      
+      // Excluir registros básicos relacionados
       await this.db.transaction(async (tx) => {
-        // Excluir medical records onde o usuário é paciente ou médico
-        await tx.delete(medicalRecords)
-          .where(or(
-            eq(medicalRecords.patientId, id),
-            eq(medicalRecords.doctorId, id)
-          ));
-          
-        // Excluir appointments onde o usuário é paciente ou médico
+        // Excluir appointments pendentes/canceladas
         await tx.delete(appointments)
-          .where(or(
-            eq(appointments.patientId, id),
-            eq(appointments.doctorId, id)
-          ));
+          .where(eq(appointments.userId, id));
           
-        // Excluir claims do usuário
-        await tx.delete(claims)
-          .where(eq(claims.userId, id));
+        // Excluir medical records vazios
+        await tx.delete(medicalRecords)
+          .where(eq(medicalRecords.patientId, id));
           
-        // Excluir subscriptions do usuário
-        await tx.delete(userSubscriptions)
-          .where(eq(userSubscriptions.userId, id));
-          
-        // Excluir dependents do usuário
+        // Excluir dependents
         await tx.delete(dependents)
           .where(eq(dependents.userId, id));
+          
+        // Excluir notificações
+        await tx.delete(notifications)
+          .where(eq(notifications.userId, id));
       });
       
       // Excluir o usuário

@@ -299,18 +299,7 @@ router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => 
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
     
-    // Verificar dependências antes de deletar
-    const dependencies = await storage.getUserDependencies(parseInt(id));
-    if (dependencies.length > 0) {
-      console.log('User has dependencies:', dependencies);
-      return res.status(400).json({ 
-        error: 'Cannot delete user: user has related records',
-        dependencies: dependencies,
-        errorType: 'HAS_DEPENDENCIES'
-      });
-    }
-    
-    // Deletar o usuário
+    // Deletar o usuário (com exclusão em cascata)
     await storage.deleteUser(parseInt(id));
     
     res.json({ 
