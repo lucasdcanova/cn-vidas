@@ -445,48 +445,48 @@ export class DatabaseStorage implements IStorage {
     
     try {
       // Verificar appointments
-      const appointmentsCount = await this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(appointments)
-        .where(or(eq(appointments.patientId, id), eq(appointments.doctorId, id)));
-      if (appointmentsCount[0]?.count > 0) {
-        dependencies.push(`appointments (${appointmentsCount[0].count})`);
+      const appointmentsResult = await this.db.execute(
+        sql`SELECT COUNT(*) as count FROM appointments WHERE patient_id = ${id} OR doctor_id = ${id}`
+      );
+      const appointmentsCount = Number(appointmentsResult.rows[0]?.count || 0);
+      if (appointmentsCount > 0) {
+        dependencies.push(`appointments (${appointmentsCount})`);
       }
       
       // Verificar medical records
-      const medicalRecordsCount = await this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(medicalRecords)
-        .where(or(eq(medicalRecords.patientId, id), eq(medicalRecords.doctorId, id)));
-      if (medicalRecordsCount[0]?.count > 0) {
-        dependencies.push(`medical records (${medicalRecordsCount[0].count})`);
+      const medicalRecordsResult = await this.db.execute(
+        sql`SELECT COUNT(*) as count FROM medical_records WHERE patient_id = ${id} OR doctor_id = ${id}`
+      );
+      const medicalRecordsCount = Number(medicalRecordsResult.rows[0]?.count || 0);
+      if (medicalRecordsCount > 0) {
+        dependencies.push(`medical records (${medicalRecordsCount})`);
       }
       
       // Verificar claims
-      const claimsCount = await this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(claims)
-        .where(eq(claims.userId, id));
-      if (claimsCount[0]?.count > 0) {
-        dependencies.push(`claims (${claimsCount[0].count})`);
+      const claimsResult = await this.db.execute(
+        sql`SELECT COUNT(*) as count FROM claims WHERE user_id = ${id}`
+      );
+      const claimsCount = Number(claimsResult.rows[0]?.count || 0);
+      if (claimsCount > 0) {
+        dependencies.push(`claims (${claimsCount})`);
       }
       
       // Verificar subscriptions
-      const subscriptionsCount = await this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(userSubscriptions)
-        .where(eq(userSubscriptions.userId, id));
-      if (subscriptionsCount[0]?.count > 0) {
-        dependencies.push(`subscriptions (${subscriptionsCount[0].count})`);
+      const subscriptionsResult = await this.db.execute(
+        sql`SELECT COUNT(*) as count FROM user_subscriptions WHERE user_id = ${id}`
+      );
+      const subscriptionsCount = Number(subscriptionsResult.rows[0]?.count || 0);
+      if (subscriptionsCount > 0) {
+        dependencies.push(`subscriptions (${subscriptionsCount})`);
       }
       
       // Verificar dependents
-      const dependentsCount = await this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(dependents)
-        .where(eq(dependents.userId, id));
-      if (dependentsCount[0]?.count > 0) {
-        dependencies.push(`dependents (${dependentsCount[0].count})`);
+      const dependentsResult = await this.db.execute(
+        sql`SELECT COUNT(*) as count FROM dependents WHERE user_id = ${id}`
+      );
+      const dependentsCount = Number(dependentsResult.rows[0]?.count || 0);
+      if (dependentsCount > 0) {
+        dependencies.push(`dependents (${dependentsCount})`);
       }
       
     } catch (error) {
@@ -508,6 +508,35 @@ export class DatabaseStorage implements IStorage {
       }
       
       console.log(`✅ Usuário encontrado: ${existingUser.fullName} (${existingUser.email})`);
+      
+      // Excluir registros relacionados em cascata
+      await this.db.transaction(async (tx) => {
+        // Excluir medical records onde o usuário é paciente ou médico
+        await tx.delete(medicalRecords)
+          .where(or(
+            eq(medicalRecords.patientId, id),
+            eq(medicalRecords.doctorId, id)
+          ));
+          
+        // Excluir appointments onde o usuário é paciente ou médico
+        await tx.delete(appointments)
+          .where(or(
+            eq(appointments.patientId, id),
+            eq(appointments.doctorId, id)
+          ));
+          
+        // Excluir claims do usuário
+        await tx.delete(claims)
+          .where(eq(claims.userId, id));
+          
+        // Excluir subscriptions do usuário
+        await tx.delete(userSubscriptions)
+          .where(eq(userSubscriptions.userId, id));
+          
+        // Excluir dependents do usuário
+        await tx.delete(dependents)
+          .where(eq(dependents.userId, id));
+      });
       
       // Excluir o usuário
       const [user] = await this.db.delete(users)
