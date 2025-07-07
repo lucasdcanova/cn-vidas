@@ -316,3 +316,7 @@ Nova tabela `doctor_digital_certificates`:
 ## Workflow de Desenvolvimento
 
 - Entenda o workflow: estou programando no Codespaces WEB pelo ipad com o claude code no terminal do codespaces web no ipad. O deploy está sendo feito automaticamente para xcode claude e os teste estao sendo feito principalmente pelo test flight com testes interno.
+
+## Secrets
+
+- as variaveis do ambiente estao salvas no codespaces secrets
