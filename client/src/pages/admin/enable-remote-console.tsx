@@ -1,19 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useRemoteConsole } from '@/hooks/use-remote-console';
 import AdminLayout from '@/components/layouts/admin-layout';
+import { Preferences } from '@capacitor/preferences';
+import { isNativeApp } from '@/utils/platform';
 
 export default function EnableRemoteConsole() {
-  const [isEnabled, setIsEnabled] = useState(
-    localStorage.getItem('enableRemoteConsole') === 'true'
-  );
+  const [isEnabled, setIsEnabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { setEnabled } = useRemoteConsole();
 
-  const handleToggle = (checked: boolean) => {
+  // Carregar estado inicial
+  useEffect(() => {
+    const loadState = async () => {
+      if (isNativeApp()) {
+        try {
+          const { value } = await Preferences.get({ key: 'enableRemoteConsole' });
+          setIsEnabled(value === 'true');
+        } catch (error) {
+          console.error('Erro ao carregar preferências:', error);
+        }
+      } else {
+        setIsEnabled(localStorage.getItem('enableRemoteConsole') === 'true');
+      }
+      setIsLoading(false);
+    };
+    loadState();
+  }, []);
+
+  const handleToggle = async (checked: boolean) => {
     setIsEnabled(checked);
+    
+    // Salvar no storage apropriado
+    if (isNativeApp()) {
+      try {
+        await Preferences.set({
+          key: 'enableRemoteConsole',
+          value: checked.toString()
+        });
+      } catch (error) {
+        console.error('Erro ao salvar preferências:', error);
+      }
+    } else {
+      localStorage.setItem('enableRemoteConsole', checked.toString());
+    }
+    
     setEnabled(checked);
     
     if (checked) {
@@ -58,6 +92,7 @@ export default function EnableRemoteConsole() {
                 id="remote-console"
                 checked={isEnabled}
                 onCheckedChange={handleToggle}
+                disabled={isLoading}
               />
             </div>
 

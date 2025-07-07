@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
+import { Preferences } from '@capacitor/preferences';
 
 interface RemoteLogEntry {
   level: 'log' | 'warn' | 'error' | 'info' | 'debug';
@@ -28,26 +29,54 @@ class RemoteConsole {
   };
 
   constructor() {
-    if (this.shouldEnableRemoteLogging()) {
+    this.initialize();
+  }
+  
+  private async initialize() {
+    const shouldEnable = await this.shouldEnableRemoteLogging();
+    
+    if (shouldEnable) {
       this.interceptConsole();
       this.originalConsole.log('[RemoteConsole] Ativado! Logs serão enviados para o servidor.');
       
-      // Adicionar um log de teste inicial
+      // Adicionar logs de teste inicial com delay
       setTimeout(() => {
         console.log('[RemoteConsole] Log de teste - Console remoto funcionando!');
-      }, 1000);
+        console.info('[RemoteConsole] Informação de teste');
+        console.warn('[RemoteConsole] Aviso de teste');
+        
+        // Forçar flush imediato para teste
+        this.flush().then(() => {
+          this.originalConsole.log('[RemoteConsole] Flush de teste completado');
+        }).catch(err => {
+          this.originalConsole.error('[RemoteConsole] Erro no flush de teste:', err);
+        });
+      }, 2000);
     } else {
       this.originalConsole.log('[RemoteConsole] Não ativado. Condições não atendidas.');
     }
   }
 
-  private shouldEnableRemoteLogging(): boolean {
+  private async shouldEnableRemoteLogging(): Promise<boolean> {
     // Ativa em produção, TestFlight, ou com flag específica
     const isProduction = process.env.NODE_ENV === 'production';
-    const hasRemoteLogFlag = localStorage.getItem('enableRemoteConsole') === 'true';
     const isTestFlight = navigator.userAgent.includes('TestFlight');
     const isCapacitor = !!(window as any).Capacitor;
     const isNativeApp = isCapacitor && (window as any).Capacitor.isNativePlatform();
+    
+    // Verifica flag no storage apropriado
+    let hasRemoteLogFlag = false;
+    
+    if (isNativeApp) {
+      try {
+        const { value } = await Preferences.get({ key: 'enableRemoteConsole' });
+        hasRemoteLogFlag = value === 'true';
+      } catch (error) {
+        this.originalConsole.error('[RemoteConsole] Erro ao ler preferências:', error);
+      }
+    } else {
+      hasRemoteLogFlag = localStorage.getItem('enableRemoteConsole') === 'true';
+    }
     
     // Log para debug
     this.originalConsole.log('[RemoteConsole] Debug info:', {
@@ -60,8 +89,14 @@ class RemoteConsole {
       nodeEnv: process.env.NODE_ENV
     });
     
+    // Sempre ativa se a flag estiver definida
+    if (hasRemoteLogFlag) {
+      this.originalConsole.log('[RemoteConsole] Ativado por flag de configuração');
+      return true;
+    }
+    
     // Ativa para qualquer app nativo ou com as outras condições
-    return isProduction || hasRemoteLogFlag || isTestFlight || isNativeApp;
+    return isProduction || isTestFlight || isNativeApp;
   }
 
   private interceptConsole() {
@@ -146,17 +181,41 @@ class RemoteConsole {
     this.logBuffer = [];
     
     try {
-      await fetch(REMOTE_LOG_ENDPOINT, {
+      this.originalConsole.log(`[RemoteConsole] Enviando ${logsToSend.length} logs para o servidor...`);
+      
+      // Tenta obter o userId do localStorage (se o usuário estiver logado)
+      const userStr = localStorage.getItem('user');
+      let userId: number | undefined;
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          userId = user.id;
+        } catch (e) {
+          // Ignora erro de parse
+        }
+      }
+      
+      const response = await fetch(REMOTE_LOG_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Incluir cookies para autenticação
         body: JSON.stringify({
           logs: logsToSend,
           sessionId: this.getSessionId(),
+          userId: userId,
         }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      this.originalConsole.log(`[RemoteConsole] ✅ ${result.count} logs enviados com sucesso`);
     } catch (error) {
+      this.originalConsole.error('[RemoteConsole] ❌ Erro ao enviar logs:', error);
       // Re-adiciona logs ao buffer se falhar
       this.logBuffer = [...logsToSend, ...this.logBuffer];
     }
@@ -177,9 +236,25 @@ class RemoteConsole {
   }
 
   // Método para ativar/desativar
-  setEnabled(enabled: boolean) {
-    localStorage.setItem('enableRemoteConsole', enabled.toString());
-    if (enabled && !this.shouldEnableRemoteLogging()) {
+  async setEnabled(enabled: boolean) {
+    const isCapacitor = !!(window as any).Capacitor;
+    const isNativeApp = isCapacitor && (window as any).Capacitor.isNativePlatform();
+    
+    if (isNativeApp) {
+      try {
+        await Preferences.set({
+          key: 'enableRemoteConsole',
+          value: enabled.toString()
+        });
+      } catch (error) {
+        this.originalConsole.error('[RemoteConsole] Erro ao salvar preferências:', error);
+      }
+    } else {
+      localStorage.setItem('enableRemoteConsole', enabled.toString());
+    }
+    
+    const shouldEnable = await this.shouldEnableRemoteLogging();
+    if (enabled && !shouldEnable) {
       window.location.reload();
     }
   }
