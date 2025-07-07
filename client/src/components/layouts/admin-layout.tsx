@@ -53,6 +53,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
     { href: "/admin/analytics", icon: CreditCard, label: "Relatórios", description: "Análises e relatórios" },
     { href: "/admin/enable-remote-console", icon: Settings, label: "Ativar Console Remoto", description: "Configurar console remoto" },
     { href: "/admin/remote-console", icon: Terminal, label: "Console Remoto", description: "Logs do TestFlight/Produção" },
+    { href: "/admin/test-remote-console", icon: Terminal, label: "Testar Console", description: "Executar testes de log" },
   ];
 
   const NavigationItem = ({ 
