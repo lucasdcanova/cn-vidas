@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 import StepOne from './step-one';
 import StepTwo from './step-two';
 import StepThree from './step-three';
+import { OnboardingLayout } from '@/components/shared/OnboardingLayout';
 
 export default function DoctorOnboardingFlow() {
   const { user } = useAuth();
@@ -126,9 +127,12 @@ export default function DoctorOnboardingFlow() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <OnboardingLayout 
+      className="bg-gradient-to-br from-blue-50 to-indigo-100"
+      contentClassName=""
+    >
       {/* Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm shadow-sm">
+      <div className="sticky top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm shadow-sm safe-top">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold text-gray-800">Configuração do Perfil Médico</h2>
@@ -146,7 +150,7 @@ export default function DoctorOnboardingFlow() {
       </div>
 
       {/* Main Content */}
-      <div className="pt-24 pb-12 px-4">
+      <div className="pt-8 pb-12 px-4 safe-bottom">
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
             <StepOne
@@ -175,6 +179,6 @@ export default function DoctorOnboardingFlow() {
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </OnboardingLayout>
   );
 }
