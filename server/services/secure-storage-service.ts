@@ -205,17 +205,44 @@ export class SecureStorageService {
     key: string, 
     fileType: string
   ): Promise<string> {
-    // URLs assinadas com expiração
-    const expirationSeconds = fileType === 'profile' ? 3600 * 24 * 7 : 3600; // 7 dias para perfil, 1 hora para médicos
-    
-    const params = {
-      Bucket: bucket,
-      Key: key,
-      Expires: expirationSeconds,
-      ResponseCacheControl: 'no-cache, no-store, must-revalidate'
-    };
+    try {
+      // URLs assinadas com expiração
+      const expirationSeconds = fileType === 'profile' ? 3600 * 24 * 7 : 3600; // 7 dias para perfil, 1 hora para médicos
+      
+      console.log('🔐 Gerando URL assinada:', {
+        bucket,
+        key,
+        fileType,
+        expirationSeconds,
+        region: process.env.AWS_REGION,
+        hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
+        hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY
+      });
+      
+      const params = {
+        Bucket: bucket,
+        Key: key,
+        Expires: expirationSeconds,
+        ResponseCacheControl: 'no-cache, no-store, must-revalidate'
+      };
 
-    return s3.getSignedUrl('getObject', params);
+      const signedUrl = s3.getSignedUrl('getObject', params);
+      
+      // Log da URL gerada (sem expor dados sensíveis)
+      const urlParts = new URL(signedUrl);
+      console.log('🔗 URL assinada gerada:', {
+        host: urlParts.hostname,
+        pathname: urlParts.pathname,
+        hasSignature: urlParts.searchParams.has('X-Amz-Signature'),
+        hasCredential: urlParts.searchParams.has('X-Amz-Credential'),
+        expires: urlParts.searchParams.get('X-Amz-Expires')
+      });
+      
+      return signedUrl;
+    } catch (error) {
+      console.error('❌ Erro ao gerar URL assinada:', error);
+      throw error;
+    }
   }
 
   // Download seguro com auditoria
