@@ -178,6 +178,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
             <span className="text-sm text-muted-foreground hidden lg:block truncate">
               Olá, {user?.fullName?.split(' ')[0]}!
             </span>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden xl:inline">Sair</span>
+            </Button>
           </div>
         </header>
 
