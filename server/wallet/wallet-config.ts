@@ -17,7 +17,7 @@ export const walletConfig = {
         wwdr: Buffer.from(process.env.WALLET_WWDR_BASE64 || '', 'base64'),
         signerCert: Buffer.from(process.env.WALLET_SIGNER_CERT_BASE64, 'base64'),
         signerKey: Buffer.from(process.env.WALLET_SIGNER_KEY_BASE64 || '', 'base64'),
-        signerKeyPassphrase: process.env.APPLE_PASS_KEY_PASSWORD || ''
+        signerKeyPassphrase: process.env.APPLE_PASS_KEY_PASSWORD || undefined
       };
     }
     
@@ -28,7 +28,7 @@ export const walletConfig = {
       wwdr: await fs.promises.readFile(path.join(certificatesPath, 'wwdr.pem')),
       signerCert: await fs.promises.readFile(path.join(certificatesPath, 'signerCert.pem')),
       signerKey: await fs.promises.readFile(path.join(certificatesPath, 'signerKey.key')),
-      signerKeyPassphrase: process.env.APPLE_PASS_KEY_PASSWORD || ''
+      signerKeyPassphrase: process.env.APPLE_PASS_KEY_PASSWORD || undefined
     };
   },
   
