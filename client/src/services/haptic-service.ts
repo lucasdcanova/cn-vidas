@@ -154,6 +154,19 @@ class HapticService {
   async pullToRefresh(): Promise<void> {
     await this.impact('light');
   }
+
+  // Métodos de conveniência
+  async success(): Promise<void> {
+    await this.notification('success');
+  }
+
+  async error(): Promise<void> {
+    await this.notification('error');
+  }
+
+  async warning(): Promise<void> {
+    await this.notification('warning');
+  }
 }
 
 export const hapticService = new HapticService();
