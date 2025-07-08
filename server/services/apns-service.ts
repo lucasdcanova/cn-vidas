@@ -28,7 +28,7 @@ export class APNsService {
         options.token = {
           teamId: apnsConfig.teamId,
           keyId: apnsConfig.keyId,
-          key: process.env.APNS_AUTH_KEY_PATH || '',
+          key: apnsConfig.getAuthKey(),
         };
       } else {
         // Usar certificados
