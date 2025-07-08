@@ -3,8 +3,16 @@ import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { CreditCard, Trash2, Plus } from "lucide-react";
+import { CreditCard, Trash2, Plus, QrCode, FileText } from "lucide-react";
 import { useStripeSetup } from '@/hooks/use-stripe-setup';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PaymentMethod {
   id: string;
@@ -14,6 +22,13 @@ interface PaymentMethod {
     last4: string;
     exp_month: number;
     exp_year: number;
+  };
+  pix?: {
+    key: string;
+    key_type: string;
+  };
+  boleto?: {
+    tax_id: string;
   };
   billing_details: {
     name: string;
@@ -95,6 +110,7 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [setupError, setSetupError] = useState<string | null>(null);
+  const [selectedPaymentType, setSelectedPaymentType] = useState<'card' | 'pix' | 'boleto' | null>(null);
   const { toast } = useToast();
   const { StripeSetupProvider, isLoading: isSetupLoading, clientSecret } = useStripeSetup({
     onError: (error) => {
@@ -180,12 +196,22 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
           className="flex items-center justify-between p-4 border rounded-lg bg-card"
         >
           <div className="flex items-center space-x-4">
-            <CreditCard className="h-6 w-6 text-muted-foreground" />
+            {method.type === 'card' && <CreditCard className="h-6 w-6 text-muted-foreground" />}
+            {method.type === 'pix' && <QrCode className="h-6 w-6 text-green-600" />}
+            {method.type === 'boleto' && <FileText className="h-6 w-6 text-gray-600" />}
             <div>
               <p className="font-medium">
                 {method.card ? (
                   <>
                     {method.card.brand.toUpperCase()} terminando em {method.card.last4}
+                  </>
+                ) : method.type === 'pix' ? (
+                  <>
+                    PIX - {method.pix?.key_type === 'cpf' ? 'CPF' : method.pix?.key_type === 'email' ? 'E-mail' : method.pix?.key_type === 'phone' ? 'Telefone' : 'Chave'}: {method.pix?.key}
+                  </>
+                ) : method.type === 'boleto' ? (
+                  <>
+                    Boleto - CPF: {method.boleto?.tax_id}
                   </>
                 ) : (
                   method.type.toUpperCase()
@@ -240,15 +266,89 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
           </div>
         )
       ) : (
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => setIsAddingNew(true)}
-          disabled={isLoading || isSetupLoading}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Adicionar novo método de pagamento
-        </Button>
+        <>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setSelectedPaymentType('card')}
+            disabled={isLoading || isSetupLoading}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar novo método de pagamento
+          </Button>
+
+          {/* Modal para seleção do tipo de pagamento */}
+          <Dialog open={!!selectedPaymentType} onOpenChange={(open) => !open && setSelectedPaymentType(null)}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Adicionar Método de Pagamento</DialogTitle>
+                <DialogDescription>
+                  Escolha o tipo de método de pagamento que deseja adicionar
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Tabs defaultValue="card" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="card">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Cartão
+                  </TabsTrigger>
+                  <TabsTrigger value="pix">
+                    <QrCode className="h-4 w-4 mr-2" />
+                    PIX
+                  </TabsTrigger>
+                  <TabsTrigger value="boleto">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Boleto
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="card" className="mt-4">
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Adicione um cartão de crédito ou débito para pagamentos recorrentes.
+                    </p>
+                    <Button 
+                      className="w-full"
+                      onClick={() => {
+                        setSelectedPaymentType(null);
+                        setIsAddingNew(true);
+                      }}
+                    >
+                      Continuar com Cartão
+                    </Button>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="pix" className="mt-4">
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Configure sua chave PIX para receber pagamentos instantâneos.
+                    </p>
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-700">
+                        ⚠️ Em breve! Estamos trabalhando para adicionar suporte a PIX como método de pagamento salvo.
+                      </p>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="boleto" className="mt-4">
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Configure boleto bancário para pagamentos únicos.
+                    </p>
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm text-amber-700">
+                        ⚠️ Em breve! Estamos trabalhando para adicionar suporte a boleto como método de pagamento.
+                      </p>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </div>
   );

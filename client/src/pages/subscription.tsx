@@ -414,8 +414,8 @@ const SubscriptionPage: React.FC = () => {
                       onClick={() => {
                         setSelectedPlan({
                           id: plan.id,
-                          name: plan.name,
-                          price: (plan.price / 100).toFixed(2)
+                          name: getPlanName(plan.name),
+                          price: `R$ ${(plan.price / 100).toFixed(2).replace('.', ',')}`
                         });
                         setCheckoutOpen(true);
                       }}
@@ -541,7 +541,9 @@ const SubscriptionPage: React.FC = () => {
         <CheckoutModal
           isOpen={checkoutOpen}
           onClose={handleCloseCheckout}
-          selectedPlan={selectedPlan}
+          planId={selectedPlan.id}
+          planName={selectedPlan.name}
+          planPrice={selectedPlan.price}
           onSuccess={() => {
             handleCloseCheckout();
             refetchSubscription();
