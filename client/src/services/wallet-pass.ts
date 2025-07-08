@@ -183,9 +183,9 @@ class WalletPassService {
       const blob = await response.blob();
       console.log('[WalletPass] Blob recebido:', blob.size, 'bytes');
       
-      // No iOS nativo, usar o método correto para abrir o .pkpass
+      // No iOS nativo, usar window.open para abrir o .pkpass
       if (this.isNative && Capacitor.getPlatform() === 'ios') {
-        console.log('[WalletPass] Usando método iOS nativo');
+        console.log('[WalletPass] Usando método iOS nativo com window.open');
         
         // Converter blob para base64
         const reader = new FileReader();
@@ -197,23 +197,17 @@ class WalletPassService {
               const base64 = reader.result as string;
               console.log('[WalletPass] Base64 gerado, tamanho:', base64.length);
               
-              // Criar um link temporário com data URL
-              const link = document.createElement('a');
-              link.href = base64;
-              link.download = `cnvidas-${passData.userId}.pkpass`;
-              link.style.display = 'none';
-              document.body.appendChild(link);
+              // Remover o prefixo data:application/octet-stream;base64, se existir
+              const base64Data = base64.split(',')[1] || base64;
               
-              console.log('[WalletPass] Link criado, simulando clique...');
+              // Criar um novo data URL com o tipo MIME correto
+              const pkpassDataUrl = `data:application/vnd.apple.pkpass;base64,${base64Data}`;
               
-              // Simular clique para forçar download
-              link.click();
+              console.log('[WalletPass] Abrindo pass com window.open...');
               
-              // Limpar
-              setTimeout(() => {
-                document.body.removeChild(link);
-                console.log('[WalletPass] Link removido');
-              }, 100);
+              // Usar window.open para abrir o arquivo
+              // No iOS, isso deve abrir o diálogo do Wallet
+              window.open(pkpassDataUrl, '_blank');
               
               resolve(true);
             } catch (err) {
