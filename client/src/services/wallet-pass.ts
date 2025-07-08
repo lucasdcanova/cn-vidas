@@ -204,10 +204,13 @@ class WalletPassService {
               const pkpassDataUrl = `data:application/vnd.apple.pkpass;base64,${base64Data}`;
               
               console.log('[WalletPass] Abrindo pass com window.open...');
+              console.log('[WalletPass] Data URL length:', pkpassDataUrl.length);
+              console.log('[WalletPass] Data URL preview:', pkpassDataUrl.substring(0, 100) + '...');
               
               // Usar window.open para abrir o arquivo
               // No iOS, isso deve abrir o diálogo do Wallet
-              window.open(pkpassDataUrl, '_blank');
+              const windowRef = window.open(pkpassDataUrl, '_blank');
+              console.log('[WalletPass] window.open retornou:', windowRef);
               
               resolve(true);
             } catch (err) {
