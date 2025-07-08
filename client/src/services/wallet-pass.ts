@@ -150,6 +150,13 @@ class WalletPassService {
   // Fazer download do pass
   async downloadPass(passData: WalletPassData): Promise<boolean> {
     try {
+      console.log('[WalletPass] Iniciando download do pass', {
+        planName: passData.planName,
+        userId: passData.userId,
+        isNative: this.isNative,
+        platform: Capacitor.getPlatform()
+      });
+
       // Fazer chamada para o servidor para gerar o .pkpass
       const response = await fetch('/api/wallet/generate-pass', {
         method: 'POST',
@@ -164,30 +171,75 @@ class WalletPassService {
         })
       });
 
+      console.log('[WalletPass] Resposta do servidor:', response.status);
+
       if (!response.ok) {
         const error = await response.json();
+        console.error('[WalletPass] Erro do servidor:', error);
         throw new Error(error.error || 'Erro ao gerar pass');
       }
 
       // Baixar o arquivo .pkpass
       const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      console.log('[WalletPass] Blob recebido:', blob.size, 'bytes');
       
-      // No iOS, o Safari abrirá automaticamente o arquivo .pkpass
-      if (this.isNative) {
-        window.location.href = url;
+      // No iOS nativo, usar o método correto para abrir o .pkpass
+      if (this.isNative && Capacitor.getPlatform() === 'ios') {
+        console.log('[WalletPass] Usando método iOS nativo');
+        
+        // Converter blob para base64
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        
+        return new Promise<boolean>((resolve, reject) => {
+          reader.onloadend = () => {
+            try {
+              const base64 = reader.result as string;
+              console.log('[WalletPass] Base64 gerado, tamanho:', base64.length);
+              
+              // Criar um link temporário com data URL
+              const link = document.createElement('a');
+              link.href = base64;
+              link.download = `cnvidas-${passData.userId}.pkpass`;
+              link.style.display = 'none';
+              document.body.appendChild(link);
+              
+              console.log('[WalletPass] Link criado, simulando clique...');
+              
+              // Simular clique para forçar download
+              link.click();
+              
+              // Limpar
+              setTimeout(() => {
+                document.body.removeChild(link);
+                console.log('[WalletPass] Link removido');
+              }, 100);
+              
+              resolve(true);
+            } catch (err) {
+              console.error('[WalletPass] Erro ao processar base64:', err);
+              reject(err);
+            }
+          };
+          
+          reader.onerror = (err) => {
+            console.error('[WalletPass] Erro ao ler blob:', err);
+            reject(err);
+          };
+        });
       } else {
-        // No navegador desktop, fazer download
+        // No navegador desktop, fazer download normal
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `cnvidas-${passData.userId}.pkpass`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        
+        // Limpar URL temporária
+        setTimeout(() => URL.revokeObjectURL(url), 100);
       }
-      
-      // Limpar URL temporária
-      setTimeout(() => URL.revokeObjectURL(url), 100);
       
       return true;
     } catch (error) {

@@ -83,12 +83,8 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
     // Obter certificados
     const certificates = await walletConfig.getCertificates();
 
-    // Criar o pass
-    const pass = new PKPass({}, certificates);
-    
-    // Definir dados do pass
-    pass.type = 'generic';
-    pass.props = {
+    // Criar o pass com a estrutura correta
+    const pass = new PKPass({}, certificates, {
         passTypeIdentifier: walletConfig.passTypeId,
         teamIdentifier: walletConfig.teamId,
         organizationName: 'CN Vidas',
@@ -159,6 +155,7 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
         // Localização (opcional - para notificações baseadas em localização)
         locations: []
       }
+    });
 
     // Adicionar assets (ícones e logos)
     const assetsPath = path.join(__dirname, '../wallet/assets');
