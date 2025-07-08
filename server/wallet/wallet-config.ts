@@ -34,6 +34,16 @@ export const walletConfig = {
   
   // Verificar se certificados estão configurados
   async isConfigured(): Promise<boolean> {
+    // Log de debug para verificar variáveis
+    console.log('[WalletConfig] Verificando configuração:', {
+      hasSignerCertBase64: !!process.env.WALLET_SIGNER_CERT_BASE64,
+      hasWwdrBase64: !!process.env.WALLET_WWDR_BASE64,
+      hasSignerKeyBase64: !!process.env.WALLET_SIGNER_KEY_BASE64,
+      hasKeyPassword: !!process.env.APPLE_PASS_KEY_PASSWORD,
+      passTypeId: process.env.APPLE_PASS_TYPE_ID,
+      teamId: process.env.APPLE_TEAM_ID
+    });
+    
     // Verificar Base64 primeiro
     if (process.env.WALLET_SIGNER_CERT_BASE64) {
       return true;
