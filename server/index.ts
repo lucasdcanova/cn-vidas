@@ -20,6 +20,7 @@ import fs from 'fs';
 import { setupCronJobs } from "./cron-setup";
 import { startEmergencyCleanupJob } from "./utils/emergency-cleanup";
 import { tokenBlacklist } from "./utils/token-blacklist";
+import { APNsService } from "./services/apns-service";
 
 (async () => {
   const app = express();
@@ -342,6 +343,17 @@ import { tokenBlacklist } from "./utils/token-blacklist";
 
   // Verificar conexão com email
   verifyEmailConnection().catch(console.error);
+
+  // Inicializar serviço de Push Notifications (APNs)
+  APNsService.initialize().then(success => {
+    if (success) {
+      console.log('✅ Serviço de Push Notifications (APNs) inicializado');
+    } else {
+      console.warn('⚠️ Push Notifications não configuradas - continuando sem APNs');
+    }
+  }).catch(error => {
+    console.error('❌ Erro ao inicializar APNs:', error);
+  });
 
   // Configurar planos de assinatura
   // setupSubscriptionPlans().catch(console.error); // Temporariamente desabilitado devido ao timeout
