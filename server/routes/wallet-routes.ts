@@ -89,11 +89,24 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
       hasSignerKey: !!certificates.signerKey,
       wwdrLength: certificates.wwdr?.length,
       signerCertLength: certificates.signerCert?.length,
-      signerKeyLength: certificates.signerKey?.length
+      signerKeyLength: certificates.signerKey?.length,
+      hasPassphrase: !!certificates.signerKeyPassphrase
     });
 
+    // Preparar certificados sem passphrase se não houver
+    const cleanCertificates: any = {
+      wwdr: certificates.wwdr,
+      signerCert: certificates.signerCert,
+      signerKey: certificates.signerKey
+    };
+    
+    // Só adicionar passphrase se existir
+    if (certificates.signerKeyPassphrase) {
+      cleanCertificates.signerKeyPassphrase = certificates.signerKeyPassphrase;
+    }
+
     // Criar o pass com a estrutura correta
-    const pass = new PKPass({}, certificates, {
+    const pass = new PKPass({}, cleanCertificates, {
         passTypeIdentifier: walletConfig.passTypeId,
         teamIdentifier: walletConfig.teamId,
         organizationName: 'CN Vidas',
@@ -246,11 +259,24 @@ router.get('/download-pass', requireAuth, async (req: AuthenticatedRequest, res)
       hasSignerKey: !!certificates.signerKey,
       wwdrLength: certificates.wwdr?.length,
       signerCertLength: certificates.signerCert?.length,
-      signerKeyLength: certificates.signerKey?.length
+      signerKeyLength: certificates.signerKey?.length,
+      hasPassphrase: !!certificates.signerKeyPassphrase
     });
 
+    // Preparar certificados sem passphrase se não houver
+    const cleanCertificates: any = {
+      wwdr: certificates.wwdr,
+      signerCert: certificates.signerCert,
+      signerKey: certificates.signerKey
+    };
+    
+    // Só adicionar passphrase se existir
+    if (certificates.signerKeyPassphrase) {
+      cleanCertificates.signerKeyPassphrase = certificates.signerKeyPassphrase;
+    }
+
     // Criar o pass com a estrutura correta
-    const pass = new PKPass({}, certificates, {
+    const pass = new PKPass({}, cleanCertificates, {
         passTypeIdentifier: walletConfig.passTypeId,
         teamIdentifier: walletConfig.teamId,
         organizationName: 'CN Vidas',
