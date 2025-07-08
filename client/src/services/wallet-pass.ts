@@ -183,47 +183,58 @@ class WalletPassService {
       const blob = await response.blob();
       console.log('[WalletPass] Blob recebido:', blob.size, 'bytes');
       
-      // No iOS nativo, usar window.open para abrir o .pkpass
+      // No iOS nativo, usar uma abordagem diferente
       if (this.isNative && Capacitor.getPlatform() === 'ios') {
-        console.log('[WalletPass] Usando método iOS nativo com window.open');
+        console.log('[WalletPass] Usando método iOS nativo');
         
-        // Converter blob para base64
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        
-        return new Promise<boolean>((resolve, reject) => {
-          reader.onloadend = () => {
-            try {
-              const base64 = reader.result as string;
-              console.log('[WalletPass] Base64 gerado, tamanho:', base64.length);
-              
-              // Remover o prefixo data:application/octet-stream;base64, se existir
-              const base64Data = base64.split(',')[1] || base64;
-              
-              // Criar um novo data URL com o tipo MIME correto
-              const pkpassDataUrl = `data:application/vnd.apple.pkpass;base64,${base64Data}`;
-              
-              console.log('[WalletPass] Abrindo pass com window.open...');
-              console.log('[WalletPass] Data URL length:', pkpassDataUrl.length);
-              console.log('[WalletPass] Data URL preview:', pkpassDataUrl.substring(0, 100) + '...');
-              
-              // Usar window.open para abrir o arquivo
-              // No iOS, isso deve abrir o diálogo do Wallet
-              const windowRef = window.open(pkpassDataUrl, '_blank');
-              console.log('[WalletPass] window.open retornou:', windowRef);
-              
-              resolve(true);
-            } catch (err) {
-              console.error('[WalletPass] Erro ao processar base64:', err);
-              reject(err);
-            }
-          };
+        // Método 1: Criar um link direto e navegar para ele
+        // Este é o método mais confiável no iOS
+        try {
+          console.log('[WalletPass] Método 1: Navegação direta via GET');
           
-          reader.onerror = (err) => {
-            console.error('[WalletPass] Erro ao ler blob:', err);
-            reject(err);
-          };
-        });
+          // Criar URL com parâmetros GET para download direto
+          const downloadUrl = `/api/wallet/download-pass?planName=${passData.planName}&qrCode=${encodeURIComponent(passData.qrCode)}`;
+          
+          console.log('[WalletPass] Navegando para:', downloadUrl);
+          
+          // No iOS, navegar diretamente para o URL funciona melhor
+          // O Safari irá reconhecer o Content-Type e abrir a Wallet
+          window.location.href = downloadUrl;
+          
+          return true;
+        } catch (error) {
+          console.error('[WalletPass] Erro no método 1:', error);
+          
+          // Método 2: Tentar com blob URL como fallback
+          try {
+            console.log('[WalletPass] Método 2: Blob URL com link');
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Criar um link real no DOM
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.textContent = 'Adicionar à Wallet';
+            a.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: #000; color: #fff; padding: 20px; border-radius: 10px; text-decoration: none; font-weight: bold;';
+            
+            document.body.appendChild(a);
+            
+            // Auto-clicar após um pequeno delay
+            setTimeout(() => {
+              a.click();
+              
+              // Remover o link após mais um delay
+              setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+              }, 1000);
+            }, 100);
+            
+            return true;
+          } catch (error2) {
+            console.error('[WalletPass] Erro no método 2:', error2);
+            throw new Error('Não foi possível abrir o pass no iOS');
+          }
+        }
       } else {
         // No navegador desktop, fazer download normal
         const url = URL.createObjectURL(blob);
