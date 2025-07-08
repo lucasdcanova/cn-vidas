@@ -39,7 +39,7 @@ doctorRouter.get('/profile', requireAuth, requireDoctorRole, async (req: Authent
     console.log('📋 Doctor /profile - Dados completos:', {
       id: doctor.id,
       userId: doctor.userId,
-      fullName: doctor.name,
+      fullName: doctor.name || '',
       specialization: doctor.specialization,
       licenseNumber: doctor.licenseNumber,
       education: doctor.education,

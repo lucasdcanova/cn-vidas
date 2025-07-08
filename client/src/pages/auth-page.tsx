@@ -53,7 +53,7 @@ const loginSchema = z.object({
 import { validateCPF, formatCPF, unformatCPF } from "@/lib/cpf-validator";
 import { validateCNPJ, formatCNPJ, unformatCNPJ } from "@/lib/cnpj-validator";
 import { useState as useStateHook, useEffect as useEffectHook } from 'react';
-import * as haptic from '@capacitor/haptics';
+import { hapticService as haptic } from '@/services/haptic-service';
 import { isNativeApp } from "@/utils/platform";
 
 // Função para processar o conteúdo e adicionar formatação
