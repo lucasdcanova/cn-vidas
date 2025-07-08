@@ -42,6 +42,7 @@
 		"HapticsPlugin",
 		"KeyboardPlugin",
 		"LocalNotificationsPlugin",
+		"PreferencesPlugin",
 		"PushNotificationsPlugin",
 		"StatusBarPlugin"
 	]
