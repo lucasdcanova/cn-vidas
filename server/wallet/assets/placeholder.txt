@@ -1,0 +1,10 @@
+Placeholder para criar a pasta assets.
+
+Os arquivos PNG necessários:
+- icon.png (29x29)
+- icon@2x.png (58x58)
+- logo.png (160x50 max)
+- logo@2x.png (320x100 max)
+
+Podem ser criados a partir do logo SVG em:
+client/public/cnvidas-logo-white.svg

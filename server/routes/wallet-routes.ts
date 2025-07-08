@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { requireAuth } from '../middleware/auth';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { walletConfig } from '../wallet/wallet-config';
 
 const router = express.Router();
 
@@ -70,41 +71,26 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
     const colors = planColors[planName] || planColors.basic;
     const planDisplayName = planDisplayNames[planName] || 'Plano Básico';
 
-    // Caminho dos certificados
-    const certificatesPath = path.join(__dirname, '../wallet/certificates');
-    
-    // Verificar se os certificados existem
-    const wwdrPath = path.join(certificatesPath, 'wwdr.pem');
-    const signerCertPath = path.join(certificatesPath, 'signerCert.pem');
-    const signerKeyPath = path.join(certificatesPath, 'signerKey.key');
-    
-    // Verificar existência dos arquivos
-    try {
-      await fs.access(wwdrPath);
-      await fs.access(signerCertPath);
-      await fs.access(signerKeyPath);
-    } catch (error) {
-      console.error('Certificados não encontrados:', error);
+    // Verificar se os certificados estão configurados
+    const isConfigured = await walletConfig.isConfigured();
+    if (!isConfigured) {
+      console.error('Certificados do Wallet não configurados');
       return res.status(500).json({ 
-        error: 'Certificados não configurados. Por favor, adicione os certificados Apple na pasta server/wallet/certificates/' 
+        error: 'Certificados não configurados. Por favor, configure os certificados do Apple Wallet.' 
       });
     }
+    
+    // Obter certificados
+    const certificates = await walletConfig.getCertificates();
 
     // Criar o pass
-    const pass = new PKPass({}, {
-      wwdr: await fs.readFile(wwdrPath),
-      signerCert: await fs.readFile(signerCertPath),
-      signerKey: {
-        keyFile: await fs.readFile(signerKeyPath),
-        passphrase: process.env.APPLE_PASS_KEY_PASSWORD || ''
-      }
-    });
+    const pass = new PKPass({}, certificates);
     
     // Definir dados do pass
     pass.type = 'generic';
     pass.props = {
-        passTypeIdentifier: process.env.APPLE_PASS_TYPE_ID || 'pass.com.cnvidas.membership',
-        teamIdentifier: process.env.APPLE_TEAM_ID || 'YOUR_TEAM_ID',
+        passTypeIdentifier: walletConfig.passTypeId,
+        teamIdentifier: walletConfig.teamId,
         organizationName: 'CN Vidas',
         description: 'Cartão de Membro CN Vidas',
         serialNumber: `CNV-${user.id}-${Date.now()}`,
@@ -173,14 +159,7 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
         // Localização (opcional - para notificações baseadas em localização)
         locations: []
       }
-    }, {
-      wwdr: await fs.readFile(wwdrPath),
-      signerCert: await fs.readFile(signerCertPath),
-      signerKey: {
-        keyFile: await fs.readFile(signerKeyPath),
-        passphrase: process.env.APPLE_PASS_KEY_PASSWORD || ''
-      }
-    });
+    };
 
     // Adicionar assets (ícones e logos)
     const assetsPath = path.join(__dirname, '../wallet/assets');
