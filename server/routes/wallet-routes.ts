@@ -82,6 +82,15 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
     
     // Obter certificados
     const certificates = await walletConfig.getCertificates();
+    
+    console.log('[WalletPass] Certificados obtidos:', {
+      hasWwdr: !!certificates.wwdr,
+      hasSignerCert: !!certificates.signerCert,
+      hasSignerKey: !!certificates.signerKey,
+      wwdrLength: certificates.wwdr?.length,
+      signerCertLength: certificates.signerCert?.length,
+      signerKeyLength: certificates.signerKey?.length
+    });
 
     // Criar o pass com a estrutura correta
     const pass = new PKPass({}, certificates, {
@@ -170,7 +179,9 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
     }
 
     // Gerar o pass
+    console.log('[WalletPass] Gerando buffer do pass...');
     const buffer = pass.getAsBuffer();
+    console.log('[WalletPass] Buffer gerado:', buffer.length, 'bytes');
 
     // Enviar o arquivo
     res.set({
@@ -179,9 +190,23 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
     });
 
     res.send(buffer);
-  } catch (error) {
-    console.error('Erro ao gerar wallet pass:', error);
-    res.status(500).json({ error: 'Erro ao gerar pass' });
+  } catch (error: any) {
+    console.error('[WalletPass] Erro detalhado:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code
+    });
+    
+    // Mensagem de erro mais específica
+    let errorMessage = 'Erro ao gerar pass';
+    if (error.message?.includes('certificate')) {
+      errorMessage = 'Erro de certificado: ' + error.message;
+    } else if (error.message?.includes('signing')) {
+      errorMessage = 'Erro ao assinar pass: ' + error.message;
+    }
+    
+    res.status(500).json({ error: errorMessage });
   }
 });
 
@@ -214,6 +239,15 @@ router.get('/download-pass', requireAuth, async (req: AuthenticatedRequest, res)
     
     // Obter certificados
     const certificates = await walletConfig.getCertificates();
+    
+    console.log('[WalletPass] Certificados obtidos:', {
+      hasWwdr: !!certificates.wwdr,
+      hasSignerCert: !!certificates.signerCert,
+      hasSignerKey: !!certificates.signerKey,
+      wwdrLength: certificates.wwdr?.length,
+      signerCertLength: certificates.signerCert?.length,
+      signerKeyLength: certificates.signerKey?.length
+    });
 
     // Criar o pass com a estrutura correta
     const pass = new PKPass({}, certificates, {
@@ -302,7 +336,9 @@ router.get('/download-pass', requireAuth, async (req: AuthenticatedRequest, res)
     }
 
     // Gerar o pass
+    console.log('[WalletPass GET] Gerando buffer do pass...');
     const buffer = pass.getAsBuffer();
+    console.log('[WalletPass GET] Buffer gerado:', buffer.length, 'bytes');
 
     // Enviar o arquivo
     res.set({
@@ -311,9 +347,23 @@ router.get('/download-pass', requireAuth, async (req: AuthenticatedRequest, res)
     });
 
     res.send(buffer);
-  } catch (error) {
-    console.error('Erro ao gerar wallet pass (GET):', error);
-    res.status(500).json({ error: 'Erro ao gerar pass' });
+  } catch (error: any) {
+    console.error('[WalletPass GET] Erro detalhado:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code
+    });
+    
+    // Mensagem de erro mais específica
+    let errorMessage = 'Erro ao gerar pass';
+    if (error.message?.includes('certificate')) {
+      errorMessage = 'Erro de certificado: ' + error.message;
+    } else if (error.message?.includes('signing')) {
+      errorMessage = 'Erro ao assinar pass: ' + error.message;
+    }
+    
+    res.status(500).json({ error: errorMessage });
   }
 });
 
