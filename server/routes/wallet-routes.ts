@@ -159,7 +159,6 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
         // Localização (opcional - para notificações baseadas em localização)
         locations: []
       }
-    };
 
     // Adicionar assets (ícones e logos)
     const assetsPath = path.join(__dirname, '../wallet/assets');
@@ -175,7 +174,7 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
     }
 
     // Gerar o pass
-    const buffer = await pass.generate();
+    const buffer = pass.getAsBuffer();
 
     // Enviar o arquivo
     res.set({
