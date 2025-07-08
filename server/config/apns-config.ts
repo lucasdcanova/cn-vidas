@@ -16,12 +16,48 @@ export const apnsConfig = {
   // Team ID e Key ID (para autenticação por token - alternativa ao certificado)
   teamId: process.env.APNS_TEAM_ID,
   keyId: process.env.APNS_KEY_ID,
+  authKeyPath: process.env.APNS_AUTH_KEY_PATH || path.join(__dirname, '../../certificates/push/AuthKey_56Q6H6FHB6.p8'),
+  
+  // Obter Auth Key (decodifica Base64 em produção)
+  getAuthKey(): string {
+    if (process.env.APNS_AUTH_KEY_BASE64) {
+      // Em produção, decodificar Base64
+      const keyPath = '/tmp/AuthKey_APNs.p8';
+      try {
+        const keyContent = Buffer.from(process.env.APNS_AUTH_KEY_BASE64, 'base64');
+        fs.writeFileSync(keyPath, keyContent, { mode: 0o600 });
+        console.log('✅ Auth Key decodificada de Base64');
+        return keyPath;
+      } catch (error) {
+        console.error('❌ Erro ao decodificar Auth Key:', error);
+        throw error;
+      }
+    }
+    // Em desenvolvimento, usar arquivo local
+    return this.authKeyPath;
+  },
   
   // Verificar se os certificados existem
   validateCertificates(): boolean {
     if (this.teamId && this.keyId) {
-      // Usando autenticação por token
-      return true;
+      // Verificar se a Auth Key existe ou pode ser criada
+      try {
+        if (process.env.APNS_AUTH_KEY_BASE64) {
+          // Em produção com Base64
+          console.log('✅ Auth Key APNs configurada via Base64');
+          return true;
+        } else if (fs.existsSync(this.authKeyPath)) {
+          // Em desenvolvimento com arquivo
+          console.log('✅ Auth Key APNs encontrada:', this.authKeyPath);
+          return true;
+        } else {
+          console.error('❌ Auth Key APNs não encontrada');
+          return false;
+        }
+      } catch (error) {
+        console.error('❌ Erro ao verificar Auth Key APNs:', error);
+        return false;
+      }
     }
     
     // Verificar certificados
