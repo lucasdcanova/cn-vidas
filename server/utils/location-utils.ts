@@ -164,6 +164,9 @@ function removeAccents(str: string): string {
  * @returns Coordenadas da cidade ou null se não encontrada
  */
 export function getCityCoordinates(cityName: string): { lat: number; lng: number } | null {
+  if (!cityName || typeof cityName !== 'string') {
+    return null;
+  }
   const normalizedCity = removeAccents(cityName.toLowerCase().trim());
   return cityCoordinates[normalizedCity] || null;
 }

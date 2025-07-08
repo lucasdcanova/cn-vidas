@@ -10,6 +10,7 @@ import { hash, compare } from 'bcrypt';
 import { scrypt, timingSafeEqual } from 'crypto';
 import { promisify } from 'util';
 import { NotificationService } from '../utils/notification-service';
+import { refreshSingleImageUrl } from '../middleware/refresh-profile-images';
 
 const scryptAsync = promisify(scrypt);
 import jwt from 'jsonwebtoken';
@@ -441,6 +442,18 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
     // Configurar cookie httpOnly para segurança
     res.cookie('auth_token', token, getCookieOptions(req));
     
+    // Renovar URL da imagem de perfil se necessário
+    let refreshedProfileImage = user.profileImage;
+    if (user.profileImage) {
+      const newUrl = await refreshSingleImageUrl(user.profileImage, user.id, 'profile');
+      if (newUrl && newUrl !== user.profileImage) {
+        refreshedProfileImage = newUrl;
+        // Atualizar no banco
+        await storage.updateUser(user.id, { profileImage: newUrl });
+        console.log('🔄 URL da imagem de perfil renovada durante login');
+      }
+    }
+    
     res.json({
       id: user.id,
       email: user.email,
@@ -450,7 +463,7 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
       subscriptionPlan: user.subscriptionPlan,
       subscriptionStatus: user.subscriptionStatus,
       emergencyConsultationsLeft: user.emergencyConsultationsLeft,
-      profileImage: user.profileImage,
+      profileImage: refreshedProfileImage,
       phone: user.phone,
       cpf: user.cpf,
       city: user.city,
@@ -1013,6 +1026,18 @@ authRouter.post('/refresh-user', async (req: Request, res: Response) => {
     
     console.log(`✅ Refresh de dados do usuário ${user.email} - profileImage: ${user.profileImage}`);
     
+    // Renovar URL da imagem de perfil se necessário
+    let refreshedProfileImage = user.profileImage;
+    if (user.profileImage) {
+      const newUrl = await refreshSingleImageUrl(user.profileImage, user.id, 'profile');
+      if (newUrl && newUrl !== user.profileImage) {
+        refreshedProfileImage = newUrl;
+        // Atualizar no banco
+        await storage.updateUser(user.id, { profileImage: newUrl });
+        console.log('🔄 URL da imagem de perfil renovada durante refresh');
+      }
+    }
+    
     // Retornar dados do usuário autenticado
     res.json({
       id: user.id,
@@ -1024,7 +1049,7 @@ authRouter.post('/refresh-user', async (req: Request, res: Response) => {
       subscriptionPlan: user.subscriptionPlan,
       subscriptionStatus: user.subscriptionStatus,
       emergencyConsultationsLeft: user.emergencyConsultationsLeft,
-      profileImage: user.profileImage,
+      profileImage: refreshedProfileImage,
       phone: user.phone,
       cpf: user.cpf,
       city: user.city,
@@ -1097,6 +1122,18 @@ authRouter.get('/user', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Usuário não encontrado' });
     }
     
+    // Renovar URL da imagem de perfil se necessário
+    let refreshedProfileImage = user.profileImage;
+    if (user.profileImage) {
+      const newUrl = await refreshSingleImageUrl(user.profileImage, user.id, 'profile');
+      if (newUrl && newUrl !== user.profileImage) {
+        refreshedProfileImage = newUrl;
+        // Atualizar no banco
+        await storage.updateUser(user.id, { profileImage: newUrl });
+        console.log('🔄 URL da imagem de perfil renovada na rota /user');
+      }
+    }
+    
     // Retornar dados do usuário autenticado
     res.json({
       id: user.id,
@@ -1108,7 +1145,7 @@ authRouter.get('/user', async (req: Request, res: Response) => {
       subscriptionPlan: user.subscriptionPlan,
       subscriptionStatus: user.subscriptionStatus,
       emergencyConsultationsLeft: user.emergencyConsultationsLeft,
-      profileImage: user.profileImage,
+      profileImage: refreshedProfileImage,
       phone: user.phone,
       cpf: user.cpf,
       city: user.city,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User as UserIcon } from "lucide-react";
@@ -15,6 +15,7 @@ interface UserProfileProps {
 export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false }) => {
   const { logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
+  const [imageError, setImageError] = useState(false);
   
   if (!user) {
     return null;
@@ -35,6 +36,14 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
   };
   
   const profileImageUrl = getImageUrl(user.profileImage);
+  
+  // Log para debug e reset do erro quando a URL mudar
+  React.useEffect(() => {
+    if (profileImageUrl) {
+      console.log('🖼️ UserProfile - Profile image URL:', profileImageUrl);
+      setImageError(false); // Reset error when URL changes
+    }
+  }, [profileImageUrl]);
   
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -105,10 +114,14 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
             <div className={`absolute -inset-0.5 rounded-full bg-gradient-to-r ${planColors.gradient} opacity-90 blur-[1px] transition-all duration-300`}></div>
           )}
           <Avatar className={`relative h-full w-full ${user.subscriptionPlan && user.subscriptionPlan !== "free" ? "" : "ring-2 ring-white/40"} shadow-sm transition-all duration-300`}>
-            {profileImageUrl ? (
+            {profileImageUrl && !imageError ? (
               <AvatarImage 
                 src={profileImageUrl} 
                 alt={user.fullName || "Avatar"}
+                onError={() => {
+                  console.error('🖼️ UserProfile - Failed to load image:', profileImageUrl);
+                  setImageError(true);
+                }}
               />
             ) : null}
             <AvatarFallback className={`${getAvatarGradient()} text-sm font-medium`}>
@@ -132,10 +145,14 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
           <div className={`absolute -inset-1 rounded-full bg-gradient-to-r ${planColors.gradient} opacity-80 blur-[1px]`}></div>
         )}
         <Avatar className={`relative h-10 w-10 ${user.subscriptionPlan && user.subscriptionPlan !== "free" ? "" : "ring-2 ring-white/30"} shadow-md`}>
-          {profileImageUrl ? (
+          {profileImageUrl && !imageError ? (
             <AvatarImage 
               src={profileImageUrl} 
-              alt={user.fullName || "Avatar"} 
+              alt={user.fullName || "Avatar"}
+              onError={() => {
+                console.error('🖼️ UserProfile - Failed to load image:', profileImageUrl);
+                setImageError(true);
+              }}
             />
           ) : null}
           <AvatarFallback className={`${getAvatarGradient()} text-sm font-medium`}>

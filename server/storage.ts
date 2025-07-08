@@ -2198,6 +2198,82 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async createSecureFile(fileData: {
+    userId: number;
+    fileKey: string;
+    fileType: string;
+    originalName: string;
+    contentType: string;
+    sizeBytes: number;
+    bucketName: string;
+    storageClass: string;
+    encryptionType: string;
+    isEncrypted: boolean;
+    lgpdConsent: boolean;
+    consentDate: Date;
+    metadata?: any;
+  }): Promise<void> {
+    try {
+      await this.db.query(`
+        INSERT INTO secure_files (
+          user_id, file_key, file_type, original_name, content_type,
+          size_bytes, bucket_name, storage_class, encryption_type,
+          is_encrypted, lgpd_consent, consent_date, metadata, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, CURRENT_TIMESTAMP)
+      `, [
+        fileData.userId,
+        fileData.fileKey,
+        fileData.fileType,
+        fileData.originalName,
+        fileData.contentType,
+        fileData.sizeBytes,
+        fileData.bucketName,
+        fileData.storageClass,
+        fileData.encryptionType,
+        fileData.isEncrypted,
+        fileData.lgpdConsent,
+        fileData.consentDate,
+        JSON.stringify(fileData.metadata || {})
+      ]);
+    } catch (error) {
+      console.error('Erro ao criar secure file:', error);
+      // Não falhar se a tabela não existir
+    }
+  }
+
+  async getSecureFileByUrl(url: string): Promise<any | null> {
+    try {
+      const result = await this.db.query(`
+        SELECT * FROM secure_files 
+        WHERE file_url = $1 
+        AND deleted_at IS NULL
+        LIMIT 1
+      `, [url]);
+      
+      if (result.rows.length === 0) {
+        // Tentar buscar pela chave S3 (parte depois do bucket)
+        const urlParts = url.split('.amazonaws.com/');
+        if (urlParts.length > 1) {
+          const keyPart = urlParts[1].split('?')[0]; // Remove query params
+          const keyResult = await this.db.query(`
+            SELECT * FROM secure_files 
+            WHERE file_key LIKE $1 
+            AND deleted_at IS NULL
+            LIMIT 1
+          `, [`%${keyPart}%`]);
+          
+          return keyResult.rows[0] || null;
+        }
+        return null;
+      }
+      
+      return result.rows[0];
+    } catch (error) {
+      console.error('Erro ao buscar secure file por URL:', error);
+      return null;
+    }
+  }
+
   async softDeleteSecureFile(id: number): Promise<void> {
     console.log('Soft deleting secure file:', id);
     
