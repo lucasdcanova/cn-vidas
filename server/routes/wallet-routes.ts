@@ -154,7 +154,6 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
         
         // Localização (opcional - para notificações baseadas em localização)
         locations: []
-      }
     });
 
     // Adicionar assets (ícones e logos)
