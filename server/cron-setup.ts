@@ -1,5 +1,5 @@
 import { processAppointmentPayments, cancelExpiredPreAuthorizations } from './jobs/process-appointment-payments';
-import { sendAppointmentReminders, checkUnattendedEmergencies } from './jobs/appointment-reminders';
+import { sendAppointmentReminders, checkUnattendedEmergencies, send24HourReminders } from './jobs/appointment-reminders';
 
 /**
  * Configuração dos jobs agendados do sistema
@@ -33,6 +33,12 @@ export function setupCronJobs() {
     cron.schedule('*/2 * * * *', async () => {
       console.log('🚨 Verificando emergências não atendidas...');
       await checkUnattendedEmergencies();
+    });
+
+    // Job para enviar lembretes de 24 horas antes das consultas (executa a cada hora)
+    cron.schedule('0 * * * *', async () => {
+      console.log('📅 Executando job de lembretes de 24h...');
+      await send24HourReminders();
     });
 
     console.log('✅ Jobs agendados configurados com sucesso');

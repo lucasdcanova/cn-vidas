@@ -2,7 +2,7 @@ import { db } from '../db';
 import { appointments, doctors, users } from '../../shared/schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { NotificationService } from '../utils/notification-service';
-import { addMinutes, subMinutes } from 'date-fns';
+import { addMinutes, subMinutes, addHours } from 'date-fns';
 
 /**
  * Job para enviar lembretes de consultas agendadas
@@ -74,6 +74,69 @@ export async function sendAppointmentReminders() {
     }
   } catch (error) {
     console.error('❌ Erro no job de lembretes:', error);
+  }
+}
+
+/**
+ * Job para enviar lembretes de 24 horas antes das consultas
+ */
+export async function send24HourReminders() {
+  try {
+    const now = new Date();
+    const twentyFourHoursFromNow = addHours(now, 24);
+    const twentyFourHoursPlusFive = addMinutes(twentyFourHoursFromNow, 5); // Margem de 5 minutos
+
+    // Buscar consultas que começam em aproximadamente 24 horas
+    const upcomingAppointments = await db
+      .select()
+      .from(appointments)
+      .where(
+        and(
+          gte(appointments.date, twentyFourHoursFromNow),
+          lte(appointments.date, twentyFourHoursPlusFive),
+          eq(appointments.status, 'scheduled')
+        )
+      );
+
+    console.log(`📅 Encontradas ${upcomingAppointments.length} consultas para lembrete de 24h`);
+
+    for (const appointment of upcomingAppointments) {
+      try {
+        // Buscar informações do paciente
+        const [patient] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, appointment.userId));
+
+        // Buscar informações do médico
+        const [doctor] = appointment.doctorId ? 
+          await db.select().from(doctors).where(eq(doctors.id, appointment.doctorId)) : 
+          [null];
+          
+        const [doctorUser] = doctor?.userId ? 
+          await db.select().from(users).where(eq(users.id, doctor.userId)) : 
+          [null];
+
+        if (!patient || !doctor || !doctorUser) {
+          console.error(`⚠️ Dados incompletos para consulta ${appointment.id}`);
+          continue;
+        }
+
+        // Criar notificação customizada para 24h
+        await NotificationService.createSystemNotification(
+          patient.id,
+          '📅 Lembrete de Consulta - Amanhã',
+          `Sua consulta com Dr(a). ${doctorUser.fullName || doctorUser.username || 'Médico'} está marcada para amanhã às ${appointment.date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+          { appointmentId: appointment.id, reminder24h: true }
+        );
+
+        console.log(`✅ Lembrete de 24h enviado para consulta ${appointment.id}`);
+      } catch (error) {
+        console.error(`❌ Erro ao enviar lembrete de 24h para consulta ${appointment.id}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Erro no job de lembretes de 24h:', error);
   }
 }
 
