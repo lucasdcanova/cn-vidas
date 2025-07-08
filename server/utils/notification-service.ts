@@ -290,6 +290,16 @@ export class NotificationService {
       
       await storage.createNotification(notification);
       console.log('✅ Notificação de sistema criada para usuário:', userId);
+      
+      // Enviar push notification se for lembrete de 24h
+      if (data?.reminder24h) {
+        await pushNotificationService.sendToUser(userId, {
+          title,
+          body: message,
+          data: { type: 'appointment_reminder_24h', ...data },
+          badge: 1,
+        });
+      }
     } catch (error) {
       console.error('❌ Erro ao criar notificação de sistema:', error);
     }
