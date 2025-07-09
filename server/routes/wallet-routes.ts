@@ -2,9 +2,13 @@ import express from 'express';
 import { PKPass } from 'passkit-generator';
 import path from 'path';
 import fs from 'fs/promises';
+import jwt from 'jsonwebtoken';
 import { requireAuth } from '../middleware/auth';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { walletConfig } from '../wallet/wallet-config';
+import { db } from '../db';
+import { users } from '../../shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = express.Router();
 
@@ -224,8 +228,36 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
 });
 
 // Rota de download direto (GET) para iOS
-router.get('/download-pass', requireAuth, async (req: AuthenticatedRequest, res) => {
+router.get('/download-pass', async (req: AuthenticatedRequest, res) => {
   try {
+    // Verificar autenticação via token na query string ou middleware normal
+    if (!req.user && req.query.token) {
+      try {
+        const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+        const decoded: any = jwt.verify(req.query.token as string, jwtSecret);
+        
+        if (decoded && decoded.userId) {
+          const result = await db.select().from(users).where(eq(users.id, decoded.userId));
+          const user = result[0];
+          
+          if (user) {
+            req.user = {
+              id: user.id,
+              email: user.email,
+              role: user.role,
+              fullName: user.fullName,
+              username: user.username,
+              emailVerified: user.emailVerified,
+              subscriptionPlan: user.subscriptionPlan,
+              subscriptionStatus: user.subscriptionStatus
+            };
+          }
+        }
+      } catch (error) {
+        console.error('[WalletPass] Erro ao verificar token:', error);
+      }
+    }
+    
     if (!req.user) {
       return res.status(401).json({ error: 'Usuário não autenticado' });
     }
