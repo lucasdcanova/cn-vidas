@@ -4,12 +4,12 @@ import DashboardLayout from "@/components/layouts/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import QRAuthGenerator from "@/components/user/qr-auth-generator";
 import { useAuth } from "@/hooks/use-auth";
-import Breadcrumb from "@/components/ui/breadcrumb";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { QrCode, ScanLine } from "lucide-react";
 
 const QRCodePage: React.FC = () => {
   const { user } = useAuth();
@@ -88,9 +88,6 @@ const QRCodePage: React.FC = () => {
   // Definir quais tabs mostrar com base na função do usuário
   const canGenerateQR = user?.role === 'doctor' || user?.role === 'patient';
   const canScanQR = user?.role === 'admin' || user?.role === 'partner';
-  
-  // Determinar qual tab deve ser ativa por padrão
-  const defaultTab = canGenerateQR ? "generate" : "scan";
 
   return (
     <DashboardLayout>
@@ -99,49 +96,55 @@ const QRCodePage: React.FC = () => {
         <meta name="description" content="Gerencie QR Codes para autenticação rápida e segura no sistema CN Vidas" />
       </Helmet>
       
-      <div className="container px-4 py-6 mx-auto max-w-6xl">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+      <div className="container px-4 py-6 mx-auto max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+            <QrCode className="h-8 w-8 text-primary" />
             {canScanQR ? "Validação QR Code" : "Meu QR Code"}
           </h1>
+          <p className="text-muted-foreground mt-2">
+            {canScanQR 
+              ? "Escaneie QR Codes para verificar identidade de usuários"
+              : "Seu código de identificação rápida e segura"}
+          </p>
         </div>
         
         {canGenerateQR && (
-          <Card>
-            <CardHeader>
-              <CardTitle>QR Code de Autenticação</CardTitle>
-              <CardDescription>
+          <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 shadow-sm border">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-2">QR Code de Autenticação</h2>
+              <p className="text-muted-foreground">
                 {user?.role === 'doctor' 
                   ? "Use este QR Code para comprovar sua identidade como médico durante consultas e procedimentos." 
-                  : "Você pode usar este QR Code para identificação rápida em consultas e procedimentos."}
-                <div className="mt-2 text-sm font-medium text-green-700">
-                  Este é seu QR Code permanente e único, gerado no momento do seu cadastro.
-                </div>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="max-w-md mx-auto">
-                <QRAuthGenerator />
-              </div>
-            </CardContent>
-          </Card>
+                  : "Use este QR Code para identificação rápida em consultas e procedimentos."}
+              </p>
+              <p className="text-sm font-medium text-green-600 mt-2">
+                Este é seu QR Code permanente e único, gerado no momento do seu cadastro.
+              </p>
+            </div>
+            
+            <QRAuthGenerator />
+          </div>
         )}
         
         {canScanQR && (
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Escanear QR Code</CardTitle>
+              <div className="flex items-center gap-2">
+                <ScanLine className="h-5 w-5 text-primary" />
+                <CardTitle>Escanear QR Code</CardTitle>
+              </div>
               <CardDescription>
                 {user?.role === 'admin'
-                  ? "Como administrador, você pode escanear QR Codes para verificar a identidade dos usuários."
-                  : "Como parceiro, você pode escanear QR Codes para verificar a identidade dos pacientes e médicos."}
+                  ? "Verifique a identidade dos usuários escaneando seus QR Codes"
+                  : "Verifique a identidade de pacientes e médicos escaneando seus QR Codes"}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center space-y-4">
                 {!scannerActive && !scanResult && (
-                  <Button onClick={startScanner}>
-                    <span className="material-icons mr-2">qr_code_scanner</span>
+                  <Button onClick={startScanner} size="lg" className="gap-2">
+                    <ScanLine className="h-5 w-5" />
                     Iniciar Scanner
                   </Button>
                 )}
@@ -150,16 +153,23 @@ const QRCodePage: React.FC = () => {
                   <>
                     <div id="qr-reader" style={{ width: '100%', maxWidth: '500px' }}></div>
                     <Button variant="outline" onClick={stopScanner}>
-                      <span className="material-icons mr-2">cancel</span>
                       Cancelar
                     </Button>
                   </>
                 )}
                 
                 {scanResult && (
-                  <div className="mt-4 p-4 border rounded bg-gray-50 w-full">
-                    <p className="font-medium">QR Code escaneado:</p>
-                    <p className="text-sm text-gray-500 break-all">{scanResult}</p>
+                  <div className="mt-4 p-4 border rounded-lg bg-gray-50 w-full">
+                    <p className="font-medium mb-1">QR Code escaneado:</p>
+                    <p className="text-sm text-gray-600 font-mono break-all">{scanResult}</p>
+                    <Button 
+                      onClick={startScanner} 
+                      variant="outline" 
+                      size="sm"
+                      className="mt-3"
+                    >
+                      Escanear Novamente
+                    </Button>
                   </div>
                 )}
               </div>
