@@ -207,7 +207,16 @@ const SubscriptionPage: React.FC = () => {
     <>
       {/* Informações da assinatura atual */}
       {currentSubscription && currentSubscription.status !== "inactive" && (
-        <Card className="mb-8 mt-4 overflow-hidden border-2 border-primary shadow-lg">
+        <Card className={`mb-8 mt-4 overflow-hidden border-2 shadow-lg ${(() => {
+          const subscription = userSubscription.subscription || userSubscription;
+          const planName = subscription.plan?.name;
+          if (planName === 'premium' || planName === 'premium_family' || planName === 'family_plus') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200';
+          if (planName === 'basic' || planName === 'basic_family' || planName === 'family_basic') return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200';
+          if (planName === 'ultra' || planName === 'ultra_family') return 'bg-gradient-to-br from-violet-50 to-purple-50 border-violet-200';
+          if (planName === 'standard') return 'bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200';
+          if (planName === 'medical') return 'bg-gradient-to-br from-indigo-50 to-slate-50 border-indigo-200';
+          return 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200';
+        })()}`}>
           <CardHeader className={`${isIOS ? 'p-5' : 'p-4 md:p-6'}
             ${(() => {
               const subscription = userSubscription.subscription || userSubscription;
@@ -221,8 +230,8 @@ const SubscriptionPage: React.FC = () => {
             })()}
           `}>
             <div className="flex justify-between items-center">
-              <CardTitle className={`flex items-center ${isIOS ? 'text-[17px]' : 'text-base md:text-xl'}`}>
-                <CreditCard className={`mr-2 ${isIOS ? 'h-4 w-4' : 'h-4 w-4 md:h-5 md:w-5'}`} />
+              <CardTitle className={`flex items-center text-white ${isIOS ? 'text-[17px]' : 'text-base md:text-xl'}`}>
+                <CreditCard className={`mr-2 text-white ${isIOS ? 'h-4 w-4' : 'h-4 w-4 md:h-5 md:w-5'}`} />
                 Sua assinatura atual
               </CardTitle>
               <Badge className={`bg-white/20 text-white border-white/30 ${isIOS ? 'text-[11px] px-2 py-0.5' : 'text-xs md:text-sm'}`}>
@@ -293,6 +302,13 @@ const SubscriptionPage: React.FC = () => {
           .filter(plan => {
             const isFamilyPlan = plan.name.includes("family");
             return showFamilyPlans ? isFamilyPlan : !isFamilyPlan;
+          })
+          .sort((a, b) => {
+            // Colocar plano gratuito por último
+            if (a.name === 'free') return 1;
+            if (b.name === 'free') return -1;
+            // Manter ordem original para outros planos
+            return 0;
           })
           .map((plan) => {
             const isCurrentPlan = currentSubscription?.plan?.id === plan.id;
