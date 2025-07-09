@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, QrCode } from 'lucide-react';
 import QRCode from 'react-qr-code';
@@ -47,41 +46,26 @@ const QRAuthGenerator = () => {
 
   if (loading && !qrToken) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Código de Autenticação</CardTitle>
-          <CardDescription>
-            Aguarde enquanto geramos seu código QR
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center py-10">
-          <Loader2 className="h-16 w-16 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+      <div className="flex justify-center py-10">
+        <Loader2 className="h-16 w-16 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Código de Autenticação</CardTitle>
-            <CardDescription>
-              Apresente este QR Code ao parceiro para validar sua identidade
-            </CardDescription>
-          </div>
-          <Badge variant="outline" className="bg-green-50 text-green-700">
-            Permanente
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="flex justify-center py-4">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <Badge variant="outline" className="bg-green-50 text-green-700">
+          QR Code Permanente
+        </Badge>
+      </div>
+      
+      <div className="flex justify-center">
         {qrToken && qrToken.qrCode ? (
-          <div className="p-4 bg-white rounded-lg">
+          <div className="p-6 bg-white rounded-xl shadow-sm border">
             <QRCode 
               value={qrToken.qrCode} 
-              size={200}
+              size={240}
               level="H"
             />
           </div>
@@ -92,16 +76,15 @@ const QRAuthGenerator = () => {
             </p>
           </div>
         )}
-      </CardContent>
+      </div>
+      
       {!isNative && (
-        <CardFooter className="flex justify-center">
-          <div className="text-center text-sm text-muted-foreground">
-            <QrCode className="h-4 w-4 inline mr-1" />
-            Seu código QR é único e permanente
-          </div>
-        </CardFooter>
+        <div className="text-center text-sm text-muted-foreground">
+          <QrCode className="h-4 w-4 inline mr-1" />
+          Seu código QR é único e permanente
+        </div>
       )}
-    </Card>
+    </div>
   );
 };
 
