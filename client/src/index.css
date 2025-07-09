@@ -846,8 +846,7 @@
     left: 0;
     right: 0;
     width: 100vw;
-    height: 50px; /* Altura fixa para garantir cobertura */
-    padding-top: env(safe-area-inset-top, 0px);
+    height: env(safe-area-inset-top, 20px); /* Usar apenas a altura da safe area */
     background: rgba(255, 255, 255, 0.60) !important;
     backdrop-filter: blur(20px) saturate(150%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
@@ -855,9 +854,9 @@
     pointer-events: none; /* Permite cliques através do overlay */
   }
   
-  /* Ajuste do header no iPad */
+  /* Ajuste do header no iPad - remover margin-top duplicado */
   .header-glassmorphism-ipad {
-    margin-top: 50px; /* Mesma altura da status bar overlay */
+    margin-top: 0; /* Removido para evitar espaço duplicado */
   }
   
   /* Remover margin-top do header quando não for sticky */

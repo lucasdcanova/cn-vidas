@@ -386,11 +386,64 @@ router.post('/partners', async (req, res) => {
 router.put('/partners/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    res.json({ 
-      message: 'Update partner endpoint', 
+    const updateData = req.body;
+    
+    console.log('🔧 [Admin] Update partner request:', {
       partnerId: id,
-      data: req.body 
+      fields: Object.keys(updateData),
+      data: updateData
     });
+    
+    // Verificar se o parceiro existe
+    const partner = await storage.getPartner(parseInt(id));
+    if (!partner) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
+    
+    // Remover campos que não devem ser atualizados
+    delete updateData.id;
+    delete updateData.userId;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+    
+    // Atualizar o parceiro
+    const updatedPartner = await storage.updatePartner(parseInt(id), updateData);
+    
+    res.json(updatedPartner);
+  } catch (error) {
+    console.error('Error updating partner:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Suportar PATCH também para compatibilidade
+router.patch('/partners/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    console.log('🔧 [Admin] Update partner request (PATCH):', {
+      partnerId: id,
+      fields: Object.keys(updateData),
+      data: updateData
+    });
+    
+    // Verificar se o parceiro existe
+    const partner = await storage.getPartner(parseInt(id));
+    if (!partner) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
+    
+    // Remover campos que não devem ser atualizados
+    delete updateData.id;
+    delete updateData.userId;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+    
+    // Atualizar o parceiro
+    const updatedPartner = await storage.updatePartner(parseInt(id), updateData);
+    
+    res.json(updatedPartner);
   } catch (error) {
     console.error('Error updating partner:', error);
     res.status(500).json({ error: 'Internal server error' });
