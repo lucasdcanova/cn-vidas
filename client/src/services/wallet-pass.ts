@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 export interface WalletPassData {
   userId: number;
@@ -210,9 +211,12 @@ class WalletPassService {
           
           console.log('[WalletPass] Navegando para URL completa com autenticação:', downloadUrl);
           
-          // No iOS, navegar diretamente para o URL funciona melhor
-          // O Safari irá reconhecer o Content-Type e abrir a Wallet
-          window.location.href = downloadUrl;
+          // No iOS, usar o Browser plugin para garantir que a URL seja aberta corretamente
+          // Isso abrirá no Safari in-app browser que reconhecerá o Content-Type do .pkpass
+          await Browser.open({ 
+            url: downloadUrl,
+            presentationStyle: 'popover' // ou 'fullscreen' se preferir
+          });
           
           return true;
         } catch (error) {
