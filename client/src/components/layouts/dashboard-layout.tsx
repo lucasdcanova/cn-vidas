@@ -196,7 +196,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       
     <div className={cn(
       "flex h-screen overflow-hidden bg-blue-50",
-      !shouldShowSidebar && "flex-col" // Use flex-col when no sidebar
+      !shouldShowSidebar && "flex-col", // Use flex-col when no sidebar
+      isIPadDevice && "pt-safe" // Adicionar padding-top apenas para a safe area no iPad
     )}>{/* Fundo azul claro sólido que corresponde à identidade visual */}
 
       {/* Overlay when sidebar is open on mobile - não mostrar para pacientes no iOS */}
