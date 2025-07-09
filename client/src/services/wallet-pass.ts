@@ -192,10 +192,16 @@ class WalletPassService {
         try {
           console.log('[WalletPass] Método 1: Navegação direta via GET');
           
-          // Criar URL com parâmetros GET para download direto
-          const downloadUrl = `/api/wallet/download-pass?planName=${passData.planName}&qrCode=${encodeURIComponent(passData.qrCode)}`;
+          // Criar URL completa com o servidor da API
+          const apiUrl = process.env.NODE_ENV === 'production' 
+            ? 'https://cnvidas.onrender.com'
+            : 'http://localhost:3001';
           
-          console.log('[WalletPass] Navegando para:', downloadUrl);
+          // Adicionar token de autenticação na URL
+          const authToken = localStorage.getItem('authToken');
+          const downloadUrl = `${apiUrl}/api/wallet/download-pass?planName=${passData.planName}&qrCode=${encodeURIComponent(passData.qrCode)}&token=${authToken}`;
+          
+          console.log('[WalletPass] Navegando para URL completa com autenticação:', downloadUrl);
           
           // No iOS, navegar diretamente para o URL funciona melhor
           // O Safari irá reconhecer o Content-Type e abrir a Wallet
