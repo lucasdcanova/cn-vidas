@@ -191,11 +191,18 @@ class WalletPassService {
         // Este é o método mais confiável no iOS
         try {
           console.log('[WalletPass] Método 1: Navegação direta via GET');
+          console.log('[WalletPass] Ambiente:', {
+            hostname: window.location.hostname,
+            isNative: this.isNative,
+            platform: Capacitor.getPlatform()
+          });
           
           // Criar URL completa com o servidor da API
-          const apiUrl = process.env.NODE_ENV === 'production' 
-            ? 'https://cnvidas.onrender.com'
-            : 'http://localhost:3001';
+          // Em produção (iOS app), sempre usar a URL de produção
+          const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          const apiUrl = isLocalDev && !this.isNative
+            ? 'http://localhost:3001'
+            : 'https://cnvidas.onrender.com';
           
           // Adicionar token de autenticação na URL
           const authToken = localStorage.getItem('authToken');
