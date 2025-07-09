@@ -1,5 +1,4 @@
 import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
 
 export interface WalletPassData {
   userId: number;
@@ -211,12 +210,24 @@ class WalletPassService {
           
           console.log('[WalletPass] Navegando para URL completa com autenticação:', downloadUrl);
           
-          // No iOS, usar o Browser plugin para garantir que a URL seja aberta corretamente
-          // Isso abrirá no Safari in-app browser que reconhecerá o Content-Type do .pkpass
-          await Browser.open({ 
-            url: downloadUrl,
-            presentationStyle: 'popover' // ou 'fullscreen' se preferir
-          });
+          // Método 1: Tentar com window.open() em _system
+          try {
+            window.open(downloadUrl, '_system');
+            return true;
+          } catch (e) {
+            console.log('[WalletPass] window.open falhou, tentando método iframe');
+          }
+          
+          // Método 2: Usar iframe invisível (funciona melhor em alguns casos no iOS)
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = downloadUrl;
+          document.body.appendChild(iframe);
+          
+          // Remover iframe após 3 segundos
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+          }, 3000);
           
           return true;
         } catch (error) {
