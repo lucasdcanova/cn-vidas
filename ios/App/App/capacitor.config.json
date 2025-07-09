@@ -38,6 +38,7 @@
 		"BiometricAuthNative",
 		"SecureStorage",
 		"AppPlugin",
+		"CAPBrowserPlugin",
 		"CAPCameraPlugin",
 		"HapticsPlugin",
 		"KeyboardPlugin",
