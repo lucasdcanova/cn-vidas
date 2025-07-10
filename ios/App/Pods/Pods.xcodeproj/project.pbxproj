@@ -915,7 +915,7 @@
 				B7E71917B1A2CBBFAA63AB74C8A18EC1 /* Support Files */,
 			);
 			name = CapacitorKeyboard;
-			path = "../../../node_modules/@capacitor/keyboard";
+			path = "CapacitorKeyboard";
 			sourceTree = "<group>";
 		};
 		4961C8CE63A1BCFCF9C168555955C7BD /* Support Files */ = {
@@ -1010,7 +1010,7 @@
 				09947097E794204032311C449DDC89AD /* Support Files */,
 			);
 			name = CapacitorHaptics;
-			path = "../../../node_modules/@capacitor/haptics";
+			path = "CapacitorHaptics";
 			sourceTree = "<group>";
 		};
 		7273633F8BB8B30A8EBDCA828D56A4B5 /* Plugins */ = {
@@ -1037,7 +1037,7 @@
 				A2F6750FBBFB0AF956D8E4810AA0D246 /* Support Files */,
 			);
 			name = CapacitorPreferences;
-			path = "../../../node_modules/@capacitor/preferences";
+			path = "CapacitorPreferences";
 			sourceTree = "<group>";
 		};
 		7AE636BA6F69BB4332F35F552DC6BFD2 /* AparajitaCapacitorSecureStorage */ = {
@@ -1073,7 +1073,7 @@
 				819F96FFF8DBBE607A9E09C1B8412267 /* Support Files */,
 			);
 			name = CapacitorCamera;
-			path = "../../../node_modules/@capacitor/camera";
+			path = "CapacitorCamera";
 			sourceTree = "<group>";
 		};
 		819F96FFF8DBBE607A9E09C1B8412267 /* Support Files */ = {
@@ -1190,7 +1190,7 @@
 				DBEAFFEE18AD57F45037D42136E24DD6 /* Support Files */,
 			);
 			name = Capacitor;
-			path = "../../../node_modules/@capacitor/ios";
+			path = "Capacitor";
 			sourceTree = "<group>";
 		};
 		96633408F0D72B004749B20BBBEDFAD2 /* Pod */ = {
@@ -1321,7 +1321,7 @@
 				85E1026E6FD08A9BD05350E3A8AD3C4B /* Support Files */,
 			);
 			name = CapacitorPushNotifications;
-			path = "../../../node_modules/@capacitor/push-notifications";
+			path = "CapacitorPushNotifications";
 			sourceTree = "<group>";
 		};
 		B0BF9E1F81B7B5235F0230E38504A555 /* Support Files */ = {
@@ -1399,7 +1399,7 @@
 				C622BB12573D17A898D9F15920331499 /* Support Files */,
 			);
 			name = CapacitorApp;
-			path = "../../../node_modules/@capacitor/app";
+			path = "CapacitorApp";
 			sourceTree = "<group>";
 		};
 		C622BB12573D17A898D9F15920331499 /* Support Files */ = {
@@ -1436,7 +1436,7 @@
 				4961C8CE63A1BCFCF9C168555955C7BD /* Support Files */,
 			);
 			name = CapacitorCordova;
-			path = "../../../node_modules/@capacitor/ios";
+			path = "Capacitor";
 			sourceTree = "<group>";
 		};
 		CF1408CF629C7361332E53B88F7BD30C = {
@@ -1532,7 +1532,7 @@
 				1C985E906B0D794AA9791EB9487E50A6 /* Support Files */,
 			);
 			name = CapacitorStatusBar;
-			path = "../../../node_modules/@capacitor/status-bar";
+			path = "CapacitorStatusBar";
 			sourceTree = "<group>";
 		};
 		F48C936F4362D11415305CAA436ABE2E /* CapacitorBrowser */ = {
@@ -1544,7 +1544,7 @@
 				5F35098EA7D761095D6D432742BE37BD /* Support Files */,
 			);
 			name = CapacitorBrowser;
-			path = "../../../node_modules/@capacitor/browser";
+			path = "CapacitorBrowser";
 			sourceTree = "<group>";
 		};
 		FD16C923A4DED13CA8CE9F6AEC8C0142 /* CapacitorLocalNotifications */ = {
@@ -1556,7 +1556,7 @@
 				B6AE8A40667C3652F03D285E035C4549 /* Support Files */,
 			);
 			name = CapacitorLocalNotifications;
-			path = "../../../node_modules/@capacitor/local-notifications";
+			path = "CapacitorLocalNotifications";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
