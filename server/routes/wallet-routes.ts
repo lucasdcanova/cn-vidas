@@ -200,10 +200,14 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
     const buffer = await pass.generate();
     console.log('[WalletPass] Buffer gerado:', buffer.length, 'bytes');
 
-    // Enviar o arquivo
+    // Enviar o arquivo com headers apropriados para iOS
     res.set({
       'Content-Type': 'application/vnd.apple.pkpass',
-      'Content-Disposition': `attachment; filename=cnvidas-${user.id}.pkpass`
+      'Content-Disposition': `attachment; filename=cnvidas-${user.id}.pkpass`,
+      'Content-Length': buffer.length.toString(),
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     });
 
     res.send(buffer);
@@ -398,10 +402,14 @@ router.get('/download-pass', async (req: AuthenticatedRequest, res) => {
     const buffer = pass.getAsBuffer();
     console.log('[WalletPass GET] Buffer gerado:', buffer.length, 'bytes');
 
-    // Enviar o arquivo
+    // Enviar o arquivo com headers apropriados para iOS
     res.set({
       'Content-Type': 'application/vnd.apple.pkpass',
-      'Content-Disposition': `attachment; filename=cnvidas-${user.id}.pkpass`
+      'Content-Disposition': `attachment; filename=cnvidas-${user.id}.pkpass`,
+      'Content-Length': buffer.length.toString(),
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     });
 
     res.send(buffer);
