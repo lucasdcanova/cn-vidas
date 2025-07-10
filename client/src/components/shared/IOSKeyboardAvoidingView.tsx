@@ -43,7 +43,7 @@ export function IOSKeyboardAvoidingView({
 
   return (
     <div 
-      className={cn("flex flex-col flex-1", className)}
+      className={cn("relative w-full h-full", className)}
       style={containerStyle}
     >
       {children}

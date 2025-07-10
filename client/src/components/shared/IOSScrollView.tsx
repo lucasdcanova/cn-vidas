@@ -22,13 +22,16 @@ export function IOSScrollView({
   // Para iOS, aplicamos estilos específicos de scroll
   const scrollStyles = isIOS() ? {
     WebkitOverflowScrolling: 'touch' as any,
-    overscrollBehavior: 'contain'
+    overscrollBehavior: 'contain',
+    // Forçar hardware acceleration
+    transform: 'translateZ(0)',
+    backfaceVisibility: 'hidden' as any
   } : {};
 
   return (
     <div 
       className={cn(
-        "flex flex-col h-full w-full",
+        "relative w-full h-full overflow-hidden",
         // Safe areas para iOS
         isIOS() && "safe-top safe-bottom",
         className
@@ -36,9 +39,11 @@ export function IOSScrollView({
     >
       <div 
         className={cn(
-          "flex-1 overflow-y-auto overflow-x-hidden",
+          "absolute inset-0 overflow-y-auto overflow-x-hidden",
           // Padding para safe areas no iOS
           isIOS() && "pb-safe pt-safe",
+          // Adicionar momentum scrolling no iOS
+          isIOS() && "overflow-y-scroll",
           contentClassName
         )}
         style={{
