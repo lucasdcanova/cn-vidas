@@ -33,17 +33,64 @@ router.get('/test-pkpass', async (req, res) => {
 // Rota de debug para verificar certificados
 router.get('/debug-certificates', async (req, res) => {
   try {
-    const certPath = path.join(__dirname, '../wallet/certificates');
-    const files = await fs.readdir(certPath).catch(() => []);
+    console.log('[WalletDebug] Verificando certificados...');
+    
+    const environment = {
+      NODE_ENV: process.env.NODE_ENV,
+      hasPassTypeId: !!process.env.APPLE_PASS_TYPE_ID,
+      passTypeId: process.env.APPLE_PASS_TYPE_ID ? 'Configurado' : 'Não configurado',
+      hasTeamId: !!process.env.APPLE_TEAM_ID,
+      teamId: process.env.APPLE_TEAM_ID ? 'Configurado' : 'Não configurado',
+      hasSignerCert: !!process.env.WALLET_SIGNER_CERT_BASE64,
+      hasSignerKey: !!process.env.WALLET_SIGNER_KEY_BASE64,
+      hasWWDR: !!process.env.WALLET_WWDR_BASE64,
+    };
+    
+    // Verificar se os certificados estão sendo decodificados corretamente
+    let certificateInfo = {
+      signerCertLength: 0,
+      signerKeyLength: 0,
+      wwdrLength: 0,
+      signerCertValid: false,
+      signerKeyValid: false,
+      wwdrValid: false
+    };
+    
+    if (process.env.WALLET_SIGNER_CERT_BASE64) {
+      try {
+        const cert = Buffer.from(process.env.WALLET_SIGNER_CERT_BASE64, 'base64').toString();
+        certificateInfo.signerCertLength = cert.length;
+        certificateInfo.signerCertValid = cert.includes('BEGIN CERTIFICATE');
+      } catch (e) {
+        console.error('Erro ao decodificar SIGNER_CERT:', e);
+      }
+    }
+    
+    if (process.env.WALLET_SIGNER_KEY_BASE64) {
+      try {
+        const key = Buffer.from(process.env.WALLET_SIGNER_KEY_BASE64, 'base64').toString();
+        certificateInfo.signerKeyLength = key.length;
+        certificateInfo.signerKeyValid = key.includes('BEGIN PRIVATE KEY') || key.includes('BEGIN RSA PRIVATE KEY');
+      } catch (e) {
+        console.error('Erro ao decodificar SIGNER_KEY:', e);
+      }
+    }
+    
+    if (process.env.WALLET_WWDR_BASE64) {
+      try {
+        const wwdr = Buffer.from(process.env.WALLET_WWDR_BASE64, 'base64').toString();
+        certificateInfo.wwdrLength = wwdr.length;
+        certificateInfo.wwdrValid = wwdr.includes('BEGIN CERTIFICATE');
+      } catch (e) {
+        console.error('Erro ao decodificar WWDR:', e);
+      }
+    }
     
     res.json({
-      certificatesPath: certPath,
-      filesFound: files,
-      environment: {
-        NODE_ENV: process.env.NODE_ENV,
-        hasPassTypeId: !!process.env.PASS_TYPE_ID,
-        hasTeamId: !!process.env.APPLE_TEAM_ID
-      }
+      message: 'Debug de certificados',
+      environment,
+      certificateInfo,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('[WalletDebug] Erro:', error);
