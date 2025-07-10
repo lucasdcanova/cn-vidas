@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { Browser } from '@capacitor/browser';
+import { App } from '@capacitor/app';
 
 export interface WalletPassData {
   userId: number;
@@ -184,9 +184,9 @@ class WalletPassService {
       const blob = await response.blob();
       console.log('[WalletPass] Blob recebido:', blob.size, 'bytes');
       
-      // No iOS nativo, usar Capacitor Browser
+      // No iOS nativo, usar App.openUrl para abrir externamente
       if (this.isNative && Capacitor.getPlatform() === 'ios') {
-        console.log('[WalletPass] Usando Capacitor Browser para iOS');
+        console.log('[WalletPass] Usando App.openUrl para iOS');
         
         try {
           // Criar URL completa com o servidor da API
@@ -194,48 +194,79 @@ class WalletPassService {
           const authToken = localStorage.getItem('authToken');
           const downloadUrl = `${apiUrl}/api/wallet/download-pass?planName=${passData.planName}&qrCode=${encodeURIComponent(passData.qrCode)}&token=${authToken}`;
           
-          console.log('[WalletPass] Abrindo URL no browser do sistema:', downloadUrl);
+          console.log('[WalletPass] Abrindo URL externamente:', downloadUrl);
           
-          // Usar Capacitor Browser para abrir no Safari
-          // Isso deve permitir que o Safari baixe e abra o .pkpass
-          await Browser.open({ 
-            url: downloadUrl,
-            presentationStyle: 'fullscreen' // Abrir em tela cheia para melhor UX
-          });
+          // Usar App.openUrl para abrir no Safari externo
+          // Isso força o Safari a baixar e processar o .pkpass
+          await App.openUrl({ url: downloadUrl });
           
+          console.log('[WalletPass] URL aberta com sucesso');
           return true;
         } catch (error) {
-          console.error('[WalletPass] Erro ao abrir browser:', error);
+          console.error('[WalletPass] Erro ao abrir URL:', error);
           
-          // Fallback: tentar com blob URL
-          console.log('[WalletPass] Tentando fallback com blob URL');
-          
-          // Criar data URL do blob
-          const reader = new FileReader();
-          const dataUrlPromise = new Promise<string>((resolve, reject) => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
+          // Fallback 1: Tentar criar um link temporário e forçar download
+          try {
+            console.log('[WalletPass] Tentando fallback com link temporário');
+            
+            // Salvar o blob em base64
+            const reader = new FileReader();
             reader.readAsDataURL(blob);
-          });
-          
-          const dataUrl = await dataUrlPromise;
-          
-          // Criar um link temporário com o data URL
-          const link = document.createElement('a');
-          link.href = dataUrl;
-          link.download = `cnvidas-${passData.userId}.pkpass`;
-          link.style.display = 'none';
-          document.body.appendChild(link);
-          
-          // Simular clique
-          link.click();
-          
-          // Limpar
-          setTimeout(() => {
-            document.body.removeChild(link);
-          }, 100);
-          
-          return true;
+            
+            await new Promise((resolve) => {
+              reader.onloadend = resolve;
+            });
+            
+            const base64Data = reader.result as string;
+            
+            // Criar um botão visível para o usuário clicar
+            const downloadButton = document.createElement('button');
+            downloadButton.textContent = 'Baixar Cartão para Wallet';
+            downloadButton.style.cssText = `
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              z-index: 999999;
+              background: #007AFF;
+              color: white;
+              padding: 16px 32px;
+              font-size: 18px;
+              font-weight: bold;
+              border: none;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            
+            // Adicionar evento de clique
+            downloadButton.onclick = async () => {
+              // Tentar abrir a URL novamente
+              const apiUrl = 'https://cnvidas.onrender.com';
+              const authToken = localStorage.getItem('authToken');
+              const downloadUrl = `${apiUrl}/api/wallet/download-pass?planName=${passData.planName}&qrCode=${encodeURIComponent(passData.qrCode)}&token=${authToken}`;
+              
+              window.location.href = downloadUrl;
+              
+              // Remover botão após clique
+              setTimeout(() => {
+                document.body.removeChild(downloadButton);
+              }, 1000);
+            };
+            
+            document.body.appendChild(downloadButton);
+            
+            // Remover botão após 10 segundos se não for clicado
+            setTimeout(() => {
+              if (document.body.contains(downloadButton)) {
+                document.body.removeChild(downloadButton);
+              }
+            }, 10000);
+            
+            return true;
+          } catch (fallbackError) {
+            console.error('[WalletPass] Erro no fallback:', fallbackError);
+            throw new Error('Não foi possível adicionar o cartão ao Wallet');
+          }
         }
       } else {
         // No navegador desktop, fazer download normal

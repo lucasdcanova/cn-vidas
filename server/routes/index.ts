@@ -41,6 +41,7 @@ import cleanupRouter from './cleanup-notifications';
 import prescriptionRouter from './prescription-routes';
 import pushNotificationsRouter from './push-notifications-routes';
 import walletRouter from './wallet-routes';
+import walletTestRouter from './wallet-test-routes';
 import uploadDiagnosticsRouter from './upload-diagnostics';
 import profileImageRouter from './profile-image-routes';
 import dailyCloudWebhookRouter from './daily-cloud-webhook';
@@ -296,6 +297,10 @@ export default async function setupRoutes(app: express.Express) {
   // Rotas do Apple Wallet
   console.log('Registrando walletRouter em /api/wallet');
   app.use('/api/wallet', walletRouter);
+  
+  // Rotas de teste do Apple Wallet
+  console.log('Registrando walletTestRouter em /api/wallet-test');
+  app.use('/api/wallet-test', walletTestRouter);
   
   // Rotas de manutenção
   app.use('/api/admin', cleanupRouter);
