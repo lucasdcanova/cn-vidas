@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 
 export interface WalletPassData {
   userId: number;
@@ -183,85 +184,58 @@ class WalletPassService {
       const blob = await response.blob();
       console.log('[WalletPass] Blob recebido:', blob.size, 'bytes');
       
-      // No iOS nativo, usar uma abordagem diferente
+      // No iOS nativo, usar Capacitor Browser
       if (this.isNative && Capacitor.getPlatform() === 'ios') {
-        console.log('[WalletPass] Usando método iOS nativo');
+        console.log('[WalletPass] Usando Capacitor Browser para iOS');
         
-        // Método 1: Criar um link direto e navegar para ele
-        // Este é o método mais confiável no iOS
         try {
-          console.log('[WalletPass] Método 1: Navegação direta via GET');
-          console.log('[WalletPass] Ambiente:', {
-            hostname: window.location.hostname,
-            isNative: this.isNative,
-            platform: Capacitor.getPlatform()
-          });
-          
           // Criar URL completa com o servidor da API
-          // Em produção (iOS app), sempre usar a URL de produção
-          const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-          const apiUrl = isLocalDev && !this.isNative
-            ? 'http://localhost:3001'
-            : 'https://cnvidas.onrender.com';
-          
-          // Adicionar token de autenticação na URL
+          const apiUrl = 'https://cnvidas.onrender.com';
           const authToken = localStorage.getItem('authToken');
           const downloadUrl = `${apiUrl}/api/wallet/download-pass?planName=${passData.planName}&qrCode=${encodeURIComponent(passData.qrCode)}&token=${authToken}`;
           
-          console.log('[WalletPass] Navegando para URL completa com autenticação:', downloadUrl);
+          console.log('[WalletPass] Abrindo URL no browser do sistema:', downloadUrl);
           
-          // Método 1: Tentar com window.open() em _system
-          try {
-            window.open(downloadUrl, '_system');
-            return true;
-          } catch (e) {
-            console.log('[WalletPass] window.open falhou, tentando método iframe');
-          }
-          
-          // Método 2: Usar iframe invisível (funciona melhor em alguns casos no iOS)
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = downloadUrl;
-          document.body.appendChild(iframe);
-          
-          // Remover iframe após 3 segundos
-          setTimeout(() => {
-            document.body.removeChild(iframe);
-          }, 3000);
+          // Usar Capacitor Browser para abrir no Safari
+          // Isso deve permitir que o Safari baixe e abra o .pkpass
+          await Browser.open({ 
+            url: downloadUrl,
+            presentationStyle: 'fullscreen' // Abrir em tela cheia para melhor UX
+          });
           
           return true;
         } catch (error) {
-          console.error('[WalletPass] Erro no método 1:', error);
+          console.error('[WalletPass] Erro ao abrir browser:', error);
           
-          // Método 2: Tentar com blob URL como fallback
-          try {
-            console.log('[WalletPass] Método 2: Blob URL com link');
-            const blobUrl = URL.createObjectURL(blob);
-            
-            // Criar um link real no DOM
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.textContent = 'Adicionar à Wallet';
-            a.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: #000; color: #fff; padding: 20px; border-radius: 10px; text-decoration: none; font-weight: bold;';
-            
-            document.body.appendChild(a);
-            
-            // Auto-clicar após um pequeno delay
-            setTimeout(() => {
-              a.click();
-              
-              // Remover o link após mais um delay
-              setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(blobUrl);
-              }, 1000);
-            }, 100);
-            
-            return true;
-          } catch (error2) {
-            console.error('[WalletPass] Erro no método 2:', error2);
-            throw new Error('Não foi possível abrir o pass no iOS');
-          }
+          // Fallback: tentar com blob URL
+          console.log('[WalletPass] Tentando fallback com blob URL');
+          
+          // Criar data URL do blob
+          const reader = new FileReader();
+          const dataUrlPromise = new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          
+          const dataUrl = await dataUrlPromise;
+          
+          // Criar um link temporário com o data URL
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = `cnvidas-${passData.userId}.pkpass`;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          
+          // Simular clique
+          link.click();
+          
+          // Limpar
+          setTimeout(() => {
+            document.body.removeChild(link);
+          }, 100);
+          
+          return true;
         }
       } else {
         // No navegador desktop, fazer download normal
