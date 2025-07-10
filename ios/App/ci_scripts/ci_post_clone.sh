@@ -13,14 +13,25 @@ ls -la
 # Verificar se estamos no diretório correto
 if [ ! -f "Podfile" ]; then
     echo "❌ Erro: Podfile não encontrado no diretório atual"
-    echo "📍 Tentando navegar para ios/App..."
+    echo "📍 Navegando para o diretório do projeto iOS..."
     
-    if [ -d "ios/App" ]; then
-        cd ios/App
-        echo "✅ Navegou para: $(pwd)"
-    else
-        echo "❌ Erro: Diretório ios/App não encontrado"
-        exit 1
+    # Se estamos em ci_scripts, subir um nível
+    if [[ "$(pwd)" == *"/ci_scripts" ]]; then
+        cd ..
+        echo "✅ Subiu para: $(pwd)"
+    fi
+    
+    # Se ainda não encontramos o Podfile, tentar outras opções
+    if [ ! -f "Podfile" ]; then
+        # Tentar voltar para a raiz e ir para ios/App
+        cd /Volumes/workspace/repository
+        if [ -d "ios/App" ]; then
+            cd ios/App
+            echo "✅ Navegou para: $(pwd)"
+        else
+            echo "❌ Erro: Diretório ios/App não encontrado a partir da raiz"
+            exit 1
+        fi
     fi
 fi
 
