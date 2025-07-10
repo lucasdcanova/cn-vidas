@@ -353,9 +353,9 @@ export default function PartnerOnboardingPage() {
   }
 
   return (
-    <IOSKeyboardAvoidingView className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <IOSKeyboardAvoidingView className="fixed inset-0 bg-gradient-to-b from-background to-muted/20">
       <IOSScrollView 
-        className="flex-1"
+        className="h-full"
         contentClassName="py-8"
       >
         <div className="max-w-3xl mx-auto px-4 pb-8">
