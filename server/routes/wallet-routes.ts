@@ -109,8 +109,9 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
       cleanCertificates.signerKeyPassphrase = certificates.signerKeyPassphrase;
     }
 
-    // Criar o pass com a estrutura correta
-    const pass = new PKPass({}, cleanCertificates, {
+    // Criar o pass com a estrutura correta para passkit-generator v3
+    const pass = new PKPass({
+      model: {
         passTypeIdentifier: walletConfig.passTypeId,
         teamIdentifier: walletConfig.teamId,
         organizationName: 'CN Vidas',
@@ -176,10 +177,9 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
         },
         
         // Validade
-        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        
-        // Localização (opcional - para notificações baseadas em localização)
-        locations: []
+        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      certificates: cleanCertificates
     });
 
     // Adicionar assets (ícones e logos)
@@ -197,7 +197,7 @@ router.post('/generate-pass', requireAuth, async (req: AuthenticatedRequest, res
 
     // Gerar o pass
     console.log('[WalletPass] Gerando buffer do pass...');
-    const buffer = pass.getAsBuffer();
+    const buffer = await pass.generate();
     console.log('[WalletPass] Buffer gerado:', buffer.length, 'bytes');
 
     // Enviar o arquivo
@@ -307,8 +307,9 @@ router.get('/download-pass', async (req: AuthenticatedRequest, res) => {
       cleanCertificates.signerKeyPassphrase = certificates.signerKeyPassphrase;
     }
 
-    // Criar o pass com a estrutura correta
-    const pass = new PKPass({}, cleanCertificates, {
+    // Criar o pass com a estrutura correta para passkit-generator v3
+    const pass = new PKPass({
+      model: {
         passTypeIdentifier: walletConfig.passTypeId,
         teamIdentifier: walletConfig.teamId,
         organizationName: 'CN Vidas',
@@ -374,10 +375,9 @@ router.get('/download-pass', async (req: AuthenticatedRequest, res) => {
         },
         
         // Validade
-        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        
-        // Localização (opcional - para notificações baseadas em localização)
-        locations: []
+        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      certificates: cleanCertificates
     });
 
     // Adicionar assets (ícones e logos)
