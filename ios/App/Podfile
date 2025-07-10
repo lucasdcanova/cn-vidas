@@ -1,10 +1,10 @@
 require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 
 platform :ios, '14.0'
-
-# Silenciar warnings específicos do Capacitor
-inhibit_all_warnings!
 use_frameworks!
+
+# Configurações para resolver problemas de build
+inhibit_all_warnings!
 
 # workaround to avoid Xcode caching of Pods that requires
 # Product -> Clean Build Folder after new Cordova plugins installed
@@ -35,19 +35,26 @@ end
 post_install do |installer|
   assertDeploymentTarget(installer)
   
-  # Desabilitar User Script Sandboxing para resolver erros de build
   installer.pods_project.targets.each do |target|
-    if target.respond_to?(:product_type) and target.product_type == "com.apple.product-type.bundle"
-      target.build_configurations.each do |config|
+    target.build_configurations.each do |config|
+      # Configurações para resolver problemas de build do Xcode Cloud
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+      config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+      
+      # Resolver problemas de code signing
+      if target.respond_to?(:product_type) and target.product_type == "com.apple.product-type.bundle"
         config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       end
     end
   end
   
+  # Configurações adicionais para projetos gerados
   installer.generated_projects.each do |project|
     project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
       end
     end
   end
