@@ -241,7 +241,7 @@ class WalletPassService {
             // Adicionar evento de clique
             downloadButton.onclick = async () => {
               // Tentar abrir a URL novamente
-              const apiUrl = 'https://cnvidas.onrender.com';
+              const apiUrl = 'https://www.homologacao.cnvidas.com.br';
               const authToken = localStorage.getItem('authToken');
               const downloadUrl = `${apiUrl}/api/wallet/download-pass?planName=${passData.planName}&qrCode=${encodeURIComponent(passData.qrCode)}&token=${authToken}`;
               
