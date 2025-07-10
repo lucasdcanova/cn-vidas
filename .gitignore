@@ -96,3 +96,10 @@ certificates/
 AuthKey_*.p8
 !ios/App/Pods/README.md
 !ios/App/Pods/Target Support Files/Pods-App/*.xcconfig
+
+# XCResult files
+*.xcresult
+*.xcresult.zip
+xcresult_*
+data*.bin
+build*_result.json
