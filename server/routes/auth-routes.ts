@@ -244,6 +244,41 @@ authRouter.post('/register', async (req: Request, res: Response) => {
       }
     }
 
+    // Criar registro de parceiro automaticamente quando role = 'partner'
+    if (role === 'partner') {
+      try {
+        await storage.createPartner({
+          userId: newUser.id,
+          businessName: newUser.fullName,
+          businessType: 'clinic', // Tipo padrão, será atualizado no onboarding
+          cnpj: cnpj || '',
+          phone: '',
+          email: newUser.email,
+          website: '',
+          description: '',
+          logoUrl: '',
+          address: '',
+          city: '',
+          state: '',
+          zipcode: '',
+          latitude: null,
+          longitude: null,
+          bankAccount: '',
+          bankAgency: '',
+          bankName: '',
+          pixKey: '',
+          commissionRate: 20, // Taxa padrão de 20%
+          isActive: true,
+          isVerified: false,
+          onboardingCompleted: false
+        });
+        console.log(`Registro de parceiro criado para usuário ${newUser.id}`);
+      } catch (partnerError) {
+        console.error('Erro ao criar registro de parceiro:', partnerError);
+        // Não falhar o registro se a criação do perfil de parceiro falhar
+      }
+    }
+
     // Salvar configurações de privacidade do usuário (incluindo consentimento de gravação)
     // Criar configurações para todos os tipos de usuário
     try {

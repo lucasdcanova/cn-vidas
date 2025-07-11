@@ -140,7 +140,10 @@ import { APNsService } from "./services/apns-service";
                 address: user.address,
                 zipcode: user.zipcode
               };
-              console.log(`🔐 JWT: Usuário ${decoded.email} autenticado via header com plano ${user.subscriptionPlan}`);
+              // Log apenas para endpoints de debug específicos
+              if (req.url.includes('/api/subscription/current') || req.url.includes('/api/admin/') || req.url.includes('/api/doctors/profile')) {
+                console.log(`🔐 JWT: Usuário ${decoded.email} autenticado via header com plano ${user.subscriptionPlan}`);
+              }
             }
           } catch (error) {
             console.error('Erro ao buscar dados do usuário:', error);
@@ -207,7 +210,10 @@ import { APNsService } from "./services/apns-service";
                 address: user.address,
                 zipcode: user.zipcode
               };
-              console.log(`🔐 JWT: Usuário ${decoded.email} autenticado via cookie com plano ${user.subscriptionPlan}`);
+              // Log apenas para endpoints de debug específicos
+              if (req.url.includes('/api/subscription/current') || req.url.includes('/api/admin/') || req.url.includes('/api/doctors/profile')) {
+                console.log(`🔐 JWT: Usuário ${decoded.email} autenticado via cookie com plano ${user.subscriptionPlan}`);
+              }
             }
           } catch (error) {
             console.error('Erro ao buscar dados do usuário:', error);
