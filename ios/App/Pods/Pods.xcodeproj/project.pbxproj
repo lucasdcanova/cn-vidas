@@ -1051,7 +1051,7 @@
 				B0BF9E1F81B7B5235F0230E38504A555 /* Support Files */,
 			);
 			name = AparajitaCapacitorSecureStorage;
-			path = "../../../node_modules/@aparajita/capacitor-secure-storage";
+			path = "AparajitaCapacitorSecureStorage";
 			sourceTree = "<group>";
 		};
 		7C6D044F0CD972C5CAB37A7A0E4EE782 /* Targets Support Files */ = {
@@ -1264,7 +1264,7 @@
 				E862DB1ABA02FA54D7AE016C07A0C1DD /* Support Files */,
 			);
 			name = AparajitaCapacitorBiometricAuth;
-			path = "../../../node_modules/@aparajita/capacitor-biometric-auth";
+			path = "AparajitaCapacitorBiometricAuth";
 			sourceTree = "<group>";
 		};
 		A53AC30275363176DE113BEBA1EB9941 /* Pod */ = {
