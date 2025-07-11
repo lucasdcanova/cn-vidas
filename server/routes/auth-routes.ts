@@ -348,14 +348,14 @@ authRouter.post('/register', async (req: Request, res: Response) => {
 
     // Retornar dados do usuário criado com login automático
     res.status(201).json({
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        username: newUser.username,
-        fullName: newUser.fullName,
-        role: newUser.role
-      },
+      id: newUser.id,
+      email: newUser.email,
+      username: newUser.username,
+      fullName: newUser.fullName,
+      role: newUser.role,
       token: token,
+      authToken: token, // Para compatibilidade com iOS
+      sessionId: `session_${newUser.id}_${Date.now()}`, // Para compatibilidade
       message: 'Usuário registrado com sucesso'
     });
 

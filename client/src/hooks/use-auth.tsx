@@ -579,10 +579,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           window.location.href = "/onboarding/doctor";
         }, 1000);
       } else if (userData.role === "partner") {
-        console.log("Usuário é parceiro, redirecionando para /partner-onboarding");
+        console.log("Usuário é parceiro, redirecionando para /partner/services");
         // Pequeno delay para garantir que os dados sejam salvos no cache
         setTimeout(() => {
-          window.location.href = "/partner-onboarding";
+          window.location.href = "/partner/services";
         }, 500);
       } else if (userData.role === "patient") {
         // Novos pacientes vão direto para a página de seleção obrigatória de plano
