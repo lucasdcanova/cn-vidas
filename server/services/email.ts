@@ -63,8 +63,14 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     const info = await transporter.sendMail(mailOptions);
     console.log('Email enviado com sucesso:', info.messageId);
     return true;
-  } catch (error) {
-    console.error('Erro ao enviar email:', error);
+  } catch (error: any) {
+    // Tratar erro de DKIM especificamente
+    if (error.code === 'EENVELOPE' && error.response?.includes('DKIM')) {
+      console.warn('⚠️ Aviso: DKIM não configurado no DNS. Email não enviado, mas o registro continua.');
+      console.warn('Para resolver: Configure o registro DKIM no DNS do domínio.');
+    } else {
+      console.error('Erro ao enviar email:', error);
+    }
     return false;
   }
 }
