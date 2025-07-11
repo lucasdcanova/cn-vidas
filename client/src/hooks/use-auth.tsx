@@ -284,8 +284,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.href = "/dashboard";
       }
       
-      // Forçar uma verificação de autenticação
-      setTimeout(() => refetch(), 300);
+      // Forçar uma verificação de autenticação antes do redirecionamento
+      await refetch();
     },
     onError: (error: Error) => {
       console.error("Erro no login:", error);
@@ -424,8 +424,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.href = "/dashboard";
       }
       
-      // Forçar uma verificação de autenticação
-      setTimeout(() => refetch(), 300);
+      // Forçar uma verificação de autenticação antes do redirecionamento
+      await refetch();
     },
     onError: (error: Error) => {
       console.error("Erro no login com QR Code:", error);
@@ -580,7 +580,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, 1000);
       } else if (userData.role === "partner") {
         console.log("Usuário é parceiro, redirecionando para /partner-onboarding");
-        window.location.href = "/partner-onboarding";
+        // Pequeno delay para garantir que os dados sejam salvos no cache
+        setTimeout(() => {
+          window.location.href = "/partner-onboarding";
+        }, 500);
       } else if (userData.role === "patient") {
         // Novos pacientes vão direto para a página de seleção obrigatória de plano
         console.log("Usuário é paciente, redirecionando para /first-subscription");
@@ -590,8 +593,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.href = "/dashboard";
       }
       
-      // Forçar uma verificação de autenticação
-      setTimeout(() => refetch(), 300);
+      // Forçar uma verificação de autenticação antes do redirecionamento
+      await refetch();
     },
     onError: (error: Error) => {
       console.error("Erro no registro:", error);
