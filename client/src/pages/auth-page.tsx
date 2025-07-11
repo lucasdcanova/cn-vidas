@@ -407,6 +407,8 @@ const AuthPage: React.FC = () => {
     isAuthenticating 
   } = useBiometricAuth();
   const [enableBiometric, setEnableBiometric] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [registerError, setRegisterError] = useState<string | null>(null);
   
   // Refs para os campos de input
   const emailLoginRef = useRef<HTMLInputElement>(null);
@@ -551,6 +553,7 @@ const AuthPage: React.FC = () => {
   // Handle login form submission with role-based redirection
   const onLoginSubmit = async (data: LoginFormValues) => {
     setIsLoggingIn(true);
+    setLoginError(null); // Limpar erros anteriores
     try {
       console.log("Attempting login with:", { email: data.email });
       
@@ -581,12 +584,30 @@ const AuthPage: React.FC = () => {
       
       // Haptic feedback de sucesso
       await haptic.success();
-    } catch (error) {
+    } catch (error: any) {
       // Additional error logging
       console.error("Login error:", error);
+      
+      // Definir mensagem de erro específica baseada na resposta
+      let errorMessage = "Erro ao fazer login. Tente novamente.";
+      
+      if (error.message) {
+        if (error.message.includes("Email ou senha incorretos")) {
+          errorMessage = "Email ou senha incorretos. Verifique seus dados e tente novamente.";
+        } else if (error.message.includes("verifique seu email")) {
+          errorMessage = "Por favor, verifique seu email antes de fazer login.";
+        } else if (error.message.includes("não encontrado")) {
+          errorMessage = "Usuário não encontrado. Verifique o email digitado.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setLoginError(errorMessage);
+      
       toast({
         title: "Erro no login",
-        description: "Verifique suas credenciais e tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
       
@@ -600,6 +621,7 @@ const AuthPage: React.FC = () => {
   // Handle register form submission with role-based redirection
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     setIsRegistering(true);
+    setRegisterError(null); // Limpar erros anteriores
     try {
       console.log("Attempting registration with:", { email: data.email, role: data.role });
       
@@ -652,14 +674,39 @@ const AuthPage: React.FC = () => {
       
       await registerMutation.mutateAsync(registerData);
       console.log("Registration successful, redirection will be handled by mutation hook");
-    } catch (error) {
+    } catch (error: any) {
       // Additional error logging
       console.error("Registration error:", error);
+      
+      // Definir mensagem de erro específica baseada na resposta
+      let errorMessage = "Erro ao criar conta. Tente novamente.";
+      
+      if (error.message) {
+        if (error.message.includes("já está cadastrado")) {
+          errorMessage = "Este email já está cadastrado. Use outro email ou faça login.";
+        } else if (error.message.includes("CPF inválido")) {
+          errorMessage = "CPF inválido. Verifique os dígitos informados.";
+        } else if (error.message.includes("CNPJ inválido")) {
+          errorMessage = "CNPJ inválido. Verifique os dígitos informados.";
+        } else if (error.message.includes("senha")) {
+          errorMessage = "A senha deve ter pelo menos 6 caracteres.";
+        } else if (error.message.includes("aceitar")) {
+          errorMessage = "Você deve aceitar todos os termos e políticas para continuar.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setRegisterError(errorMessage);
+      
       toast({
         title: "Erro no cadastro",
-        description: "Verifique seus dados e tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
+      
+      // Haptic feedback de erro
+      await haptic.error();
     } finally {
       setIsRegistering(false);
     }
@@ -680,7 +727,12 @@ const AuthPage: React.FC = () => {
           scrollBehavior: 'smooth',
           overflow: activeTab === 'login' && !isKeyboardVisible ? 'hidden' : undefined
         }}>
-        <Tabs defaultValue="register" value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
+        <Tabs defaultValue="register" value={activeTab} onValueChange={(value) => {
+          setActiveTab(value);
+          // Limpar erros ao trocar de aba
+          setLoginError(null);
+          setRegisterError(null);
+        }} className="w-full flex-1 flex flex-col">
           <TabsList className={`grid w-full grid-cols-2 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg shadow-lg ${activeTab === 'login' ? 'mb-3' : 'mb-4'}`}>
             <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-blue-600" style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -711,6 +763,18 @@ const AuthPage: React.FC = () => {
                   Acesse sua conta para continuar
                 </p>
               </div>
+              
+              {/* Mensagem de erro do login */}
+              {loginError && (
+                <Alert className="mb-4 border-red-200 bg-red-50/50 backdrop-blur-sm">
+                  <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <AlertDescription className="text-xs text-red-800">
+                    {loginError}
+                  </AlertDescription>
+                </Alert>
+              )}
             
             <Form {...loginForm}>
               <form 
@@ -885,6 +949,18 @@ const AuthPage: React.FC = () => {
                   Preencha os dados para criar seu perfil na CN Vidas
                 </p>
               </div>
+              
+              {/* Mensagem de erro do registro */}
+              {registerError && (
+                <Alert className="mb-4 border-red-200 bg-red-50/50 backdrop-blur-sm">
+                  <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <AlertDescription className="text-xs text-red-800">
+                    {registerError}
+                  </AlertDescription>
+                </Alert>
+              )}
             
             <Form {...registerForm}>
               <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-3">
