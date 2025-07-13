@@ -500,7 +500,7 @@ const AdminUsersPage: React.FC = () => {
 
   return (
     <AdminLayout title="Gerenciamento de Usuários">
-      <div className="space-y-4 lg:space-y-6 max-w-full">
+      <div className="space-y-4 lg:space-y-6 max-w-full pb-8">
         <Card className="w-full">
           <CardHeader className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 pb-3 sm:pb-2">
             <CardTitle className="text-lg sm:text-xl font-medium">Filtros e Busca</CardTitle>
@@ -659,7 +659,7 @@ const AdminUsersPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="w-full">
+        <Card className="w-full mb-8">
           <CardHeader className="px-3 py-4 sm:px-6">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg sm:text-xl">Lista de Usuários</CardTitle>
@@ -668,7 +668,7 @@ const AdminUsersPage: React.FC = () => {
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 pb-4">
             {isLoading ? (
               <div className="space-y-4 p-4">
                 {[...Array(5)].map((_, i) => (
@@ -682,8 +682,8 @@ const AdminUsersPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="w-full overflow-x-auto">
-                <div className="min-w-full">
+              <div className="w-full">
+                <div className="overflow-x-auto">
                   <ResponsiveTable>
                   <ResponsiveTableHeader>
                     <TableRow>
