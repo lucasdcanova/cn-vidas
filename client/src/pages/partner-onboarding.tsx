@@ -118,6 +118,7 @@ export default function PartnerOnboardingPage() {
   
   const [usePercentageOnly, setUsePercentageOnly] = useState(false);
   const [discountPercentage, setDiscountPercentage] = useState(10); // Desconto padrão de 10%
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Check if user is a partner
   useEffect(() => {
@@ -479,6 +480,11 @@ export default function PartnerOnboardingPage() {
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFocusedField(e.target.id);
     scrollToFocusedElement(e.target);
+  };
+
+  // Handler para quando um input perde o foco
+  const handleInputBlur = () => {
+    setFocusedField(null);
   };
 
   if (isLoading) {
