@@ -1090,7 +1090,11 @@ authRouter.post('/refresh-user', async (req: Request, res: Response) => {
       city: user.city,
       state: user.state,
       address: user.address,
-      zipcode: user.zipcode
+      zipcode: user.zipcode,
+      street: user.street,
+      number: user.number,
+      complement: user.complement,
+      neighborhood: user.neighborhood
     });
     
   } catch (error) {
@@ -1186,7 +1190,11 @@ authRouter.get('/user', async (req: Request, res: Response) => {
       city: user.city,
       state: user.state,
       address: user.address,
-      zipcode: user.zipcode
+      zipcode: user.zipcode,
+      street: user.street,
+      number: user.number,
+      complement: user.complement,
+      neighborhood: user.neighborhood
     });
     
   } catch (error) {

@@ -1163,11 +1163,11 @@ const Profile: React.FC = () => {
                 </div>
               </CardHeader>
               
-              <CardContent className="pb-24 md:pb-8"> {/* Adicionando padding maior no mobile para evitar o botão ser cortado */}
+              <CardContent className="pb-8 profile-form-container">
                 {/* Paciente (padrão) */}
                 {(user?.role === "patient" || user?.role === "admin") && (
                   <Form {...patientForm}>
-                    <form onSubmit={patientForm.handleSubmit(onPatientSubmit)} className="space-y-4">
+                    <form onSubmit={patientForm.handleSubmit(onPatientSubmit)} className="space-y-4 scroll-pb-32">
                       {/* Upload de foto de perfil para pacientes */}
                       <div className="flex justify-center mb-6">
                         <ProfilePhotoSection
@@ -1279,7 +1279,7 @@ const Profile: React.FC = () => {
                       />
                       
                       {/* Seção de Endereço Completo */}
-                      <div className="mt-6 mb-4">
+                      <div className="mt-6 mb-8">
                         <div className="flex items-center gap-2 mb-4">
                           <MapPin className="h-5 w-5 text-primary" />
                           <h3 className="text-lg font-medium">Endereço</h3>
