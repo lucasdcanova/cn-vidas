@@ -44,6 +44,7 @@ import { Switch } from '@/components/ui/switch';
 import { IOSScrollView } from '@/components/shared/IOSScrollView';
 import { IOSKeyboardAvoidingView } from '@/components/shared/IOSKeyboardAvoidingView';
 import { isIOS } from '@/utils/platform';
+import { StatusBar } from '@capacitor/status-bar';
 
 interface AddressData {
   name: string;
@@ -120,11 +121,24 @@ export default function PartnerOnboardingPage() {
   const [discountPercentage, setDiscountPercentage] = useState(10); // Desconto padrão de 10%
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Check if user is a partner
+  // Check if user is a partner and configure status bar
   useEffect(() => {
     if (user && user.role !== 'partner') {
       navigate('/dashboard');
     }
+    
+    // Configure status bar for iOS
+    if (isIOS()) {
+      StatusBar.setBackgroundColor({ color: '#f9fafb' }); // bg-gray-50
+      StatusBar.setStyle({ style: 'DARK' });
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (isIOS()) {
+        StatusBar.setBackgroundColor({ color: '#ffffff' });
+      }
+    };
   }, [user, navigate]);
 
   // Get current partner profile
@@ -459,13 +473,13 @@ export default function PartnerOnboardingPage() {
       // Altura do teclado iOS baseada nos logs (aproximadamente 345-390px)
       const keyboardHeight = 370;
       
-      // Altura da área visível (tela - teclado - safe areas)
+      // Altura da área visível (tela - teclado)
       const safeAreaTop = 50;
-      const safeAreaBottom = 34; // iPhone X+ bottom safe area
-      const visibleHeight = window.innerHeight - keyboardHeight - safeAreaTop - safeAreaBottom;
+      const visibleHeight = window.innerHeight - keyboardHeight;
       
-      // Queremos o campo no centro da área visível
-      const targetPosition = visibleHeight / 2;
+      // Queremos o campo no centro da área visível entre o teclado e o topo
+      // Adicionamos o safeAreaTop para compensar a status bar
+      const targetPosition = safeAreaTop + ((visibleHeight - safeAreaTop) / 2);
       
       // Posição atual do elemento relativa ao início do container
       const elementOffsetTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
@@ -516,20 +530,21 @@ export default function PartnerOnboardingPage() {
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-b from-background to-muted/20">
+    <div className="fixed inset-0 bg-gray-50">
       <IOSScrollView 
         ref={scrollViewRef}
         className="h-full"
-        contentClassName="py-8"
+        contentClassName=""
       >
-        <div className="max-w-3xl mx-auto px-4 pb-32">
-          <div className="text-center mb-8" style={{ animation: 'fadeInSimple 0.5s ease-out forwards' }}>
-            <div className="flex flex-col items-center gap-3 mb-4">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center flex items-center gap-3 text-gray-900">
-                <span>BEM-VINDO AO</span>
-                <img src={cnvidasLogo} alt="CN VIDAS" className="h-10 md:h-12 inline-block object-contain" />
-                <span>!</span>
-              </h1>
+        <div className="bg-gray-50 pt-safe pb-8">
+          <div className="max-w-3xl mx-auto px-4 pb-32">
+            <div className="text-center mb-8 pt-4" style={{ animation: 'fadeInSimple 0.5s ease-out forwards' }}>
+              <div className="flex flex-col items-center gap-3 mb-4">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center text-gray-900">
+                  <span>BEM-VINDO AO</span>
+                  <img src={cnvidasLogo} alt="CN VIDAS" className="h-10 md:h-12 inline-block object-contain mx-2" />
+                  <span>!</span>
+                </h1>
               <h2 className="text-2xl md:text-3xl font-semibold text-primary animate-fade-in" style={{ animationDelay: '0.4s' }}>
                 {user?.fullName || user?.name || 'Parceiro'}
               </h2>
@@ -1168,8 +1183,9 @@ export default function PartnerOnboardingPage() {
               </a>
             </p>
           </div>
-        </div> {/* Fecha a div mt-8 space-y-6 */}
-      </div> {/* Fecha a div max-w-3xl */}
+          </div> {/* Fecha a div mt-8 space-y-6 */}
+        </div> {/* Fecha a div max-w-3xl */}
+      </div> {/* Fecha a div bg-gray-50 */}
       </IOSScrollView>
     </div>
   );
