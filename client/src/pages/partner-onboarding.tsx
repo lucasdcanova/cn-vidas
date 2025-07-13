@@ -442,38 +442,58 @@ export default function PartnerOnboardingPage() {
     if (!isIOS()) return;
     
     setTimeout(() => {
-      const scrollContainer = scrollViewRef.current?.querySelector('.overflow-y-auto');
-      if (!scrollContainer) return;
+      // Tenta encontrar o container de scroll correto
+      const scrollContainer = document.querySelector('.ios-scroll-view-content') || 
+                             scrollViewRef.current?.querySelector('.overflow-y-auto') ||
+                             scrollViewRef.current;
+      
+      if (!scrollContainer) {
+        console.error('Scroll container not found');
+        return;
+      }
 
       const elementRect = element.getBoundingClientRect();
       const containerRect = scrollContainer.getBoundingClientRect();
       
-      // Altura do teclado iOS (aproximadamente 260-350px dependendo do dispositivo)
-      const keyboardHeight = 300;
+      // Altura do teclado iOS (varia por dispositivo)
+      const keyboardHeight = window.innerHeight * 0.4; // 40% da altura da tela
       
-      // Altura visível da tela (tela total - teclado - safe areas)
-      const safeAreaTop = 50; // Estimativa para notch/status bar
+      // Calcula a altura visível disponível
+      const safeAreaTop = 44; // Status bar padrão iOS
       const visibleHeight = window.innerHeight - keyboardHeight - safeAreaTop;
       
-      // Queremos o campo no meio da área visível
+      // Posição alvo: centro da área visível
       const targetPosition = safeAreaTop + (visibleHeight / 2);
       
-      // Posição atual do elemento relativa ao container
-      const elementTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
+      // Posição atual do elemento relativa ao topo do documento
+      const elementTop = element.offsetTop || (elementRect.top + window.pageYOffset);
       
-      // Calcula o scroll necessário para centralizar o elemento
-      const scrollTo = elementTop - targetPosition + (elementRect.height / 2);
+      // Calcula o scroll necessário para centralizar
+      const currentScroll = scrollContainer.scrollTop || window.pageYOffset;
+      const elementCenter = elementTop - targetPosition + (element.offsetHeight / 2);
       
-      // Garante que não vamos rolar além dos limites
-      const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-      const finalScroll = Math.max(0, Math.min(scrollTo, maxScroll));
+      // Scroll suave para a posição calculada
+      if (scrollContainer === window || scrollContainer === document.documentElement) {
+        window.scrollTo({
+          top: elementCenter,
+          behavior: 'smooth'
+        });
+      } else {
+        scrollContainer.scrollTo({
+          top: elementCenter,
+          behavior: 'smooth'
+        });
+      }
       
-      // Rola suavemente para a posição
-      scrollContainer.scrollTo({
-        top: finalScroll,
-        behavior: 'smooth'
+      // Log para debug
+      console.log('Scroll debug:', {
+        elementTop,
+        targetPosition,
+        elementCenter,
+        keyboardHeight,
+        visibleHeight
       });
-    }, 350); // Aguarda o teclado abrir completamente
+    }, 400); // Aguarda o teclado abrir completamente
   };
 
   // Handler para quando um input recebe foco
@@ -503,9 +523,9 @@ export default function PartnerOnboardingPage() {
         contentClassName="py-8"
       >
         <div className="max-w-3xl mx-auto px-4 pb-32">
-          <div className="text-center mb-8 animate-fade-in">
+          <div className="text-center mb-8" style={{ animation: 'fadeInSimple 0.5s ease-out forwards' }}>
             <div className="flex flex-col items-center gap-3 mb-4">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center whitespace-nowrap">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center whitespace-nowrap text-gray-900">
                 BEM-VINDO AO CN VIDAS!
               </h1>
               <div className="animate-scale-in" style={{ animationDelay: '0.2s' }}>
