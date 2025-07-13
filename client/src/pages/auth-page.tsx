@@ -1114,7 +1114,7 @@ const AuthPage: React.FC = () => {
                           </svg>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="w-1/3 pl-10">
+                          <div className="w-24 pl-10">
                             <Select 
                               defaultValue={estadoSelecionado}
                               onValueChange={setEstadoSelecionado}
@@ -1131,7 +1131,7 @@ const AuthPage: React.FC = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="w-2/3">
+                          <div className="flex-1">
                             <FormField
                               control={registerForm.control}
                               name="username"
