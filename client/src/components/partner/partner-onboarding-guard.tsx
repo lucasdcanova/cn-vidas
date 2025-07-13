@@ -96,34 +96,34 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
       console.log('🔍 [PartnerOnboardingGuard] Addresses:', addresses);
       console.log('🔍 [PartnerOnboardingGuard] Services:', services);
       
-      // First check if onboardingCompleted flag is set
-      if (partnerProfile.onboardingCompleted === true) {
-        console.log('✅ [PartnerOnboardingGuard] Partner already completed onboarding (flag=true)');
-        return;
-      }
-      
-      // If flag is not set, check if essential data exists
+      // Check if essential data exists
       const isProfileIncomplete = !partnerProfile.businessName || 
                                  !partnerProfile.businessType || 
                                  !partnerProfile.cnpj ||
                                  !partnerProfile.phone;
       
-      // Check if has at least one address (but NOT services - partner can operate without services)
+      // Check if has at least one address
       const hasNoAddresses = !addresses || addresses.length === 0;
       const hasNoActiveServices = !services || !services.some((s: any) => s.isActive);
+      
+      // If partner has complete profile AND has addresses, consider onboarding complete
+      // regardless of the onboardingCompleted flag (for backward compatibility)
+      const isOnboardingComplete = partnerProfile.onboardingCompleted === true || 
+                                  (!isProfileIncomplete && !hasNoAddresses);
       
       console.log('🔍 [PartnerOnboardingGuard] Check results:', {
         onboardingCompleted: partnerProfile.onboardingCompleted,
         isProfileIncomplete,
         hasNoAddresses,
         hasNoActiveServices,
-        needsOnboarding: !partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses),
+        isOnboardingComplete,
+        needsOnboarding: !isOnboardingComplete,
         addressesError: addressesError ? String(addressesError) : null,
         servicesError: servicesError ? String(servicesError) : null
       });
       
-      // Only redirect if profile is incomplete or has no addresses (services are optional)
-      if (!partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses)) {
+      // Only redirect if onboarding is not complete
+      if (!isOnboardingComplete) {
         if (!isRedirecting) {
           console.log('❌ [PartnerOnboardingGuard] Redirecting to onboarding');
           setIsRedirecting(true);
