@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import cnvidasLogo from '@/assets/cnvidas-logo-transparent.png';
 import {
   Select,
   SelectContent,
@@ -74,6 +75,8 @@ export default function PartnerOnboardingPage() {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
+  const scrollViewRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
   
   // Form state
   const [partnerData, setPartnerData] = useState({
@@ -207,6 +210,14 @@ export default function PartnerOnboardingPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/partners/addresses'] });
+    },
+    onError: (error: Error) => {
+      console.error('Address creation error:', error);
+      toast({
+        title: 'Erro ao criar endereço',
+        description: error.message || 'Ocorreu um erro ao salvar o endereço.',
+        variant: 'destructive'
+      });
     }
   });
 
@@ -242,6 +253,8 @@ export default function PartnerOnboardingPage() {
   });
 
   const handleNext = async () => {
+    console.log('handleNext called, current step:', step);
+    
     if (step === 1) {
       // Validate business info
       if (!partnerData.businessName || !partnerData.businessType || !partnerData.cnpj || !partnerData.phone) {
@@ -258,16 +271,37 @@ export default function PartnerOnboardingPage() {
         await updateProfileMutation.mutateAsync(partnerData);
         setStep(2);
       } catch (error) {
-        // Error is handled by mutation
+        console.error('Error updating profile:', error);
+        toast({
+          title: 'Erro ao salvar',
+          description: 'Ocorreu um erro ao salvar as informações. Tente novamente.',
+          variant: 'destructive'
+        });
       }
     } else if (step === 2) {
-      // Validate address
-      if (!addressData.name || !addressData.cep || !addressData.address || 
-          !addressData.number || !addressData.neighborhood || !addressData.city || 
-          !addressData.state || !addressData.phone) {
+      console.log('Step 2 validation - addressData:', addressData);
+      
+      // Validate address - check each field individually for better debugging
+      const requiredFields = {
+        name: addressData.name,
+        cep: addressData.cep,
+        address: addressData.address,
+        number: addressData.number,
+        neighborhood: addressData.neighborhood,
+        city: addressData.city,
+        state: addressData.state,
+        phone: addressData.phone
+      };
+      
+      const missingFields = Object.entries(requiredFields)
+        .filter(([_, value]) => !value || value.trim() === '')
+        .map(([key, _]) => key);
+      
+      if (missingFields.length > 0) {
+        console.log('Missing fields:', missingFields);
         toast({
           title: 'Campos obrigatórios',
-          description: 'Por favor, preencha todos os campos do endereço.',
+          description: `Por favor, preencha os seguintes campos: ${missingFields.join(', ')}`,
           variant: 'destructive'
         });
         return;
@@ -275,10 +309,21 @@ export default function PartnerOnboardingPage() {
       
       // Create address
       try {
-        await createAddressMutation.mutateAsync(addressData);
+        console.log('Creating address with data:', addressData);
+        // Clean up data before sending - remove empty optional fields
+        const cleanAddressData = {
+          ...addressData,
+          email: addressData.email || partnerData.email || '', // Use partner email if not provided
+          complement: addressData.complement || undefined,
+          openingHours: addressData.openingHours || undefined
+        };
+        
+        await createAddressMutation.mutateAsync(cleanAddressData);
+        console.log('Address created successfully, moving to step 3');
         setStep(3);
       } catch (error) {
-        // Error is handled by mutation
+        console.error('Error creating address:', error);
+        // Error already handled by mutation onError
       }
     } else if (step === 3) {
       // Validate service
@@ -344,6 +389,41 @@ export default function PartnerOnboardingPage() {
     return 0;
   };
 
+  // Função para centralizar o campo focado
+  const scrollToFocusedElement = (element: HTMLElement) => {
+    if (!isIOS()) return;
+    
+    setTimeout(() => {
+      const scrollContainer = scrollViewRef.current?.querySelector('.overflow-y-auto');
+      if (!scrollContainer) return;
+
+      const elementRect = element.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+      
+      // Calcula a altura disponível (container - teclado estimado)
+      const keyboardHeight = window.innerHeight * 0.4; // Estima 40% da tela para o teclado
+      const availableHeight = window.innerHeight - keyboardHeight;
+      
+      // Calcula onde queremos que o elemento fique (centro da área visível)
+      const targetPosition = availableHeight / 2;
+      
+      // Calcula o quanto precisamos rolar
+      const elementTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
+      const scrollTo = elementTop - targetPosition + (elementRect.height / 2);
+      
+      // Rola suavemente para a posição
+      scrollContainer.scrollTo({
+        top: scrollTo,
+        behavior: 'smooth'
+      });
+    }, 300); // Aguarda o teclado abrir
+  };
+
+  // Handler para quando um input recebe foco
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    scrollToFocusedElement(e.target);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -353,16 +433,25 @@ export default function PartnerOnboardingPage() {
   }
 
   return (
-    <IOSKeyboardAvoidingView className="fixed inset-0 bg-gradient-to-b from-background to-muted/20">
+    <div className="fixed inset-0 bg-gradient-to-b from-background to-muted/20">
       <IOSScrollView 
+        ref={scrollViewRef}
         className="h-full"
         contentClassName="py-8"
       >
-        <div className="max-w-3xl mx-auto px-4 pb-8">
+        <div className="max-w-3xl mx-auto px-4 pb-32">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold tracking-tight mb-2">
-              Bem-vindo ao CNVidas, {user?.name}!
-            </h1>
+            <div className="flex flex-col items-center gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  Bem-vindo ao
+                </h1>
+                <img src={cnvidasLogo} alt="CNVidas" className="h-10 md:h-12 object-contain" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-semibold text-primary">
+                {user?.name}!
+              </h2>
+            </div>
             <p className="text-muted-foreground text-lg">
               Complete seu cadastro para começar a oferecer seus serviços
             </p>
@@ -425,6 +514,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="Ex: Empresa de Saúde LTDA"
                       value={partnerData.businessName}
                       onChange={(e) => setPartnerData({ ...partnerData, businessName: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -435,6 +525,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="Ex: Clínica Saúde & Vida"
                       value={partnerData.tradingName}
                       onChange={(e) => setPartnerData({ ...partnerData, tradingName: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -465,6 +556,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="00.000.000/0000-00"
                       value={partnerData.cnpj}
                       onChange={(e) => setPartnerData({ ...partnerData, cnpj: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -475,6 +567,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="(11) 99999-9999"
                       value={partnerData.phone}
                       onChange={(e) => setPartnerData({ ...partnerData, phone: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -485,6 +578,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="https://www.suaempresa.com.br"
                       value={partnerData.website}
                       onChange={(e) => setPartnerData({ ...partnerData, website: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -496,6 +590,7 @@ export default function PartnerOnboardingPage() {
                       rows={4}
                       value={partnerData.description}
                       onChange={(e) => setPartnerData({ ...partnerData, description: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -535,6 +630,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="Ex: Matriz, Filial Centro"
                       value={addressData.name}
                       onChange={(e) => setAddressData({ ...addressData, name: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -546,6 +642,7 @@ export default function PartnerOnboardingPage() {
                       value={addressData.cep}
                       onChange={(e) => handleCepChange(e.target.value)}
                       maxLength={9}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -557,6 +654,7 @@ export default function PartnerOnboardingPage() {
                         placeholder="Rua, Avenida..."
                         value={addressData.address}
                         onChange={(e) => setAddressData({ ...addressData, address: e.target.value })}
+                        onFocus={handleInputFocus}
                       />
                     </div>
                     <div className="grid gap-2">
@@ -566,6 +664,7 @@ export default function PartnerOnboardingPage() {
                         placeholder="123"
                         value={addressData.number}
                         onChange={(e) => setAddressData({ ...addressData, number: e.target.value })}
+                        onFocus={handleInputFocus}
                       />
                     </div>
                   </div>
@@ -577,6 +676,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="Sala, Andar, Bloco..."
                       value={addressData.complement}
                       onChange={(e) => setAddressData({ ...addressData, complement: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -588,6 +688,7 @@ export default function PartnerOnboardingPage() {
                         placeholder="Bairro"
                         value={addressData.neighborhood}
                         onChange={(e) => setAddressData({ ...addressData, neighborhood: e.target.value })}
+                        onFocus={handleInputFocus}
                       />
                     </div>
                     <div className="grid gap-2">
@@ -597,6 +698,7 @@ export default function PartnerOnboardingPage() {
                         placeholder="Cidade"
                         value={addressData.city}
                         onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
+                        onFocus={handleInputFocus}
                       />
                     </div>
                   </div>
@@ -609,6 +711,7 @@ export default function PartnerOnboardingPage() {
                       maxLength={2}
                       value={addressData.state}
                       onChange={(e) => setAddressData({ ...addressData, state: e.target.value.toUpperCase() })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -619,6 +722,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="(11) 99999-9999"
                       value={addressData.phone}
                       onChange={(e) => setAddressData({ ...addressData, phone: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -630,6 +734,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="contato@local.com.br"
                       value={addressData.email}
                       onChange={(e) => setAddressData({ ...addressData, email: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -641,6 +746,7 @@ export default function PartnerOnboardingPage() {
                       rows={3}
                       value={addressData.openingHours}
                       onChange={(e) => setAddressData({ ...addressData, openingHours: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
                 </div>
@@ -680,6 +786,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="Ex: Consulta Médica, Exame de Sangue"
                       value={serviceData.name}
                       onChange={(e) => setServiceData({ ...serviceData, name: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -691,6 +798,7 @@ export default function PartnerOnboardingPage() {
                       rows={4}
                       value={serviceData.description}
                       onChange={(e) => setServiceData({ ...serviceData, description: e.target.value })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -730,6 +838,7 @@ export default function PartnerOnboardingPage() {
                           className="pl-10"
                           value={serviceData.regularPrice}
                           onChange={(e) => setServiceData({ ...serviceData, regularPrice: parseFloat(e.target.value) || 0 })}
+                          onFocus={handleInputFocus}
                         />
                       </div>
                     </div>
@@ -748,6 +857,7 @@ export default function PartnerOnboardingPage() {
                           className="pl-10"
                           value={serviceData.discountPrice}
                           onChange={(e) => setServiceData({ ...serviceData, discountPrice: parseFloat(e.target.value) || 0 })}
+                          onFocus={handleInputFocus}
                         />
                       </div>
                     </div>
@@ -778,6 +888,7 @@ export default function PartnerOnboardingPage() {
                       placeholder="30"
                       value={serviceData.duration}
                       onChange={(e) => setServiceData({ ...serviceData, duration: parseInt(e.target.value) || 30 })}
+                      onFocus={handleInputFocus}
                     />
                   </div>
 
@@ -815,10 +926,20 @@ export default function PartnerOnboardingPage() {
               disabled={updateProfileMutation.isPending || createAddressMutation.isPending || createServiceMutation.isPending}
               className={step === 1 ? 'ml-auto' : ''}
             >
-              {(updateProfileMutation.isPending || createAddressMutation.isPending || createServiceMutation.isPending) ? (
+              {step === 1 && updateProfileMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processando...
+                  Salvando empresa...
+                </>
+              ) : step === 2 && createAddressMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando endereço...
+                </>
+              ) : step === 3 && createServiceMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Finalizando cadastro...
                 </>
               ) : step === 3 ? (
                 <>
@@ -888,6 +1009,6 @@ export default function PartnerOnboardingPage() {
         </div> {/* Fecha a div mt-8 space-y-6 */}
       </div> {/* Fecha a div max-w-3xl */}
       </IOSScrollView>
-    </IOSKeyboardAvoidingView>
+    </div>
   );
 }
