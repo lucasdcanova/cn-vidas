@@ -179,8 +179,8 @@ export default function PartnerOnboardingPage() {
         nationwideService: partnerProfile.nationwideService || false
       });
       
-      // If partner already has addresses and services, redirect
-      if (addresses && addresses.length > 0 && services && services.length > 0) {
+      // If partner already completed onboarding, redirect
+      if (partnerProfile.onboardingCompleted || (addresses && addresses.length > 0)) {
         navigate('/partner/dashboard');
       }
     }
@@ -245,7 +245,15 @@ export default function PartnerOnboardingPage() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Marcar onboarding como completo
+      try {
+        await apiRequest('PUT', '/api/partners/me', { onboardingCompleted: true });
+        queryClient.invalidateQueries({ queryKey: ['/api/partners/me'] });
+      } catch (error) {
+        console.error('Erro ao marcar onboarding como completo:', error);
+      }
+      
       toast({
         title: 'Cadastro completado!',
         description: 'Bem-vindo ao CNVidas. Você já pode começar a gerenciar seus serviços.',

@@ -108,7 +108,7 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
                                  !partnerProfile.cnpj ||
                                  !partnerProfile.phone;
       
-      // Check if has at least one address and one active service
+      // Check if has at least one address (but NOT services - partner can operate without services)
       const hasNoAddresses = !addresses || addresses.length === 0;
       const hasNoActiveServices = !services || !services.some((s: any) => s.isActive);
       
@@ -117,12 +117,13 @@ export function PartnerOnboardingGuard({ children }: PartnerOnboardingGuardProps
         isProfileIncomplete,
         hasNoAddresses,
         hasNoActiveServices,
-        needsOnboarding: !partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses || hasNoActiveServices),
+        needsOnboarding: !partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses),
         addressesError: addressesError ? String(addressesError) : null,
         servicesError: servicesError ? String(servicesError) : null
       });
       
-      if (!partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses || hasNoActiveServices)) {
+      // Only redirect if profile is incomplete or has no addresses (services are optional)
+      if (!partnerProfile.onboardingCompleted && (isProfileIncomplete || hasNoAddresses)) {
         if (!isRedirecting) {
           console.log('❌ [PartnerOnboardingGuard] Redirecting to onboarding');
           setIsRedirecting(true);
