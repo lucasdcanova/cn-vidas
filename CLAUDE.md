@@ -321,9 +321,6 @@ Nova tabela `doctor_digital_certificates`:
 
 - as variaveis do ambiente estao salvas no codespaces secrets
 
-## Memórias
-
-- lembre-se de sempre procurar os screenshots na pasta temp-screenshots na raiz do projeto, que vai ser onde eu vou colocar arquivos temporarios para voce ler.
 
 ## Memórias de Desenvolvimento
 

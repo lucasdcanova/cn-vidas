@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { isIOS } from '@/utils/platform';
 
@@ -11,14 +11,14 @@ interface IOSScrollViewProps {
   keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
 }
 
-export function IOSScrollView({
+export const IOSScrollView = forwardRef<HTMLDivElement, IOSScrollViewProps>(({
   children,
   className,
   contentClassName,
   showsVerticalScrollIndicator = false,
   bounces = true,
   keyboardShouldPersistTaps = 'handled'
-}: IOSScrollViewProps) {
+}, ref) => {
   // Para iOS, aplicamos estilos específicos de scroll
   const scrollStyles = isIOS() ? {
     WebkitOverflowScrolling: 'touch' as any,
@@ -30,6 +30,7 @@ export function IOSScrollView({
 
   return (
     <div 
+      ref={ref}
       className={cn(
         "relative w-full h-full overflow-hidden",
         // Safe areas para iOS
@@ -62,4 +63,6 @@ export function IOSScrollView({
       </div>
     </div>
   );
-}
+});
+
+IOSScrollView.displayName = 'IOSScrollView';
