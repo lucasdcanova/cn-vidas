@@ -807,7 +807,7 @@
 				700B3F63DFE01B31A6E4FD9FA87BFB43 /* CapacitorHaptics.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorHaptics";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorHaptics";
 			sourceTree = "<group>";
 		};
 		0F7777CB5152FEA977A0370261C49471 /* Pod */ = {
@@ -872,7 +872,7 @@
 				163D5A75180798220A3310EF34B3FA55 /* CapacitorStatusBar.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorStatusBar";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorStatusBar";
 			sourceTree = "<group>";
 		};
 		22AF8D753C34128EBC3AAAFAFFCA7605 /* include */ = {
@@ -915,7 +915,7 @@
 				B7E71917B1A2CBBFAA63AB74C8A18EC1 /* Support Files */,
 			);
 			name = CapacitorKeyboard;
-			path = "CapacitorKeyboard";
+			path = "../../../node_modules/@capacitor/keyboard";
 			sourceTree = "<group>";
 		};
 		4961C8CE63A1BCFCF9C168555955C7BD /* Support Files */ = {
@@ -929,7 +929,7 @@
 				15705262CD7E3BBB8CC8AACDC8DC4C45 /* CapacitorCordova.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorCordova";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorCordova";
 			sourceTree = "<group>";
 		};
 		4FD751BC904940CDF38DFC448645294F /* Pod */ = {
@@ -980,7 +980,7 @@
 				CD4F1489D1056841711D3EDC7CC9F7DF /* CapacitorBrowser.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorBrowser";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorBrowser";
 			sourceTree = "<group>";
 		};
 		6914C866BAE31BFBA9841BEDCD93C6A6 /* Pods */ = {
@@ -1010,7 +1010,7 @@
 				09947097E794204032311C449DDC89AD /* Support Files */,
 			);
 			name = CapacitorHaptics;
-			path = "CapacitorHaptics";
+			path = "../../../node_modules/@capacitor/haptics";
 			sourceTree = "<group>";
 		};
 		7273633F8BB8B30A8EBDCA828D56A4B5 /* Plugins */ = {
@@ -1037,7 +1037,7 @@
 				A2F6750FBBFB0AF956D8E4810AA0D246 /* Support Files */,
 			);
 			name = CapacitorPreferences;
-			path = "CapacitorPreferences";
+			path = "../../../node_modules/@capacitor/preferences";
 			sourceTree = "<group>";
 		};
 		7AE636BA6F69BB4332F35F552DC6BFD2 /* AparajitaCapacitorSecureStorage */ = {
@@ -1051,7 +1051,7 @@
 				B0BF9E1F81B7B5235F0230E38504A555 /* Support Files */,
 			);
 			name = AparajitaCapacitorSecureStorage;
-			path = "AparajitaCapacitorSecureStorage";
+			path = "../../../node_modules/@aparajita/capacitor-secure-storage";
 			sourceTree = "<group>";
 		};
 		7C6D044F0CD972C5CAB37A7A0E4EE782 /* Targets Support Files */ = {
@@ -1073,7 +1073,7 @@
 				819F96FFF8DBBE607A9E09C1B8412267 /* Support Files */,
 			);
 			name = CapacitorCamera;
-			path = "CapacitorCamera";
+			path = "../../../node_modules/@capacitor/camera";
 			sourceTree = "<group>";
 		};
 		819F96FFF8DBBE607A9E09C1B8412267 /* Support Files */ = {
@@ -1088,7 +1088,7 @@
 				2D18394E016C90E7D2EE15E280DC6F11 /* CapacitorCamera.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorCamera";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorCamera";
 			sourceTree = "<group>";
 		};
 		857F6C147085F1A487DEFEDDC0853280 /* Pod */ = {
@@ -1113,7 +1113,7 @@
 				2DA0C6EFC2119C55E4210F3830B3F49E /* CapacitorPushNotifications.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorPushNotifications";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorPushNotifications";
 			sourceTree = "<group>";
 		};
 		892D3467669E92A8860D5B7E68AB73BD /* Pod */ = {
@@ -1190,7 +1190,7 @@
 				DBEAFFEE18AD57F45037D42136E24DD6 /* Support Files */,
 			);
 			name = Capacitor;
-			path = "Capacitor";
+			path = "../../../node_modules/@capacitor/ios";
 			sourceTree = "<group>";
 		};
 		96633408F0D72B004749B20BBBEDFAD2 /* Pod */ = {
@@ -1251,7 +1251,7 @@
 				4F4B94DA407B91933EBAA65078216F6D /* CapacitorPreferences.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorPreferences";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorPreferences";
 			sourceTree = "<group>";
 		};
 		A4AA48AEDE78AEEF5681E02BC2E899BE /* AparajitaCapacitorBiometricAuth */ = {
@@ -1264,7 +1264,7 @@
 				E862DB1ABA02FA54D7AE016C07A0C1DD /* Support Files */,
 			);
 			name = AparajitaCapacitorBiometricAuth;
-			path = "AparajitaCapacitorBiometricAuth";
+			path = "../../../node_modules/@aparajita/capacitor-biometric-auth";
 			sourceTree = "<group>";
 		};
 		A53AC30275363176DE113BEBA1EB9941 /* Pod */ = {
@@ -1321,7 +1321,7 @@
 				85E1026E6FD08A9BD05350E3A8AD3C4B /* Support Files */,
 			);
 			name = CapacitorPushNotifications;
-			path = "CapacitorPushNotifications";
+			path = "../../../node_modules/@capacitor/push-notifications";
 			sourceTree = "<group>";
 		};
 		B0BF9E1F81B7B5235F0230E38504A555 /* Support Files */ = {
@@ -1336,7 +1336,7 @@
 				AD2C1A9C0B3E52AF94CAD844AF79657A /* AparajitaCapacitorSecureStorage.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/AparajitaCapacitorSecureStorage";
+			path = "../../../ios/App/Pods/Target Support Files/AparajitaCapacitorSecureStorage";
 			sourceTree = "<group>";
 		};
 		B6AE8A40667C3652F03D285E035C4549 /* Support Files */ = {
@@ -1351,7 +1351,7 @@
 				6C3180C28C4A05D014A06BB95A9C42E9 /* CapacitorLocalNotifications.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorLocalNotifications";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorLocalNotifications";
 			sourceTree = "<group>";
 		};
 		B7E71917B1A2CBBFAA63AB74C8A18EC1 /* Support Files */ = {
@@ -1366,7 +1366,7 @@
 				E300B2B35DB94789A2E3F86D830D2CEE /* CapacitorKeyboard.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorKeyboard";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorKeyboard";
 			sourceTree = "<group>";
 		};
 		B9A6F8D79491FE83E70AF8D0A0456802 /* Pod */ = {
@@ -1399,7 +1399,7 @@
 				C622BB12573D17A898D9F15920331499 /* Support Files */,
 			);
 			name = CapacitorApp;
-			path = "CapacitorApp";
+			path = "../../../node_modules/@capacitor/app";
 			sourceTree = "<group>";
 		};
 		C622BB12573D17A898D9F15920331499 /* Support Files */ = {
@@ -1414,7 +1414,7 @@
 				D32C52402B7BD74154602CCA97003FE8 /* CapacitorApp.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/CapacitorApp";
+			path = "../../../ios/App/Pods/Target Support Files/CapacitorApp";
 			sourceTree = "<group>";
 		};
 		CDF90A20AD3B9364EB977650647D1444 /* assets */ = {
@@ -1436,7 +1436,7 @@
 				4961C8CE63A1BCFCF9C168555955C7BD /* Support Files */,
 			);
 			name = CapacitorCordova;
-			path = "Capacitor";
+			path = "../../../node_modules/@capacitor/ios";
 			sourceTree = "<group>";
 		};
 		CF1408CF629C7361332E53B88F7BD30C = {
@@ -1490,7 +1490,7 @@
 				5924ACD6B0348D396A4C339DF85E8F92 /* Capacitor.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/Capacitor";
+			path = "../../../ios/App/Pods/Target Support Files/Capacitor";
 			sourceTree = "<group>";
 		};
 		DE77983EC8C5CFCB54CD9A49F7383441 /* Pod */ = {
@@ -1515,7 +1515,7 @@
 				69C155D3E4515FE7643112B76C22CB59 /* AparajitaCapacitorBiometricAuth.release.xcconfig */,
 			);
 			name = "Support Files";
-			path = "../Target Support Files/AparajitaCapacitorBiometricAuth";
+			path = "../../../ios/App/Pods/Target Support Files/AparajitaCapacitorBiometricAuth";
 			sourceTree = "<group>";
 		};
 		F34C26D779D8799EEC7BEFD5D1367153 /* CapacitorStatusBar */ = {
@@ -1532,7 +1532,7 @@
 				1C985E906B0D794AA9791EB9487E50A6 /* Support Files */,
 			);
 			name = CapacitorStatusBar;
-			path = "CapacitorStatusBar";
+			path = "../../../node_modules/@capacitor/status-bar";
 			sourceTree = "<group>";
 		};
 		F48C936F4362D11415305CAA436ABE2E /* CapacitorBrowser */ = {
@@ -1544,7 +1544,7 @@
 				5F35098EA7D761095D6D432742BE37BD /* Support Files */,
 			);
 			name = CapacitorBrowser;
-			path = "CapacitorBrowser";
+			path = "../../../node_modules/@capacitor/browser";
 			sourceTree = "<group>";
 		};
 		FD16C923A4DED13CA8CE9F6AEC8C0142 /* CapacitorLocalNotifications */ = {
@@ -1556,7 +1556,7 @@
 				B6AE8A40667C3652F03D285E035C4549 /* Support Files */,
 			);
 			name = CapacitorLocalNotifications;
-			path = "CapacitorLocalNotifications";
+			path = "../../../node_modules/@capacitor/local-notifications";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
