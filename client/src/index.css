@@ -7,6 +7,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Animação simples para o título do onboarding */
+@keyframes fadeInSimple {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Animation Classes for iOS */
 @layer utilities {
   @keyframes fadeIn {
