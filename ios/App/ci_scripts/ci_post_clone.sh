@@ -4,12 +4,23 @@ set -e
 echo "🔧 Script ci_post_clone iniciado..."
 echo "📍 Diretório de trabalho: $(pwd)"
 
-# Navegar para o diretório raiz do repositório
-cd "$CI_WORKSPACE"
+# Navegar para o diretório iOS/App
+if [ -d "$CI_WORKSPACE/ios/App" ]; then
+    cd "$CI_WORKSPACE/ios/App"
+elif [ -d "../.." ] && [ -f "../../Podfile" ]; then
+    # Se estivermos em ci_scripts, voltar para App
+    cd ../..
+else
+    echo "❌ Erro: Não foi possível encontrar o diretório iOS/App"
+    echo "Estrutura de diretórios:"
+    ls -la "$CI_WORKSPACE"
+    exit 1
+fi
 
 echo "📦 Instalando CocoaPods..."
-cd ios/App
 pod install || echo "⚠️ Falha ao executar pod install"
+
+# Voltar para o diretório raiz
 cd "$CI_WORKSPACE"
 
 echo "📦 Criando estrutura de diretórios para plugins Capacitor..."
