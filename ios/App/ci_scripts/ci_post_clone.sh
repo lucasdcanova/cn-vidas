@@ -3,69 +3,74 @@ set -e
 
 echo "🔧 Script ci_post_clone iniciado..."
 echo "📍 Diretório de trabalho: $(pwd)"
+echo "📍 CI_WORKSPACE: $CI_WORKSPACE"
 
-# Navegar para o diretório iOS/App
-if [ -d "$CI_WORKSPACE/ios/App" ]; then
+# Debug: mostrar estrutura de diretórios
+echo "📂 Estrutura de diretórios:"
+ls -la "$CI_WORKSPACE" || echo "Erro ao listar CI_WORKSPACE"
+
+# Primeiro, vamos garantir que estamos no diretório correto
+if [ -f "$CI_WORKSPACE/ios/App/Podfile" ]; then
+    echo "✅ Encontrado Podfile em $CI_WORKSPACE/ios/App/"
     cd "$CI_WORKSPACE/ios/App"
-elif [ -d "../.." ] && [ -f "../../Podfile" ]; then
-    # Se estivermos em ci_scripts, voltar para App
+elif [ -f "../../Podfile" ]; then
+    echo "✅ Encontrado Podfile em ../../"
     cd ../..
+elif [ -f "Podfile" ]; then
+    echo "✅ Já estamos no diretório com Podfile"
 else
-    echo "❌ Erro: Não foi possível encontrar o diretório iOS/App"
-    echo "Estrutura de diretórios:"
-    ls -la "$CI_WORKSPACE"
+    echo "❌ Erro: Não foi possível encontrar o Podfile"
+    echo "Procurando Podfile..."
+    find "$CI_WORKSPACE" -name "Podfile" -type f 2>/dev/null || echo "Nenhum Podfile encontrado"
     exit 1
 fi
 
 echo "📦 Instalando CocoaPods..."
+echo "Diretório atual: $(pwd)"
 pod install || echo "⚠️ Falha ao executar pod install"
 
 # Voltar para o diretório raiz
 cd "$CI_WORKSPACE"
 
-echo "📦 Criando estrutura de diretórios para plugins Capacitor..."
+echo "📦 Copiando arquivos dos plugins Capacitor..."
 
 # Criar diretórios necessários
 mkdir -p node_modules/@capacitor/preferences/ios/Sources/PreferencesPlugin
 mkdir -p node_modules/@capacitor/browser/ios/Sources/BrowserPlugin
 
-# Copiar arquivos do Preferences
-echo "📋 Copiando arquivos do plugin Preferences..."
-if [ -f "ios/App/Pods/CapacitorPreferences/ios/Sources/PreferencesPlugin/Preferences.swift" ]; then
-    cp ios/App/Pods/CapacitorPreferences/ios/Sources/PreferencesPlugin/*.swift node_modules/@capacitor/preferences/ios/Sources/PreferencesPlugin/
-    echo "✅ Plugin @capacitor/preferences copiado com sucesso"
+# Copiar Preferences Plugin
+echo "📋 Procurando arquivos do plugin preferences..."
+if [ -d "ios/App/Pods/CapacitorPreferences/ios/Sources/PreferencesPlugin" ]; then
+    echo "✅ Encontrado em Pods"
+    cp ios/App/Pods/CapacitorPreferences/ios/Sources/PreferencesPlugin/*.swift node_modules/@capacitor/preferences/ios/Sources/PreferencesPlugin/ 2>/dev/null || echo "Erro ao copiar"
+elif [ -d "ios/App/PluginSources/CapacitorPreferences/Sources/PreferencesPlugin" ]; then
+    echo "✅ Encontrado em PluginSources" 
+    cp ios/App/PluginSources/CapacitorPreferences/Sources/PreferencesPlugin/*.swift node_modules/@capacitor/preferences/ios/Sources/PreferencesPlugin/ 2>/dev/null || echo "Erro ao copiar"
 else
-    # Tentar copiar de outros locais possíveis
-    echo "⚠️ Arquivos não encontrados em Pods, tentando PluginSources..."
-    if [ -d "ios/App/PluginSources/CapacitorPreferences" ]; then
-        find ios/App/PluginSources/CapacitorPreferences -name "*.swift" -exec cp {} node_modules/@capacitor/preferences/ios/Sources/PreferencesPlugin/ \;
-        echo "✅ Copiado de PluginSources"
-    else
-        echo "❌ Arquivos do plugin Preferences não encontrados"
-    fi
+    echo "❌ Arquivos do plugin preferences não encontrados"
+    echo "Procurando arquivos PreferencesPlugin.swift..."
+    find . -name "PreferencesPlugin.swift" -type f 2>/dev/null | head -5
 fi
 
-# Copiar arquivos do Browser
-echo "📋 Copiando arquivos do plugin Browser..."
-if [ -f "ios/App/Pods/CapacitorBrowser/ios/Sources/BrowserPlugin/Browser.swift" ]; then
-    cp ios/App/Pods/CapacitorBrowser/ios/Sources/BrowserPlugin/*.swift node_modules/@capacitor/browser/ios/Sources/BrowserPlugin/
-    echo "✅ Plugin @capacitor/browser copiado com sucesso"
+# Copiar Browser Plugin
+echo "📋 Procurando arquivos do plugin browser..."
+if [ -d "ios/App/Pods/CapacitorBrowser/ios/Sources/BrowserPlugin" ]; then
+    echo "✅ Encontrado em Pods"
+    cp ios/App/Pods/CapacitorBrowser/ios/Sources/BrowserPlugin/*.swift node_modules/@capacitor/browser/ios/Sources/BrowserPlugin/ 2>/dev/null || echo "Erro ao copiar"
+elif [ -d "ios/App/PluginSources/CapacitorBrowser/Sources/BrowserPlugin" ]; then
+    echo "✅ Encontrado em PluginSources"
+    cp ios/App/PluginSources/CapacitorBrowser/Sources/BrowserPlugin/*.swift node_modules/@capacitor/browser/ios/Sources/BrowserPlugin/ 2>/dev/null || echo "Erro ao copiar"
 else
-    # Tentar copiar de outros locais possíveis
-    echo "⚠️ Arquivos não encontrados em Pods, tentando PluginSources..."
-    if [ -d "ios/App/PluginSources/CapacitorBrowser" ]; then
-        find ios/App/PluginSources/CapacitorBrowser -name "*.swift" -exec cp {} node_modules/@capacitor/browser/ios/Sources/BrowserPlugin/ \;
-        echo "✅ Copiado de PluginSources"
-    else
-        echo "❌ Arquivos do plugin Browser não encontrados"
-    fi
+    echo "❌ Arquivos do plugin browser não encontrados"
+    echo "Procurando arquivos BrowserPlugin.swift..."
+    find . -name "BrowserPlugin.swift" -type f 2>/dev/null | head -5
 fi
 
-# Listar arquivos copiados para verificação
+# Verificar resultados
 echo "📋 Verificando arquivos copiados:"
 echo "Preferences:"
-ls -la node_modules/@capacitor/preferences/ios/Sources/PreferencesPlugin/ 2>/dev/null || echo "Diretório não existe"
+ls -la node_modules/@capacitor/preferences/ios/Sources/PreferencesPlugin/*.swift 2>/dev/null || echo "❌ Nenhum arquivo Swift em preferences"
 echo "Browser:"
-ls -la node_modules/@capacitor/browser/ios/Sources/BrowserPlugin/ 2>/dev/null || echo "Diretório não existe"
+ls -la node_modules/@capacitor/browser/ios/Sources/BrowserPlugin/*.swift 2>/dev/null || echo "❌ Nenhum arquivo Swift em browser"
 
 echo "✅ Script ci_post_clone concluído!"
