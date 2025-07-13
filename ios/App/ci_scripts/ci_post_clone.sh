@@ -5,7 +5,7 @@ echo "🔧 Script ci_post_clone iniciado..."
 echo "📍 Diretório de trabalho: $(pwd)"
 
 # Navegar para o diretório raiz do repositório
-cd "$CI_WORKSPACE/repository"
+cd "$CI_WORKSPACE"
 
 echo "📦 Criando estrutura de diretórios para plugins Capacitor..."
 
