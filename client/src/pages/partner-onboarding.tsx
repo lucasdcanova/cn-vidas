@@ -112,9 +112,12 @@ export default function PartnerOnboardingPage() {
     category: '',
     regularPrice: 0,
     discountPrice: 0,
-    duration: 30,
+    duration: 0, // Agora inicia vazio
     isFeatured: false
   });
+  
+  const [usePercentageOnly, setUsePercentageOnly] = useState(false);
+  const [discountPercentage, setDiscountPercentage] = useState(10); // Desconto padrão de 10%
 
   // Check if user is a partner
   useEffect(() => {
@@ -223,12 +226,18 @@ export default function PartnerOnboardingPage() {
 
   // Create service mutation
   const createServiceMutation = useMutation({
-    mutationFn: async (data: ServiceData) => {
+    mutationFn: async (data: any) => {
       const res = await apiRequest('POST', '/api/partners/services', {
-        ...data,
-        discountPercentage: Math.round(((data.regularPrice - data.discountPrice) / data.regularPrice) * 100),
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        regularPrice: data.regularPrice,
+        discountPrice: data.discountPrice,
+        discountPercentage: data.discountPercentage,
+        duration: data.duration,
         isActive: true,
-        isNational: partnerData.nationwideService
+        isNational: partnerData.nationwideService,
+        isFeatured: false
       });
       if (!res.ok) {
         const error = await res.json();
@@ -336,27 +345,48 @@ export default function PartnerOnboardingPage() {
       }
     } else if (step === 3) {
       // Validate service
-      if (!serviceData.name || !serviceData.description || !serviceData.category || 
-          !serviceData.regularPrice || !serviceData.discountPrice) {
+      if (!serviceData.name || !serviceData.description || !serviceData.category) {
         toast({
           title: 'Campos obrigatórios',
-          description: 'Por favor, preencha todos os campos do serviço.',
+          description: 'Por favor, preencha todos os campos obrigatórios do serviço.',
           variant: 'destructive'
         });
         return;
       }
 
-      if (serviceData.discountPrice >= serviceData.regularPrice) {
-        toast({
-          title: 'Preço inválido',
-          description: 'O preço com desconto deve ser menor que o preço regular.',
-          variant: 'destructive'
-        });
-        return;
+      // Validar preços apenas se não estiver usando porcentagem
+      if (!usePercentageOnly) {
+        if (!serviceData.regularPrice || !serviceData.discountPrice) {
+          toast({
+            title: 'Campos obrigatórios',
+            description: 'Por favor, informe os preços do serviço.',
+            variant: 'destructive'
+          });
+          return;
+        }
+
+        if (serviceData.discountPrice >= serviceData.regularPrice) {
+          toast({
+            title: 'Preço inválido',
+            description: 'O preço com desconto deve ser menor que o preço regular.',
+            variant: 'destructive'
+          });
+          return;
+        }
       }
       
+      // Preparar dados do serviço
+      const servicePayload = {
+        ...serviceData,
+        regularPrice: usePercentageOnly ? 0 : serviceData.regularPrice,
+        discountPrice: usePercentageOnly ? 0 : serviceData.discountPrice,
+        discountPercentage: usePercentageOnly ? discountPercentage : Math.round(((serviceData.regularPrice - serviceData.discountPrice) / serviceData.regularPrice) * 100),
+        duration: serviceData.duration || null, // null se não tiver duração
+        isFeatured: false // Sempre false, apenas admin pode destacar
+      };
+      
       // Create service and complete onboarding
-      createServiceMutation.mutate(serviceData);
+      createServiceMutation.mutate(servicePayload);
     }
   };
 
@@ -831,48 +861,85 @@ export default function PartnerOnboardingPage() {
                     </Select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="regularPrice">Preço Regular (R$) *</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          R$
-                        </span>
-                        <Input
-                          id="regularPrice"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0,00"
-                          className="pl-10"
-                          value={serviceData.regularPrice}
-                          onChange={(e) => setServiceData({ ...serviceData, regularPrice: parseFloat(e.target.value) || 0 })}
-                          onFocus={handleInputFocus}
-                        />
-                      </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="usePercentageOnly"
+                        checked={usePercentageOnly}
+                        onCheckedChange={setUsePercentageOnly}
+                      />
+                      <Label htmlFor="usePercentageOnly" className="cursor-pointer">
+                        Definir apenas porcentagem de desconto (sem preço específico)
+                      </Label>
                     </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="discountPrice">Preço com Desconto (R$) *</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                          R$
-                        </span>
-                        <Input
-                          id="discountPrice"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0,00"
-                          className="pl-10"
-                          value={serviceData.discountPrice}
-                          onChange={(e) => setServiceData({ ...serviceData, discountPrice: parseFloat(e.target.value) || 0 })}
-                          onFocus={handleInputFocus}
-                        />
+
+                    {usePercentageOnly ? (
+                      <div className="grid gap-2">
+                        <Label htmlFor="discountPercentage">Porcentagem de Desconto *</Label>
+                        <div className="relative">
+                          <Input
+                            id="discountPercentage"
+                            type="number"
+                            min="1"
+                            max="100"
+                            placeholder="10"
+                            value={discountPercentage}
+                            onChange={(e) => setDiscountPercentage(parseInt(e.target.value) || 10)}
+                            onFocus={handleInputFocus}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            %
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Os assinantes CNVidas terão {discountPercentage}% de desconto neste serviço
+                        </p>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="regularPrice">Preço Regular (R$) *</Label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                              R$
+                            </span>
+                            <Input
+                              id="regularPrice"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              placeholder="0,00"
+                              className="pl-10"
+                              value={serviceData.regularPrice}
+                              onChange={(e) => setServiceData({ ...serviceData, regularPrice: parseFloat(e.target.value) || 0 })}
+                              onFocus={handleInputFocus}
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="discountPrice">Preço com Desconto (R$) *</Label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                              R$
+                            </span>
+                            <Input
+                              id="discountPrice"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              placeholder="0,00"
+                              className="pl-10"
+                              value={serviceData.discountPrice}
+                              onChange={(e) => setServiceData({ ...serviceData, discountPrice: parseFloat(e.target.value) || 0 })}
+                              onFocus={handleInputFocus}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {serviceData.regularPrice > 0 && serviceData.discountPrice > 0 && (
+                  {!usePercentageOnly && serviceData.regularPrice > 0 && serviceData.discountPrice > 0 && (
                     <div className="bg-muted rounded-lg p-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Desconto oferecido:</span>
@@ -888,32 +955,22 @@ export default function PartnerOnboardingPage() {
                   )}
 
                   <div className="grid gap-2">
-                    <Label htmlFor="duration">Duração do Serviço (minutos)</Label>
+                    <Label htmlFor="duration">Duração do Serviço (minutos) - Opcional</Label>
                     <Input
                       id="duration"
                       type="number"
-                      min="15"
+                      min="0"
                       step="15"
-                      placeholder="30"
-                      value={serviceData.duration}
-                      onChange={(e) => setServiceData({ ...serviceData, duration: parseInt(e.target.value) || 30 })}
+                      placeholder="Deixe em branco se não aplicável"
+                      value={serviceData.duration || ''}
+                      onChange={(e) => setServiceData({ ...serviceData, duration: parseInt(e.target.value) || 0 })}
                       onFocus={handleInputFocus}
                     />
+                    <p className="text-sm text-muted-foreground">
+                      Deixe vazio para serviços sem duração definida
+                    </p>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="featured"
-                      checked={serviceData.isFeatured}
-                      onCheckedChange={(checked) => setServiceData({ ...serviceData, isFeatured: checked })}
-                    />
-                    <Label htmlFor="featured" className="cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        Destacar este serviço
-                      </div>
-                    </Label>
-                  </div>
                 </div>
               </CardContent>
             </>
