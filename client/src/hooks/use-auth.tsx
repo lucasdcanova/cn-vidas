@@ -250,8 +250,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             window.location.href = "/doctor-telemedicine";
             return;
           } else {
-            console.log("⚠️ [Login] Médico não completou onboarding (onboardingCompleted =", doctorProfile.onboardingCompleted, "), redirecionando para /onboarding/doctor");
-            window.location.href = "/onboarding/doctor";
+            console.log("⚠️ [Login] Médico não completou onboarding (onboardingCompleted =", doctorProfile.onboardingCompleted, "), redirecionando para /doctor-onboarding");
+            window.location.href = "/doctor-onboarding";
             return;
           }
         } catch (error: any) {
@@ -265,8 +265,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           // Se for 404, redirecionar para onboarding
           if (error?.status === 404) {
-            console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /onboarding/doctor");
-            window.location.href = "/onboarding/doctor";
+            console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /doctor-onboarding");
+            window.location.href = "/doctor-onboarding";
             return;
           }
           
@@ -390,8 +390,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             window.location.href = "/doctor-telemedicine";
             return;
           } else {
-            console.log("⚠️ [Login] Médico não completou onboarding (onboardingCompleted =", doctorProfile.onboardingCompleted, "), redirecionando para /onboarding/doctor");
-            window.location.href = "/onboarding/doctor";
+            console.log("⚠️ [Login] Médico não completou onboarding (onboardingCompleted =", doctorProfile.onboardingCompleted, "), redirecionando para /doctor-onboarding");
+            window.location.href = "/doctor-onboarding";
             return;
           }
         } catch (error: any) {
@@ -405,8 +405,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           // Se for 404, redirecionar para onboarding
           if (error?.status === 404) {
-            console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /onboarding/doctor");
-            window.location.href = "/onboarding/doctor";
+            console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /doctor-onboarding");
+            window.location.href = "/doctor-onboarding";
             return;
           }
           
@@ -573,10 +573,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Usuário é administrador, redirecionando para /admin/users");
         window.location.href = "/admin/users";
       } else if (userData.role === "doctor") {
-        console.log("Usuário é médico, redirecionando para /onboarding/doctor");
+        console.log("Usuário é médico, redirecionando para /doctor-onboarding");
         // Pequeno delay para garantir que o perfil do médico seja criado no backend
         setTimeout(() => {
-          window.location.href = "/onboarding/doctor";
+          window.location.href = "/doctor-onboarding";
         }, 1000);
       } else if (userData.role === "partner") {
         console.log("Usuário é parceiro, redirecionando para /partner/services");
