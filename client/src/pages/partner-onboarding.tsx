@@ -540,26 +540,41 @@ export default function PartnerOnboardingPage() {
           <div className="max-w-3xl mx-auto px-4 pb-32">
             <div
               className="relative mx-auto my-6 md:my-8 px-6 py-8 md:px-8 md:py-12 flex flex-col items-center gap-4 text-center rounded-3xl bg-gradient-to-b from-white/70 to-gray-100 shadow-lg backdrop-blur-sm"
-              style={{ animation: 'fadeInSimple 0.5s ease-out forwards', animationDelay: '0.2s' }}
+              style={{ 
+                opacity: 0,
+                animation: 'fadeInSimple 0.5s ease-out forwards', 
+                animationDelay: '0.2s',
+                animationFillMode: 'forwards'
+              }}
             >
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 flex items-center justify-center gap-2">
-                <span className="whitespace-nowrap">BEM-VINDO&nbsp;AO</span>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 flex flex-col md:flex-row items-center justify-center gap-2">
+                <span>Bem-vindo ao</span>
                 <img
                   src={cnvidasLogo}
-                  alt="CN VIDAS"
+                  alt="CNVidas"
                   className="h-9 md:h-11 inline-block object-contain"
                 />
                 <span>!</span>
               </h1>
               <h2
                 className="text-xl md:text-2xl font-semibold text-primary"
-                style={{ animation: 'fadeInSimple 0.5s ease-out forwards', animationDelay: '0.4s' }}
+                style={{ 
+                  opacity: 0,
+                  animation: 'fadeInSimple 0.5s ease-out forwards', 
+                  animationDelay: '0.4s',
+                  animationFillMode: 'forwards'
+                }}
               >
                 {user?.fullName || user?.name || 'Parceiro'}
               </h2>
               <p
                 className="text-muted-foreground text-base md:text-lg max-w-md"
-                style={{ animation: 'fadeInSimple 0.5s ease-out forwards', animationDelay: '0.6s' }}
+                style={{ 
+                  opacity: 0,
+                  animation: 'fadeInSimple 0.5s ease-out forwards', 
+                  animationDelay: '0.6s',
+                  animationFillMode: 'forwards'
+                }}
               >
                 Complete seu cadastro para começar a oferecer seus serviços
               </p>
