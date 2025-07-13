@@ -78,8 +78,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
       >
         <Icon className="h-4 w-4 flex-shrink-0" />
         <div className="flex flex-col min-w-0 flex-1">
-          <span className="truncate">{label}</span>
-          <span className="text-xs text-muted-foreground hidden lg:block truncate">{description}</span>
+          <span className="truncate text-xs md:text-sm">{label}</span>
+          <span className="text-[10px] md:text-xs text-muted-foreground hidden xl:block truncate">{description}</span>
         </div>
       </div>
     </Link>
@@ -87,14 +87,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
 
   const SidebarContent = ({ onLinkClick }: { onLinkClick?: () => void }) => (
     <div className="flex h-full flex-col min-h-0">
-      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6 flex-shrink-0">
+      <div className="flex h-14 items-center border-b px-3 md:px-4 lg:h-[60px] flex-shrink-0">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold min-w-0">
-          <img src={logo} alt="CN Vidas" className="h-8 w-auto flex-shrink-0" />
-          <span className="hidden lg:block truncate">Admin</span>
+          <img src={logo} alt="CN Vidas" className="h-6 md:h-7 lg:h-8 w-auto flex-shrink-0" />
+          <span className="hidden lg:block text-sm xl:text-base truncate">Admin</span>
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto py-2 min-h-0">
-        <nav className="grid items-start px-2 text-sm font-medium lg:px-4 gap-1">
+        <nav className="grid items-start px-2 md:px-3 lg:px-4 gap-0.5 md:gap-1">
           {navLinks.map((link) => (
             <NavigationItem
               key={link.href}
@@ -108,25 +108,35 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
           ))}
         </nav>
       </div>
-      <div className="mt-auto p-4 flex-shrink-0 border-t bg-muted/20">
-        <div className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 mb-3">
-          <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary flex-shrink-0">
-            <User size={16} />
-          </div>
-          <div className="flex-1 overflow-hidden min-w-0">
-            <p className="text-sm font-medium truncate">{user?.fullName}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+      <div className="mt-auto flex-shrink-0 border-t bg-muted/20">
+        <div className="p-2 md:p-3 lg:p-4">
+          <div className="flex flex-col gap-2">
+            {/* User info card */}
+            <div className="flex items-center gap-2 rounded-lg bg-muted px-2 py-1.5 md:px-3 md:py-2">
+              <div className="h-7 w-7 md:h-8 md:w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+                <User className="h-3 w-3 md:h-4 md:w-4" />
+              </div>
+              <div className="flex-1 overflow-hidden min-w-0">
+                <p className="text-xs md:text-sm font-medium truncate leading-tight">
+                  {user?.fullName?.split(' ').slice(0, 2).join(' ')}
+                </p>
+                <p className="text-[10px] md:text-xs text-muted-foreground truncate leading-tight">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+            {/* Logout button */}
+            <Button 
+              variant="outline" 
+              className="w-full justify-start h-8 md:h-9 text-xs md:text-sm" 
+              onClick={handleLogout}
+              size="sm"
+            >
+              <LogOut className="mr-1.5 h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
+              <span>Sair</span>
+            </Button>
           </div>
         </div>
-        <Button 
-          variant="outline" 
-          className="w-full justify-start" 
-          onClick={handleLogout}
-          size="sm"
-        >
-          <LogOut className="mr-2 h-4 w-4 flex-shrink-0" />
-          <span className="truncate">Sair</span>
-        </Button>
       </div>
     </div>
   );
@@ -134,7 +144,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
   return (
     <div className="flex h-screen w-full overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden border-r bg-muted/40 md:block md:w-[240px] lg:w-[280px] xl:w-[320px] flex-shrink-0">
+      <div className="hidden border-r bg-muted/40 md:block md:w-[220px] lg:w-[250px] xl:w-[280px] 2xl:w-[320px] flex-shrink-0">
         <SidebarContent />
       </div>
 
