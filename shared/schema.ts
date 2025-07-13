@@ -310,21 +310,6 @@ export const qrAuthLogs = pgTable("qr_auth_logs", {
   success: boolean("success").default(true),
 });
 
-export const remoteConsoleLogs = pgTable("remote_console_logs", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
-  sessionId: text("session_id"),
-  level: text("level").notNull(), // 'log', 'info', 'warn', 'error'
-  message: text("message").notNull(),
-  timestamp: timestamp("timestamp").notNull(),
-  userAgent: text("user_agent"),
-  platform: text("platform"),
-  appVersion: text("app_version"),
-  stack: text("stack"),
-  metadata: json("metadata"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
 export const partnerAddresses = pgTable("partner_addresses", {
   id: serial("id").primaryKey(),
   partnerId: integer("partner_id").references(() => partners.id, { onDelete: "cascade" }).notNull(),
@@ -585,13 +570,6 @@ export const qrAuthLogsRelations = relations(qrAuthLogs, ({ one }) => ({
   }),
 }));
 
-export const remoteConsoleLogsRelations = relations(remoteConsoleLogs, ({ one }) => ({
-  user: one(users, {
-    fields: [remoteConsoleLogs.userId],
-    references: [users.id],
-  }),
-}));
-
 export const userSettingsRelations = relations(userSettings, ({ one }) => ({
   user: one(users, {
     fields: [userSettings.userId],
@@ -696,7 +674,6 @@ export type EmailVerification = InferSelectModel<typeof emailVerifications>;
 export type PasswordReset = InferSelectModel<typeof passwordResets>;
 export type AvailabilitySlot = InferSelectModel<typeof availabilitySlots>;
 export type QrAuthLog = InferSelectModel<typeof qrAuthLogs>;
-export type RemoteConsoleLog = InferSelectModel<typeof remoteConsoleLogs>;
 export type PartnerAddress = InferSelectModel<typeof partnerAddresses>;
 export type UserSubscription = InferSelectModel<typeof userSubscriptions>;
 export type Subscription = InferSelectModel<typeof subscriptions>;
@@ -726,7 +703,6 @@ export type InsertEmailVerification = InferInsertModel<typeof emailVerifications
 export type InsertPasswordReset = InferInsertModel<typeof passwordResets>;
 export type InsertAvailabilitySlot = InferInsertModel<typeof availabilitySlots>;
 export type InsertQrAuthLog = InferInsertModel<typeof qrAuthLogs>;
-export type InsertRemoteConsoleLog = InferInsertModel<typeof remoteConsoleLogs>;
 export type InsertPartnerAddress = InferInsertModel<typeof partnerAddresses>;
 export type InsertUserSubscription = InferInsertModel<typeof userSubscriptions>;
 export type InsertSubscription = InferInsertModel<typeof subscriptions>;
