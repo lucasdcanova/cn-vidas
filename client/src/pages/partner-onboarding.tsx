@@ -539,8 +539,8 @@ export default function PartnerOnboardingPage() {
         <div className="bg-gray-50 pt-safe pb-8">
           <div className="max-w-3xl mx-auto px-4 pb-32">
             <div
-              className="relative mx-auto my-6 md:my-8 px-6 py-8 md:px-8 md:py-12 flex flex-col items-center gap-4 text-center rounded-3xl bg-gradient-to-b from-white/70 to-gray-100 shadow-lg backdrop-blur-sm animate-fade-in"
-              style={{ animationDelay: '0.2s' }}
+              className="relative mx-auto my-6 md:my-8 px-6 py-8 md:px-8 md:py-12 flex flex-col items-center gap-4 text-center rounded-3xl bg-gradient-to-b from-white/70 to-gray-100 shadow-lg backdrop-blur-sm"
+              style={{ animation: 'fadeInSimple 0.5s ease-out forwards', animationDelay: '0.2s' }}
             >
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 flex items-center justify-center gap-2">
                 <span className="whitespace-nowrap">BEM-VINDO&nbsp;AO</span>
@@ -552,14 +552,14 @@ export default function PartnerOnboardingPage() {
                 <span>!</span>
               </h1>
               <h2
-                className="text-xl md:text-2xl font-semibold text-primary animate-fade-in"
-                style={{ animationDelay: '0.4s' }}
+                className="text-xl md:text-2xl font-semibold text-primary"
+                style={{ animation: 'fadeInSimple 0.5s ease-out forwards', animationDelay: '0.4s' }}
               >
                 {user?.fullName || user?.name || 'Parceiro'}
               </h2>
               <p
-                className="text-muted-foreground text-base md:text-lg animate-fade-in max-w-md"
-                style={{ animationDelay: '0.6s' }}
+                className="text-muted-foreground text-base md:text-lg max-w-md"
+                style={{ animation: 'fadeInSimple 0.5s ease-out forwards', animationDelay: '0.6s' }}
               >
                 Complete seu cadastro para começar a oferecer seus serviços
               </p>
