@@ -682,8 +682,8 @@ const AdminUsersPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="w-full table-container">
-                <div className="pr-4">
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-full">
                   <ResponsiveTable>
                   <ResponsiveTableHeader>
                     <TableRow>
@@ -935,7 +935,7 @@ const AdminUsersPage: React.FC = () => {
                       ))
                     ) : (
                       <ResponsiveTableRow>
-                        <ResponsiveTableCell colSpan={9} className="h-24">
+                        <ResponsiveTableCell colSpan={6} className="h-24">
                           <div className="flex flex-col items-center justify-center py-8">
                             <AlertCircle className="h-8 w-8 mb-2 text-muted-foreground" />
                             <p className="text-sm sm:text-base text-muted-foreground text-center">

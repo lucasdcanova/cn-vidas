@@ -527,7 +527,12 @@ export default function PartnerOnboardingPage() {
             </div>
           </div>
 
-          <Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 0.5 }}
+          >
+          <Card className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border-gray-200/50">
           {/* Step 1: Business Information */}
           {step === 1 && (
             <>
@@ -717,13 +722,17 @@ export default function PartnerOnboardingPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="complement">Complemento</Label>
+                    <Label htmlFor="complement" className="text-gray-700 font-medium">Complemento</Label>
                     <Input
                       id="complement"
                       placeholder="Sala, Andar, Bloco..."
                       value={addressData.complement}
                       onChange={(e) => setAddressData({ ...addressData, complement: e.target.value })}
                       onFocus={handleInputFocus}
+                      onBlur={handleInputBlur}
+                      className={`rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                        focusedField === 'complement' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                      }`}
                     />
                   </div>
 
@@ -751,7 +760,7 @@ export default function PartnerOnboardingPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="state">Estado *</Label>
+                    <Label htmlFor="state" className="text-gray-700 font-medium">Estado *</Label>
                     <Input
                       id="state"
                       placeholder="SP"
@@ -759,6 +768,10 @@ export default function PartnerOnboardingPage() {
                       value={addressData.state}
                       onChange={(e) => setAddressData({ ...addressData, state: e.target.value.toUpperCase() })}
                       onFocus={handleInputFocus}
+                      onBlur={handleInputBlur}
+                      className={`rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                        focusedField === 'state' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                      }`}
                     />
                   </div>
 
@@ -774,27 +787,41 @@ export default function PartnerOnboardingPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="addressEmail">E-mail do Local</Label>
-                    <Input
-                      id="addressEmail"
-                      type="email"
-                      placeholder="contato@local.com.br"
-                      value={addressData.email}
-                      onChange={(e) => setAddressData({ ...addressData, email: e.target.value })}
-                      onFocus={handleInputFocus}
-                    />
+                    <Label htmlFor="addressEmail" className="text-gray-700 font-medium">E-mail do Local</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="addressEmail"
+                        type="email"
+                        placeholder="contato@local.com.br"
+                        value={addressData.email}
+                        onChange={(e) => setAddressData({ ...addressData, email: e.target.value })}
+                        onFocus={handleInputFocus}
+                        onBlur={handleInputBlur}
+                        className={`pl-10 rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                          focusedField === 'addressEmail' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                        }`}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="openingHours">Horário de Funcionamento</Label>
-                    <Textarea
-                      id="openingHours"
-                      placeholder="Ex: Segunda a Sexta: 8h às 18h&#10;Sábado: 8h às 12h"
-                      rows={3}
-                      value={addressData.openingHours}
-                      onChange={(e) => setAddressData({ ...addressData, openingHours: e.target.value })}
-                      onFocus={handleInputFocus}
-                    />
+                    <Label htmlFor="openingHours" className="text-gray-700 font-medium">Horário de Funcionamento</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Textarea
+                        id="openingHours"
+                        placeholder="Ex: Segunda a Sexta: 8h às 18h&#10;Sábado: 8h às 12h"
+                        rows={3}
+                        value={addressData.openingHours}
+                        onChange={(e) => setAddressData({ ...addressData, openingHours: e.target.value })}
+                        onFocus={handleInputFocus}
+                        onBlur={handleInputBlur}
+                        className={`pl-10 rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                          focusedField === 'openingHours' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                        }`}
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -850,12 +877,19 @@ export default function PartnerOnboardingPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="category">Categoria *</Label>
+                    <Label htmlFor="category" className="text-gray-700 font-medium">Categoria *</Label>
                     <Select
                       value={serviceData.category}
                       onValueChange={(value) => setServiceData({ ...serviceData, category: value })}
                     >
-                      <SelectTrigger id="category">
+                      <SelectTrigger 
+                        id="category"
+                        className={`rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                          focusedField === 'category' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                        }`}
+                        onFocus={() => setFocusedField('category')}
+                        onBlur={() => setFocusedField(null)}
+                      >
                         <SelectValue placeholder="Selecione a categoria" />
                       </SelectTrigger>
                       <SelectContent>
@@ -883,8 +917,9 @@ export default function PartnerOnboardingPage() {
 
                     {usePercentageOnly ? (
                       <div className="grid gap-2">
-                        <Label htmlFor="discountPercentage">Porcentagem de Desconto *</Label>
+                        <Label htmlFor="discountPercentage" className="text-gray-700 font-medium">Porcentagem de Desconto *</Label>
                         <div className="relative">
+                          <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
                             id="discountPercentage"
                             type="number"
@@ -894,6 +929,10 @@ export default function PartnerOnboardingPage() {
                             value={discountPercentage}
                             onChange={(e) => setDiscountPercentage(parseInt(e.target.value) || 10)}
                             onFocus={handleInputFocus}
+                            onBlur={handleInputBlur}
+                            className={`pl-10 pr-10 rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                              focusedField === 'discountPercentage' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                            }`}
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                             %
@@ -906,9 +945,10 @@ export default function PartnerOnboardingPage() {
                     ) : (
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="regularPrice">Preço Regular (R$) *</Label>
+                          <Label htmlFor="regularPrice" className="text-gray-700 font-medium">Preço Regular (R$) *</Label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <span className="absolute left-9 top-1/2 -translate-y-1/2 text-muted-foreground">
                               R$
                             </span>
                             <Input
@@ -917,17 +957,21 @@ export default function PartnerOnboardingPage() {
                               min="0"
                               step="0.01"
                               placeholder="0,00"
-                              className="pl-10"
                               value={serviceData.regularPrice}
                               onChange={(e) => setServiceData({ ...serviceData, regularPrice: parseFloat(e.target.value) || 0 })}
                               onFocus={handleInputFocus}
+                              onBlur={handleInputBlur}
+                              className={`pl-16 rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                                focusedField === 'regularPrice' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                              }`}
                             />
                           </div>
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="discountPrice">Preço com Desconto (R$) *</Label>
+                          <Label htmlFor="discountPrice" className="text-gray-700 font-medium">Preço com Desconto (R$) *</Label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <span className="absolute left-9 top-1/2 -translate-y-1/2 text-muted-foreground">
                               R$
                             </span>
                             <Input
@@ -936,10 +980,13 @@ export default function PartnerOnboardingPage() {
                               min="0"
                               step="0.01"
                               placeholder="0,00"
-                              className="pl-10"
                               value={serviceData.discountPrice}
                               onChange={(e) => setServiceData({ ...serviceData, discountPrice: parseFloat(e.target.value) || 0 })}
                               onFocus={handleInputFocus}
+                              onBlur={handleInputBlur}
+                              className={`pl-16 rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                                focusedField === 'discountPrice' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                              }`}
                             />
                           </div>
                         </div>
@@ -963,17 +1010,24 @@ export default function PartnerOnboardingPage() {
                   )}
 
                   <div className="grid gap-2">
-                    <Label htmlFor="duration">Duração do Serviço (minutos) - Opcional</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      min="0"
-                      step="15"
-                      placeholder="Deixe em branco se não aplicável"
-                      value={serviceData.duration || ''}
-                      onChange={(e) => setServiceData({ ...serviceData, duration: parseInt(e.target.value) || 0 })}
-                      onFocus={handleInputFocus}
-                    />
+                    <Label htmlFor="duration" className="text-gray-700 font-medium">Duração do Serviço (minutos) - Opcional</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="duration"
+                        type="number"
+                        min="0"
+                        step="15"
+                        placeholder="Deixe em branco se não aplicável"
+                        value={serviceData.duration || ''}
+                        onChange={(e) => setServiceData({ ...serviceData, duration: parseInt(e.target.value) || 0 })}
+                        onFocus={handleInputFocus}
+                        onBlur={handleInputBlur}
+                        className={`pl-10 rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
+                          focusedField === 'duration' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
+                        }`}
+                      />
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       Deixe vazio para serviços sem duração definida
                     </p>
@@ -1026,10 +1080,16 @@ export default function PartnerOnboardingPage() {
             </Button>
           </CardFooter>
         </Card>
+        </motion.div>
 
         {/* Additional Information */}
         <div className="mt-8 space-y-6">
-          <Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.5 }}
+          >
+          <Card className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border-gray-200/50">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
@@ -1067,6 +1127,7 @@ export default function PartnerOnboardingPage() {
               </div>
             </CardContent>
           </Card>
+          </motion.div>
 
           <div className="text-center text-sm text-muted-foreground">
             <p>
