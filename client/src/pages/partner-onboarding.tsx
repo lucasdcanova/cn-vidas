@@ -310,15 +310,24 @@ export default function PartnerOnboardingPage() {
       // Create address
       try {
         console.log('Creating address with data:', addressData);
-        // Clean up data before sending - remove empty optional fields
-        const cleanAddressData = {
-          ...addressData,
-          email: addressData.email || partnerData.email || '', // Use partner email if not provided
-          complement: addressData.complement || undefined,
-          openingHours: addressData.openingHours || undefined
+        // Mapear campos para português como esperado pela API
+        const addressPayload = {
+          name: addressData.name,
+          cep: addressData.cep,
+          logradouro: addressData.address, // address -> logradouro
+          numero: addressData.number, // number -> numero
+          complemento: addressData.complement || '', // complement -> complemento
+          bairro: addressData.neighborhood, // neighborhood -> bairro
+          cidade: addressData.city, // city -> cidade
+          estado: addressData.state, // state -> estado
+          phone: addressData.phone,
+          email: addressData.email || partnerData.email || '',
+          openingHours: addressData.openingHours || '',
+          isPrimary: addressData.isPrimary
         };
         
-        await createAddressMutation.mutateAsync(cleanAddressData);
+        console.log('Sending address payload:', addressPayload);
+        await createAddressMutation.mutateAsync(addressPayload);
         console.log('Address created successfully, moving to step 3');
         setStep(3);
       } catch (error) {
