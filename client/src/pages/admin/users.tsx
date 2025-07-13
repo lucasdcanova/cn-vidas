@@ -687,15 +687,11 @@ const AdminUsersPage: React.FC = () => {
                   <ResponsiveTable>
                   <ResponsiveTableHeader>
                     <TableRow>
-                      <ResponsiveTableHead className="min-w-[200px]">Nome</ResponsiveTableHead>
-                      <ResponsiveTableHead className="min-w-[200px] hidden sm:table-cell">Email</ResponsiveTableHead>
-                      <ResponsiveTableHead className="min-w-[120px] hidden lg:table-cell">Usuário</ResponsiveTableHead>
-                      <ResponsiveTableHead className="min-w-[100px]">Perfil</ResponsiveTableHead>
-                      <ResponsiveTableHead className="min-w-[100px] hidden sm:table-cell">Plano</ResponsiveTableHead>
-                      <ResponsiveTableHead className="min-w-[120px] hidden md:table-cell">Status</ResponsiveTableHead>
-                      <ResponsiveTableHead className="min-w-[150px] hidden xl:table-cell">Cadastro</ResponsiveTableHead>
-                      <ResponsiveTableHead className="min-w-[100px] hidden lg:table-cell text-center">Verificado</ResponsiveTableHead>
-                      <ResponsiveTableHead className="min-w-[80px] w-[80px] text-right">Ações</ResponsiveTableHead>
+                      <ResponsiveTableHead className="w-[40%]">Nome</ResponsiveTableHead>
+                      <ResponsiveTableHead className="w-[25%] hidden sm:table-cell">Email</ResponsiveTableHead>
+                      <ResponsiveTableHead className="w-[15%]">Perfil</ResponsiveTableHead>
+                      <ResponsiveTableHead className="w-[15%] hidden sm:table-cell">Plano</ResponsiveTableHead>
+                      <ResponsiveTableHead className="w-[5%] text-right">Ações</ResponsiveTableHead>
                     </TableRow>
                   </ResponsiveTableHeader>
                   <ResponsiveTableBody>
