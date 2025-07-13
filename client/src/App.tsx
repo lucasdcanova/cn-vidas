@@ -79,15 +79,11 @@ import ReenviarVerificacao from "@/pages/reenviar-verificacao";
 import EsqueciSenha from "@/pages/esqueci-senha";
 import AdminMedicalRecords from "@/pages/admin/medical-records";
 import AdminDoctors from "@/pages/admin/doctors";
-import AdminRemoteConsole from "@/pages/admin/remote-console";
-import EnableRemoteConsole from "@/pages/admin/enable-remote-console";
-import TestRemoteConsole from "@/pages/admin/test-remote-console";
 import DoctorMedicalRecords from "@/pages/doctor/medical-records";
 import DoctorMedicalRecordEdit from "@/pages/doctor/medical-record-edit";
 import ProcessingMedicalRecordPage from "@/pages/doctor/processing-medical-record";
 import TestHeadlessDaily from "@/pages/test-headless-daily";
 import { ProcessingWaitPage } from "@/pages/processing-wait";
-import { useRemoteConsole } from "@/hooks/use-remote-console";
 
 // Componente de erro boundary
 class ErrorBoundary extends React.Component<
@@ -234,9 +230,6 @@ function Router() {
       <ProtectedRoute path="/admin/checkout-tracking" component={CheckoutTrackingPage} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/medical-records" component={AdminMedicalRecords} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/doctors" component={AdminDoctors} allowedRoles={["admin"]} />
-      <ProtectedRoute path="/admin/remote-console" component={AdminRemoteConsole} allowedRoles={["admin"]} />
-      <ProtectedRoute path="/admin/enable-remote-console" component={EnableRemoteConsole} allowedRoles={["admin"]} />
-      <ProtectedRoute path="/admin/test-remote-console" component={TestRemoteConsole} allowedRoles={["admin"]} />
       
       {/* Test routes */}
       <ProtectedRoute path="/test-headless-daily" component={TestHeadlessDaily} />
@@ -250,8 +243,6 @@ function Router() {
 function App() {
   // Usar hook para atualizar a cor do tema dinamicamente
   useThemeColor();
-  // Ativar console remoto
-  useRemoteConsole();
   
   // Inicializar push notifications e configurações iOS em apps nativos
   React.useEffect(() => {
