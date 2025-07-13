@@ -619,8 +619,8 @@ export default function PartnerOnboardingPage() {
               <CardContent className="space-y-6">
                 <Alert>
                   <Info className="h-4 w-4" />
-                  <AlertTitle className="flex items-center gap-2">
-                    Como funciona a <img src={cnvidasLogo} alt="CNVidas" className="h-5 inline-block object-contain" /> para Parceiros
+                  <AlertTitle className="flex items-center gap-1 whitespace-nowrap">
+                    Como funciona a <img src={cnvidasLogo} alt="CNVidas" className="h-6 w-auto inline-block object-contain align-middle -mt-1" /> para Parceiros
                   </AlertTitle>
                   <AlertDescription className="space-y-2 mt-2">
                     <p>• Ofereça seus serviços com descontos exclusivos para assinantes</p>
