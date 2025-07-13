@@ -38,7 +38,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { IOSScrollView } from '@/components/shared/IOSScrollView';
-import { IOSKeyboardAvoidingView } from '@/components/shared/IOSKeyboardAvoidingView';
 import { isIOS } from '@/utils/platform';
 import { StatusBar } from '@capacitor/status-bar';
 
@@ -284,62 +283,56 @@ export default function DoctorOnboardingPage() {
     }
   };
 
-  // Função para centralizar o campo focado - IDÊNTICA À DO PARCEIRO
+  // Função para centralizar o campo focado
   const scrollToFocusedElement = (element: HTMLElement) => {
     if (!isIOS()) return;
     
     setTimeout(() => {
-      // Tenta encontrar o container de scroll correto
-      const scrollContainer = document.querySelector('.ios-scroll-view-content') || 
-                             scrollViewRef.current?.querySelector('.overflow-y-auto') ||
-                             scrollViewRef.current;
+      // Encontrar o container de scroll
+      const scrollContainer = document.querySelector('.ios-scroll-view-content');
       
       if (!scrollContainer) {
         console.error('Scroll container not found');
         return;
       }
 
-      // Obter a posição relativa do elemento dentro do container
+      // Obter posições
       const elementRect = element.getBoundingClientRect();
       const containerRect = scrollContainer.getBoundingClientRect();
       
-      // Altura do teclado iOS (hardcoded baseado em observações)
-      const keyboardHeight = 370;
+      // Altura do teclado iOS (valores típicos: iPhone 336px, iPad 408px)
+      const keyboardHeight = window.innerHeight < 600 ? 336 : 408;
       
-      // Altura da área visível (tela - teclado)
-      const safeAreaTop = 50;
+      // Área visível considerando o teclado
       const visibleHeight = window.innerHeight - keyboardHeight;
+      const targetCenter = visibleHeight / 2;
       
-      // Queremos o campo no centro da área visível entre o teclado e o topo
-      const targetPosition = safeAreaTop + ((visibleHeight - safeAreaTop) / 2);
+      // Posição do elemento relativa ao container
+      const elementTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
+      const elementCenter = elementTop + (element.offsetHeight / 2);
       
-      // Posição atual do elemento relativa ao início do container
-      const elementOffsetTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
+      // Calcular novo scroll para centralizar elemento
+      const newScrollTop = elementCenter - targetCenter;
       
-      // Calcula onde devemos scrollar para centralizar o elemento
-      const desiredScrollTop = elementOffsetTop - targetPosition + (element.offsetHeight / 2);
-      
-      // Garante que não vamos scrollar além dos limites
+      // Limitar scroll aos bounds
       const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-      const finalScrollTop = Math.max(0, Math.min(desiredScrollTop, maxScroll));
+      const finalScrollTop = Math.max(0, Math.min(newScrollTop, maxScroll));
       
-      // Executa o scroll
+      // Executar scroll suave
       scrollContainer.scrollTo({
         top: finalScrollTop,
         behavior: 'smooth'
       });
       
-      // Log para debug
-      console.log('Scroll debug:', {
-        elementOffsetTop,
-        targetPosition,
-        desiredScrollTop: finalScrollTop,
+      console.log('iOS Scroll Debug:', {
+        windowHeight: window.innerHeight,
         keyboardHeight,
         visibleHeight,
-        containerHeight: scrollContainer.clientHeight,
-        scrollHeight: scrollContainer.scrollHeight
+        elementTop,
+        targetCenter,
+        newScrollTop: finalScrollTop
       });
-    }, 400); // Aguarda o teclado abrir completamente
+    }, 300); // Tempo reduzido para resposta mais rápida
   };
 
   // Handler para quando um input recebe foco
@@ -369,8 +362,8 @@ export default function DoctorOnboardingPage() {
         className="h-full"
         contentClassName=""
       >
-        <div className="bg-gray-50 pt-safe pb-8">
-          <div className="max-w-3xl mx-auto px-4 pb-32">
+        <div className="bg-gray-50">
+          <div className="max-w-3xl mx-auto px-4 py-8">
             <div
               className="relative mx-auto my-6 md:my-8 px-6 py-8 md:px-8 md:py-12 flex flex-col items-center gap-4 text-center rounded-3xl bg-gradient-to-b from-white/70 to-gray-100 shadow-lg backdrop-blur-sm"
               style={{ 
@@ -859,9 +852,11 @@ export default function DoctorOnboardingPage() {
               </a>
             </p>
           </div>
+          
+          {/* Padding extra para garantir scroll quando teclado aberto */}
+          <div className="h-80"></div>
           </div>
         </div>
-      </div>
       </IOSScrollView>
     </div>
   );
