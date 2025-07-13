@@ -538,24 +538,35 @@ export default function PartnerOnboardingPage() {
       >
         <div className="bg-gray-50 pt-safe pb-8">
           <div className="max-w-3xl mx-auto px-4 pb-32">
-            <div className="text-center mb-8 pt-4" style={{ animation: 'fadeInSimple 0.5s ease-out forwards' }}>
-              <div className="flex flex-col items-center gap-3 mb-4">
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center text-gray-900">
-                  <span>BEM-VINDO AO</span>
-                  <img src={cnvidasLogo} alt="CN VIDAS" className="h-10 md:h-12 inline-block object-contain mx-2" />
-                  <span>!</span>
-                </h1>
-              <h2 className="text-2xl md:text-3xl font-semibold text-primary animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div
+              className="relative mx-auto my-6 md:my-8 px-6 py-8 md:px-8 md:py-12 flex flex-col items-center gap-4 text-center rounded-3xl bg-gradient-to-b from-white/70 to-gray-100 shadow-lg backdrop-blur-sm animate-fade-in"
+              style={{ animationDelay: '0.2s' }}
+            >
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 flex items-center justify-center gap-2">
+                <span className="whitespace-nowrap">BEM-VINDO&nbsp;AO</span>
+                <img
+                  src={cnvidasLogo}
+                  alt="CN VIDAS"
+                  className="h-9 md:h-11 inline-block object-contain"
+                />
+                <span>!</span>
+              </h1>
+              <h2
+                className="text-xl md:text-2xl font-semibold text-primary animate-fade-in"
+                style={{ animationDelay: '0.4s' }}
+              >
                 {user?.fullName || user?.name || 'Parceiro'}
               </h2>
+              <p
+                className="text-muted-foreground text-base md:text-lg animate-fade-in max-w-md"
+                style={{ animationDelay: '0.6s' }}
+              >
+                Complete seu cadastro para começar a oferecer seus serviços
+              </p>
             </div>
-            <p className="text-muted-foreground text-lg animate-fade-in" style={{ animationDelay: '0.6s' }}>
-              Complete seu cadastro para começar a oferecer seus serviços
-            </p>
-          </div>
 
           {/* Progress indicator */}
-          <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center justify-center mt-6 mb-8">
             <div className="flex items-center space-x-4">
               <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
                 step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
