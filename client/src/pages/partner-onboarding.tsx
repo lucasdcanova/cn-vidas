@@ -452,46 +452,46 @@ export default function PartnerOnboardingPage() {
         return;
       }
 
+      // Obter a posição relativa do elemento dentro do container
       const elementRect = element.getBoundingClientRect();
       const containerRect = scrollContainer.getBoundingClientRect();
       
-      // Altura do teclado iOS (varia por dispositivo)
-      const keyboardHeight = window.innerHeight * 0.4; // 40% da altura da tela
+      // Altura do teclado iOS baseada nos logs (aproximadamente 345-390px)
+      const keyboardHeight = 370;
       
-      // Calcula a altura visível disponível
-      const safeAreaTop = 44; // Status bar padrão iOS
-      const visibleHeight = window.innerHeight - keyboardHeight - safeAreaTop;
+      // Altura da área visível (tela - teclado - safe areas)
+      const safeAreaTop = 50;
+      const safeAreaBottom = 34; // iPhone X+ bottom safe area
+      const visibleHeight = window.innerHeight - keyboardHeight - safeAreaTop - safeAreaBottom;
       
-      // Posição alvo: centro da área visível
-      const targetPosition = safeAreaTop + (visibleHeight / 2);
+      // Queremos o campo no centro da área visível
+      const targetPosition = visibleHeight / 2;
       
-      // Posição atual do elemento relativa ao topo do documento
-      const elementTop = element.offsetTop || (elementRect.top + window.pageYOffset);
+      // Posição atual do elemento relativa ao início do container
+      const elementOffsetTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
       
-      // Calcula o scroll necessário para centralizar
-      const currentScroll = scrollContainer.scrollTop || window.pageYOffset;
-      const elementCenter = elementTop - targetPosition + (element.offsetHeight / 2);
+      // Calcula onde devemos scrollar para centralizar o elemento
+      const desiredScrollTop = elementOffsetTop - targetPosition + (element.offsetHeight / 2);
       
-      // Scroll suave para a posição calculada
-      if (scrollContainer === window || scrollContainer === document.documentElement) {
-        window.scrollTo({
-          top: elementCenter,
-          behavior: 'smooth'
-        });
-      } else {
-        scrollContainer.scrollTo({
-          top: elementCenter,
-          behavior: 'smooth'
-        });
-      }
+      // Garante que não vamos scrollar além dos limites
+      const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+      const finalScrollTop = Math.max(0, Math.min(desiredScrollTop, maxScroll));
+      
+      // Executa o scroll
+      scrollContainer.scrollTo({
+        top: finalScrollTop,
+        behavior: 'smooth'
+      });
       
       // Log para debug
       console.log('Scroll debug:', {
-        elementTop,
+        elementOffsetTop,
         targetPosition,
-        elementCenter,
+        desiredScrollTop: finalScrollTop,
         keyboardHeight,
-        visibleHeight
+        visibleHeight,
+        containerHeight: scrollContainer.clientHeight,
+        scrollHeight: scrollContainer.scrollHeight
       });
     }, 400); // Aguarda o teclado abrir completamente
   };
@@ -525,14 +525,13 @@ export default function PartnerOnboardingPage() {
         <div className="max-w-3xl mx-auto px-4 pb-32">
           <div className="text-center mb-8" style={{ animation: 'fadeInSimple 0.5s ease-out forwards' }}>
             <div className="flex flex-col items-center gap-3 mb-4">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center whitespace-nowrap text-gray-900">
-                BEM-VINDO AO CN VIDAS!
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center flex items-center gap-3 text-gray-900">
+                <span>BEM-VINDO AO</span>
+                <img src={cnvidasLogo} alt="CN VIDAS" className="h-10 md:h-12 inline-block object-contain" />
+                <span>!</span>
               </h1>
-              <div className="animate-scale-in" style={{ animationDelay: '0.2s' }}>
-                <img src={cnvidasLogo} alt="CNVidas" className="h-16 md:h-20 object-contain" />
-              </div>
               <h2 className="text-2xl md:text-3xl font-semibold text-primary animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                {user?.name}
+                {user?.fullName || user?.name || 'Parceiro'}
               </h2>
             </div>
             <p className="text-muted-foreground text-lg animate-fade-in" style={{ animationDelay: '0.6s' }}>
