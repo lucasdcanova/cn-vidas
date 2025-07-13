@@ -552,9 +552,8 @@ export default function PartnerOnboardingPage() {
                 <img
                   src={cnvidasLogo}
                   alt="CNVidas"
-                  className="h-9 md:h-11 inline-block object-contain"
+                  className="h-12 md:h-16 inline-block object-contain"
                 />
-                <span>!</span>
               </h1>
               <h2
                 className="text-xl md:text-2xl font-semibold text-primary"
