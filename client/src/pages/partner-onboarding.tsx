@@ -527,11 +527,7 @@ export default function PartnerOnboardingPage() {
             </div>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.5 }}
-          >
+          <div className="animate-slide-up" style={{ animationDelay: '1s' }}>
           <Card className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border-gray-200/50">
           {/* Step 1: Business Information */}
           {step === 1 && (
@@ -1080,15 +1076,11 @@ export default function PartnerOnboardingPage() {
             </Button>
           </CardFooter>
         </Card>
-        </motion.div>
+        </div>
 
         {/* Additional Information */}
         <div className="mt-8 space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
-          >
+          <div className="animate-slide-up" style={{ animationDelay: '1.2s' }}>
           <Card className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl border-gray-200/50">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -1127,7 +1119,7 @@ export default function PartnerOnboardingPage() {
               </div>
             </CardContent>
           </Card>
-          </motion.div>
+          </div>
 
           <div className="text-center text-sm text-muted-foreground">
             <p>
