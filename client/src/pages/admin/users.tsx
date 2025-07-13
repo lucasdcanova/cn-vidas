@@ -698,25 +698,27 @@ const AdminUsersPage: React.FC = () => {
                     {filteredUsers?.length > 0 ? (
                       filteredUsers.map((user) => (
                         <ResponsiveTableRow key={user.id}>
-                          <ResponsiveTableCell header="Nome" className="font-medium">
+                          <ResponsiveTableCell header="Nome" className="font-medium w-[40%]">
                             <div className="flex items-center gap-2 min-w-0">
                               <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-primary/10 text-xs sm:text-sm font-semibold flex-shrink-0">
                                 {user.fullName?.charAt(0).toUpperCase() || 'U'}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="truncate font-medium text-sm sm:text-base">{user.fullName}</p>
-                                <p className="text-xs sm:text-sm text-muted-foreground truncate sm:hidden">{user.email}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="truncate font-medium text-sm sm:text-base">{user.fullName}</p>
+                                  {user.emailVerified && (
+                                    <Check className="h-3 w-3 text-green-500 flex-shrink-0" title="Email verificado" />
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground truncate sm:hidden">{user.email}</p>
                               </div>
                             </div>
                           </ResponsiveTableCell>
-                          <ResponsiveTableCell header="Email" className="hidden sm:table-cell">
-                            <span className="truncate block max-w-[200px]">{user.email}</span>
+                          <ResponsiveTableCell header="Email" className="hidden sm:table-cell w-[25%]">
+                            <span className="truncate block">{user.email}</span>
                           </ResponsiveTableCell>
-                          <ResponsiveTableCell header="Usuário" className="hidden lg:table-cell">
-                            <span className="truncate block max-w-[120px]">{user.username}</span>
-                          </ResponsiveTableCell>
-                          <ResponsiveTableCell header="Perfil">
-                            <Badge className={`text-xs sm:text-sm whitespace-nowrap ${
+                          <ResponsiveTableCell header="Perfil" className="w-[15%]">
+                            <Badge className={`text-xs whitespace-nowrap ${
                               user.role === 'patient' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
                               user.role === 'doctor' ? 'bg-purple-100 text-purple-800 hover:bg-purple-100' :
                               user.role === 'partner' ? 'bg-orange-100 text-orange-800 hover:bg-orange-100' :
@@ -727,74 +729,39 @@ const AdminUsersPage: React.FC = () => {
                                  user.role === 'doctor' ? <Stethoscope className="h-3 w-3" /> :
                                  user.role === 'partner' ? <Building2 className="h-3 w-3" /> : 
                                  <Shield className="h-3 w-3" />}
-                                {user.role === 'patient' ? 'Paciente' :
-                                 user.role === 'doctor' ? 'Médico' :
-                                 user.role === 'partner' ? 'Parceiro' : 'Admin'}
+                                <span className="hidden sm:inline">
+                                  {user.role === 'patient' ? 'Paciente' :
+                                   user.role === 'doctor' ? 'Médico' :
+                                   user.role === 'partner' ? 'Parceiro' : 'Admin'}
+                                </span>
                               </span>
                             </Badge>
                           </ResponsiveTableCell>
-                          <ResponsiveTableCell header="Plano" className="hidden sm:table-cell">
+                          <ResponsiveTableCell header="Plano" className="hidden sm:table-cell w-[15%]">
                             {user.role === 'patient' ? (
-                              user.subscriptionPlan ? (
-                                <Badge className={`text-xs sm:text-sm whitespace-nowrap ${
-                                  user.subscriptionPlan === 'premium' || user.subscriptionPlan === 'premium_family' ? 'bg-yellow-500 hover:bg-yellow-600' : 
-                                  user.subscriptionPlan === 'basic' || user.subscriptionPlan === 'basic_family' ? 'bg-blue-500 hover:bg-blue-600' : 
-                                  user.subscriptionPlan === 'ultra' || user.subscriptionPlan === 'ultra_family' ? 'bg-purple-500 hover:bg-purple-600' :
-                                  'bg-slate-500 hover:bg-slate-600'
-                                }`}>
-                                  {getPlanName(user.subscriptionPlan as any)}
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-xs sm:text-sm whitespace-nowrap">Gratuito</Badge>
-                              )
-                            ) : (
-                              <span className="text-xs sm:text-sm text-muted-foreground">-</span>
-                            )}
-                          </ResponsiveTableCell>
-                          <ResponsiveTableCell header="Status" className="hidden md:table-cell">
-                            {user.role === 'patient' ? (
-                              <Badge 
-                                variant={user.subscriptionStatus === 'active' ? 'default' : 'destructive'}
-                                className="text-xs sm:text-sm whitespace-nowrap"
-                              >
-                                {user.subscriptionStatus === 'active' ? 'Ativo' : 
-                                 user.subscriptionStatus === 'inactive' ? 'Inativo' : 
-                                 user.subscriptionStatus === 'pending' ? 'Pendente' : 
-                                 user.subscriptionStatus || 'N/A'}
-                              </Badge>
-                            ) : (
-                              <span className="text-xs sm:text-sm text-muted-foreground">-</span>
-                            )}
-                          </ResponsiveTableCell>
-                          <ResponsiveTableCell header="Cadastro" className="hidden xl:table-cell">
-                            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                              {formatDate(user.createdAt)}
-                            </span>
-                          </ResponsiveTableCell>
-                          <ResponsiveTableCell header="Verificado" className="hidden lg:table-cell">
-                            <div className="flex justify-center">
-                              {user.emailVerified ? (
-                                <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-                              ) : (
-                                <X className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
-                              )}
-                            </div>
-                          </ResponsiveTableCell>
-                          <ResponsiveTableCell header="Ações" className="text-right w-[80px]">
-                            <div className="flex items-center justify-end gap-2 min-w-[80px]">
-                              {/* Mobile quick actions */}
-                              <div className="flex sm:hidden gap-1">
-                                {user.role === 'patient' && user.subscriptionPlan && (
-                                  <Badge className="text-xs" variant={user.subscriptionStatus === 'active' ? 'default' : 'outline'}>
+                              <div className="flex items-center gap-2">
+                                {user.subscriptionPlan ? (
+                                  <Badge className={`text-xs whitespace-nowrap ${
+                                    user.subscriptionPlan === 'premium' || user.subscriptionPlan === 'premium_family' ? 'bg-yellow-500 hover:bg-yellow-600' : 
+                                    user.subscriptionPlan === 'basic' || user.subscriptionPlan === 'basic_family' ? 'bg-blue-500 hover:bg-blue-600' : 
+                                    user.subscriptionPlan === 'ultra' || user.subscriptionPlan === 'ultra_family' ? 'bg-purple-500 hover:bg-purple-600' :
+                                    'bg-slate-500 hover:bg-slate-600'
+                                  }`}>
                                     {getPlanName(user.subscriptionPlan as any)}
                                   </Badge>
-                                )}
-                                {user.emailVerified ? (
-                                  <Check className="h-4 w-4 text-green-500" />
                                 ) : (
-                                  <X className="h-4 w-4 text-red-500" />
+                                  <Badge variant="outline" className="text-xs whitespace-nowrap">Gratuito</Badge>
+                                )}
+                                {user.subscriptionStatus === 'active' && (
+                                  <Check className="h-3 w-3 text-green-500 flex-shrink-0" title="Ativo" />
                                 )}
                               </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">-</span>
+                            )}
+                          </ResponsiveTableCell>
+                          <ResponsiveTableCell header="Ações" className="text-right w-[5%]">
+                            <div className="flex items-center justify-end">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button 
@@ -814,6 +781,22 @@ const AdminUsersPage: React.FC = () => {
                                       <Edit className="mr-2 h-4 w-4" />
                                       <span>Editar Usuário</span>
                                     </DropdownMenuItem>
+                                    
+                                    {/* Informações do usuário */}
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuLabel className="font-normal text-xs text-muted-foreground">Informações</DropdownMenuLabel>
+                                    <DropdownMenuItem className="text-xs" disabled>
+                                      <span className="text-muted-foreground">Usuário: {user.username}</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-xs" disabled>
+                                      <span className="text-muted-foreground">Cadastro: {formatDate(user.createdAt)}</span>
+                                    </DropdownMenuItem>
+                                    {!user.emailVerified && (
+                                      <DropdownMenuItem className="text-xs" disabled>
+                                        <AlertCircle className="mr-2 h-3 w-3 text-yellow-500" />
+                                        <span className="text-muted-foreground">Email não verificado</span>
+                                      </DropdownMenuItem>
+                                    )}
                                     
                                     {/* Mostrar opções de assinatura apenas para pacientes */}
                                     {user.role === 'patient' && (
@@ -931,7 +914,7 @@ const AdminUsersPage: React.FC = () => {
                       ))
                     ) : (
                       <ResponsiveTableRow>
-                        <ResponsiveTableCell colSpan={6} className="h-24">
+                        <ResponsiveTableCell colSpan={5} className="h-24">
                           <div className="flex flex-col items-center justify-center py-8">
                             <AlertCircle className="h-8 w-8 mb-2 text-muted-foreground" />
                             <p className="text-sm sm:text-base text-muted-foreground text-center">
