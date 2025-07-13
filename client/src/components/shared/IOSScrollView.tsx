@@ -40,7 +40,7 @@ export const IOSScrollView = forwardRef<HTMLDivElement, IOSScrollViewProps>(({
     >
       <div 
         className={cn(
-          "absolute inset-0 overflow-y-auto overflow-x-hidden",
+          "absolute inset-0 overflow-y-auto overflow-x-hidden ios-scroll-view-content",
           // Padding para safe areas no iOS
           isIOS() && "pb-safe pt-safe",
           // Adicionar momentum scrolling no iOS
