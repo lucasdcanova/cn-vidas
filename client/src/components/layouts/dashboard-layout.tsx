@@ -188,12 +188,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const shouldShowSidebar = !isIOSDevice;
 
   return (
-    <>
-      {/* Status bar glassmorphism overlay para iPad */}
-      {isIPadDevice && (
-        <div className="statusbar-glassmorphism-ipad" />
-      )}
-      
     <div className={cn(
       "flex h-screen overflow-hidden bg-blue-50",
       !shouldShowSidebar && "flex-col", // Use flex-col when no sidebar
@@ -428,7 +422,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <MobileNavigation userRole={user?.role} />
       </div>
     </div>
-    </>
   );
 };
 

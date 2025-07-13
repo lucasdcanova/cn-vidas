@@ -29,6 +29,18 @@ userRouter.get('/profile', requireAuth, async (req: AuthenticatedRequest, res: R
 
     // Remove campos sensíveis
     const { password, ...userWithoutPassword } = user;
+    
+    console.log(`📤 GET /profile - Retornando dados do usuário ${req.user.id}:`, {
+      street: userWithoutPassword.street,
+      number: userWithoutPassword.number,
+      complement: userWithoutPassword.complement,
+      neighborhood: userWithoutPassword.neighborhood,
+      address: userWithoutPassword.address,
+      city: userWithoutPassword.city,
+      state: userWithoutPassword.state,
+      zipcode: userWithoutPassword.zipcode
+    });
+    
     return res.json(userWithoutPassword);
   } catch (error) {
     console.error('Erro ao buscar perfil:', error);

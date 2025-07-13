@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { isIPad, isIPhone } from "@/utils/platform";
+import { isIPad, isIPhone, isNativeApp } from "@/utils/platform";
 
 interface MobileNavigationProps {
   userRole?: string;
@@ -16,6 +16,11 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
     setIsIOSDevice(isIPad() || isIPhone());
     setIsIPhoneDevice(isIPhone());
   }, []);
+  
+  // Não mostrar a barra bottom em versões web (incluindo Safari do iPad)
+  if (!isNativeApp()) {
+    return null;
+  }
   
   const isLinkActive = (path: string) => {
     return location === path;
