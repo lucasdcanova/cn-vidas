@@ -447,27 +447,37 @@ export default function PartnerOnboardingPage() {
       const elementRect = element.getBoundingClientRect();
       const containerRect = scrollContainer.getBoundingClientRect();
       
-      // Calcula a altura disponível (container - teclado estimado)
-      const keyboardHeight = window.innerHeight * 0.4; // Estima 40% da tela para o teclado
-      const availableHeight = window.innerHeight - keyboardHeight;
+      // Altura do teclado iOS (aproximadamente 260-350px dependendo do dispositivo)
+      const keyboardHeight = 300;
       
-      // Calcula onde queremos que o elemento fique (centro da área visível)
-      const targetPosition = availableHeight / 2;
+      // Altura visível da tela (tela total - teclado - safe areas)
+      const safeAreaTop = 50; // Estimativa para notch/status bar
+      const visibleHeight = window.innerHeight - keyboardHeight - safeAreaTop;
       
-      // Calcula o quanto precisamos rolar
+      // Queremos o campo no meio da área visível
+      const targetPosition = safeAreaTop + (visibleHeight / 2);
+      
+      // Posição atual do elemento relativa ao container
       const elementTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
+      
+      // Calcula o scroll necessário para centralizar o elemento
       const scrollTo = elementTop - targetPosition + (elementRect.height / 2);
+      
+      // Garante que não vamos rolar além dos limites
+      const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+      const finalScroll = Math.max(0, Math.min(scrollTo, maxScroll));
       
       // Rola suavemente para a posição
       scrollContainer.scrollTo({
-        top: scrollTo,
+        top: finalScroll,
         behavior: 'smooth'
       });
-    }, 300); // Aguarda o teclado abrir
+    }, 350); // Aguarda o teclado abrir completamente
   };
 
   // Handler para quando um input recebe foco
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFocusedField(e.target.id);
     scrollToFocusedElement(e.target);
   };
 
@@ -487,19 +497,19 @@ export default function PartnerOnboardingPage() {
         contentClassName="py-8"
       >
         <div className="max-w-3xl mx-auto px-4 pb-32">
-          <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 mb-4">
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                  Bem-vindo ao
-                </h1>
-                <img src={cnvidasLogo} alt="CNVidas" className="h-10 md:h-12 object-contain" />
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="flex flex-col items-center gap-3 mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-center whitespace-nowrap">
+                BEM-VINDO AO CN VIDAS!
+              </h1>
+              <div className="animate-scale-in" style={{ animationDelay: '0.2s' }}>
+                <img src={cnvidasLogo} alt="CNVidas" className="h-16 md:h-20 object-contain" />
               </div>
-              <h2 className="text-2xl md:text-3xl font-semibold text-primary">
-                {user?.name}!
+              <h2 className="text-2xl md:text-3xl font-semibold text-primary animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                {user?.name}
               </h2>
             </div>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-lg animate-fade-in" style={{ animationDelay: '0.6s' }}>
               Complete seu cadastro para começar a oferecer seus serviços
             </p>
           </div>

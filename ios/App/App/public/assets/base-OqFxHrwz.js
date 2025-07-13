@@ -1,0 +1,1 @@
+import{c as r,f as s,e as i,A as c}from"./index-DzWe-Sc3.js";class h extends r{async authenticate(t){try{await this.internalAuthenticate(t)}catch(e){throw e instanceof s?new i(e.message,e.code):e}}async addResumeListener(t){return c.addListener("appStateChange",({isActive:e})=>{e&&this.checkBiometry().then(a=>{t(a)}).catch(console.error)})}}export{h as B};
