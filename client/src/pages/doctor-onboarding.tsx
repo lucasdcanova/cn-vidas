@@ -284,7 +284,7 @@ export default function DoctorOnboardingPage() {
     }
   };
 
-  // Função para centralizar o campo focado
+  // Função para centralizar o campo focado - IDÊNTICA À DO PARCEIRO
   const scrollToFocusedElement = (element: HTMLElement) => {
     if (!isIOS()) return;
     
@@ -303,7 +303,7 @@ export default function DoctorOnboardingPage() {
       const elementRect = element.getBoundingClientRect();
       const containerRect = scrollContainer.getBoundingClientRect();
       
-      // Altura do teclado iOS baseada nos logs (aproximadamente 345-390px)
+      // Altura do teclado iOS (hardcoded baseado em observações)
       const keyboardHeight = 370;
       
       // Altura da área visível (tela - teclado)
@@ -311,7 +311,6 @@ export default function DoctorOnboardingPage() {
       const visibleHeight = window.innerHeight - keyboardHeight;
       
       // Queremos o campo no centro da área visível entre o teclado e o topo
-      // Adicionamos o safeAreaTop para compensar a status bar
       const targetPosition = safeAreaTop + ((visibleHeight - safeAreaTop) / 2);
       
       // Posição atual do elemento relativa ao início do container
@@ -344,9 +343,10 @@ export default function DoctorOnboardingPage() {
   };
 
   // Handler para quando um input recebe foco
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFocusedField(e.target.id);
-    scrollToFocusedElement(e.target);
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const fieldId = e.target.id || e.target.getAttribute('data-field-id');
+    setFocusedField(fieldId);
+    scrollToFocusedElement(e.target as HTMLElement);
   };
 
   // Handler para quando um input perde o foco
@@ -683,11 +683,12 @@ export default function DoctorOnboardingPage() {
                     >
                       <SelectTrigger 
                         id="pixKeyType"
+                        data-field-id="pixKeyType"
                         className={`rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
                           focusedField === 'pixKeyType' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
                         }`}
-                        onFocus={() => setFocusedField('pixKeyType')}
-                        onBlur={() => setFocusedField(null)}
+                        onFocus={handleInputFocus}
+                        onBlur={handleInputBlur}
                       >
                         <SelectValue placeholder="Selecione o tipo de chave" />
                       </SelectTrigger>
@@ -749,11 +750,12 @@ export default function DoctorOnboardingPage() {
                     >
                       <SelectTrigger 
                         id="accountType"
+                        data-field-id="accountType"
                         className={`rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
                           focusedField === 'accountType' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
                         }`}
-                        onFocus={() => setFocusedField('accountType')}
-                        onBlur={() => setFocusedField(null)}
+                        onFocus={handleInputFocus}
+                        onBlur={handleInputBlur}
                       >
                         <SelectValue placeholder="Selecione o tipo de conta" />
                       </SelectTrigger>
@@ -784,20 +786,10 @@ export default function DoctorOnboardingPage() {
               disabled={updateProfileMutation.isPending || completeOnboardingMutation.isPending}
               className={step === 1 ? 'ml-auto' : ''}
             >
-              {step === 1 && updateProfileMutation.isPending ? (
+              {updateProfileMutation.isPending || completeOnboardingMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando informações...
-                </>
-              ) : step === 2 && updateProfileMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando valor...
-                </>
-              ) : step === 3 && completeOnboardingMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Finalizando cadastro...
+                  {step === 3 ? 'Finalizando cadastro...' : 'Salvando...'}
                 </>
               ) : step === 3 ? (
                 <>
@@ -867,9 +859,9 @@ export default function DoctorOnboardingPage() {
               </a>
             </p>
           </div>
-          </div> {/* Fecha a div mt-8 space-y-6 */}
-        </div> {/* Fecha a div max-w-3xl */}
-      </div> {/* Fecha a div bg-gray-50 */}
+          </div>
+        </div>
+      </div>
       </IOSScrollView>
     </div>
   );
