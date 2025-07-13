@@ -199,7 +199,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
 
         {/* Main Content - Improved scrolling -->*/}
         <main className="flex-1 overflow-y-auto bg-background">
-          <div className="container mx-auto p-4 lg:p-6 max-w-full">
+          <div className="container mx-auto p-4 lg:p-6 pb-8 lg:pb-12 max-w-full">
             {children}
           </div>
         </main>
