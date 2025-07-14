@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useEffect } from 'react';
 import { useForm, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -57,6 +57,13 @@ export const AddressFormOptimized = memo(({
 }: AddressFormOptimizedProps) => {
   const [isSearchingCep, setIsSearchingCep] = useState(false);
   const [cepError, setCepError] = useState<string | null>(null);
+  
+  // Log para debug
+  useEffect(() => {
+    console.log('[AddressFormOptimized] Component mounted/updated');
+    console.log('[AddressFormOptimized] External control:', !!externalControl);
+    console.log('[AddressFormOptimized] Default values:', defaultValues);
+  }, [externalControl, defaultValues]);
   
   // Inicializar o formulário apenas se não houver control externo
   const internalForm = useForm<AddressFormValues>({
@@ -190,8 +197,6 @@ export const AddressFormOptimized = memo(({
 
   const formFields = (
     <>
-      {console.log('[AddressFormOptimized] Renderizando campos com control externo:', !!externalControl)}
-      {console.log('[AddressFormOptimized] Default values:', defaultValues)}
       {title && <h3 className="text-lg font-medium">{title}</h3>}
       {description && <p className="text-sm text-muted-foreground mb-4">{description}</p>}
       
@@ -218,7 +223,7 @@ export const AddressFormOptimized = memo(({
                       name="zipcode"
                       placeholder="00000-000"
                       disabled={isSubmitting || isReadOnly}
-                      value={formatCep(field.value)}
+                      value={field.value ? formatCep(field.value) : ''}
                       onChange={(e) => {
                         const formatted = formatCep(e.target.value);
                         field.onChange(formatted);

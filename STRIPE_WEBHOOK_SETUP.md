@@ -17,7 +17,7 @@ Os cartões de crédito não estavam sendo salvos corretamente porque não havia
 1. Acesse o [Dashboard do Stripe](https://dashboard.stripe.com/webhooks)
 2. Clique em "Add endpoint"
 3. Configure:
-   - **Endpoint URL**: `https://cnvidas.onrender.com/api/webhooks/stripe`
+   - **Endpoint URL**: `https://www.homologacao.cnvidas.com.br/api/webhooks/stripe`
    - **Events to listen**: Selecione pelo menos:
      - `setup_intent.succeeded`
      - `payment_method.attached`
