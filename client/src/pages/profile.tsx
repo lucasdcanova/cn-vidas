@@ -1285,8 +1285,18 @@ const Profile: React.FC = () => {
                           <h3 className="text-lg font-medium">Endereço</h3>
                         </div>
                         
+                        {console.log('[Profile] Renderizando AddressForm com valores:', {
+                          zipcode: patientForm.watch("zipcode"),
+                          street: patientForm.watch("street"),
+                          number: patientForm.watch("number"),
+                          neighborhood: patientForm.watch("neighborhood"),
+                          city: patientForm.watch("city"),
+                          state: patientForm.watch("state")
+                        })}
+                        
                         <AddressForm
                           key={`patient-address-${profileData?.id}-${isPatientFormInitialized}`}
+                          control={patientForm.control} // Passar o control do formulário pai
                           defaultValues={{
                             zipcode: patientForm.watch("zipcode") || "",
                             street: patientForm.watch("street") || "",

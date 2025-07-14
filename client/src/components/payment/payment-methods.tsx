@@ -55,7 +55,7 @@ function PaymentForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess:
     setIsLoading(true);
 
     try {
-      const { error } = await stripe.confirmSetup({
+      const { error, setupIntent } = await stripe.confirmSetup({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/payments`,
@@ -66,6 +66,23 @@ function PaymentForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess:
       if (error) {
         throw error;
       }
+
+      // Aguardar um pouco para garantir que o webhook processou o evento
+      console.log('Setup Intent confirmado:', setupIntent);
+      
+      if (setupIntent?.id) {
+        // Confirmar no backend que o setup intent foi processado
+        const confirmResponse = await apiRequest('POST', '/api/subscription/confirm-setup-intent', {
+          setupIntentId: setupIntent.id
+        });
+        
+        if (!confirmResponse.ok) {
+          console.error('Erro ao confirmar setup intent no backend');
+        }
+      }
+      
+      // Dar tempo adicional para garantir processamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast({
         title: "Método de pagamento adicionado",

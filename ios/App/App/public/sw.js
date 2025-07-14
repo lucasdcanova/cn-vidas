@@ -33,52 +33,8 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Estratégia de cache: Network First com fallback para cache
-self.addEventListener('fetch', event => {
-  // Ignorar requisições não-GET
-  if (event.request.method !== 'GET') return;
-
-  // Ignorar requisições para APIs externas e WebSockets
-  const url = new URL(event.request.url);
-  if (url.protocol === 'ws:' || url.protocol === 'wss:') return;
-  if (url.hostname !== self.location.hostname) return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Não cachear respostas com erro
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
-        }
-
-        // Clonar a resposta
-        const responseToCache = response.clone();
-
-        caches.open(CACHE_NAME)
-          .then(cache => {
-            // Não cachear requisições da API
-            if (!event.request.url.includes('/api/')) {
-              cache.put(event.request, responseToCache);
-            }
-          });
-
-        return response;
-      })
-      .catch(() => {
-        // Se a rede falhar, tentar buscar do cache
-        return caches.match(event.request)
-          .then(response => {
-            if (response) {
-              return response;
-            }
-            // Retornar página offline se disponível
-            if (event.request.destination === 'document') {
-              return caches.match('/offline.html');
-            }
-          });
-      })
-  );
-});
+// Service Worker desabilitado temporariamente
+// NÃO interceptar nenhuma requisição fetch
 
 // Notificações Push (preparado para futuro)
 self.addEventListener('push', event => {
