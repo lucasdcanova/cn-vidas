@@ -46,7 +46,7 @@ curl -X POST https://api.daily.co/v1/webhooks \
   -H "Authorization: Bearer YOUR_DAILY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://cnvidas.onrender.com/api/webhooks/daily-recording",
+    "url": "https://www.homologacao.cnvidas.com.br/api/webhooks/daily-recording",
     "eventTypes": [
       "recording.started",
       "recording.stopped",
@@ -60,7 +60,7 @@ curl -X POST https://api.daily.co/v1/webhooks \
 
 Adicione ao `.env` se necessário:
 ```env
-DAILY_WEBHOOK_URL=https://cnvidas.onrender.com/api/webhooks/daily-recording
+DAILY_WEBHOOK_URL=https://www.homologacao.cnvidas.com.br/api/webhooks/daily-recording
 DAILY_WEBHOOK_SECRET=seu-secret-aqui
 ```
 

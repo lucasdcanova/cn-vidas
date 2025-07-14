@@ -86,7 +86,7 @@ export const S3_CORS_CONFIG = {
       AllowedHeaders: ['*'],
       AllowedMethods: ['GET', 'PUT', 'POST'],
       AllowedOrigins: [
-        'https://cnvidas.onrender.com',
+        'https://www.homologacao.cnvidas.com.br',
         'capacitor://localhost', // iOS
         'http://localhost' // Android
       ],
