@@ -1,21 +1,25 @@
-// Registrar o Service Worker
+// Registrar o Service Worker - TEMPORARIAMENTE DESABILITADO
 export function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(registration => {
-          console.log('Service Worker registrado com sucesso:', registration);
+  // Service Worker desabilitado temporariamente devido a problemas
+  console.log('Service Worker temporariamente desabilitado');
+  return;
+  
+  // if ('serviceWorker' in navigator) {
+  //   window.addEventListener('load', () => {
+  //     navigator.serviceWorker.register('/sw.js')
+  //       .then(registration => {
+  //         console.log('Service Worker registrado com sucesso:', registration);
           
-          // Verificar atualizações periodicamente
-          setInterval(() => {
-            registration.update();
-          }, 60000); // A cada minuto
-        })
-        .catch(error => {
-          console.error('Erro ao registrar Service Worker:', error);
-        });
-    });
-  }
+  //         // Verificar atualizações periodicamente
+  //         setInterval(() => {
+  //           registration.update();
+  //         }, 60000); // A cada minuto
+  //       })
+  //       .catch(error => {
+  //         console.error('Erro ao registrar Service Worker:', error);
+  //       });
+  //   });
+  // }
 }
 
 // Gerenciar prompt de instalação do PWA

@@ -156,9 +156,43 @@ doctorRouter.put('/profile', requireAuth, requireDoctorRole, async (req: Authent
       address 
     } = req.body;
     
-    const doctor = await storage.getDoctorByUserId(req.user!.id);
+    let doctor = await storage.getDoctorByUserId(req.user!.id);
+    
+    // Se o perfil não existe, criar um novo
     if (!doctor) {
-      return res.status(404).json({ error: 'Perfil de médico não encontrado' });
+      console.log('🔍 Doctor PUT /profile - Perfil não encontrado, criando novo perfil para usuário:', req.user!.id);
+      
+      try {
+        // Buscar dados do usuário para pegar o username (CRM)
+        const user = await storage.getUser(req.user!.id);
+        
+        // Criar novo perfil de médico
+        doctor = await storage.createDoctor({
+          userId: req.user!.id,
+          specialization: specialization || specialty || '',
+          licenseNumber: licenseNumber || crm || user?.username || '',
+          biography: biography || bio || '',
+          education: education || '',
+          experienceYears: parseInt(experienceYears) || 0,
+          availableForEmergency: Boolean(availableForEmergency) || false,
+          consultationFee: parseFloat(consultationFee || consultationPrice) || 0,
+          status: 'pending',
+          welcomeCompleted: false,
+          onboardingCompleted: false,
+          pixKeyType: pixKeyType || '',
+          pixKey: pixKey || '',
+          bankName: bankName || '',
+          accountType: accountType || 'corrente'
+        });
+        
+        console.log('✅ Doctor PUT /profile - Novo perfil criado:', doctor.id);
+      } catch (createError) {
+        console.error('❌ Erro ao criar perfil de médico:', createError);
+        return res.status(500).json({ 
+          error: 'Erro ao criar perfil de médico',
+          details: createError instanceof Error ? createError.message : 'Erro desconhecido'
+        });
+      }
     }
     
     // Mapear campos para o formato correto do banco
