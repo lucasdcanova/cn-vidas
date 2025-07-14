@@ -1291,51 +1291,6 @@ const Profile: React.FC = () => {
                           <h3 className="text-lg font-medium">Endereço</h3>
                         </div>
                         
-                        {/* Campo de teste para debug */}
-                        <div className="mb-4 p-4 bg-gray-100 rounded">
-                          <p className="text-sm">Debug - Valores atuais do formulário:</p>
-                          <p className="text-xs">CEP: {patientForm.watch("zipcode") || "(vazio)"}</p>
-                          <p className="text-xs">Rua: {patientForm.watch("street") || "(vazio)"}</p>
-                          <p className="text-xs">Número: {patientForm.watch("number") || "(vazio)"}</p>
-                          <p className="text-xs">Bairro: {patientForm.watch("neighborhood") || "(vazio)"}</p>
-                          <p className="text-xs">Cidade: {patientForm.watch("city") || "(vazio)"}</p>
-                          <p className="text-xs">Estado: {patientForm.watch("state") || "(vazio)"}</p>
-                        </div>
-                        
-                        {/* Campo de CEP direto para teste */}
-                        <FormField
-                          control={patientForm.control}
-                          name="zipcode"
-                          render={({ field }) => (
-                            <FormItem className="mb-4">
-                              <FormLabel>CEP (teste direto)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="00000-000"
-                                  {...field}
-                                  disabled={!isEditMode}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        {(() => {
-                          const formValues = patientForm.getValues();
-                          console.log('[Profile] Renderizando AddressForm com valores:', {
-                            zipcode: formValues.zipcode,
-                            street: formValues.street,
-                            number: formValues.number,
-                            neighborhood: formValues.neighborhood,
-                            city: formValues.city,
-                            state: formValues.state,
-                            isInitialized: isPatientFormInitialized,
-                            profileData: profileData
-                          });
-                          return null;
-                        })()}
-                        
                         <AddressForm
                           key={`patient-address-${profileData?.id}-${isPatientFormInitialized}-${forceUpdate}`}
                           control={patientForm.control} // Passar o control do formulário pai

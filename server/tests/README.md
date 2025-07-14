@@ -52,7 +52,7 @@ node server/tests/test-doctor-upload.js
 TEST_DOCTOR_EMAIL=doctor@example.com TEST_DOCTOR_PASSWORD=password node server/tests/test-doctor-upload.js
 
 # Against production (be careful!)
-API_URL=https://cnvidas.onrender.com node server/tests/test-doctor-upload.js
+API_URL=https://www.homologacao.cnvidas.com.br node server/tests/test-doctor-upload.js
 ```
 
 ## Test Coverage
