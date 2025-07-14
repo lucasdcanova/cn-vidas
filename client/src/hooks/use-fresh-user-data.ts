@@ -12,6 +12,16 @@ export function useFreshUserData() {
   useEffect(() => {
     const refreshUserData = async () => {
       try {
+        // Verificar se há token de autenticação antes de tentar fazer refresh
+        const authToken = localStorage.getItem('authToken');
+        const hasCookies = document.cookie.includes('auth_token');
+        
+        // Se não há token nem cookies, não tentar fazer refresh
+        if (!authToken && !hasCookies) {
+          console.log('🔒 Nenhum token de autenticação encontrado, pulando refresh');
+          return;
+        }
+        
         // Forçar refresh dos dados do usuário
         const response = await apiRequest('POST', '/api/auth/refresh-user');
         const userData = await response.json();
@@ -31,6 +41,16 @@ export function useFreshUserData() {
   // Também retornar uma função para refresh manual
   const refreshUserData = async () => {
     try {
+      // Verificar se há token de autenticação antes de tentar fazer refresh
+      const authToken = localStorage.getItem('authToken');
+      const hasCookies = document.cookie.includes('auth_token');
+      
+      // Se não há token nem cookies, não tentar fazer refresh
+      if (!authToken && !hasCookies) {
+        console.log('🔒 Nenhum token de autenticação encontrado, pulando refresh manual');
+        return null;
+      }
+      
       const response = await apiRequest('POST', '/api/auth/refresh-user');
       const userData = await response.json();
       

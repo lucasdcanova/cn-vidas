@@ -156,11 +156,14 @@ export default function ProfileImageUploader({
       console.log('[ProfileImageUploader] Dados recebidos:', data);
 
       if (data.imageUrl) {
-        // Forçar refresh dos dados do usuário primeiro
-        try {
-          await apiRequest('POST', '/api/auth/refresh-user');
-        } catch (error) {
-          console.error('Erro ao fazer refresh dos dados:', error);
+        // Forçar refresh dos dados do usuário primeiro (apenas se houver token)
+        const authToken = localStorage.getItem('authToken');
+        if (authToken) {
+          try {
+            await apiRequest('POST', '/api/auth/refresh-user');
+          } catch (error) {
+            console.error('Erro ao fazer refresh dos dados:', error);
+          }
         }
         
         // Atualizar cache do React Query - IMPORTANTE: usar a mesma queryKey do useAuth
@@ -215,11 +218,14 @@ export default function ProfileImageUploader({
     try {
       await apiRequest('DELETE', '/api/profile/remove-image');
 
-      // Forçar refresh dos dados do usuário primeiro
-      try {
-        await apiRequest('POST', '/api/auth/refresh-user');
-      } catch (error) {
-        console.error('Erro ao fazer refresh dos dados:', error);
+      // Forçar refresh dos dados do usuário primeiro (apenas se houver token)
+      const authToken = localStorage.getItem('authToken');
+      if (authToken) {
+        try {
+          await apiRequest('POST', '/api/auth/refresh-user');
+        } catch (error) {
+          console.error('Erro ao fazer refresh dos dados:', error);
+        }
       }
       
       // Invalidar as mesmas queries do upload
