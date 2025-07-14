@@ -40,13 +40,17 @@ import { APNsService } from "./services/apns-service";
   
   app.use(cors(corsOptions));
 
+  // Raw body para webhook do Stripe (DEVE vir ANTES dos outros parsers)
+  app.use('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
+
   // Configurações básicas
-  // Excluir rotas de upload do parser JSON
+  // Excluir rotas de upload e webhook do Stripe do parser JSON
   app.use((req, res, next) => {
     if (req.path.includes('/doctor-profile-image') || 
         req.path.includes('/profile/upload-image') ||
-        req.path.includes('profile-image')) {
-      // Skip JSON parsing for file uploads
+        req.path.includes('profile-image') ||
+        req.path.includes('/api/webhooks/stripe')) {
+      // Skip JSON parsing for file uploads and Stripe webhooks
       next();
     } else {
       express.json({ limit: '50mb' })(req, res, next);
