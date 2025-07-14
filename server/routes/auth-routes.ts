@@ -225,7 +225,6 @@ authRouter.post('/register', async (req: Request, res: Response) => {
       try {
         await storage.createDoctor({
           userId: newUser.id,
-          name: newUser.fullName,
           specialization: '',
           licenseNumber: newUser.username || '',
           biography: '',
@@ -233,7 +232,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
           experienceYears: 0,
           availableForEmergency: false,
           consultationFee: 0,
-          status: 'active',
+          status: 'pending',
           welcomeCompleted: false,
           onboardingCompleted: false
         });
