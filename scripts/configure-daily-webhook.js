@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const DAILY_API_KEY = process.env.DAILY_API_KEY;
 const DAILY_DOMAIN = process.env.DAILY_DOMAIN;
-const WEBHOOK_URL = process.env.DAILY_WEBHOOK_URL || 'https://cnvidas.onrender.com/api/webhooks/daily-recording';
+const WEBHOOK_URL = process.env.DAILY_WEBHOOK_URL || 'https://www.homologacao.cnvidas.com.br/api/webhooks/daily-recording';
 
 async function configureDailyWebhook() {
   console.log('🔧 Configurando webhook do Daily.co...');

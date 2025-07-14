@@ -73,7 +73,7 @@ http://localhost:5173
 
 ### 1. Deploy em Produção
 - O PWA precisa de HTTPS (✅ automático no Render)
-- Testar após deploy em https://cnvidas.onrender.com
+- Testar após deploy em https://www.homologacao.cnvidas.com.br
 
 ### 2. Melhorias Futuras
 - [ ] Implementar sincronização offline completa

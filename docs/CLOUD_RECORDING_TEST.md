@@ -25,7 +25,7 @@ curl -X POST https://api.daily.co/v1/webhooks \
   -H "Authorization: Bearer 0642e267ec3735a1f93e22af832e31cf13cd3f138f1fcd13394d4d83994b8137" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://cnvidas.onrender.com/api/webhooks/daily-recording",
+    "url": "https://www.homologacao.cnvidas.com.br/api/webhooks/daily-recording",
     "eventTypes": [
       "recording.started",
       "recording.stopped",
