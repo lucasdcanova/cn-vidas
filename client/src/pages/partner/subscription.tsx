@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
+import DashboardLayout from "@/components/layouts/dashboard-layout";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -154,7 +155,7 @@ function CheckoutForm({ plan, onSuccess }: { plan: Plan; onSuccess: () => void }
 
 export default function PartnerSubscription() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null>(null);
   const [billingHistory, setBillingHistory] = useState<BillingHistory[]>([]);
@@ -164,12 +165,12 @@ export default function PartnerSubscription() {
 
   useEffect(() => {
     if (user?.role !== 'partner') {
-      navigate('/');
+      setLocation('/');
       return;
     }
     
     fetchData();
-  }, [user, navigate]);
+  }, [user, setLocation]);
 
   const fetchData = async () => {
     try {
@@ -285,6 +286,16 @@ export default function PartnerSubscription() {
     return colors[planType as keyof typeof colors] || 'text-gray-600';
   };
 
+  const getPlanDisplayName = (planType: string): string => {
+    const names = {
+      free: 'Gratuito',
+      basic: 'Básico',
+      premium: 'Premium',
+      ultra: 'Ultra'
+    };
+    return names[planType as keyof typeof names] || planType;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -294,73 +305,97 @@ export default function PartnerSubscription() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <CreditCard className="h-8 w-8" />
-          Assinatura e Faturamento
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Gerencie seu plano e histórico de pagamentos
-        </p>
-      </div>
+    <DashboardLayout>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <CreditCard className="h-8 w-8" />
+            Assinatura e Faturamento
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Gerencie seu plano e histórico de pagamentos
+          </p>
+        </div>
 
       {/* Assinatura Atual */}
-      {currentSubscription && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Plano Atual</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {currentSubscription.plan && (
-                  <>
-                    <div className={`p-3 rounded-lg bg-primary/10 ${getPlanColor(currentSubscription.plan.planType)}`}>
-                      {(() => {
-                        const Icon = getPlanIcon(currentSubscription.plan.planType);
-                        return <Icon className="h-8 w-8" />;
-                      })()}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold">{currentSubscription.plan.planName}</h3>
-                      <p className="text-muted-foreground">
-                        {currentSubscription.isFreePlan ? 'Gratuito' : `R$ ${currentSubscription.plan.monthlyPrice}/mês`}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline">
-                          <Users className="h-3 w-3 mr-1" />
-                          {currentSubscription.activeCollaborators} colaboradores ativos
-                        </Badge>
-                        {currentSubscription.plan.maxCollaborators && (
-                          <Badge variant="secondary">
-                            Limite: {currentSubscription.plan.maxCollaborators}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-              
-              {currentSubscription.subscription && !currentSubscription.isFreePlan && (
-                <div className="text-right">
-                  {currentSubscription.subscription.nextBillingDate && (
-                    <p className="text-sm text-muted-foreground">
-                      Próxima cobrança: {format(new Date(currentSubscription.subscription.nextBillingDate), 'dd/MM/yyyy', { locale: ptBR })}
-                    </p>
-                  )}
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-2"
-                    onClick={handleCancelSubscription}
-                  >
-                    Cancelar Assinatura
-                  </Button>
-                </div>
-              )}
+      {currentSubscription && currentSubscription.subscription && (
+        <Card className={`mb-8 mt-4 overflow-hidden border-2 shadow-lg ${(() => {
+          const planType = currentSubscription.plan?.planType;
+          if (planType === 'premium') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200';
+          if (planType === 'basic') return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200';
+          if (planType === 'ultra') return 'bg-gradient-to-br from-violet-50 to-purple-50 border-violet-200';
+          return 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200';
+        })()}`}>
+          <CardHeader className={`p-4 md:p-6 ${(() => {
+            const planType = currentSubscription.plan?.planType;
+            if (planType === 'premium') return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white';
+            if (planType === 'basic') return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
+            if (planType === 'ultra') return 'bg-gradient-to-r from-violet-500 to-purple-600 text-white';
+            return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white';
+          })()}`}>
+            <div className="flex justify-between items-center">
+              <CardTitle className="flex items-center text-white">
+                <CreditCard className="mr-2 h-5 w-5" />
+                Sua assinatura atual
+              </CardTitle>
+              <Badge className="bg-white/20 text-white border-white/30">
+                {currentSubscription.subscription.status === "active" ? "Ativa" : 
+                 currentSubscription.subscription.status === "trial" ? "Em teste" : 
+                 currentSubscription.subscription.status}
+              </Badge>
             </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            {currentSubscription.plan && (
+              <div className="space-y-4">
+                <div className="flex flex-col md:flex-row justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl md:text-2xl font-bold">
+                      {currentSubscription.plan.planName}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {currentSubscription.plan.maxCollaborators 
+                        ? `Até ${currentSubscription.plan.maxCollaborators} colaboradores`
+                        : "Colaboradores ilimitados"}
+                    </p>
+                    <div className="mt-4 space-y-2">
+                      {currentSubscription.plan.features && Object.entries(currentSubscription.plan.features).map(([key, value]) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          <span className="text-sm text-gray-700">
+                            {key === 'servicesLimit' && `${value} serviços ativos`}
+                            {key === 'monthlyBookings' && `${value} agendamentos/mês`}
+                          </span>
+                        </div>
+                      ))}
+                      {currentSubscription.plan.prioritySupport && (
+                        <div className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          <span className="text-sm text-gray-700">Suporte prioritário</span>
+                        </div>
+                      )}
+                      {currentSubscription.plan.analyticsAccess && (
+                        <div className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          <span className="text-sm text-gray-700">Análises avançadas</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-left md:text-right">
+                    <p className="text-2xl md:text-3xl font-bold">
+                      R$ {parseFloat(currentSubscription.plan.monthlyPrice).toFixed(2)}
+                    </p>
+                    <p className="text-xs md:text-sm text-muted-foreground">/mês</p>
+                    {currentSubscription.subscription.nextBillingDate && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Próximo pagamento: {format(new Date(currentSubscription.subscription.nextBillingDate), "dd/MM/yyyy", { locale: ptBR })}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -376,21 +411,36 @@ export default function PartnerSubscription() {
             return (
               <Card 
                 key={plan.id} 
-                className={`relative ${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}
+                className={`relative overflow-hidden transition-all hover:shadow-lg border-2 ${
+                  isCurrentPlan ? 'ring-2 ring-primary' : ''
+                } ${(() => {
+                  if (plan.planType === 'premium') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300';
+                  if (plan.planType === 'basic') return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300';
+                  if (plan.planType === 'ultra') return 'bg-gradient-to-br from-violet-50 to-purple-50 border-violet-200 hover:border-violet-300';
+                  return 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200';
+                })()}`}
               >
                 {isCurrentPlan && (
-                  <Badge className="absolute top-2 right-2" variant="default">
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-2 py-1 text-xs md:text-sm font-medium rounded-bl-lg z-10">
                     Plano Atual
-                  </Badge>
+                  </div>
                 )}
                 
-                <CardHeader>
-                  <div className={`p-2 rounded-lg bg-primary/10 w-fit ${getPlanColor(plan.planType)}`}>
-                    <Icon className="h-6 w-6" />
+                <CardHeader className={`${(() => {
+                  if (plan.planType === 'premium') return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white';
+                  if (plan.planType === 'basic') return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
+                  if (plan.planType === 'ultra') return 'bg-gradient-to-r from-violet-500 to-purple-600 text-white';
+                  return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white';
+                })()}`}>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg text-white">{plan.planName}</CardTitle>
+                    <Icon className="h-5 w-5 text-white/80" />
                   </div>
-                  <CardTitle className="mt-4">{plan.planName}</CardTitle>
-                  <CardDescription>
-                    {plan.planType === 'free' ? 'Gratuito' : `R$ ${plan.monthlyPrice}/mês`}
+                  <CardDescription className="text-white/90 mt-2">
+                    <span className="text-2xl font-bold text-white">
+                      {plan.planType === 'free' ? 'Grátis' : `R$ ${parseFloat(plan.monthlyPrice).toFixed(2)}`}
+                    </span>
+                    {plan.planType !== 'free' && <span className="text-sm">/mês</span>}
                   </CardDescription>
                 </CardHeader>
                 
@@ -519,6 +569,7 @@ export default function PartnerSubscription() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
