@@ -227,11 +227,14 @@ O `AndroidManifest.xml` já inclui:
 ## Deploy
 
 O projeto está configurado para deploy automático:
-- **URL de homologação**: https://www.homologacao.cnvidas.com.br
-- **URL de produção**: https://www.cnvidas.com.br (quando lançar)
+- **URL do sistema (homologação e produção)**: https://www.homologacao.cnvidas.com.br
+- **URL da landing page (site institucional)**: https://www.cnvidas.com.br
 - **Deploy automático**: Após cada `git push` para a branch `main`
 
-IMPORTANTE: NUNCA use URLs como cnvidas.onrender.com - o domínio correto é sempre www.homologacao.cnvidas.com.br
+IMPORTANTE: 
+- NUNCA use URLs como cnvidas.onrender.com
+- O sistema SEMPRE roda em www.homologacao.cnvidas.com.br (mesmo em produção)
+- cnvidas.com.br é apenas a landing page, NÃO é o sistema
 
 ## Integração VIDaaS - Certificação Digital de Médicos (A IMPLEMENTAR)
 
