@@ -271,6 +271,26 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
                 Endereços
             </Link>
             
+            <Link href="/partner/collaborators"
+              className={`${linkBaseClass} ${
+                isLinkActive("/partner/collaborators") 
+                  ? linkActiveClass 
+                  : linkInactiveClass
+              }`}>
+                <Users className="w-5 h-5 mr-3" />
+                Colaboradores
+            </Link>
+            
+            <Link href="/partner/subscription"
+              className={`${linkBaseClass} ${
+                isLinkActive("/partner/subscription") 
+                  ? linkActiveClass 
+                  : linkInactiveClass
+              }`}>
+                <CreditCard className="w-5 h-5 mr-3" />
+                Assinatura
+            </Link>
+            
             <Link href="/partner/verification"
               className={`${linkBaseClass} ${
                 isLinkActive("/partner/verification") 
