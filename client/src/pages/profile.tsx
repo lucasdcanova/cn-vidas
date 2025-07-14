@@ -302,6 +302,7 @@ const Profile: React.FC = () => {
   
   // Estado para controlar se os dados iniciais já foram carregados
   const [isPatientFormInitialized, setIsPatientFormInitialized] = React.useState(false);
+  const [forceUpdate, setForceUpdate] = React.useState(0);
   
   // Atualizar o formulário quando os dados do perfil forem carregados pela primeira vez
   React.useEffect(() => {
@@ -331,7 +332,12 @@ const Profile: React.FC = () => {
         state: profileData.state || "",
         birthDate: profileData.birthDate ? new Date(profileData.birthDate).toISOString().split('T')[0] : "",
       });
-      setIsPatientFormInitialized(true);
+      // Pequeno delay para garantir que o formulário foi atualizado
+      setTimeout(() => {
+        setIsPatientFormInitialized(true);
+        // Forçar re-render do AddressForm após carregar os dados
+        setForceUpdate(prev => prev + 1);
+      }, 100);
     }
   }, [profileData, isPatientFormInitialized, user?.role]);
   
@@ -1285,26 +1291,62 @@ const Profile: React.FC = () => {
                           <h3 className="text-lg font-medium">Endereço</h3>
                         </div>
                         
-                        {console.log('[Profile] Renderizando AddressForm com valores:', {
-                          zipcode: patientForm.watch("zipcode"),
-                          street: patientForm.watch("street"),
-                          number: patientForm.watch("number"),
-                          neighborhood: patientForm.watch("neighborhood"),
-                          city: patientForm.watch("city"),
-                          state: patientForm.watch("state")
-                        })}
+                        {/* Campo de teste para debug */}
+                        <div className="mb-4 p-4 bg-gray-100 rounded">
+                          <p className="text-sm">Debug - Valores atuais do formulário:</p>
+                          <p className="text-xs">CEP: {patientForm.watch("zipcode") || "(vazio)"}</p>
+                          <p className="text-xs">Rua: {patientForm.watch("street") || "(vazio)"}</p>
+                          <p className="text-xs">Número: {patientForm.watch("number") || "(vazio)"}</p>
+                          <p className="text-xs">Bairro: {patientForm.watch("neighborhood") || "(vazio)"}</p>
+                          <p className="text-xs">Cidade: {patientForm.watch("city") || "(vazio)"}</p>
+                          <p className="text-xs">Estado: {patientForm.watch("state") || "(vazio)"}</p>
+                        </div>
+                        
+                        {/* Campo de CEP direto para teste */}
+                        <FormField
+                          control={patientForm.control}
+                          name="zipcode"
+                          render={({ field }) => (
+                            <FormItem className="mb-4">
+                              <FormLabel>CEP (teste direto)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="00000-000"
+                                  {...field}
+                                  disabled={!isEditMode}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        {(() => {
+                          const formValues = patientForm.getValues();
+                          console.log('[Profile] Renderizando AddressForm com valores:', {
+                            zipcode: formValues.zipcode,
+                            street: formValues.street,
+                            number: formValues.number,
+                            neighborhood: formValues.neighborhood,
+                            city: formValues.city,
+                            state: formValues.state,
+                            isInitialized: isPatientFormInitialized,
+                            profileData: profileData
+                          });
+                          return null;
+                        })()}
                         
                         <AddressForm
-                          key={`patient-address-${profileData?.id}-${isPatientFormInitialized}`}
+                          key={`patient-address-${profileData?.id}-${isPatientFormInitialized}-${forceUpdate}`}
                           control={patientForm.control} // Passar o control do formulário pai
                           defaultValues={{
-                            zipcode: patientForm.watch("zipcode") || "",
-                            street: patientForm.watch("street") || "",
-                            number: patientForm.watch("number") || "",
-                            complement: patientForm.watch("complement") || "",
-                            neighborhood: patientForm.watch("neighborhood") || "",
-                            city: patientForm.watch("city") || "",
-                            state: patientForm.watch("state") || "",
+                            zipcode: patientForm.getValues("zipcode") || "",
+                            street: patientForm.getValues("street") || "",
+                            number: patientForm.getValues("number") || "",
+                            complement: patientForm.getValues("complement") || "",
+                            neighborhood: patientForm.getValues("neighborhood") || "",
+                            city: patientForm.getValues("city") || "",
+                            state: patientForm.getValues("state") || "",
                           }}
                           isSubmitting={isUpdatingProfile || !isEditMode}
                           onSubmit={(addressData) => {
