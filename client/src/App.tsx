@@ -238,7 +238,7 @@ function Router() {
   );
 }
 
-function App() {
+function AppContent() {
   // Usar hook para atualizar a cor do tema dinamicamente
   useThemeColor();
   
@@ -263,13 +263,21 @@ function App() {
   }, []);
 
   return (
+    <>
+      <IOSSessionGuard />
+      <Router />
+    </>
+  );
+}
+
+function App() {
+  return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
-            <IOSSessionGuard />
-            <Router />
+            <AppContent />
           </TooltipProvider>
         </AuthProvider>
       </QueryClientProvider>
