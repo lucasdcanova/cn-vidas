@@ -489,10 +489,6 @@ export default function PartnerSubscription() {
                         <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                         <span className="text-sm text-gray-700">{plan.maxCollaborators ? `Até ${plan.maxCollaborators} colaboradores` : 'Colaboradores ilimitados'}</span>
                       </li>
-                      <li className="flex items-start gap-3">
-                        <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-700">Comissão de {plan.commissionRate}%</span>
-                      </li>
                       {plan.features?.servicesLimit && (
                         <li className="flex items-start gap-3">
                           <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
