@@ -1,5 +1,5 @@
 import React, { useState, useCallback, memo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import axios from 'axios';
@@ -40,6 +40,7 @@ interface AddressFormOptimizedProps {
   description?: string;
   standAlone?: boolean;
   isReadOnly?: boolean;
+  control?: Control<any>; // Control do formulário pai quando usado em modo integrado
 }
 
 // Componente memo para evitar re-renders desnecessários
@@ -52,12 +53,13 @@ export const AddressFormOptimized = memo(({
   description,
   standAlone = true,
   isReadOnly = false,
+  control: externalControl,
 }: AddressFormOptimizedProps) => {
   const [isSearchingCep, setIsSearchingCep] = useState(false);
   const [cepError, setCepError] = useState<string | null>(null);
   
-  // Inicializar o formulário com defaultValues
-  const form = useForm<AddressFormValues>({
+  // Inicializar o formulário apenas se não houver control externo
+  const internalForm = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
       zipcode: defaultValues?.zipcode || '',
@@ -72,6 +74,9 @@ export const AddressFormOptimized = memo(({
     // Isso preserva os valores digitados pelo usuário
     mode: 'onChange',
   });
+  
+  // Usar o control externo se fornecido, caso contrário usar o interno
+  const form = internalForm;
 
   // Função para buscar endereço pelo CEP usando nossa API interna
   const fetchAddressByCep = useCallback(async (cep: string) => {
@@ -97,21 +102,36 @@ export const AddressFormOptimized = memo(({
       console.log('Dados do endereço encontrados:', data);
       
       // Preencher os campos do formulário com os dados do endereço
-      // Usar setValue com shouldValidate e shouldDirty para garantir que o formulário seja atualizado
-      form.setValue('street', data.street || '', { shouldValidate: true, shouldDirty: true });
-      form.setValue('neighborhood', data.neighborhood || '', { shouldValidate: true, shouldDirty: true });
-      form.setValue('city', data.city || '', { shouldValidate: true, shouldDirty: true });
-      form.setValue('state', data.state || '', { shouldValidate: true, shouldDirty: true });
+      // Se usando control externo, chamar diretamente o onSubmit para atualizar os valores
+      if (externalControl) {
+        onSubmit({
+          zipcode: cleanCep,
+          street: data.street || '',
+          neighborhood: data.neighborhood || '',
+          city: data.city || '',
+          state: data.state || '',
+          number: '',
+          complement: ''
+        });
+      } else {
+        // Usar setValue com shouldValidate e shouldDirty para garantir que o formulário seja atualizado
+        internalForm.setValue('street', data.street || '', { shouldValidate: true, shouldDirty: true });
+        internalForm.setValue('neighborhood', data.neighborhood || '', { shouldValidate: true, shouldDirty: true });
+        internalForm.setValue('city', data.city || '', { shouldValidate: true, shouldDirty: true });
+        internalForm.setValue('state', data.state || '', { shouldValidate: true, shouldDirty: true });
+      }
       
-      // Chamar onSubmit com os valores atualizados para sincronizar com o formulário pai
-      const currentValues = form.getValues();
-      onSubmit({
-        ...currentValues,
-        street: data.street || currentValues.street,
-        neighborhood: data.neighborhood || currentValues.neighborhood,
-        city: data.city || currentValues.city,
-        state: data.state || currentValues.state,
-      });
+      // Se usando formulário interno, chamar onSubmit com os valores atualizados
+      if (!externalControl) {
+        const currentValues = internalForm.getValues();
+        onSubmit({
+          ...currentValues,
+          street: data.street || currentValues.street,
+          neighborhood: data.neighborhood || currentValues.neighborhood,
+          city: data.city || currentValues.city,
+          state: data.state || currentValues.state,
+        });
+      }
       
       // Manter o foco no campo de número após preencher o endereço
       setTimeout(() => {
@@ -132,7 +152,7 @@ export const AddressFormOptimized = memo(({
     } finally {
       setIsSearchingCep(false);
     }
-  }, [form, onSubmit]);
+  }, [internalForm, onSubmit, externalControl]);
 
   // Formatar o CEP enquanto digita (99999-999)
   const formatCep = useCallback((value: string) => {
@@ -157,17 +177,21 @@ export const AddressFormOptimized = memo(({
 
   // Função para sincronizar valores em tempo real com o formulário pai
   const syncWithParent = useCallback(() => {
-    const currentValues = form.getValues();
-    const formattedData = {
-      ...currentValues,
-      zipcode: currentValues.zipcode.replace(/\D/g, ''),
-    };
-    onSubmit(formattedData);
-  }, [form, onSubmit]);
+    if (!externalControl) {
+      const currentValues = internalForm.getValues();
+      const formattedData = {
+        ...currentValues,
+        zipcode: currentValues.zipcode.replace(/\D/g, ''),
+      };
+      onSubmit(formattedData);
+    }
+  }, [internalForm, onSubmit, externalControl]);
 
 
   const formFields = (
     <>
+      {console.log('[AddressFormOptimized] Renderizando campos com control externo:', !!externalControl)}
+      {console.log('[AddressFormOptimized] Default values:', defaultValues)}
       {title && <h3 className="text-lg font-medium">{title}</h3>}
       {description && <p className="text-sm text-muted-foreground mb-4">{description}</p>}
       
@@ -182,7 +206,7 @@ export const AddressFormOptimized = memo(({
       <div className="flex flex-col md:flex-row gap-4">
         <div className="md:w-1/3">
           <FormField
-            control={form.control}
+            control={externalControl || internalForm.control}
             name="zipcode"
             render={({ field }) => (
               <FormItem className="relative">
@@ -230,7 +254,7 @@ export const AddressFormOptimized = memo(({
 
         <div className="md:w-2/3">
           <FormField
-            control={form.control}
+            control={externalControl || internalForm.control}
             name="street"
             render={({ field }) => (
               <FormItem>
@@ -259,7 +283,7 @@ export const AddressFormOptimized = memo(({
       <div className="flex flex-col md:flex-row gap-4">
         <div className="md:w-1/4">
           <FormField
-            control={form.control}
+            control={externalControl || internalForm.control}
             name="number"
             render={({ field }) => (
               <FormItem>
@@ -285,7 +309,7 @@ export const AddressFormOptimized = memo(({
         
         <div className="md:w-3/4">
           <FormField
-            control={form.control}
+            control={externalControl || internalForm.control}
             name="complement"
             render={({ field }) => (
               <FormItem>
@@ -311,7 +335,7 @@ export const AddressFormOptimized = memo(({
       </div>
       
       <FormField
-        control={form.control}
+        control={externalControl || internalForm.control}
         name="neighborhood"
         render={({ field }) => (
           <FormItem>
@@ -337,7 +361,7 @@ export const AddressFormOptimized = memo(({
       <div className="flex flex-col md:flex-row gap-4">
         <div className="md:w-3/4">
           <FormField
-            control={form.control}
+            control={externalControl || internalForm.control}
             name="city"
             render={({ field }) => (
               <FormItem>
@@ -363,7 +387,7 @@ export const AddressFormOptimized = memo(({
         
         <div className="md:w-1/4">
           <FormField
-            control={form.control}
+            control={externalControl || internalForm.control}
             name="state"
             render={({ field }) => (
               <FormItem>
@@ -412,19 +436,19 @@ export const AddressFormOptimized = memo(({
 
   // Se não for um formulário independente, apenas renderiza os campos
   if (!standAlone) {
+    console.log('[AddressForm] Renderizando em modo integrado');
+    console.log('[AddressForm] Control externo fornecido:', !!externalControl);
     return (
-      <Form {...form}>
-        <div className="space-y-4 animate-fade-in">
-          {formFields}
-        </div>
-      </Form>
+      <div className="space-y-4">
+        {formFields}
+      </div>
     );
   }
 
   // Caso contrário, renderiza um formulário completo
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 animate-fade-in">
+    <Form {...internalForm}>
+      <form onSubmit={internalForm.handleSubmit(handleSubmit)} className="space-y-4 animate-fade-in">
         {formFields}
       </form>
     </Form>
