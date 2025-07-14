@@ -20,11 +20,16 @@ import {
   BarChart3,
   Headphones,
   Code,
-  Calendar
+  Calendar,
+  Receipt, 
+  DollarSign, 
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -162,6 +167,7 @@ export default function PartnerSubscription() {
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [activeTab, setActiveTab] = useState("plans");
 
   useEffect(() => {
     if (user?.role !== 'partner') {
@@ -296,27 +302,48 @@ export default function PartnerSubscription() {
     return names[planType as keyof typeof names] || planType;
   };
 
+  // Estado de carregamento
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
+      <DashboardLayout title="Gerenciar Planos">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Carregando informações...</p>
+          </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
-  return (
-    <DashboardLayout>
-      <div className="container mx-auto p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <CreditCard className="h-8 w-8" />
-            Assinatura e Faturamento
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Gerencie seu plano e histórico de pagamentos
-          </p>
+  // Estado de erro
+  if (!plans || plans.length === 0) {
+    return (
+      <DashboardLayout title="Gerenciar Planos">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Alert variant="destructive" className="max-w-md">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erro ao carregar dados</AlertTitle>
+            <AlertDescription>
+              Não foi possível carregar os planos de assinatura.
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={() => window.location.reload()}
+              >
+                Tentar novamente
+              </Button>
+            </AlertDescription>
+          </Alert>
         </div>
+      </DashboardLayout>
+    );
+  }
 
+  // Conteúdo dos planos
+  const PlansContent = () => (
+    <>
       {/* Assinatura Atual */}
       {currentSubscription && currentSubscription.subscription && (
         <Card className={`mb-8 mt-4 overflow-hidden border-2 shadow-lg ${(() => {
@@ -402,11 +429,21 @@ export default function PartnerSubscription() {
 
       {/* Planos Disponíveis */}
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-4">Planos Disponíveis</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {plans.map((plan) => {
+        <h2 className="text-xl md:text-2xl font-semibold mb-6">Planos disponíveis</h2>
+        <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {plans
+            .sort((a, b) => {
+              // Colocar plano gratuito por último
+              if (a.planType === 'free') return 1;
+              if (b.planType === 'free') return -1;
+              // Manter ordem original para outros planos
+              return 0;
+            })
+            .map((plan) => {
             const Icon = getPlanIcon(plan.planType);
             const isCurrentPlan = currentSubscription?.plan?.id === plan.id;
+            const isDowngrade = currentSubscription?.plan && 
+                              parseFloat(currentSubscription.plan.monthlyPrice) > parseFloat(plan.monthlyPrice);
             
             return (
               <Card 
@@ -448,54 +485,60 @@ export default function PartnerSubscription() {
                   <div>
                     <p className="text-sm font-medium mb-2">Recursos inclusos:</p>
                     <ul className="space-y-2 text-sm">
-                      <li className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-600" />
-                        {plan.maxCollaborators ? `Até ${plan.maxCollaborators} colaboradores` : 'Colaboradores ilimitados'}
+                      <li className="flex items-start gap-3">
+                        <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-700">{plan.maxCollaborators ? `Até ${plan.maxCollaborators} colaboradores` : 'Colaboradores ilimitados'}</span>
                       </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-600" />
-                        Comissão de {plan.commissionRate}%
+                      <li className="flex items-start gap-3">
+                        <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-700">Comissão de {plan.commissionRate}%</span>
                       </li>
                       {plan.features?.servicesLimit && (
-                        <li className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-600" />
-                          {plan.features.servicesLimit ? `Até ${plan.features.servicesLimit} serviços` : 'Serviços ilimitados'}
+                        <li className="flex items-start gap-3">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">{plan.features.servicesLimit ? `Até ${plan.features.servicesLimit} serviços` : 'Serviços ilimitados'}</span>
                         </li>
                       )}
                       {plan.prioritySupport && (
-                        <li className="flex items-center gap-2">
-                          <Headphones className="h-4 w-4 text-green-600" />
-                          Suporte prioritário
+                        <li className="flex items-start gap-3">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">Suporte prioritário</span>
                         </li>
                       )}
                       {plan.customBranding && (
-                        <li className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-green-600" />
-                          Marca personalizada
+                        <li className="flex items-start gap-3">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">Marca personalizada</span>
                         </li>
                       )}
                       {plan.analyticsAccess && (
-                        <li className="flex items-center gap-2">
-                          <BarChart3 className="h-4 w-4 text-green-600" />
-                          Relatórios avançados
+                        <li className="flex items-start gap-3">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">Relatórios avançados</span>
                         </li>
                       )}
                       {plan.apiAccess && (
-                        <li className="flex items-center gap-2">
-                          <Code className="h-4 w-4 text-green-600" />
-                          Acesso à API
+                        <li className="flex items-start gap-3">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">Acesso à API</span>
                         </li>
                       )}
                     </ul>
                   </div>
                   
                   <Button 
-                    className="w-full"
+                    className="w-full mt-4"
                     variant={isCurrentPlan ? "secondary" : "default"}
                     disabled={isCurrentPlan}
                     onClick={() => handleSelectPlan(plan)}
                   >
-                    {isCurrentPlan ? 'Plano Atual' : 'Selecionar Plano'}
+                    {isCurrentPlan 
+                      ? 'Plano Atual' 
+                      : plan.planType === 'free' 
+                        ? 'Usar plano gratuito'
+                        : isDowngrade 
+                          ? 'Fazer downgrade' 
+                          : 'Fazer upgrade'}
                   </Button>
                 </CardContent>
               </Card>
@@ -504,23 +547,75 @@ export default function PartnerSubscription() {
         </div>
       </div>
 
+    </>
+  );
+
+  // Conteúdo de pagamentos
+  const PaymentsContent = () => (
+    <div className="space-y-6">
+      {/* Card de Informações de Assinatura */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Receipt className="h-5 w-5 text-primary" />
+            <CardTitle>Informações de Assinatura</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Plano Atual</p>
+              <p className="text-2xl font-bold">
+                {currentSubscription?.plan ? getPlanDisplayName(currentSubscription.plan.planType) : "Sem Plano"}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Status</p>
+              <div className="flex items-center gap-2">
+                <div className={`h-3 w-3 rounded-full ${
+                  currentSubscription?.subscription?.status === 'active' 
+                    ? 'bg-green-500' 
+                    : 'bg-gray-300'
+                }`} />
+                <p className={`text-lg font-semibold ${
+                  currentSubscription?.subscription?.status === 'active' 
+                    ? 'text-green-600' 
+                    : 'text-gray-600'
+                }`}>
+                  {currentSubscription?.subscription?.status === 'active' ? 'Ativo' : 'Inativo'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Histórico de Cobranças */}
-      {billingHistory.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Histórico de Cobranças</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle>Histórico de Cobranças</CardTitle>
+          <CardDescription>
+            Visualize todas as suas transações e faturas
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {billingHistory.length > 0 ? (
             <div className="space-y-2">
               {billingHistory.map((billing) => (
-                <div key={billing.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={billing.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
+                    <div className={`p-2 rounded-full ${
+                      billing.paymentStatus === 'paid' ? 'bg-green-100' : 'bg-gray-100'
+                    }`}>
+                      <DollarSign className={`h-4 w-4 ${
+                        billing.paymentStatus === 'paid' ? 'text-green-600' : 'text-gray-600'
+                      }`} />
+                    </div>
                     <div>
-                      <p className="font-medium">R$ {billing.amount}</p>
+                      <p className="font-medium">R$ {parseFloat(billing.amount).toFixed(2)}</p>
                       <p className="text-sm text-muted-foreground">
-                        Período: {format(new Date(billing.periodStart), 'dd/MM', { locale: ptBR })} - 
-                        {format(new Date(billing.periodEnd), 'dd/MM/yyyy', { locale: ptBR })}
+                        {format(new Date(billing.periodStart), "dd 'de' MMMM", { locale: ptBR })} - 
+                        {format(new Date(billing.periodEnd), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                       </p>
                     </div>
                   </div>
@@ -530,12 +625,37 @@ export default function PartnerSubscription() {
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Receipt className="h-12 w-12 mx-auto mb-3 opacity-30" />
+              <p>Nenhuma cobrança registrada</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 
-      {/* Modal de Checkout */}
-      {showCheckout && selectedPlan && (
+  return (
+    <DashboardLayout title="Gerenciar Planos">
+      <div className="max-w-7xl mx-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="plans">Planos</TabsTrigger>
+            <TabsTrigger value="payments">Pagamentos</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="plans" className="mt-6">
+            <PlansContent />
+          </TabsContent>
+          
+          <TabsContent value="payments" className="mt-6">
+            <PaymentsContent />
+          </TabsContent>
+        </Tabs>
+
+        {/* Modal de Checkout */}
+        {showCheckout && selectedPlan && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <Card className="max-w-md w-full">
             <CardHeader>
