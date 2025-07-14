@@ -41,7 +41,17 @@ import { APNsService } from "./services/apns-service";
   app.use(cors(corsOptions));
 
   // Configurações básicas
-  app.use(express.json({ limit: '50mb' }));
+  // Excluir rotas de upload do parser JSON
+  app.use((req, res, next) => {
+    if (req.path.includes('/doctor-profile-image') || 
+        req.path.includes('/profile/upload-image') ||
+        req.path.includes('profile-image')) {
+      // Skip JSON parsing for file uploads
+      next();
+    } else {
+      express.json({ limit: '50mb' })(req, res, next);
+    }
+  });
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
   app.use(cookieParser());
 
@@ -60,6 +70,12 @@ import { APNsService } from "./services/apns-service";
   });
 
   app.use('/api/profile/upload-image', (req, res, next) => {
+    req.setTimeout(120000); // 2 minutos para uploads
+    res.setTimeout(120000);
+    next();
+  });
+
+  app.use('/api/doctor-profile-image', (req, res, next) => {
     req.setTimeout(120000); // 2 minutos para uploads
     res.setTimeout(120000);
     next();

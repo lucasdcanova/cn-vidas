@@ -37,13 +37,16 @@ import {
   GraduationCap,
   Calendar,
   MapPin,
-  Briefcase
+  Briefcase,
+  Camera,
+  Upload
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { IOSScrollView } from '@/components/shared/IOSScrollView';
 import { isIOS } from '@/utils/platform';
 import { StatusBar } from '@capacitor/status-bar';
+import ProfileImageUploader from '@/components/shared/ProfileImageUploader';
 
 interface DoctorProfileData {
   specialization: string;
@@ -66,6 +69,7 @@ export default function DoctorOnboardingPage() {
   const scrollViewRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState<DoctorProfileData>({
@@ -121,7 +125,7 @@ export default function DoctorOnboardingPage() {
     if (doctorProfile) {
       setFormData({
         specialization: doctorProfile.specialization || '',
-        licenseNumber: doctorProfile.licenseNumber || '',
+        licenseNumber: doctorProfile.licenseNumber || user?.username || '', // Use username (CRM) from user registration
         biography: doctorProfile.biography || '',
         education: doctorProfile.education || '',
         experienceYears: doctorProfile.experienceYears || 0,
@@ -132,12 +136,23 @@ export default function DoctorOnboardingPage() {
         accountType: doctorProfile.accountType || 'corrente'
       });
       
+      // Set profile image if exists
+      if (doctorProfile.profileImage) {
+        setProfileImage(doctorProfile.profileImage);
+      }
+      
       // If doctor already completed onboarding, redirect
       if (doctorProfile.onboardingCompleted) {
         navigate('/dashboard');
       }
+    } else if (user?.username) {
+      // If no doctor profile yet, use username (CRM) from user registration
+      setFormData(prev => ({
+        ...prev,
+        licenseNumber: user.username
+      }));
     }
-  }, [doctorProfile, navigate]);
+  }, [doctorProfile, user, navigate]);
 
   // Update doctor profile mutation
   const updateProfileMutation = useMutation({
@@ -154,6 +169,10 @@ export default function DoctorOnboardingPage() {
     }
   });
 
+  const handleImageUpdate = (imageUrl: string) => {
+    setProfileImage(imageUrl);
+  };
+
   const handleNext = async () => {
     console.log('handleNext called, current step:', step);
     
@@ -163,6 +182,16 @@ export default function DoctorOnboardingPage() {
         toast({
           title: 'Campos obrigatórios',
           description: 'Por favor, preencha todos os campos obrigatórios.',
+          variant: 'destructive'
+        });
+        return;
+      }
+      
+      // Validate profile image
+      if (!profileImage) {
+        toast({
+          title: 'Foto obrigatória',
+          description: 'Por favor, adicione uma foto do perfil antes de continuar.',
           variant: 'destructive'
         });
         return;
@@ -401,11 +430,19 @@ export default function DoctorOnboardingPage() {
                           <p>• Receba pagamentos diretamente via PIX após cada consulta</p>
                           <p>• Prescreva receitas digitais com assinatura eletrônica</p>
                           <p>• Acesse prontuário eletrônico completo dos pacientes</p>
-                          <p>• Sem mensalidade - você paga apenas uma taxa por consulta realizada</p>
+                          <p>• Sem mensalidade ou taxas</p>
                         </AlertDescription>
                       </Alert>
 
                       <div className="grid gap-4">
+                        {/* Profile Image Upload */}
+                        <ProfileImageUploader
+                          currentImage={profileImage}
+                          userName={user?.fullName || user?.name || 'Médico'}
+                          userType="doctor"
+                          onImageUpdate={handleImageUpdate}
+                        />
+
                         <div className="grid gap-2">
                           <Label htmlFor="specialization" className="text-gray-700 font-medium">Especialidade *</Label>
                           <div className="relative">
@@ -431,16 +468,15 @@ export default function DoctorOnboardingPage() {
                             <Input
                               id="licenseNumber"
                               placeholder="Ex: 123456/SP"
-                              value={formData.licenseNumber}
-                              onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                              onFocus={handleInputFocus}
-                              onBlur={handleInputBlur}
-                              className={`pl-10 rounded-xl bg-gray-50/50 border-gray-200/50 hover:bg-white/60 transition-all duration-200 ${
-                                focusedField === 'licenseNumber' ? 'border-blue-500 ring-4 ring-blue-500/10' : ''
-                              }`}
+                              value={formData.licenseNumber.replace('CRM', '').replace(/^([A-Z]{2})(\d+)$/, '$2/$1')}
+                              readOnly
+                              disabled
+                              className="pl-10 rounded-xl bg-gray-100 border-gray-200/50 cursor-not-allowed opacity-75"
                             />
                           </div>
+                          <p className="text-sm text-muted-foreground">CRM informado no cadastro - não pode ser alterado</p>
                         </div>
+
 
                         <div className="grid gap-2">
                           <Label htmlFor="education" className="text-gray-700 font-medium">Formação Acadêmica *</Label>
@@ -524,7 +560,9 @@ export default function DoctorOnboardingPage() {
                           <p>• Você define o valor da consulta</p>
                           <p>• Pacientes pagam antecipadamente via cartão, PIX ou boleto</p>
                           <p>• Você recebe automaticamente via PIX após a consulta</p>
-                          <p>• CNVidas cobra apenas 20% de taxa sobre cada consulta realizada</p>
+                          <p>• Sua remuneração varia conforme o plano do paciente:</p>
+                          <p className="ml-4">- Plano Basic: você recebe 70% do valor</p>
+                          <p className="ml-4">- Planos Premium/Ultra: você recebe 50% do valor</p>
                           <p>• Sem mensalidade ou taxas fixas</p>
                         </AlertDescription>
                       </Alert>
@@ -553,26 +591,37 @@ export default function DoctorOnboardingPage() {
                             />
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            Valor sugerido: R$ 100,00 a R$ 300,00 por consulta
+                            Valor sugerido: R$ 200,00 a R$ 600,00 por consulta
                           </p>
                         </div>
 
                         {formData.consultationFee > 0 && (
-                          <div className="bg-muted rounded-lg p-4 space-y-2">
+                          <div className="bg-muted rounded-lg p-4 space-y-4">
                             <div className="flex items-center justify-between">
                               <span className="text-sm font-medium">Valor da consulta:</span>
                               <span className="font-semibold">R$ {formData.consultationFee.toFixed(2)}</span>
                             </div>
-                            <div className="flex items-center justify-between text-muted-foreground">
-                              <span className="text-sm">Taxa CNVidas (20%):</span>
-                              <span className="text-sm">- R$ {(formData.consultationFee * 0.20).toFixed(2)}</span>
-                            </div>
+                            
                             <Separator />
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">Você recebe:</span>
-                              <span className="font-semibold text-green-600">
-                                R$ {(formData.consultationFee * 0.80).toFixed(2)}
-                              </span>
+                            
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium text-muted-foreground">Você receberá por tipo de plano do paciente:</p>
+                              
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm">Plano Basic (70%):</span>
+                                  <span className="font-semibold text-green-600">
+                                    R$ {(formData.consultationFee * 0.70).toFixed(2)}
+                                  </span>
+                                </div>
+                                
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm">Planos Premium/Ultra (50%):</span>
+                                  <span className="font-semibold text-green-600">
+                                    R$ {(formData.consultationFee * 0.50).toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         )}

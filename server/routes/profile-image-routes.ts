@@ -139,7 +139,7 @@ router.post('/profile/upload-image', requireAuth, processBase64Upload, async (re
 });
 
 // Upload de imagem de perfil (médico)
-router.post('/doctor-profile-image', requireAuth, processBase64Upload, async (req, res) => {
+router.post('/doctor-profile-image', requireAuth, upload.single('profileImage'), processBase64Upload, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
