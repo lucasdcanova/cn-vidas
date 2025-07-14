@@ -88,6 +88,110 @@ export const partners = pgTable("partners", {
   status: text("status").default('pending').notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  // B2B fields
+  isEnterprise: boolean("is_enterprise").default(false),
+  companyName: varchar("company_name", { length: 255 }),
+  companyDocument: varchar("company_document", { length: 20 }), // CNPJ
+  billingEmail: varchar("billing_email", { length: 255 }),
+  billingAddress: json("billing_address").$type<{
+    street?: string;
+    number?: string;
+    complement?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    zipcode?: string;
+  }>(),
+  collaboratorCount: integer("collaborator_count").default(0),
+  stripeCustomerId: text("stripe_customer_id"),
+});
+
+// Partner B2B Tables
+export const partnerSubscriptionPlanEnum = pgEnum('partner_subscription_plan_type', ['basic', 'premium', 'ultra', 'free']);
+
+export const partnerSubscriptionPlans = pgTable("partner_subscription_plans", {
+  id: serial("id").primaryKey(),
+  planName: varchar("plan_name", { length: 50 }).notNull(),
+  planType: partnerSubscriptionPlanEnum("plan_type").notNull(),
+  monthlyPrice: decimal("monthly_price", { precision: 10, scale: 2 }).notNull(),
+  maxCollaborators: integer("max_collaborators"),
+  features: json("features").$type<{
+    servicesLimit?: number;
+    monthlyBookings?: number;
+    [key: string]: any;
+  }>().default({}),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default('0'),
+  prioritySupport: boolean("priority_support").default(false),
+  customBranding: boolean("custom_branding").default(false),
+  analyticsAccess: boolean("analytics_access").default(false),
+  apiAccess: boolean("api_access").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const partnerSubscriptionStatusEnum = pgEnum('partner_subscription_status', ['active', 'cancelled', 'suspended', 'trial']);
+
+export const partnerSubscriptions = pgTable("partner_subscriptions", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id, { onDelete: "cascade" }).notNull(),
+  planId: integer("plan_id").references(() => partnerSubscriptionPlans.id),
+  status: partnerSubscriptionStatusEnum("status").default('active'),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  nextBillingDate: date("next_billing_date"),
+  paymentMethodId: varchar("payment_method_id", { length: 255 }),
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+  trialEndsAt: timestamp("trial_ends_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const partnerCollaboratorRoleEnum = pgEnum('partner_collaborator_role', ['admin', 'manager', 'collaborator']);
+export const partnerCollaboratorStatusEnum = pgEnum('partner_collaborator_status', ['pending', 'active', 'inactive']);
+
+export const partnerCollaborators = pgTable("partner_collaborators", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  role: partnerCollaboratorRoleEnum("role").default('collaborator'),
+  department: varchar("department", { length: 100 }),
+  permissions: json("permissions").$type<{
+    canManageServices?: boolean;
+    canViewAnalytics?: boolean;
+    canManageCollaborators?: boolean;
+    canAccessBilling?: boolean;
+    [key: string]: any;
+  }>().default({}),
+  canManageServices: boolean("can_manage_services").default(false),
+  canViewAnalytics: boolean("can_view_analytics").default(false),
+  canManageCollaborators: boolean("can_manage_collaborators").default(false),
+  canAccessBilling: boolean("can_access_billing").default(false),
+  invitationToken: varchar("invitation_token", { length: 255 }).unique(),
+  invitationSentAt: timestamp("invitation_sent_at"),
+  invitationAcceptedAt: timestamp("invitation_accepted_at"),
+  status: partnerCollaboratorStatusEnum("status").default('pending'),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const partnerBillingPaymentStatusEnum = pgEnum('partner_billing_payment_status', ['pending', 'paid', 'failed', 'refunded']);
+
+export const partnerBillingHistory = pgTable("partner_billing_history", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id, { onDelete: "cascade" }).notNull(),
+  subscriptionId: integer("subscription_id").references(() => partnerSubscriptions.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default('BRL'),
+  paymentStatus: partnerBillingPaymentStatusEnum("payment_status").default('pending'),
+  paymentMethod: varchar("payment_method", { length: 50 }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  invoiceNumber: varchar("invoice_number", { length: 50 }).unique(),
+  invoiceUrl: text("invoice_url"),
+  paidAt: timestamp("paid_at"),
+  periodStart: date("period_start"),
+  periodEnd: date("period_end"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const doctors = pgTable("doctors", {
@@ -503,12 +607,35 @@ export const dependentsRelations = relations(dependents, ({ one }) => ({
 export const partnersRelations = relations(partners, ({ one, many }) => ({
   user: one(users, { fields: [partners.userId], references: [users.id] }),
   services: many(partnerServices),
+  subscriptions: many(partnerSubscriptions),
+  collaborators: many(partnerCollaborators),
+  billingHistory: many(partnerBillingHistory),
 }));
 
 export const doctorsRelations = relations(doctors, ({ one, many }) => ({
   user: one(users, { fields: [doctors.userId], references: [users.id] }),
   appointments: many(appointments),
   payments: many(doctorPayments),
+}));
+
+// Partner B2B Relations
+export const partnerSubscriptionPlansRelations = relations(partnerSubscriptionPlans, ({ many }) => ({
+  subscriptions: many(partnerSubscriptions),
+}));
+
+export const partnerSubscriptionsRelations = relations(partnerSubscriptions, ({ one }) => ({
+  partner: one(partners, { fields: [partnerSubscriptions.partnerId], references: [partners.id] }),
+  plan: one(partnerSubscriptionPlans, { fields: [partnerSubscriptions.planId], references: [partnerSubscriptionPlans.id] }),
+}));
+
+export const partnerCollaboratorsRelations = relations(partnerCollaborators, ({ one }) => ({
+  partner: one(partners, { fields: [partnerCollaborators.partnerId], references: [partners.id] }),
+  user: one(users, { fields: [partnerCollaborators.userId], references: [users.id] }),
+}));
+
+export const partnerBillingHistoryRelations = relations(partnerBillingHistory, ({ one }) => ({
+  partner: one(partners, { fields: [partnerBillingHistory.partnerId], references: [partners.id] }),
+  subscription: one(partnerSubscriptions, { fields: [partnerBillingHistory.subscriptionId], references: [partnerSubscriptions.id] }),
 }));
 
 export const doctorPaymentsRelations = relations(doctorPayments, ({ one }) => ({
@@ -678,6 +805,11 @@ export type UserSubscription = InferSelectModel<typeof userSubscriptions>;
 export type Subscription = InferSelectModel<typeof subscriptions>;
 export type PaymentSchedule = InferSelectModel<typeof paymentSchedules>;
 export type SellerCommission = InferSelectModel<typeof sellerCommissions>;
+// Partner B2B Types
+export type PartnerSubscriptionPlan = InferSelectModel<typeof partnerSubscriptionPlans>;
+export type PartnerSubscription = InferSelectModel<typeof partnerSubscriptions>;
+export type PartnerCollaborator = InferSelectModel<typeof partnerCollaborators>;
+export type PartnerBillingHistory = InferSelectModel<typeof partnerBillingHistory>;
 export type UserSchema = z.infer<typeof userSchema>;
 export type AppointmentSchema = z.infer<typeof appointmentSchema>;
 export type ClaimSchema = z.infer<typeof claimSchema>;
@@ -707,6 +839,11 @@ export type InsertUserSubscription = InferInsertModel<typeof userSubscriptions>;
 export type InsertSubscription = InferInsertModel<typeof subscriptions>;
 export type InsertPaymentSchedule = InferInsertModel<typeof paymentSchedules>;
 export type InsertSellerCommission = InferInsertModel<typeof sellerCommissions>;
+// Partner B2B Insert Types
+export type InsertPartnerSubscriptionPlan = InferInsertModel<typeof partnerSubscriptionPlans>;
+export type InsertPartnerSubscription = InferInsertModel<typeof partnerSubscriptions>;
+export type InsertPartnerCollaborator = InferInsertModel<typeof partnerCollaborators>;
+export type InsertPartnerBillingHistory = InferInsertModel<typeof partnerBillingHistory>;
 
 // Tipos para prontuários médicos
 export type MedicalRecord = InferSelectModel<typeof medicalRecords>;

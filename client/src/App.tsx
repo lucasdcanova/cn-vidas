@@ -67,6 +67,8 @@ import PartnerOnboarding from "@/pages/partner-onboarding";
 import PartnerVerification from "@/pages/partner-verification";
 import PartnerServices from "@/pages/partner-services";
 import PartnerAddresses from "@/pages/partner/PartnerAddresses";
+import PartnerCollaborators from "@/pages/partner/collaborators";
+import PartnerSubscription from "@/pages/partner/subscription";
 import QRCodePage from "@/pages/qr-code";
 import { TestQRPage } from "@/pages/test-qr";
 import PatientSettings from "@/pages/patient/settings";
@@ -212,6 +214,8 @@ function Router() {
       <ProtectedRoute path="/partner/verification" component={PartnerVerification} allowedRoles={["partner"]} />
       <ProtectedRoute path="/partner/services" component={PartnerServices} allowedRoles={["partner"]} />
       <ProtectedRoute path="/partner/addresses" component={PartnerAddresses} allowedRoles={["partner"]} />
+      <ProtectedRoute path="/partner/collaborators" component={PartnerCollaborators} allowedRoles={["partner"]} />
+      <ProtectedRoute path="/partner/subscription" component={PartnerSubscription} allowedRoles={["partner"]} />
       
       {/* Admin Routes */}
       <ProtectedRoute path="/admin" component={AdminDashboard} allowedRoles={["admin"]} />
