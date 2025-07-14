@@ -46,6 +46,8 @@ import uploadDiagnosticsRouter from './upload-diagnostics';
 import profileImageRouter from './profile-image-routes';
 import dailyCloudWebhookRouter from './daily-cloud-webhook';
 import stripeWebhookRouter from './stripe-webhook';
+import { partnerCollaboratorsRouter } from './partner-collaborators-routes';
+import { partnerSubscriptionRouter } from './partner-subscription-routes';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -158,6 +160,12 @@ export default async function setupRoutes(app: express.Express) {
   // Rotas de parceiros (autenticadas)
   console.log('Registrando partnerRouter em /api/partners');
   app.use('/api/partners', partnerRouter);
+  
+  // Rotas B2B de parceiros
+  console.log('Registrando partnerCollaboratorsRouter em /api/partners/collaborators');
+  app.use('/api/partners/collaborators', partnerCollaboratorsRouter);
+  console.log('Registrando partnerSubscriptionRouter em /api/partners/subscription');
+  app.use('/api/partners/subscription', partnerSubscriptionRouter);
   
   // Rotas de médicos (autenticadas)
   console.log('Registrando doctorRouter em /api/doctors');
