@@ -118,7 +118,7 @@ async function setupBuckets() {
             AllowedHeaders: ['*'],
             AllowedMethods: ['GET', 'PUT', 'POST', 'DELETE'],
             AllowedOrigins: [
-              'https://cnvidas.onrender.com',
+              'https://www.homologacao.cnvidas.com.br',
               'http://localhost:3000',
               'capacitor://localhost',
               'http://localhost'

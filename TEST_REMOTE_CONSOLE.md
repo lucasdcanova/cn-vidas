@@ -29,7 +29,7 @@ O Console Remoto permite capturar logs do app iOS em tempo real e visualizá-los
 ### No Painel Web:
 
 1. **Acessar Console**
-   - https://cnvidas.onrender.com (produção)
+   - https://www.homologacao.cnvidas.com.br (produção)
    - http://localhost:3000 (desenvolvimento)
    - Login como admin
 

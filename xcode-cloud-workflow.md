@@ -66,7 +66,7 @@ CI_STRIPE_PUBLIC_KEY=pk_live_51RAOnMKOsPzrrDErXaDRtMivvPi3iVD7socexHWBbvb5BEjeUu
 CI_DAILY_API_KEY=<sua_daily_api_key>
 
 # Environment Variables
-CI_API_URL=https://cnvidas.onrender.com
+CI_API_URL=https://www.homologacao.cnvidas.com.br
 NODE_ENV=production
 ```
 

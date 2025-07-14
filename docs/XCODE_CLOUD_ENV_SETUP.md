@@ -39,8 +39,8 @@
 - `OPENAI_API_KEY` - sk-... (API OpenAI)
 
 ### URLs
-- `FRONTEND_URL` - https://cnvidas.onrender.com
-- `BACKEND_URL` - https://cnvidas.onrender.com
+- `FRONTEND_URL` - https://www.homologacao.cnvidas.com.br
+- `BACKEND_URL` - https://www.homologacao.cnvidas.com.br
 
 ### Opcionais
 - `WHATSAPP_API_KEY` - Se usar WhatsApp

@@ -210,6 +210,14 @@ const ProfileV2: React.FC = () => {
   // Initialize forms with data
   useEffect(() => {
     if (profileData && (user?.role === "patient" || user?.role === "admin")) {
+      console.log('[ProfileV2] Resetting patient form with data:', {
+        zipcode: profileData.zipcode,
+        street: profileData.street,
+        number: profileData.number,
+        neighborhood: profileData.neighborhood,
+        city: profileData.city,
+        state: profileData.state
+      });
       patientForm.reset({
         fullName: profileData.fullName || "",
         username: profileData.username || "",
@@ -580,14 +588,16 @@ const ProfileV2: React.FC = () => {
                       icon={MapPin}
                     >
                       <AddressForm
+                        key={`address-form-${profileData?.id}`}
+                        control={patientForm.control}
                         defaultValues={{
-                          zipcode: patientForm.watch("zipcode") || "",
-                          street: patientForm.watch("street") || "",
-                          number: patientForm.watch("number") || "",
-                          complement: patientForm.watch("complement") || "",
-                          neighborhood: patientForm.watch("neighborhood") || "",
-                          city: patientForm.watch("city") || "",
-                          state: patientForm.watch("state") || "",
+                          zipcode: patientForm.getValues("zipcode") || "",
+                          street: patientForm.getValues("street") || "",
+                          number: patientForm.getValues("number") || "",
+                          complement: patientForm.getValues("complement") || "",
+                          neighborhood: patientForm.getValues("neighborhood") || "",
+                          city: patientForm.getValues("city") || "",
+                          state: patientForm.getValues("state") || "",
                         }}
                         onSubmit={(addressData) => {
                           Object.keys(addressData).forEach((key) => {
@@ -969,6 +979,7 @@ const ProfileV2: React.FC = () => {
                         icon={MapPin}
                       >
                         <AddressForm
+                          control={partnerForm.control}
                           defaultValues={{
                             zipcode: partnerForm.watch("zipcode") || "",
                             street: partnerForm.watch("street") || "",
