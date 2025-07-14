@@ -54,7 +54,6 @@ import SellerStats from "@/pages/admin/seller-stats";
 import CheckoutTrackingPage from "@/pages/admin/checkout-tracking";
 import DoctorTelemedicine from "@/pages/doctor-telemedicine";
 import DoctorOnboarding from "@/pages/doctor-onboarding";
-import DoctorOnboardingFlow from "@/pages/onboarding/doctor";
 import DoctorAvailability from "@/pages/doctor-availability";
 import DoctorEmergencyRoom from "@/pages/doctor-emergency-room";
 import PatientEmergencyRoom from "@/pages/patient-emergency-room";
@@ -184,7 +183,6 @@ function Router() {
       <ProtectedRoute path="/doctor/medical-records/processing" component={ProcessingMedicalRecordPage} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor/processing-wait" component={ProcessingWaitPage} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-onboarding" component={DoctorOnboarding} allowedRoles={["doctor"]} />
-      <ProtectedRoute path="/onboarding/doctor" component={DoctorOnboardingFlow} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-telemedicine" component={DoctorTelemedicine} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-availability" component={DoctorAvailability} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-emergency" component={TelemedicineEmergencyV3} allowedRoles={["doctor", "patient"]} />
