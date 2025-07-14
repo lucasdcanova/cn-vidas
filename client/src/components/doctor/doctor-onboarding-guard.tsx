@@ -44,7 +44,7 @@ export function DoctorOnboardingGuard({ children }: DoctorOnboardingGuardProps) 
                                  !doctorProfile.bankName;
       
       if (isProfileIncomplete) {
-        navigate('/onboarding/doctor');
+        navigate('/doctor-onboarding');
       }
     }
   }, [user, doctorProfile, isLoading, location, navigate]);
