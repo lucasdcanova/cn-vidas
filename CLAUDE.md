@@ -226,10 +226,12 @@ O `AndroidManifest.xml` já inclui:
 
 ## Deploy
 
-O projeto está configurado para deploy automático no Render:
-- **URL de produção**: https://cnvidas.onrender.com
+O projeto está configurado para deploy automático:
+- **URL de homologação**: https://www.homologacao.cnvidas.com.br
+- **URL de produção**: https://www.cnvidas.com.br (quando lançar)
 - **Deploy automático**: Após cada `git push` para a branch `main`
-- **Configuração**: Definida no arquivo `render.yaml`
+
+IMPORTANTE: NUNCA use URLs como cnvidas.onrender.com - o domínio correto é sempre www.homologacao.cnvidas.com.br
 
 ## Integração VIDaaS - Certificação Digital de Médicos (A IMPLEMENTAR)
 
