@@ -45,6 +45,7 @@ import walletTestRouter from './wallet-test-routes';
 import uploadDiagnosticsRouter from './upload-diagnostics';
 import profileImageRouter from './profile-image-routes';
 import dailyCloudWebhookRouter from './daily-cloud-webhook';
+import stripeWebhookRouter from './stripe-webhook';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -308,6 +309,10 @@ export default async function setupRoutes(app: express.Express) {
   // Webhook do Daily.co para gravações na nuvem
   console.log('Registrando dailyCloudWebhookRouter em /api/webhooks');
   app.use('/api/webhooks', dailyCloudWebhookRouter);
+  
+  // Webhook do Stripe
+  console.log('Registrando stripeWebhookRouter em /api/webhooks');
+  app.use('/api/webhooks', stripeWebhookRouter);
   
   // Middleware catch-all para rotas de API não encontradas
   // IMPORTANTE: Deve ser o último middleware antes de retornar o app

@@ -362,26 +362,31 @@ const Services: React.FC = () => {
           <CardContent>
             <div className="prose max-w-none">
               <p>
-                Como assinante do CN Vidas, você tem acesso a uma rede de parceiros que 
-                oferecem serviços de saúde com descontos exclusivos. Todos os serviços 
-                são prestados por profissionais qualificados e clínicas credenciadas.
+                Como assinante do CN Vidas, você tem acesso a uma rede exclusiva de parceiros que 
+                oferecem serviços de saúde com descontos especiais. Todos os serviços 
+                são prestados por profissionais qualificados e estabelecimentos credenciados.
               </p>
               
               <h3>Benefícios exclusivos</h3>
               <ul>
-                <li>Descontos de até 50% em consultas e exames</li>
-                <li>Atendimento prioritário em clínicas parceiras</li>
-                <li>Histórico médico integrado à plataforma</li>
-                <li>Agendamento simplificado com confirmação imediata</li>
+                <li>Descontos de até 70% em consultas presenciais, exames e procedimentos</li>
+                <li>Acesso a uma ampla rede de clínicas, laboratórios e especialistas</li>
+                <li>Rede de parceiros em constante expansão</li>
+                <li>QR Code digital para identificação rápida</li>
               </ul>
               
-              <h3>Como funciona?</h3>
+              <h3>Como utilizar os serviços?</h3>
               <ol>
                 <li>Escolha o serviço desejado entre as opções disponíveis</li>
-                <li>Clique em "Agendar" e selecione a data e horário de sua preferência</li>
-                <li>Confirme sua reserva e receba as instruções por e-mail</li>
-                <li>Compareça no local e horário agendados ou acesse a teleconsulta</li>
+                <li>Clique em "Entrar em contato" para falar diretamente com o parceiro</li>
+                <li>Agende seu atendimento diretamente com o estabelecimento</li>
+                <li>No dia do atendimento, apresente seu QR Code CN Vidas (disponível em seu perfil) para garantir o desconto</li>
               </ol>
+              
+              <p className="text-sm text-gray-600 mt-4">
+                <strong>Importante:</strong> O agendamento deve ser feito diretamente com o parceiro. 
+                O QR Code é sua identificação como assinante CN Vidas e garante os descontos exclusivos.
+              </p>
             </div>
           </CardContent>
         </Card>

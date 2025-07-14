@@ -306,10 +306,13 @@ subscriptionPaymentRouter.get("/payment-methods", requireAuth, async (req: Reque
     }
 
     // Buscar todos os métodos de pagamento do cliente no Stripe
+    console.log(`🔍 Buscando métodos de pagamento para o cliente ${stripeCustomerId}`);
     const paymentMethods = await stripe.paymentMethods.list({
       customer: stripeCustomerId,
       type: 'card'
     });
+    
+    console.log(`💳 Encontrados ${paymentMethods.data.length} métodos de pagamento`);
 
     // Se não há métodos de pagamento mas o usuário tem assinatura ativa, tentar recuperar do histórico
     if (paymentMethods.data.length === 0 && user.subscriptionStatus === 'active') {
@@ -410,6 +413,69 @@ subscriptionPaymentRouter.delete("/payment-methods/:id", requireAuth, async (req
   }
 });
 
+// Rota para confirmar que um setup intent foi processado
+subscriptionPaymentRouter.post("/confirm-setup-intent", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { setupIntentId } = req.body;
+    
+    if (!setupIntentId) {
+      return res.status(400).json({ message: "Setup Intent ID é obrigatório" });
+    }
+
+    const authReq = req as AuthenticatedRequest;
+    const user = authReq.user!;
+
+    // Buscar o setup intent no Stripe
+    const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
+    
+    console.log(`🔍 Setup Intent ${setupIntentId} status: ${setupIntent.status}`);
+    
+    if (setupIntent.status === 'succeeded' && setupIntent.payment_method) {
+      // Garantir que o payment method está anexado ao cliente
+      const paymentMethodId = setupIntent.payment_method as string;
+      
+      try {
+        // Verificar se já está anexado
+        const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
+        
+        if (paymentMethod.customer !== user.stripeCustomerId) {
+          // Anexar ao cliente se ainda não estiver
+          await stripe.paymentMethods.attach(paymentMethodId, {
+            customer: user.stripeCustomerId!
+          });
+          console.log(`✅ Payment method ${paymentMethodId} anexado ao cliente`);
+        }
+        
+        // Definir como padrão
+        await stripe.customers.update(user.stripeCustomerId!, {
+          invoice_settings: {
+            default_payment_method: paymentMethodId
+          }
+        });
+        
+        return res.json({
+          success: true,
+          message: "Método de pagamento confirmado e salvo"
+        });
+      } catch (error) {
+        console.error('Erro ao processar payment method:', error);
+      }
+    }
+    
+    return res.json({
+      success: false,
+      message: "Setup intent ainda não foi processado"
+    });
+    
+  } catch (error: any) {
+    console.error("Erro ao confirmar setup intent:", error);
+    return res.status(500).json({ 
+      message: `Erro ao confirmar setup intent: ${error.message}`,
+      error: error.toString()
+    });
+  }
+});
+
 // Rota para criar uma intenção de configuração do Stripe
 subscriptionPaymentRouter.post("/create-setup-intent", requireAuth, async (req: Request, res: Response) => {
   try {
@@ -443,7 +509,10 @@ subscriptionPaymentRouter.post("/create-setup-intent", requireAuth, async (req: 
     const setupIntent = await stripe.setupIntents.create({
       customer: stripeCustomerId,
       payment_method_types: ['card'],
-      usage: 'off_session'
+      usage: 'off_session',
+      metadata: {
+        userId: user.id.toString()
+      }
     });
 
     return res.json({
