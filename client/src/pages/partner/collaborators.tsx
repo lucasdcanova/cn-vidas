@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "wouter";
+import DashboardLayout from "@/components/layouts/dashboard-layout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,7 +61,7 @@ interface SubscriptionInfo {
 
 export default function PartnerCollaborators() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -266,9 +267,11 @@ export default function PartnerCollaborators() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -278,16 +281,17 @@ export default function PartnerCollaborators() {
   try {
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Users className="h-8 w-8" />
-          Colaboradores
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Gerencie os colaboradores da sua empresa
-        </p>
-      </div>
+    <DashboardLayout>
+      <div className="container mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Users className="h-8 w-8" />
+            Colaboradores
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Gerencie os colaboradores da sua empresa
+          </p>
+        </div>
 
       {/* Card de informações do plano */}
       {subscriptionInfo && (
@@ -713,18 +717,21 @@ export default function PartnerCollaborators() {
           </DialogContent>
         </Dialog>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
   } catch (error) {
     console.error('❌ [PartnerCollaborators] Erro ao renderizar:', error);
     return (
-      <div className="container mx-auto p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h2 className="text-red-800 font-semibold">Erro ao carregar página</h2>
-          <p className="text-red-600 mt-2">Ocorreu um erro ao carregar a página de colaboradores.</p>
-          <p className="text-sm text-red-500 mt-1">{error instanceof Error ? error.message : 'Erro desconhecido'}</p>
+      <DashboardLayout>
+        <div className="container mx-auto p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h2 className="text-red-800 font-semibold">Erro ao carregar página</h2>
+            <p className="text-red-600 mt-2">Ocorreu um erro ao carregar a página de colaboradores.</p>
+            <p className="text-sm text-red-500 mt-1">{error instanceof Error ? error.message : 'Erro desconhecido'}</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 }
