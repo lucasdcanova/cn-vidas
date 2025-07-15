@@ -110,10 +110,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
         onClick={() => setLocation('/profile')}
       >
         <div className="relative h-full w-full">
-          {user.subscriptionPlan && user.subscriptionPlan !== "free" && (
+          {user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" && (
             <div className={`absolute -inset-0.5 rounded-full bg-gradient-to-r ${planColors.gradient} opacity-90 blur-[1px] transition-all duration-300`}></div>
           )}
-          <Avatar className={`relative h-full w-full ${user.subscriptionPlan && user.subscriptionPlan !== "free" ? "" : "ring-2 ring-white/40"} shadow-sm transition-all duration-300`}>
+          <Avatar className={`relative h-full w-full ${user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" ? "" : "ring-2 ring-white/40"} shadow-sm transition-all duration-300`}>
             {profileImageUrl && !imageError ? (
               <AvatarImage 
                 src={profileImageUrl} 
@@ -128,7 +128,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
               {getUserInitials()}
             </AvatarFallback>
           </Avatar>
-          {user.subscriptionPlan && user.subscriptionPlan !== "free" && (
+          {user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" && (
             <div className="absolute -bottom-1 -right-1 transition-all duration-300">
               <PlanIndicator plan={user.subscriptionPlan} variant="icon" size="sm" />
             </div>
@@ -141,10 +141,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
   return (
     <div className="flex items-center p-2 rounded-lg hover:bg-white/30 transition-all duration-200">
       <div className="flex-shrink-0 relative">
-        {user.subscriptionPlan && user.subscriptionPlan !== "free" && (
+        {user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" && (
           <div className={`absolute -inset-1 rounded-full bg-gradient-to-r ${planColors.gradient} opacity-80 blur-[1px]`}></div>
         )}
-        <Avatar className={`relative h-10 w-10 ${user.subscriptionPlan && user.subscriptionPlan !== "free" ? "" : "ring-2 ring-white/30"} shadow-md`}>
+        <Avatar className={`relative h-10 w-10 ${user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" ? "" : "ring-2 ring-white/30"} shadow-md`}>
           {profileImageUrl && !imageError ? (
             <AvatarImage 
               src={profileImageUrl} 
@@ -159,7 +159,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
             {getUserInitials()}
           </AvatarFallback>
         </Avatar>
-        {user.subscriptionPlan && user.subscriptionPlan !== "free" && (
+        {user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" && (
           <div className="absolute -bottom-1 -right-1">
             <PlanIndicator plan={user.subscriptionPlan} variant="icon" size="sm" />
           </div>
@@ -173,7 +173,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
               {getRoleLabel()}
             </span>
           )}
-          {user.subscriptionPlan && user.role !== "doctor" && (
+          {user.subscriptionPlan && user.role === "patient" && (
             <PlanIndicator plan={user.subscriptionPlan} variant="badge" size="sm" />
           )}
         </div>

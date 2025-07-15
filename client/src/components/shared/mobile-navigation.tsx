@@ -142,6 +142,15 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
               <span className="text-xs mt-1 font-medium">Dashboard</span>
             </div>
           </Link>
+          
+          <Link href="/partner/corporate-plans">
+            <div className={`flex flex-col items-center py-3 px-2 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
+              isLinkActive("/partner/corporate-plans") ? activeClass : inactiveClass
+            }`}>
+              <span className="material-icons text-lg transition-transform duration-300">business</span>
+              <span className="text-xs mt-1 font-medium">Planos</span>
+            </div>
+          </Link>
 
           <Link href="/partner/services">
             <div className={`flex flex-col items-center py-3 px-2 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
@@ -161,6 +170,14 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
             </div>
           </Link>
           
+          <Link href="/partner/qr-verification">
+            <div className={`flex flex-col items-center py-3 px-2 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
+              isLinkActive("/partner/qr-verification") ? activeClass : inactiveClass
+            }`}>
+              <span className="material-icons text-lg transition-transform duration-300">qr_code_scanner</span>
+              <span className="text-xs mt-1 font-medium">QR Code</span>
+            </div>
+          </Link>
         </>
       )}
     </div>

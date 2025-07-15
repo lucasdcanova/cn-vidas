@@ -895,6 +895,30 @@ partnerRouter.put('/services/:serviceId/addresses', requireAuth, requirePartner,
   }
 });
 
+/**
+ * Obter analytics dos colaboradores
+ * GET /api/partners/analytics
+ */
+partnerRouter.get('/analytics', requireAuth, requirePartner, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { period = 'month' } = req.query;
+
+    const partner = await storage.getPartnerByUserId(userId);
+    if (!partner) {
+      return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
+    }
+
+    // Buscar dados reais do banco
+    const analyticsData = await storage.getPartnerAnalytics(partner.id, period as string);
+
+    res.json(analyticsData);
+  } catch (error) {
+    console.error('Erro ao buscar analytics:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 // Middleware de tratamento de erros para rotas de parceiro
 partnerRouter.use((error: any, req: Request, res: Response, next: NextFunction) => {
   console.error('❌ [Partner Router] Erro não tratado:', {

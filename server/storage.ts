@@ -1,4 +1,4 @@
-import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, partnerServiceAddresses, medicalRecords, medicalRecordEntries, userSubscriptions } from '../shared/schema';
+import { users, partners, doctors, partnerServices, appointments, claims, notifications, doctorPayments, auditLogs, qrTokens, subscriptionPlans, userSettings, emailVerifications, passwordResets, availabilitySlots, qrAuthLogs, dependents, partnerAddresses, partnerServiceAddresses, medicalRecords, medicalRecordEntries, userSubscriptions, partnerCollaborators } from '../shared/schema';
 // Import the actual Drizzle types from schema instead of generic types
 import type { User, Partner, Doctor, PartnerService, Appointment, Claim, Notification, DoctorPayment, AuditLog, QrToken, SubscriptionPlan, UserSettings, EmailVerification, PasswordReset, AvailabilitySlot, QrAuthLog, Dependent, MedicalRecord, MedicalRecordEntry, MedicalRecordAccess, PartnerAddress, InsertUser, InsertPartner, InsertDoctor, InsertPartnerService, InsertAppointment, InsertClaim, InsertNotification, InsertDoctorPayment, InsertAuditLog, InsertQrToken, InsertSubscriptionPlan, InsertUserSettings, InsertEmailVerification, InsertPasswordReset, InsertAvailabilitySlot, InsertQrAuthLog, InsertDependent, InsertMedicalRecord, InsertMedicalRecordEntry, InsertMedicalRecordAccess, InsertPartnerAddress } from '../shared/schema';
 import { db, safeQuery } from "./db";
@@ -251,6 +251,9 @@ export interface IStorage {
     limit?: number,
     offset?: number
   ): Promise<any[]>;
+  
+  // Partner Analytics
+  getPartnerAnalytics(partnerId: number, period?: string): Promise<any>;
 }
 
 // Implement the storage interface with a database storage
@@ -2298,6 +2301,220 @@ export class DatabaseStorage implements IStorage {
       `, [request.userId, request.requestType, request.status]);
     } catch (error) {
       console.error('Erro ao criar LGPD request:', error);
+    }
+  }
+
+  // Partner Analytics Methods
+  async getPartnerAnalytics(partnerId: number, period: string = 'month'): Promise<any> {
+    try {
+      // Get date range based on period
+      const endDate = new Date();
+      const startDate = new Date();
+      
+      switch (period) {
+        case 'week':
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case 'month':
+          startDate.setMonth(startDate.getMonth() - 1);
+          break;
+        case 'year':
+          startDate.setFullYear(startDate.getFullYear() - 1);
+          break;
+        default:
+          startDate.setMonth(startDate.getMonth() - 1);
+      }
+
+      // Get collaborators data
+      const collaboratorsData = await safeQuery(() =>
+        db.select({
+          total: count(),
+          status: partnerCollaborators.status,
+          department: partnerCollaborators.department
+        })
+        .from(partnerCollaborators)
+        .where(eq(partnerCollaborators.partnerId, partnerId))
+        .groupBy(partnerCollaborators.status, partnerCollaborators.department)
+      );
+
+      const totalCollaborators = collaboratorsData.reduce((sum, row) => sum + row.total, 0);
+      const activeCollaborators = collaboratorsData.filter(row => row.status === 'active').reduce((sum, row) => sum + row.total, 0);
+      const inactiveCollaborators = collaboratorsData.filter(row => row.status === 'inactive').reduce((sum, row) => sum + row.total, 0);
+      const pendingInvites = collaboratorsData.filter(row => row.status === 'pending').reduce((sum, row) => sum + row.total, 0);
+
+      // Get collaborators by department
+      const departmentMap = new Map<string, number>();
+      collaboratorsData.forEach(row => {
+        if (row.department) {
+          departmentMap.set(row.department, (departmentMap.get(row.department) || 0) + row.total);
+        }
+      });
+      
+      const collaboratorsByDepartment = Array.from(departmentMap.entries())
+        .map(([department, count]) => ({ department, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      // Get consultations data
+      const consultationsData = await safeQuery(() =>
+        db.select({
+          total: count(),
+          isEmergency: appointments.isEmergency,
+          date: appointments.scheduledAt
+        })
+        .from(appointments)
+        .innerJoin(partnerCollaborators, eq(appointments.userId, partnerCollaborators.userId))
+        .where(and(
+          eq(partnerCollaborators.partnerId, partnerId),
+          gte(appointments.scheduledAt, startDate),
+          lte(appointments.scheduledAt, endDate),
+          ne(appointments.status, 'cancelled')
+        ))
+      );
+
+      const totalConsultations = consultationsData.length;
+      const emergencyConsultations = consultationsData.filter(row => row.isEmergency).length;
+      const scheduledConsultations = totalConsultations - emergencyConsultations;
+
+      // TODO: Implementar rastreamento real de duração de consultas
+      const averageConsultationDuration = 0; // Será 0 até implementarmos o tracking
+
+      // Get satisfaction rate from ratings
+      const ratingsData = await safeQuery(() =>
+        db.select({
+          avgRating: sql<number>`COALESCE(AVG(rating), 0)`
+        })
+        .from(appointments)
+        .innerJoin(partnerCollaborators, eq(appointments.userId, partnerCollaborators.userId))
+        .where(and(
+          eq(partnerCollaborators.partnerId, partnerId),
+          gte(appointments.scheduledAt, startDate),
+          lte(appointments.scheduledAt, endDate),
+          ne(appointments.status, 'cancelled'),
+          sql`rating IS NOT NULL`
+        ))
+      );
+
+      const satisfactionRate = ratingsData[0]?.avgRating ? (ratingsData[0].avgRating / 5) * 100 : 0;
+
+      // Get attestations data (from claims)
+      const attestationsData = await safeQuery(() =>
+        db.select({
+          total: count(),
+          type: claims.type,
+          createdAt: claims.createdAt
+        })
+        .from(claims)
+        .innerJoin(partnerCollaborators, eq(claims.userId, partnerCollaborators.userId))
+        .where(and(
+          eq(partnerCollaborators.partnerId, partnerId),
+          gte(claims.createdAt, startDate),
+          lte(claims.createdAt, endDate)
+        ))
+      );
+
+      const totalAttestations = attestationsData.length;
+      const thisMonthAttestations = attestationsData.filter(row => {
+        const claimDate = new Date(row.createdAt);
+        const now = new Date();
+        return claimDate.getMonth() === now.getMonth() && claimDate.getFullYear() === now.getFullYear();
+      }).length;
+
+      // Group attestations by type
+      const attestationsByType = new Map<string, number>();
+      attestationsData.forEach(row => {
+        const type = row.type || 'Atestado Médico';
+        attestationsByType.set(type, (attestationsByType.get(type) || 0) + 1);
+      });
+
+      const attestationTypes = Array.from(attestationsByType.entries())
+        .map(([type, count]) => ({
+          type,
+          count,
+          percentage: totalAttestations > 0 ? Math.round((count / totalAttestations) * 100) : 0
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      // Calculate financial metrics
+      const consultationCost = 35000; // R$ 350 em centavos (custo médio consulta particular)
+      const cnVidasCost = 9000; // R$ 90 em centavos (custo CN Vidas)
+      const savingsPerConsultation = consultationCost - cnVidasCost;
+      const totalSaved = totalConsultations * savingsPerConsultation;
+
+      // Get subscription utilization
+      const activeUsers = await safeQuery(() =>
+        db.select({
+          count: count()
+        })
+        .from(partnerCollaborators)
+        .innerJoin(appointments, eq(partnerCollaborators.userId, appointments.userId))
+        .where(and(
+          eq(partnerCollaborators.partnerId, partnerId),
+          eq(partnerCollaborators.status, 'active'),
+          gte(appointments.scheduledAt, startDate),
+          lte(appointments.scheduledAt, endDate)
+        ))
+        .groupBy(partnerCollaborators.userId)
+      );
+
+      const subscriptionUtilization = activeCollaborators > 0 
+        ? Math.round((activeUsers.length / activeCollaborators) * 100)
+        : 0;
+
+      // Generate activity data for the last 30 days
+      const activityData = [];
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        
+        // TODO: Implementar rastreamento real de logins
+        // Por enquanto, retorna 0 para logins até implementarmos o tracking
+        const logins = 0;
+        
+        // Get actual consultations for this day
+        const dayConsultations = consultationsData.filter(row => {
+          const consultDate = new Date(row.date);
+          return consultDate.toDateString() === date.toDateString();
+        }).length;
+        
+        activityData.push({
+          date: dateStr,
+          logins,
+          consultations: dayConsultations
+        });
+      }
+
+      return {
+        totalCollaborators,
+        activeCollaborators,
+        inactiveCollaborators,
+        pendingInvites,
+        collaboratorsByDepartment,
+        collaboratorActivity: activityData,
+        healthMetrics: {
+          totalConsultations,
+          emergencyConsultations,
+          scheduledConsultations,
+          averageConsultationDuration,
+          satisfactionRate: Math.round(satisfactionRate * 10) / 10
+        },
+        attestations: {
+          total: totalAttestations,
+          thisMonth: thisMonthAttestations,
+          averageDuration: 0, // TODO: Implementar cálculo real de duração média
+          byType: attestationTypes
+        },
+        financialMetrics: {
+          totalSaved: totalSaved / 100, // Convert to reais
+          averageSavingsPerConsultation: savingsPerConsultation / 100,
+          subscriptionUtilization
+        }
+      };
+
+    } catch (error) {
+      console.error('Erro ao buscar analytics do parceiro:', error);
+      throw error;
     }
   }
 }
