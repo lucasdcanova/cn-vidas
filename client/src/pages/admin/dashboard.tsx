@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, User as UserIcon, Briefcase, Stethoscope, Activity, Clock, Calendar, AlertTriangle } from "lucide-react";
+import { Users, User as UserIcon, Briefcase, Stethoscope, Activity, Clock, Calendar, AlertTriangle, Building2, TrendingUp } from "lucide-react";
 import AdminLayout from "@/components/layouts/admin-layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Claim, User, Appointment } from '@/shared/types';
@@ -14,6 +14,12 @@ interface AdminStats {
   totalPartners: number;
   totalAppointments: number;
   pendingClaims: number;
+  corporateStats?: {
+    activePartners: number;
+    totalEmployees: number;
+    monthlyRevenue: number;
+    employeeAppointments: number;
+  };
 }
 
 interface RecentUser {
@@ -110,6 +116,83 @@ const AdminDashboard: React.FC = () => {
             </Card>
           ))}
         </div>
+
+        {/* Estatísticas Corporativas */}
+        {stats.corporateStats && (
+          <div className="mt-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Programa Corporativo
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4 lg:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs lg:text-sm font-medium text-gray-600">Parceiros Ativos</p>
+                      {isStatsLoading ? (
+                        <Skeleton className="h-7 lg:h-9 w-12 lg:w-16 mt-1" />
+                      ) : (
+                        <p className="text-xl lg:text-2xl font-bold mt-1">{stats.corporateStats.activePartners}</p>
+                      )}
+                    </div>
+                    <Building2 className="h-6 w-6 text-blue-500 flex-shrink-0 ml-2" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4 lg:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs lg:text-sm font-medium text-gray-600">Total de Colaboradores</p>
+                      {isStatsLoading ? (
+                        <Skeleton className="h-7 lg:h-9 w-12 lg:w-16 mt-1" />
+                      ) : (
+                        <p className="text-xl lg:text-2xl font-bold mt-1">{stats.corporateStats.totalEmployees}</p>
+                      )}
+                    </div>
+                    <Users className="h-6 w-6 text-green-500 flex-shrink-0 ml-2" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4 lg:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs lg:text-sm font-medium text-gray-600">Receita Mensal</p>
+                      {isStatsLoading ? (
+                        <Skeleton className="h-7 lg:h-9 w-12 lg:w-16 mt-1" />
+                      ) : (
+                        <p className="text-xl lg:text-2xl font-bold mt-1">
+                          R$ {(stats.corporateStats.monthlyRevenue || 0).toLocaleString('pt-BR')}
+                        </p>
+                      )}
+                    </div>
+                    <TrendingUp className="h-6 w-6 text-purple-500 flex-shrink-0 ml-2" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4 lg:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs lg:text-sm font-medium text-gray-600">Consultas (Colaboradores)</p>
+                      {isStatsLoading ? (
+                        <Skeleton className="h-7 lg:h-9 w-12 lg:w-16 mt-1" />
+                      ) : (
+                        <p className="text-xl lg:text-2xl font-bold mt-1">{stats.corporateStats.employeeAppointments}</p>
+                      )}
+                    </div>
+                    <Activity className="h-6 w-6 text-orange-500 flex-shrink-0 ml-2" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
 
         {/* Tabs para diferentes visualizações */}
         <Tabs defaultValue="users">
