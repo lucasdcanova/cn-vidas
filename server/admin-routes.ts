@@ -940,13 +940,24 @@ router.get('/stats', async (req, res) => {
     const totalDoctors = allUsers.filter(u => u.role === 'doctor').length;
     const totalPartners = allUsers.filter(u => u.role === 'partner').length;
     
+    // Buscar estatísticas corporativas se houver função disponível
+    let corporateStats = null;
+    try {
+      if (typeof storage.getCorporateStats === 'function') {
+        corporateStats = await storage.getCorporateStats();
+      }
+    } catch (error) {
+      console.error('Erro ao buscar estatísticas corporativas:', error);
+    }
+    
     res.json({
       totalUsers: allUsers.length,
       totalPatients,
       totalDoctors,
       totalPartners,
       totalAppointments: 0, // TODO: Implement appointments count
-      pendingClaims: 0 // TODO: Implement claims count
+      pendingClaims: 0, // TODO: Implement claims count
+      corporateStats
     });
   } catch (error) {
     console.error('Error in admin stats route:', error);

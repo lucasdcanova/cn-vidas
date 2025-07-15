@@ -49,6 +49,7 @@ import stripeWebhookRouter from './stripe-webhook';
 import { partnerCollaboratorsRouter } from './partner-collaborators-routes';
 import { partnerSubscriptionRouter } from './partner-subscription-routes';
 import { corporateRouter } from './corporate-routes';
+import adminPartnerRouter from './admin-partner-routes';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -157,6 +158,10 @@ export default async function setupRoutes(app: express.Express) {
   // Rotas administrativas
   console.log('Registrando adminRoutes em /api/admin');
   app.use('/api/admin', adminRoutes);
+  
+  // Rotas administrativas de parceiros
+  console.log('Registrando adminPartnerRouter em /api/admin');
+  app.use('/api/admin', adminPartnerRouter);
   
   // Rotas de parceiros (autenticadas)
   console.log('Registrando partnerRouter em /api/partners');
