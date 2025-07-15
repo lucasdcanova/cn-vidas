@@ -327,7 +327,7 @@ export default function PartnerCollaborators() {
                   <Button 
                     variant="link" 
                     className="p-0 h-auto text-yellow-800 underline"
-                    onClick={() => navigate('/partner/subscription')}
+                    onClick={() => navigate('/partner/corporate-plans')}
                   >
                     Faça upgrade para adicionar mais colaboradores
                   </Button>

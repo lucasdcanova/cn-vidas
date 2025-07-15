@@ -68,7 +68,9 @@ import PartnerVerification from "@/pages/partner-verification";
 import PartnerServices from "@/pages/partner-services";
 import PartnerAddresses from "@/pages/partner/PartnerAddresses";
 import PartnerCollaborators from "@/pages/partner/collaborators";
-import PartnerSubscription from "@/pages/partner/subscription";
+import CorporatePlansPage from "@/pages/partner/corporate-plans";
+import CorporateEmployees from "@/pages/partner/corporate-employees";
+import CorporateInvitePage from "@/pages/corporate-invite";
 import QRCodePage from "@/pages/qr-code";
 import { TestQRPage } from "@/pages/test-qr";
 import PatientSettings from "@/pages/patient/settings";
@@ -215,7 +217,11 @@ function Router() {
       <ProtectedRoute path="/partner/services" component={PartnerServices} allowedRoles={["partner"]} />
       <ProtectedRoute path="/partner/addresses" component={PartnerAddresses} allowedRoles={["partner"]} />
       <ProtectedRoute path="/partner/collaborators" component={PartnerCollaborators} allowedRoles={["partner"]} />
-      <ProtectedRoute path="/partner/subscription" component={PartnerSubscription} allowedRoles={["partner"]} />
+      <ProtectedRoute path="/partner/corporate-plans" component={CorporatePlansPage} allowedRoles={["partner"]} />
+      <ProtectedRoute path="/partner/corporate-employees" component={CorporateEmployees} allowedRoles={["partner"]} />
+      
+      {/* Corporate invite route - accessible without authentication */}
+      <Route path="/corporate-invite/:token" component={CorporateInvitePage} />
       
       {/* Admin Routes */}
       <ProtectedRoute path="/admin" component={AdminDashboard} allowedRoles={["admin"]} />
