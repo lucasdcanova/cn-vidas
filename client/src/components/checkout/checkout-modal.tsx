@@ -19,6 +19,12 @@ interface CheckoutModalProps {
   planName: string;
   planPrice: string;
   onSuccess?: () => void;
+  isCorporate?: boolean;
+  corporateData?: {
+    planType: string;
+    employeeCount: number;
+    billingPeriod: string;
+  };
 }
 
 // Componente interno para o formulário de pagamento
@@ -173,7 +179,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   planId,
   planName,
   planPrice,
-  onSuccess
+  onSuccess,
+  isCorporate = false,
+  corporateData
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -201,24 +209,36 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   
   // Função para criar assinatura com método de pagamento específico
   const createSubscription = async (method: 'card' | 'pix' | 'boleto') => {
-    if (!planId) return;
+    if (!isCorporate && !planId) return;
     
     setIsLoading(true);
     
     // Rastrear início do checkout
     const priceNumber = parseFloat(planPrice.replace('R$', '').replace(',', '.')) * 100;
-    await trackCheckoutStart('subscription', priceNumber, {
+    await trackCheckoutStart(isCorporate ? 'corporate_subscription' : 'subscription', priceNumber, {
       planName,
       planId,
-      paymentMethod: method
+      paymentMethod: method,
+      ...(isCorporate && corporateData ? corporateData : {})
     });
     
     try {
-      console.log('Iniciando criação de assinatura para o plano:', planId, 'com método de pagamento:', method);
-      const response = await apiRequest("POST", "/api/subscription/create-session", { 
-        planId: planId.toString(),
-        paymentMethod: method 
-      });
+      let response;
+      let data;
+      
+      if (isCorporate && corporateData) {
+        console.log('Iniciando criação de assinatura corporativa:', corporateData);
+        response = await apiRequest("POST", "/api/corporate/subscribe", {
+          ...corporateData,
+          paymentMethodId: null // Será definido depois no Stripe Elements
+        });
+      } else {
+        console.log('Iniciando criação de assinatura para o plano:', planId, 'com método de pagamento:', method);
+        response = await apiRequest("POST", "/api/subscription/create-session", { 
+          planId: planId.toString(),
+          paymentMethod: method 
+        });
+      }
       
       if (!response.ok) {
         // Se a resposta não for ok, lançar um erro com mais detalhes
@@ -226,7 +246,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         throw new Error(errorData.message || 'Erro na requisição');
       }
       
-      const data = await response.json();
+      data = await response.json();
       console.log('Resposta da API de assinatura:', data);
       
       // Armazenar que uma assinatura foi iniciada

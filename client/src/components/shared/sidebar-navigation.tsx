@@ -251,6 +251,28 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
           <>
             <p className={sectionTitleClass}>Gerenciamento</p>
             
+            <Link href="/partner/corporate-plans"
+              className={`${linkBaseClass} ${
+                isLinkActive("/partner/corporate-plans") 
+                  ? linkActiveClass 
+                  : linkInactiveClass
+              }`}>
+                <Building2 className="w-5 h-5 mr-3" />
+                Planos Corporativos
+            </Link>
+            
+            <Link href="/partner/corporate-employees"
+              className={`${linkBaseClass} ${
+                isLinkActive("/partner/corporate-employees") || isLinkActive("/partner/collaborators")
+                  ? linkActiveClass 
+                  : linkInactiveClass
+              }`}>
+                <Users className="w-5 h-5 mr-3" />
+                Colaboradores
+            </Link>
+            
+            <p className={sectionTitleClass}>Serviços Ofertados</p>
+            
             <Link href="/partner/services"
               className={`${linkBaseClass} ${
                 isLinkActive("/partner/services") 
@@ -259,26 +281,6 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
               }`}>
                 <Stethoscope className="w-5 h-5 mr-3" />
                 Meus Serviços
-            </Link>
-            
-            <Link href="/partner/collaborators"
-              className={`${linkBaseClass} ${
-                isLinkActive("/partner/collaborators") 
-                  ? linkActiveClass 
-                  : linkInactiveClass
-              }`}>
-                <Users className="w-5 h-5 mr-3" />
-                Colaboradores
-            </Link>
-            
-            <Link href="/partner/subscription"
-              className={`${linkBaseClass} ${
-                isLinkActive("/partner/subscription") 
-                  ? linkActiveClass 
-                  : linkInactiveClass
-              }`}>
-                <CreditCard className="w-5 h-5 mr-3" />
-                Assinatura
             </Link>
             
             <Link href="/partner/verification"
@@ -294,7 +296,10 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole =
         )}
         
         <div className="mt-auto">
-          <p className={sectionTitleClass}>Conta</p>
+          {/* Só mostrar seção Conta se houver itens relevantes */}
+          {(userRole === "patient" || userRole === "doctor" || userRole === "admin") && (
+            <p className={sectionTitleClass}>Conta</p>
+          )}
           
           {/* Planos disponível apenas para pacientes */}
           {userRole === "patient" && (
