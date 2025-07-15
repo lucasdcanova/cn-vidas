@@ -343,7 +343,7 @@ const CorporatePlansPage: React.FC = () => {
         </Card>
 
         {/* Grid de planos */}
-        <div className="mb-8">
+        <div className="mb-32">
           <h2 className="text-xl font-semibold mb-6">Escolha o plano ideal para sua empresa</h2>
           <div className={`grid ${isIOS ? 'gap-5' : 'gap-4 md:gap-6'} grid-cols-1 md:grid-cols-3`}>
             {/* Planos pagos */}
@@ -488,8 +488,8 @@ const CorporatePlansPage: React.FC = () => {
         </div>
 
         {/* Resumo e botão de contratação */}
-        <Card className="sticky bottom-4 border-2 shadow-lg bg-white/95 backdrop-blur-xl">
-          <CardContent className="p-6">
+        <Card className="sticky bottom-16 sm:bottom-20 border-2 shadow-lg bg-white/95 backdrop-blur-xl z-40">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="text-center md:text-left">
                 <p className="text-sm text-muted-foreground">Plano selecionado</p>
