@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, CreditCard, User, Users, AlertTriangle, Star, Crown, Heart, Shield, Zap, CheckCircle, CheckCircle2, Sparkles } from "lucide-react";
+import { Loader2, Check, CreditCard, User, Users, AlertTriangle, Star, Crown, Heart, Shield, Zap, CheckCircle, CheckCircle2, Sparkles, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { getSubscriptionPlans, getUserSubscription, updateUserSubscription } from "@/lib/api";
@@ -15,6 +15,9 @@ import CheckoutModal from "@/components/checkout/checkout-modal-fix";
 import cnvidasLogo from "@/assets/cnvidas-logo-transparent.png";
 import { getPlanName } from "@/components/shared/plan-indicator";
 import { motion, AnimatePresence } from "framer-motion";
+import { IOSScrollView } from '@/components/shared/IOSScrollView';
+import { isIOS } from '@/utils/platform';
+import { StatusBar } from '@capacitor/status-bar';
 
 // Definição do tipo de plano de assinatura
 interface SubscriptionPlan {
@@ -54,9 +57,24 @@ const FirstSubscriptionPage: React.FC = () => {
   const [hasAttemptedLeave, setHasAttemptedLeave] = useState(false);
   const [showActivationAnimation, setShowActivationAnimation] = useState(false);
   const [activationStatus, setActivationStatus] = useState<'checking' | 'activating' | 'activated'>('checking');
+  const scrollViewRef = useRef<HTMLDivElement>(null);
 
   console.log("🔍 FirstSubscriptionPage - Location atual:", location);
   console.log("🔧 TESTE: FirstSubscriptionPage carregada às", new Date().toLocaleTimeString());
+  
+  // Configure status bar for iOS
+  useEffect(() => {
+    if (isIOS()) {
+      StatusBar.setBackgroundColor({ color: '#ffffff' });
+      StatusBar.setStyle({ style: 'DARK' });
+    }
+    
+    return () => {
+      if (isIOS()) {
+        StatusBar.setBackgroundColor({ color: '#ffffff' });
+      }
+    };
+  }, []);
 
   // Buscar planos de assinatura disponíveis
   const { data: plans, isLoading: plansLoading } = useQuery({
@@ -389,64 +407,111 @@ const FirstSubscriptionPage: React.FC = () => {
       </AnimatePresence>
 
       {/* Conteúdo original da página */}
-      <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-muted">
-        <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <h1 className="text-4xl font-bold mr-2">Bem-vindo ao</h1>
+      <IOSScrollView ref={scrollViewRef} className="flex flex-col min-h-screen bg-gray-50">
+        {/* Header animado similar aos outros onboardings */}
+        <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 px-4 py-8 animate-fadeInSimple">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-center mb-6">
               <img 
                 src={cnvidasLogo} 
                 alt="CN Vidas" 
-                style={{ height: "100px" }} 
-                className="w-auto" 
+                className="h-16 md:h-20 w-auto"
               />
             </div>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Para começar a usar nossa plataforma, por favor selecione um dos planos abaixo que melhor atenda às suas necessidades.
-            </p>
             
-            {hasAttemptedLeave && (
-              <div className="mt-6 bg-destructive/10 border border-destructive p-4 rounded-lg mx-auto max-w-md flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <p className="text-destructive font-medium">É necessário selecionar um plano para continuar.</p>
+            {/* Progress indicator */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                  1
+                </div>
+                <div className="w-16 h-1 bg-primary/20"></div>
+                <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                  2
+                </div>
+                <div className="w-16 h-1 bg-gray-300"></div>
+                <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                  3
+                </div>
               </div>
-            )}
+            </div>
+            
+            <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-2">
+              Escolha seu Plano
+            </h1>
+            <p className="text-center text-gray-600">
+              Selecione o melhor plano para suas necessidades
+            </p>
           </div>
+        </div>
+        
+        <main className="flex-1 px-4 py-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Card informativo sobre planos */}
+          <Card className="mb-6 backdrop-blur-sm bg-white/90 shadow-lg animate-slide-up">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Star className="h-6 w-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">Por que escolher o CN Vidas?</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Acesso imediato a consultas médicas, telemedicina 24/7, rede credenciada e muito mais.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {hasAttemptedLeave && (
+            <div className="mb-6 bg-destructive/10 border border-destructive p-4 rounded-lg flex items-center gap-3 animate-slide-up">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <p className="text-destructive font-medium">É necessário selecionar um plano para continuar.</p>
+            </div>
+          )}
           
           {/* Toggle para planos individuais/familiares */}
-          <div className="flex items-center justify-center space-x-2 mb-12 bg-white p-4 rounded-lg shadow-sm mx-auto max-w-md">
-            <div className="flex items-center space-x-2">
-              <User className="h-5 w-5 text-primary" />
-              <Label htmlFor="family-toggle" className={!showFamilyPlans ? "font-semibold text-base" : "text-base"}>Individual</Label>
-            </div>
-            <Switch 
-              id="family-toggle" 
-              checked={showFamilyPlans} 
-              onCheckedChange={setShowFamilyPlans} 
-            />
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-primary" />
-              <Label htmlFor="family-toggle" className={showFamilyPlans ? "font-semibold text-base" : "text-base"}>Familiar</Label>
-            </div>
-          </div>
+          <Card className="mb-8 sticky top-0 z-10 backdrop-blur-sm bg-white/95 shadow-md">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-center space-x-3">
+                <div className="flex items-center space-x-2">
+                  <User className="h-5 w-5 text-primary" />
+                  <Label htmlFor="family-toggle" className={!showFamilyPlans ? "font-semibold text-base text-primary" : "text-base text-gray-600"}>Individual</Label>
+                </div>
+                <Switch 
+                  id="family-toggle" 
+                  checked={showFamilyPlans} 
+                  onCheckedChange={setShowFamilyPlans} 
+                  className="data-[state=checked]:bg-primary"
+                />
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <Label htmlFor="family-toggle" className={showFamilyPlans ? "font-semibold text-base text-primary" : "text-base text-gray-600"}>Familiar</Label>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Lista de planos */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Lista de planos - scroll horizontal no mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
             {plans && getFilteredAndGroupedPlans()
               .map((plan: SubscriptionPlan) => (
               <Card 
                 key={plan.id} 
-                className={`overflow-hidden transform transition-all duration-300 hover:shadow-xl ${
+                className={`overflow-hidden transform transition-all duration-300 hover:shadow-xl animate-slide-up ${
                   plan.name === 'ultra' || plan.name === 'ultra_family' 
-                    ? 'hover:-translate-y-2 border-violet-400 shadow-lg shadow-violet-300 relative ring-2 ring-violet-400/70 scale-105' : 
+                    ? 'md:hover:-translate-y-2 border-violet-400 shadow-lg shadow-violet-300 relative ring-2 ring-violet-400/70 md:scale-105' : 
                   plan.name === 'premium' || plan.name === 'premium_family' 
-                    ? 'hover:-translate-y-1 border-amber-300' :
+                    ? 'md:hover:-translate-y-1 border-amber-300' :
                   plan.name === 'basic' || plan.name === 'basic_family' 
-                    ? 'hover:-translate-y-1 border-emerald-300' :
+                    ? 'md:hover:-translate-y-1 border-emerald-300' :
                   plan.name === 'free'
-                    ? 'hover:-translate-y-1 border-gray-300 bg-gray-50' : ''
+                    ? 'md:hover:-translate-y-1 border-gray-300 bg-gray-50' : ''
                 }`}
+                style={{
+                  animationDelay: `${plans?.indexOf(plan) * 100}ms`
+                }}
               >
                 <CardHeader className={`${
                   plan.name === 'ultra' || plan.name === 'ultra_family'
@@ -477,18 +542,18 @@ const FirstSubscriptionPage: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <div className="mb-6">
-                    <span className="text-3xl font-bold">
+                  <div className="mb-6 text-center">
+                    <span className="text-2xl md:text-3xl font-bold block">
                       {plan.price ? `R$ ${(plan.price / 100).toFixed(2)}` : "Gratuito"}
                     </span>
-                    {plan.price > 0 && <span className="text-muted-foreground">/mês</span>}
+                    {plan.price > 0 && <span className="text-sm text-muted-foreground">/mês</span>}
                   </div>
 
-                  <ul className="space-y-3 my-6">
+                  <ul className="space-y-2 md:space-y-3 my-4 md:my-6">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start">
-                        <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                        <span>{feature}</span>
+                        <Check className="h-4 w-4 md:h-5 md:w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
+                        <span className="text-sm md:text-base">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -512,17 +577,28 @@ const FirstSubscriptionPage: React.FC = () => {
 
 
           {/* Informação adicional */}
-          <div className="mt-12 bg-white p-6 rounded-lg shadow-sm max-w-2xl mx-auto">
-            <h2 className="text-xl font-semibold mb-4">Importante</h2>
-            <p className="text-muted-foreground mb-4">
-              Você deve selecionar um plano para continuar usando a plataforma CN Vidas. Este é um passo obrigatório 
-              para novos usuários pacientes.
-            </p>
-            <p className="text-muted-foreground">
-              Se você tiver alguma dúvida sobre os planos disponíveis, entre em contato com nosso suporte através 
-              do e-mail <a href="mailto:suporte@cnvidas.com.br" className="text-primary hover:underline">suporte@cnvidas.com.br</a>.
-            </p>
-          </div>
+          <Card className="mt-8 backdrop-blur-sm bg-white/90 shadow-md animate-fade-in" style={{ animationDelay: '400ms' }}>
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-3">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <Info className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 mb-2">Informação Importante</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Você deve selecionar um plano para continuar usando a plataforma CN Vidas. Este é um passo obrigatório 
+                    para novos usuários pacientes.
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Dúvidas? Entre em contato: <a href="mailto:suporte@cnvidas.com.br" className="text-primary hover:underline font-medium">suporte@cnvidas.com.br</a>
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Bottom padding for iOS */}
+          <div className="h-8 md:h-12"></div>
         </div>
       </main>
 
@@ -537,7 +613,7 @@ const FirstSubscriptionPage: React.FC = () => {
           onSuccess={handlePlanSelected}
         />
       )}
-    </div>
+    </IOSScrollView>
     </>
   );
 };
