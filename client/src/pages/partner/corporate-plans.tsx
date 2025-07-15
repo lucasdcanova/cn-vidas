@@ -50,7 +50,7 @@ const CorporatePlansPage: React.FC = () => {
   const [, setLocation] = useLocation();
   
   // Estados para seleção
-  const [selectedPlanType, setSelectedPlanType] = useState<string>("basic_corp");
+  const [selectedPlanType, setSelectedPlanType] = useState<string>("free_corp");
   const [selectedEmployeeCount, setSelectedEmployeeCount] = useState<number>(10);
   const [billingPeriod, setBillingPeriod] = useState<string>("monthly");
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -85,6 +85,9 @@ const CorporatePlansPage: React.FC = () => {
   const calculatePrice = () => {
     if (!plans || !selectedPlanType) return 0;
     
+    // Plano gratuito sempre retorna 0
+    if (selectedPlanType === 'free_corp') return 0;
+    
     const plan = plans.find((p: CorporatePlan) => p.planType === selectedPlanType);
     if (!plan) return 0;
     
@@ -117,6 +120,15 @@ const CorporatePlansPage: React.FC = () => {
   // Função para obter as características do plano
   const getPlanFeatures = (planType: string) => {
     switch (planType) {
+      case 'free_corp':
+        return [
+          'Listagem no marketplace',
+          'Sem destaque nos resultados',
+          'Gestão básica de colaboradores',
+          'Sem benefícios de saúde',
+          'Sem consultas incluídas',
+          'Sem suporte prioritário'
+        ];
       case 'basic_corp':
         return [
           'Consultas ilimitadas',
@@ -157,6 +169,8 @@ const CorporatePlansPage: React.FC = () => {
   // Função para obter as cores do plano
   const getPlanColorClass = (planType: string) => {
     switch (planType) {
+      case 'free_corp':
+        return 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200 hover:border-gray-300';
       case 'basic_corp':
         return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300';
       case 'premium_corp':
@@ -170,6 +184,8 @@ const CorporatePlansPage: React.FC = () => {
 
   const getPlanHeaderClass = (planType: string) => {
     switch (planType) {
+      case 'free_corp':
+        return 'bg-gradient-to-r from-gray-400 to-slate-500 text-white';
       case 'basic_corp':
         return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
       case 'premium_corp':
@@ -260,14 +276,14 @@ const CorporatePlansPage: React.FC = () => {
               <Label className="text-base font-medium mb-3 block">
                 Quantos colaboradores sua empresa possui?
               </Label>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
                 <input
                   type="range"
                   min="5"
                   max="500"
                   value={selectedEmployeeCount}
                   onChange={(e) => setSelectedEmployeeCount(parseInt(e.target.value))}
-                  className="flex-1"
+                  className="flex-1 w-full"
                 />
                 <div className="text-center min-w-[100px]">
                   <p className="text-2xl font-bold">{selectedEmployeeCount}</p>
@@ -330,6 +346,7 @@ const CorporatePlansPage: React.FC = () => {
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-6">Escolha o plano ideal para sua empresa</h2>
           <div className={`grid ${isIOS ? 'gap-5' : 'gap-4 md:gap-6'} grid-cols-1 md:grid-cols-3`}>
+            {/* Planos pagos */}
             {plans && plans.map((plan: CorporatePlan) => {
               const isCurrentPlan = currentSubscription?.planType === plan.planType;
               const features = getPlanFeatures(plan.planType);
@@ -409,6 +426,64 @@ const CorporatePlansPage: React.FC = () => {
                 </Card>
               );
             })}
+            
+            {/* Plano Gratuito - sempre por último */}
+            <Card 
+              className={`relative overflow-hidden transition-all hover:shadow-lg border-2 ${
+                currentSubscription?.planType === 'free_corp' ? 'ring-2 ring-primary' : ''
+              } ${
+                selectedPlanType === 'free_corp' ? 'ring-2 ring-blue-500' : ''
+              } ${getPlanColorClass('free_corp')} md:col-span-3 lg:col-span-1`}
+              onClick={() => setSelectedPlanType('free_corp')}
+            >
+              {currentSubscription?.planType === 'free_corp' && (
+                <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-2 py-1 text-xs md:text-sm font-medium rounded-bl-lg z-10">
+                  Plano Atual
+                </div>
+              )}
+              
+              <CardHeader className={`${getPlanHeaderClass('free_corp')} ${isIOS ? 'p-5' : 'p-4 md:p-6'}`}>
+                <CardTitle className={`flex items-center justify-between ${isIOS ? 'text-[17px]' : 'text-base md:text-lg'}`}>
+                  <span>Gratuito</span>
+                  <Building2 className={`${isIOS ? 'h-4 w-4' : 'h-4 w-4 md:h-5 md:w-5'} opacity-80`} />
+                </CardTitle>
+                <CardDescription className="text-white/90 mt-2">
+                  <div>
+                    <span className={`${isIOS ? 'text-[16px]' : 'text-base'} font-medium text-white`}>
+                      R$ 0,00
+                    </span>
+                    <span className={`${isIOS ? 'text-[12px]' : 'text-sm'}`}>/colaborador/mês</span>
+                  </div>
+                  <div className="mt-1">
+                    <span className={`${isIOS ? 'text-[20px]' : 'text-xl'} font-bold text-white`}>
+                      Grátis
+                    </span>
+                  </div>
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className={`${isIOS ? 'p-5' : 'p-4 md:p-6'}`}>
+                <ul className={`${isIOS ? 'space-y-4' : 'space-y-3'}`}>
+                  {getPlanFeatures('free_corp').map((feature, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className={`${isIOS ? 'text-[13px] leading-[1.6]' : 'text-xs md:text-sm'} text-gray-700`}>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              
+              <CardFooter className={`${isIOS ? 'p-5 pt-3' : 'p-4 md:p-6 pt-2'}`}>
+                <Button 
+                  className={`w-full ${isIOS ? 'text-[15px] h-11' : 'text-sm md:text-base'} ${
+                    selectedPlanType === 'free_corp' ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                  }`}
+                  variant={selectedPlanType === 'free_corp' ? "default" : "outline"}
+                >
+                  {selectedPlanType === 'free_corp' ? "Selecionado" : "Selecionar"}
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
         </div>
 
@@ -419,19 +494,19 @@ const CorporatePlansPage: React.FC = () => {
               <div className="text-center md:text-left">
                 <p className="text-sm text-muted-foreground">Plano selecionado</p>
                 <p className="text-xl font-bold">
-                  {plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName}
+                  {selectedPlanType === 'free_corp' ? 'Gratuito' : plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {selectedEmployeeCount} colaboradores • {getEmployeeTier(selectedEmployeeCount)} vidas • 
-                  {billingPeriod === 'monthly' ? ' Mensal' : billingPeriod === 'semiannual' ? ' Semestral' : ' Anual'}
+                  {selectedPlanType === 'free_corp' ? 'Sem limite de colaboradores • ' : `${selectedEmployeeCount} colaboradores • ${getEmployeeTier(selectedEmployeeCount)} vidas • `}
+                  {selectedPlanType === 'free_corp' ? 'Apenas listagem no marketplace' : billingPeriod === 'monthly' ? 'Mensal' : billingPeriod === 'semiannual' ? 'Semestral' : 'Anual'}
                 </p>
               </div>
               <div className="text-center md:text-right">
                 <p className="text-sm text-muted-foreground">Total mensal</p>
                 <p className="text-3xl font-bold text-green-600">
-                  R$ {finalPrice.toFixed(2)}
+                  {selectedPlanType === 'free_corp' ? 'Gratuito' : `R$ ${finalPrice.toFixed(2)}`}
                 </p>
-                {billingPeriod !== 'monthly' && (
+                {billingPeriod !== 'monthly' && selectedPlanType !== 'free_corp' && (
                   <p className="text-sm text-green-600">
                     Economizando {billingPeriod === 'semiannual' ? '5%' : '8%'}
                   </p>
@@ -441,15 +516,23 @@ const CorporatePlansPage: React.FC = () => {
                 size="lg" 
                 className="w-full md:w-auto"
                 onClick={() => {
-                  setSelectedPlan({
-                    id: 0, // Será usado apenas para o modal
-                    name: plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName || '',
-                    price: `R$ ${finalPrice.toFixed(2).replace('.', ',')}`
-                  });
-                  setCheckoutOpen(true);
+                  if (selectedPlanType === 'free_corp') {
+                    // Para o plano gratuito, criar automaticamente sem checkout
+                    toast({
+                      title: "Plano Gratuito",
+                      description: "O plano gratuito já está ativo. Você pode começar a usar o marketplace.",
+                    });
+                  } else {
+                    setSelectedPlan({
+                      id: 0, // Será usado apenas para o modal
+                      name: plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName || '',
+                      price: `R$ ${finalPrice.toFixed(2).replace('.', ',')}`
+                    });
+                    setCheckoutOpen(true);
+                  }
                 }}
               >
-                Contratar Plano Corporativo
+                {selectedPlanType === 'free_corp' ? 'Ativar Plano Gratuito' : 'Contratar Plano Corporativo'}
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
