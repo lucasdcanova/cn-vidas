@@ -48,6 +48,7 @@ import dailyCloudWebhookRouter from './daily-cloud-webhook';
 import stripeWebhookRouter from './stripe-webhook';
 import { partnerCollaboratorsRouter } from './partner-collaborators-routes';
 import { partnerSubscriptionRouter } from './partner-subscription-routes';
+import { corporateRouter } from './corporate-routes';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -166,6 +167,10 @@ export default async function setupRoutes(app: express.Express) {
   app.use('/api/partners/collaborators', partnerCollaboratorsRouter);
   console.log('Registrando partnerSubscriptionRouter em /api/partners/subscription');
   app.use('/api/partners/subscription', partnerSubscriptionRouter);
+  
+  // Rotas corporativas
+  console.log('Registrando corporateRouter em /api/corporate');
+  app.use('/api/corporate', corporateRouter);
   
   // Rotas de médicos (autenticadas)
   console.log('Registrando doctorRouter em /api/doctors');
