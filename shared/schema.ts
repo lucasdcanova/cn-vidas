@@ -1,14 +1,14 @@
 import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, json, date, varchar, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { relations, InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { relations, InferSelectModel, InferInsertModel, sql } from "drizzle-orm";
 
 // 1. Enfileirar todas as declarações de enum, depois tabelas, depois relations, depois schemas, depois tipos.
 // 2. Garantir que nenhuma tabela seja referenciada antes de ser declarada.
 // 3. Exportar tipos apenas no final.
 
 export const userRoleEnum = pgEnum('user_role', ['patient', 'partner', 'admin', 'doctor']);
-export const subscriptionPlanEnum = pgEnum('subscription_plan', ['free', 'basic', 'premium', 'ultra', 'basic_family', 'premium_family', 'ultra_family']);
+export const subscriptionPlanEnum = pgEnum('subscription_plan', ['free', 'basic', 'premium', 'ultra', 'basic_family', 'premium_family', 'ultra_family', 'basic_corp', 'premium_corp', 'ultra_corp']);
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -60,7 +60,11 @@ export const users = pgTable("users", {
   pixKey: varchar("pix_key", { length: 255 }),
   bankName: varchar("bank_name", { length: 100 }),
   accountType: varchar("account_type", { length: 20 }),
-
+  
+  // Corporate fields
+  corporatePartnerId: integer("corporate_partner_id").references(() => partners.id),
+  isCorporateUser: boolean("is_corporate_user").default(false),
+  corporatePlanType: varchar("corporate_plan_type", { length: 50 }),
 });
 
 export const partners = pgTable("partners", {
@@ -104,6 +108,12 @@ export const partners = pgTable("partners", {
   }>(),
   collaboratorCount: integer("collaborator_count").default(0),
   stripeCustomerId: text("stripe_customer_id"),
+  // White-label fields
+  logoUrl: text("logo_url"),
+  brandColorPrimary: varchar("brand_color_primary", { length: 7 }),
+  brandColorSecondary: varchar("brand_color_secondary", { length: 7 }),
+  isCorporate: boolean("is_corporate").default(false),
+  activeEmployeesCount: integer("active_employees_count").default(0),
 });
 
 // Partner B2B Tables
@@ -588,6 +598,91 @@ export const sellerCommissions = pgTable("seller_commissions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Corporate Plans Tables
+export const corporateSubscriptionPlans = pgTable("corporate_subscription_plans", {
+  id: serial("id").primaryKey(),
+  planType: varchar("plan_type", { length: 50 }).notNull(),
+  minEmployees: integer("min_employees").notNull(),
+  maxEmployees: integer("max_employees"),
+  monthlyPricePerEmployee: decimal("monthly_price_per_employee", { precision: 10, scale: 2 }).notNull(),
+  features: json("features").default({}),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const corporateSubscriptions = pgTable("corporate_subscriptions", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id, { onDelete: "cascade" }).notNull(),
+  planType: varchar("plan_type", { length: 50 }).notNull(),
+  employeeTier: varchar("employee_tier", { length: 20 }).notNull(),
+  monthlyPricePerEmployee: decimal("monthly_price_per_employee", { precision: 10, scale: 2 }).notNull(),
+  billingPeriod: varchar("billing_period", { length: 20 }).default('monthly'),
+  discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }).default('0'),
+  status: varchar("status", { length: 50 }).default('active'),
+  currentBillingDate: date("current_billing_date"),
+  nextBillingDate: date("next_billing_date"),
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const corporateInvitations = pgTable("corporate_invitations", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id, { onDelete: "cascade" }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  fullName: varchar("full_name", { length: 255 }),
+  invitationToken: varchar("invitation_token", { length: 255 }).notNull().unique(),
+  status: varchar("status", { length: 50 }).default('pending'),
+  invitedAt: timestamp("invited_at").defaultNow(),
+  acceptedAt: timestamp("accepted_at"),
+  expiresAt: timestamp("expires_at").default(sql`NOW() + INTERVAL '7 days'`),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const corporateEmployees = pgTable("corporate_employees", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id, { onDelete: "cascade" }).notNull(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  employeeEmail: varchar("employee_email", { length: 255 }).notNull(),
+  status: varchar("status", { length: 50 }).default('active'),
+  addedAt: timestamp("added_at").defaultNow(),
+  removedAt: timestamp("removed_at"),
+  lastActiveAt: timestamp("last_active_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const corporateUsageReports = pgTable("corporate_usage_reports", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").references(() => partners.id, { onDelete: "cascade" }).notNull(),
+  reportMonth: date("report_month").notNull(),
+  totalEmployees: integer("total_employees").default(0),
+  totalConsultations: integer("total_consultations").default(0),
+  totalEmergencyConsultations: integer("total_emergency_consultations").default(0),
+  totalClaims: integer("total_claims").default(0),
+  totalSickDays: integer("total_sick_days").default(0),
+  reportData: json("report_data").default({}),
+  generatedAt: timestamp("generated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const medicalCertificates = pgTable("medical_certificates", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  appointmentId: integer("appointment_id").references(() => appointments.id),
+  doctorId: integer("doctor_id").references(() => doctors.id).notNull(),
+  corporatePartnerId: integer("corporate_partner_id").references(() => partners.id),
+  certificateNumber: varchar("certificate_number", { length: 100 }).unique(),
+  sickDays: integer("sick_days").notNull(),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  cidCode: varchar("cid_code", { length: 10 }),
+  diagnosisDescription: text("diagnosis_description"),
+  issuedAt: timestamp("issued_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   partners: many(partners),
   doctors: many(doctors),
@@ -852,3 +947,17 @@ export type MedicalRecordEntry = InferSelectModel<typeof medicalRecordEntries>;
 export type InsertMedicalRecordEntry = InferInsertModel<typeof medicalRecordEntries>;
 export type MedicalRecordAccess = InferSelectModel<typeof medicalRecordAccess>;
 export type InsertMedicalRecordAccess = InferInsertModel<typeof medicalRecordAccess>;
+
+// Corporate Types
+export type CorporateSubscriptionPlan = InferSelectModel<typeof corporateSubscriptionPlans>;
+export type InsertCorporateSubscriptionPlan = InferInsertModel<typeof corporateSubscriptionPlans>;
+export type CorporateSubscription = InferSelectModel<typeof corporateSubscriptions>;
+export type InsertCorporateSubscription = InferInsertModel<typeof corporateSubscriptions>;
+export type CorporateInvitation = InferSelectModel<typeof corporateInvitations>;
+export type InsertCorporateInvitation = InferInsertModel<typeof corporateInvitations>;
+export type CorporateEmployee = InferSelectModel<typeof corporateEmployees>;
+export type InsertCorporateEmployee = InferInsertModel<typeof corporateEmployees>;
+export type CorporateUsageReport = InferSelectModel<typeof corporateUsageReports>;
+export type InsertCorporateUsageReport = InferInsertModel<typeof corporateUsageReports>;
+export type MedicalCertificate = InferSelectModel<typeof medicalCertificates>;
+export type InsertMedicalCertificate = InferInsertModel<typeof medicalCertificates>;
