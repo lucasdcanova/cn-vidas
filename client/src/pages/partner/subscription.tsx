@@ -430,7 +430,7 @@ export default function PartnerSubscription() {
       {/* Planos Disponíveis */}
       <div className="mb-6">
         <h2 className="text-xl md:text-2xl font-semibold mb-6">Planos disponíveis</h2>
-        <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-stretch">
           {plans
             .sort((a, b) => {
               // Colocar plano gratuito por último
@@ -448,8 +448,8 @@ export default function PartnerSubscription() {
             return (
               <Card 
                 key={plan.id} 
-                className={`relative overflow-hidden transition-all hover:shadow-lg border-2 ${
-                  isCurrentPlan ? 'ring-2 ring-primary' : ''
+                className={`relative overflow-hidden transition-all hover:shadow-lg border-2 flex flex-col h-full ${
+                  isCurrentPlan ? 'ring-4 ring-blue-500 shadow-xl transform scale-105' : ''
                 } ${(() => {
                   if (plan.planType === 'premium') return 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:border-amber-300';
                   if (plan.planType === 'basic') return 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300';
@@ -457,18 +457,13 @@ export default function PartnerSubscription() {
                   return 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200';
                 })()}`}
               >
-                {isCurrentPlan && (
-                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-2 py-1 text-xs md:text-sm font-medium rounded-bl-lg z-10">
-                    Plano Atual
-                  </div>
-                )}
                 
                 <CardHeader className={`${(() => {
                   if (plan.planType === 'premium') return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white';
                   if (plan.planType === 'basic') return 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white';
                   if (plan.planType === 'ultra') return 'bg-gradient-to-r from-violet-500 to-purple-600 text-white';
                   return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white';
-                })()}`}>
+                })()} ${isCurrentPlan ? 'pb-8' : ''}`}>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg text-white">{plan.planName}</CardTitle>
                     <Icon className="h-5 w-5 text-white/80" />
@@ -479,11 +474,18 @@ export default function PartnerSubscription() {
                     </span>
                     {plan.planType !== 'free' && <span className="text-sm">/mês</span>}
                   </CardDescription>
+                  {isCurrentPlan && (
+                    <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-blue-600 text-white px-4 py-1 text-xs font-bold shadow-lg">
+                        ✓ PLANO ATUAL
+                      </Badge>
+                    </div>
+                  )}
                 </CardHeader>
                 
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium mb-2">Recursos inclusos:</p>
+                <CardContent className="flex-1 flex flex-col">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium mb-3">Recursos inclusos:</p>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-start gap-3">
                         <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
@@ -493,6 +495,12 @@ export default function PartnerSubscription() {
                         <li className="flex items-start gap-3">
                           <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                           <span className="text-sm text-gray-700">{plan.features.servicesLimit ? `Até ${plan.features.servicesLimit} serviços` : 'Serviços ilimitados'}</span>
+                        </li>
+                      )}
+                      {plan.features?.monthlyBookings && (
+                        <li className="flex items-start gap-3">
+                          <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">{plan.features.monthlyBookings} agendamentos/mês</span>
                         </li>
                       )}
                       {plan.prioritySupport && (
@@ -513,29 +521,94 @@ export default function PartnerSubscription() {
                           <span className="text-sm text-gray-700">Relatórios avançados</span>
                         </li>
                       )}
-                      {plan.apiAccess && (
-                        <li className="flex items-start gap-3">
-                          <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-gray-700">Acesso à API</span>
-                        </li>
+                      {/* Vantagens adicionais baseadas no tipo de plano */}
+                      {plan.planType === 'free' && (
+                        <>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">Sem seguro internação</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">0 consultas de emergência</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">0% desconto com especialistas</span>
+                          </li>
+                        </>
+                      )}
+                      {plan.planType === 'basic' && (
+                        <>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">Seguro internação R$ 300/dia</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">2 consultas de emergência/mês</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">30% desconto com especialistas</span>
+                          </li>
+                        </>
+                      )}
+                      {plan.planType === 'premium' && (
+                        <>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">Seguro internação R$ 300/dia</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">Consultas de emergência ilimitadas</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">50% desconto com especialistas</span>
+                          </li>
+                        </>
+                      )}
+                      {plan.planType === 'ultra' && (
+                        <>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">Seguro internação R$ 500/dia</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">Consultas de emergência ilimitadas</span>
+                          </li>
+                          <li className="flex items-start gap-3">
+                            <Check className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">70% desconto com especialistas</span>
+                          </li>
+                        </>
                       )}
                     </ul>
                   </div>
                   
-                  <Button 
-                    className="w-full mt-4"
-                    variant={isCurrentPlan ? "secondary" : "default"}
-                    disabled={isCurrentPlan}
-                    onClick={() => handleSelectPlan(plan)}
-                  >
-                    {isCurrentPlan 
-                      ? 'Plano Atual' 
-                      : plan.planType === 'free' 
-                        ? 'Usar plano gratuito'
-                        : isDowngrade 
-                          ? 'Fazer downgrade' 
-                          : 'Fazer upgrade'}
-                  </Button>
+                  <div className="mt-6">
+                    <Button 
+                      className={`w-full ${
+                        isCurrentPlan 
+                          ? 'bg-gray-400 hover:bg-gray-400 cursor-not-allowed' 
+                          : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
+                      variant={isCurrentPlan ? "secondary" : "default"}
+                      disabled={isCurrentPlan}
+                      onClick={() => handleSelectPlan(plan)}
+                    >
+                      {isCurrentPlan 
+                        ? 'Plano Atual' 
+                        : plan.planType === 'free' 
+                          ? 'Usar plano gratuito'
+                          : isDowngrade 
+                            ? 'Fazer downgrade' 
+                            : 'Fazer upgrade'}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );

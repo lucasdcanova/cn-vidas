@@ -152,21 +152,21 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
             </div>
           </Link>
           
-          <Link href="/partner/addresses">
+          <Link href="/partner/collaborators">
             <div className={`flex flex-col items-center py-3 px-2 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
-              isLinkActive("/partner/addresses") ? activeClass : inactiveClass
+              isLinkActive("/partner/collaborators") ? activeClass : inactiveClass
             }`}>
-              <span className="material-icons text-lg transition-transform duration-300">location_on</span>
-              <span className="text-xs mt-1 font-medium">Endereços</span>
+              <span className="material-icons text-lg transition-transform duration-300">group</span>
+              <span className="text-xs mt-1 font-medium">Colaboradores</span>
             </div>
           </Link>
           
-          <Link href="/partner/verification">
+          <Link href="/partner/subscription">
             <div className={`flex flex-col items-center py-3 px-2 transition-all duration-300 ease-out transform-gpu active:scale-95 ${
-              isLinkActive("/partner/verification") ? activeClass : inactiveClass
+              isLinkActive("/partner/subscription") ? activeClass : inactiveClass
             }`}>
-              <span className="material-icons text-lg transition-transform duration-300">qr_code</span>
-              <span className="text-xs mt-1 font-medium">Verificar</span>
+              <span className="material-icons text-lg transition-transform duration-300">credit_card</span>
+              <span className="text-xs mt-1 font-medium">Assinatura</span>
             </div>
           </Link>
         </>

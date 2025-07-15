@@ -299,22 +299,42 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 </>
               )}
               
-              {/* Ícones de configurações e ajuda apenas para pacientes */}
+              {/* Ícones de navegação conforme o tipo de usuário */}
+              {/* Endereços - apenas para parceiros */}
+              {user?.role === "partner" && (
+                <Link href="/partner/addresses">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className={cn(
+                      "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                      location === "/partner/addresses" ? "bg-gray-100" : ""
+                    )}
+                    title="Endereços"
+                  >
+                    <MapPin className="h-5 w-5 text-gray-600" />
+                  </Button>
+                </Link>
+              )}
+              
+              {/* Configurações - para todos os usuários */}
+              <Link href={user?.role === "doctor" ? "/doctor/settings" : "/settings"}>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={cn(
+                    "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                    location === "/settings" || location === "/doctor/settings" ? "bg-gray-100" : ""
+                  )}
+                  title="Configurações"
+                >
+                  <Settings className="h-5 w-5 text-gray-600" />
+                </Button>
+              </Link>
+              
+              {/* Ícones adicionais apenas para pacientes */}
               {user?.role === "patient" && (
                 <>
-                  <Link href="/settings">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className={cn(
-                        "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
-                        location === "/settings" ? "bg-gray-100" : ""
-                      )}
-                      title="Configurações"
-                    >
-                      <Settings className="h-5 w-5 text-gray-600" />
-                    </Button>
-                  </Link>
                   {/* Botão de Planos - apenas no iPhone */}
                   {isIPhoneDevice && (
                     <Link href="/subscription">
@@ -374,6 +394,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     title="Financeiro"
                   >
                     <DollarSign className="h-5 w-5 text-gray-700" />
+                  </Button>
+                </Link>
+              )}
+              
+              {/* Link para Endereços - apenas para parceiros */}
+              {user?.role === "partner" && (
+                <Link href="/partner/addresses">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
+                    title="Endereços"
+                  >
+                    <MapPin className="h-5 w-5 text-gray-700" />
                   </Button>
                 </Link>
               )}
