@@ -21,8 +21,9 @@ export default function AddressPage() {
 
   // Carregar os dados de endereço do usuário quando a página carregar
   useEffect(() => {
+    console.log('Usuário carregado:', user);
     if (user) {
-      setDefaultValues({
+      const values = {
         zipcode: user.zipcode || '',
         street: user.address || '',
         number: '',
@@ -30,7 +31,9 @@ export default function AddressPage() {
         neighborhood: '',
         city: user.city || '',
         state: user.state || '',
-      });
+      };
+      console.log('Valores padrão do endereço:', values);
+      setDefaultValues(values);
     }
   }, [user]);
 
@@ -95,21 +98,21 @@ export default function AddressPage() {
         <meta name="description" content="Atualize seu endereço e informações de contato na plataforma CN Vidas" />
       </Helmet>
       
-      <div className="container max-w-4xl py-8 animate-fade-in">
-        <div className="mb-6 flex items-center justify-between">
+      <div className="container max-w-4xl py-8">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Gerenciar Endereço</h1>
-            <p className="text-muted-foreground">Atualize seu endereço e informações de contato</p>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Gerenciar Endereço</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Atualize seu endereço e informações de contato</p>
           </div>
           <Link href="/profile">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2 w-full sm:w-auto">
               <ArrowLeft className="h-4 w-4" />
               Voltar ao Perfil
             </Button>
           </Link>
         </div>
         
-        <Card className="animate-slide-up shadow-md hover:shadow-lg transition-all duration-300">
+        <Card className="shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Home className="h-5 w-5 text-primary" />
@@ -120,20 +123,46 @@ export default function AddressPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Debug info for iOS */}
+            <div className="mb-4 p-4 bg-gray-100 rounded text-sm" style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px' }}>
+              <p style={{ margin: '4px 0' }}>Debug: User loaded: {user ? 'Yes' : 'No'}</p>
+              <p style={{ margin: '4px 0' }}>Debug: User email: {user?.email || 'N/A'}</p>
+              <p style={{ margin: '4px 0' }}>Debug: Default values loaded: {Object.keys(defaultValues).length > 0 ? 'Yes' : 'No'}</p>
+              <p style={{ margin: '4px 0' }}>Debug: Zipcode: {defaultValues.zipcode || 'empty'}</p>
+              <p style={{ margin: '4px 0' }}>Debug: Street: {defaultValues.street || 'empty'}</p>
+              <p style={{ margin: '4px 0' }}>Debug: City: {defaultValues.city || 'empty'}</p>
+              <p style={{ margin: '4px 0' }}>Debug: State: {defaultValues.state || 'empty'}</p>
+            </div>
+            
+            {/* Teste simples de input para iOS */}
+            <div className="mb-4 p-4 border border-gray-300 rounded">
+              <h4 className="font-bold mb-2">Teste de Input Simples:</h4>
+              <input 
+                type="text" 
+                placeholder="Digite algo aqui" 
+                className="w-full p-2 border border-gray-400 rounded"
+                style={{ 
+                  WebkitAppearance: 'none',
+                  appearance: 'none',
+                  fontSize: '16px',
+                  backgroundColor: 'white',
+                  border: '1px solid #ccc'
+                }}
+              />
+            </div>
+            
             <AddressForm 
               defaultValues={defaultValues}
               onSubmit={handleAddressSubmit}
               isSubmitting={isSubmitting}
-              showSubmitButton={true}
+              showSubmitButton={false}
               standAlone={true}
             />
             
             <div className="mt-6 flex justify-end">
               <Button 
                 type="submit"
-                onClick={() => document.getElementById('address-form')?.dispatchEvent(
-                  new Event('submit', { bubbles: true, cancelable: true })
-                )}
+                form="address-form"
                 disabled={isSubmitting}
                 className="gap-2"
               >
