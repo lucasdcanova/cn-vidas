@@ -466,12 +466,12 @@ const PartnerServicesPage: React.FC = () => {
   return (
     <PartnerOnboardingGuard>
       <DashboardLayout title="Gerenciamento de Serviços">
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Meus Serviços</h1>
-          <p className="text-gray-600">Gerencie os serviços oferecidos pela sua empresa</p>
+          <h1 className="text-xl sm:text-2xl font-bold">Meus Serviços</h1>
+          <p className="text-sm sm:text-base text-gray-600">Gerencie os serviços oferecidos pela sua empresa</p>
         </div>
-        <Button onClick={handleAddNew}>
+        <Button onClick={handleAddNew} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           Adicionar Serviço
         </Button>
@@ -499,7 +499,7 @@ const PartnerServicesPage: React.FC = () => {
       ) : (
         <>
           {services && services.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {services.map((service) => (
                 <Card key={service.id} className="overflow-hidden flex flex-col">
                   {/* Imagem do serviço ou fallback para a imagem do parceiro */}
@@ -531,8 +531,8 @@ const PartnerServicesPage: React.FC = () => {
                   <CardHeader className="bg-primary/5">
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle>{service.name}</CardTitle>
-                        <CardDescription className="mt-1">{service.category}</CardDescription>
+                        <CardTitle className="text-base sm:text-lg">{service.name}</CardTitle>
+                        <CardDescription className="mt-1 text-xs sm:text-sm">{service.category}</CardDescription>
                         {service.isNational && (
                           <span className="inline-flex items-center mt-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
                             🌍 Nacional
@@ -568,11 +568,11 @@ const PartnerServicesPage: React.FC = () => {
                         ) : (
                           <>
                             {service.regularPrice ? (
-                              <p className="text-lg font-bold">
+                              <p className="text-base sm:text-lg font-bold">
                                 R$ {(service.regularPrice / 100).toFixed(2)}
                               </p>
                             ) : (
-                              <p className="text-lg font-bold">Consulte</p>
+                              <p className="text-base sm:text-lg font-bold">Consulte</p>
                             )}
                           </>
                         )}
@@ -586,11 +586,12 @@ const PartnerServicesPage: React.FC = () => {
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="flex justify-between border-t pt-4">
+                  <CardFooter className="flex justify-between border-t pt-4 gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(service)}
+                      className="flex-1"
                     >
                       <Edit className="h-4 w-4 mr-1" /> Editar
                     </Button>
@@ -600,6 +601,7 @@ const PartnerServicesPage: React.FC = () => {
                           variant="destructive"
                           size="sm"
                           disabled={deleteServiceMutation.isPending}
+                          className="flex-1"
                         >
                           {deleteServiceMutation.isPending ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -610,7 +612,7 @@ const PartnerServicesPage: React.FC = () => {
                           )}
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
+                      <DialogContent className="w-[90vw] sm:max-w-[425px]">
                         <DialogHeader>
                           <DialogTitle>Confirmar exclusão</DialogTitle>
                           <DialogDescription>
@@ -662,7 +664,7 @@ const PartnerServicesPage: React.FC = () => {
 
       {/* Service Form Dialog */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="sm:max-w-[700px] h-[90vh] overflow-y-auto pt-6">
+        <DialogContent className="w-[95vw] max-w-[700px] h-[90vh] overflow-y-auto pt-6">
           <DialogHeader>
             <DialogTitle>{isEditing ? "Editar Serviço" : "Adicionar Novo Serviço"}</DialogTitle>
             <DialogDescription>
@@ -829,7 +831,7 @@ const PartnerServicesPage: React.FC = () => {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="regularPrice"
@@ -966,7 +968,7 @@ const PartnerServicesPage: React.FC = () => {
                 <input type="hidden" {...form.register("discountPrice")} />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="duration"

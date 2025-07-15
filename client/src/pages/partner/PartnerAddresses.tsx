@@ -221,15 +221,15 @@ export default function PartnerAddresses() {
   return (
     <PartnerOnboardingGuard>
       <DashboardLayout title="Meus Endereços">
-        <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6 flex justify-between items-center">
+        <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Meus Endereços</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Meus Endereços</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
             Gerencie os endereços dos seus serviços
           </p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
+        <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           Adicionar Endereço
         </Button>
@@ -250,20 +250,20 @@ export default function PartnerAddresses() {
           </Button>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {/* Mostrar endereço do perfil primeiro se existir */}
           {profileAddress && (
-            <Card key="profile-address" className="p-6 border-primary/20 bg-primary/5">
+            <Card key="profile-address" className="p-4 sm:p-6 border-primary/20 bg-primary/5">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{profileAddress.name}</h3>
-                  <Badge variant="default" className="mt-1">
+                  <h3 className="font-semibold text-base sm:text-lg">{profileAddress.name}</h3>
+                  <Badge variant="default" className="mt-1 text-xs">
                     Principal
                   </Badge>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -301,10 +301,10 @@ export default function PartnerAddresses() {
           
           {/* Mostrar outros endereços */}
           {addresses.map((address) => (
-            <Card key={address.id} className="p-6">
+            <Card key={address.id} className="p-4 sm:p-6">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{address.name}</h3>
+                  <h3 className="font-semibold text-base sm:text-lg">{address.name}</h3>
                   {address.isPrimary && (
                     <Badge variant="secondary" className="mt-1">
                       Principal
@@ -313,7 +313,7 @@ export default function PartnerAddresses() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
