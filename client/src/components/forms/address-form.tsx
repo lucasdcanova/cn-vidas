@@ -165,7 +165,7 @@ export function AddressForm({
       {description && <p className="text-sm text-muted-foreground mb-4">{description}</p>}
       
       {cepError && (
-        <Alert variant="destructive" className="animate-slide-up">
+        <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Erro</AlertTitle>
           <AlertDescription>{cepError}</AlertDescription>
@@ -186,7 +186,7 @@ export function AddressForm({
                       id="zipcode"
                       name="zipcode"
                       placeholder="00000-000"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isReadOnly}
                       value={formatCep(field.value)}
                       onChange={(e) => {
                         const formatted = formatCep(e.target.value);
@@ -197,7 +197,7 @@ export function AddressForm({
                           fetchAddressByCep(e.target.value);
                         }
                       }}
-                      className="pr-10 transition-all duration-300 hover:shadow-sm focus:shadow-md"
+                      className="pr-10"
                     />
                     <Button
                       type="button"
@@ -234,7 +234,7 @@ export function AddressForm({
                     placeholder="Nome da rua"
                     disabled={isSubmitting || isReadOnly}
                     {...field}
-                    className="transition-all duration-300 hover:shadow-sm focus:shadow-md"
+                    className=""
                   />
                 </FormControl>
                 <FormMessage />
@@ -258,7 +258,7 @@ export function AddressForm({
                     placeholder="123"
                     disabled={isSubmitting || isReadOnly}
                     {...field}
-                    className="transition-all duration-300 hover:shadow-sm focus:shadow-md"
+                    className=""
                   />
                 </FormControl>
                 <FormMessage />
@@ -280,7 +280,7 @@ export function AddressForm({
                     placeholder="Apto 101, Bloco B, etc."
                     disabled={isSubmitting}
                     {...field}
-                    className="transition-all duration-300 hover:shadow-sm focus:shadow-md"
+                    className=""
                   />
                 </FormControl>
                 <FormMessage />
@@ -302,7 +302,7 @@ export function AddressForm({
                 placeholder="Nome do bairro"
                 disabled={isSubmitting}
                 {...field}
-                className="transition-all duration-300 hover:shadow-sm focus:shadow-md"
+                className=""
               />
             </FormControl>
             <FormMessage />
@@ -324,7 +324,7 @@ export function AddressForm({
                     placeholder="Nome da cidade"
                     disabled={isSubmitting}
                     {...field}
-                    className="transition-all duration-300 hover:shadow-sm focus:shadow-md"
+                    className=""
                   />
                 </FormControl>
                 <FormMessage />
@@ -346,7 +346,7 @@ export function AddressForm({
                     placeholder="UF"
                     disabled={isSubmitting}
                     {...field}
-                    className="transition-all duration-300 hover:shadow-sm focus:shadow-md"
+                    className=""
                   />
                 </FormControl>
                 <FormMessage />
@@ -379,7 +379,7 @@ export function AddressForm({
   if (!standAlone) {
     return (
       <Form {...form}>
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-4">
           {formFields}
         </div>
       </Form>
@@ -389,7 +389,7 @@ export function AddressForm({
   // Caso contrário, renderiza um formulário completo
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 animate-fade-in">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" id="address-form">
         {formFields}
       </form>
     </Form>
