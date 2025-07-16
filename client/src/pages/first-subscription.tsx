@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, CreditCard, User, Users, AlertTriangle, Star, Crown, Heart, Shield, Zap, CheckCircle, CheckCircle2, Sparkles, Info } from "lucide-react";
+import { Loader2, Check, CreditCard, User, Users, AlertTriangle, Star, Crown, Heart, Shield, Zap, CheckCircle, CheckCircle2, Sparkles, Info, Phone, Calendar, MapPin, ArrowLeft, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { getSubscriptionPlans, getUserSubscription, updateUserSubscription } from "@/lib/api";
@@ -18,6 +18,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IOSScrollView } from '@/components/shared/IOSScrollView';
 import { isIOS } from '@/utils/platform';
 import { StatusBar } from '@capacitor/status-bar';
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AddressForm } from "@/components/forms/address-form";
 
 // Definição do tipo de plano de assinatura
 interface SubscriptionPlan {
@@ -58,6 +61,25 @@ const FirstSubscriptionPage: React.FC = () => {
   const [showActivationAnimation, setShowActivationAnimation] = useState(false);
   const [activationStatus, setActivationStatus] = useState<'checking' | 'activating' | 'activated'>('checking');
   const scrollViewRef = useRef<HTMLDivElement>(null);
+  
+  // Estado para controlar as etapas do onboarding
+  const [step, setStep] = useState(1);
+  const [selectedPlanData, setSelectedPlanData] = useState<SubscriptionPlan | null>(null);
+  const [personalData, setPersonalData] = useState({
+    phone: '',
+    birthDate: '',
+    cpf: '',
+    gender: ''
+  });
+  const [addressData, setAddressData] = useState({
+    zipcode: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: ''
+  });
 
   console.log("🔍 FirstSubscriptionPage - Location atual:", location);
   console.log("🔧 TESTE: FirstSubscriptionPage carregada às", new Date().toLocaleTimeString());
@@ -125,53 +147,15 @@ const FirstSubscriptionPage: React.FC = () => {
   const handleSelectPlan = async (plan: SubscriptionPlan) => {
     console.log("🔧 Selecionando plano:", plan.name);
     
-    // Se for o plano gratuito, ativar o plano e redirecionar
+    // Salvar o plano selecionado
+    setSelectedPlanData(plan);
+    
+    // Se for o plano gratuito, avançar para a próxima etapa
     if (plan.name === 'free') {
-      try {
-        console.log("🔄 Ativando plano gratuito...");
-        
-        // Fazer requisição para ativar o plano gratuito
-        const response = await apiRequest("POST", "/api/subscription/activate-free", {});
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log("✅ Plano gratuito ativado com sucesso!", data);
-          
-          // Atualizar a cache da assinatura para evitar redirecionamentos circulares
-          if (data.subscription) {
-            console.log("🔄 Atualizando cache da assinatura:", data.subscription);
-            // Como a função getUserSubscription agora extrai o objeto diretamente,
-            // vamos salvar o objeto de assinatura diretamente na cache
-            queryClient.setQueryData(["/api/subscription/current"], data.subscription);
-            
-            // Também invalidar o cache do usuário para forçar atualização
-            await queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
-            await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-          }
-          
-          toast({
-            title: "Plano Gratuito Ativado!",
-            description: "Você será redirecionado para o dashboard.",
-          });
-          
-          // Marcar que acabamos de ativar uma assinatura
-          sessionStorage.setItem('subscription-just-activated', 'true');
-          
-          // Aguardar um momento para mostrar o toast e depois redirecionar
-          setTimeout(() => {
-            console.log("🔄 Redirecionando para dashboard...");
-            window.location.replace("/dashboard");
-          }, 1000);
-        } else {
-          throw new Error("Falha ao ativar plano gratuito");
-        }
-      } catch (error) {
-        console.error("❌ Erro ao ativar plano gratuito:", error);
-        toast({
-          title: "Erro",
-          description: "Não foi possível ativar o plano. Tente novamente.",
-          variant: "destructive",
-        });
+      setStep(2);
+      // Scroll para o topo
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTop = 0;
       }
       return;
     }
@@ -239,13 +223,12 @@ const FirstSubscriptionPage: React.FC = () => {
   };
 
   const handlePlanSelected = () => {
-    // O plano foi selecionado com sucesso - mostrar animação
-    console.log("✅ Plano selecionado, mostrando animação de ativação...");
-    setShowActivationAnimation(true);
-    setActivationStatus('activating');
-    
-    // Verificar o status do pagamento periodicamente
-    checkPaymentStatus();
+    // O plano foi selecionado com sucesso - avançar para próxima etapa
+    console.log("✅ Plano pago selecionado, avançando para etapa 2...");
+    setStep(2);
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTop = 0;
+    }
   };
 
   const checkPaymentStatus = async () => {
@@ -282,6 +265,66 @@ const FirstSubscriptionPage: React.FC = () => {
     }
   };
 
+  // Função para completar o onboarding
+  const handleCompleteOnboarding = async () => {
+    try {
+      console.log("🔄 Completando onboarding...");
+      
+      // Se for plano gratuito, ativar o plano
+      if (selectedPlanData?.name === 'free') {
+        const response = await apiRequest("POST", "/api/subscription/activate-free", {});
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("✅ Plano gratuito ativado com sucesso!", data);
+          
+          if (data.subscription) {
+            queryClient.setQueryData(["/api/subscription/current"], data.subscription);
+            await queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
+            await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+          }
+        }
+      }
+      
+      // Atualizar dados do usuário (telefone, data de nascimento, etc)
+      const profileResponse = await apiRequest("PUT", "/api/users/profile", {
+        phone: personalData.phone,
+        birthDate: personalData.birthDate,
+        cpf: personalData.cpf,
+        gender: personalData.gender,
+        ...addressData,
+        address: addressData.street, // Mapear street para address
+      });
+      
+      if (!profileResponse.ok) {
+        throw new Error("Falha ao atualizar perfil");
+      }
+      
+      toast({
+        title: "Bem-vindo ao CN Vidas!",
+        description: "Seu cadastro foi concluído com sucesso.",
+      });
+      
+      sessionStorage.setItem('subscription-just-activated', 'true');
+      
+      // Mostrar animação de ativação
+      setShowActivationAnimation(true);
+      setActivationStatus('activated');
+      
+      setTimeout(() => {
+        window.location.replace("/dashboard");
+      }, 3000);
+      
+    } catch (error) {
+      console.error("❌ Erro ao completar onboarding:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível completar o cadastro. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   // Função para lidar com tentativa de sair sem selecionar um plano
   const handleTryLeave = () => {
     setHasAttemptedLeave(true);
@@ -426,25 +469,27 @@ const FirstSubscriptionPage: React.FC = () => {
             {/* Progress indicator */}
             <div className="flex items-center justify-center mb-6">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                <div className={`w-8 h-8 ${step >= 1 ? 'bg-primary text-white' : 'bg-gray-300 text-gray-600'} rounded-full flex items-center justify-center text-sm font-semibold`}>
                   1
                 </div>
-                <div className="w-16 h-1 bg-primary/20"></div>
-                <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                <div className={`w-16 h-1 ${step >= 2 ? 'bg-primary' : 'bg-gray-300'}`}></div>
+                <div className={`w-8 h-8 ${step >= 2 ? 'bg-primary text-white' : 'bg-gray-300 text-gray-600'} rounded-full flex items-center justify-center text-sm font-semibold`}>
                   2
                 </div>
-                <div className="w-16 h-1 bg-gray-300"></div>
-                <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                <div className={`w-16 h-1 ${step >= 3 ? 'bg-primary' : 'bg-gray-300'}`}></div>
+                <div className={`w-8 h-8 ${step >= 3 ? 'bg-primary text-white' : 'bg-gray-300 text-gray-600'} rounded-full flex items-center justify-center text-sm font-semibold`}>
                   3
                 </div>
               </div>
             </div>
             
             <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-2">
-              Escolha seu Plano
+              {step === 1 ? 'Escolha seu Plano' : step === 2 ? 'Informações Pessoais' : 'Endereço'}
             </h1>
             <p className="text-center text-gray-600">
-              Selecione o melhor plano para suas necessidades
+              {step === 1 ? 'Selecione o melhor plano para suas necessidades' : 
+               step === 2 ? 'Complete seus dados pessoais' : 
+               'Informe seu endereço completo'}
             </p>
           </div>
         </div>
