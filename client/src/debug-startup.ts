@@ -20,17 +20,28 @@ export function debugStartup() {
     justify-content: center;
     backdrop-filter: blur(10px);
   `;
+  // Tentar múltiplos caminhos para garantir que funcione em diferentes contextos
+  const possiblePaths = [
+    './assets/cnvidas-logo-transparent.png',
+    '/assets/cnvidas-logo-transparent.png',
+    'assets/cnvidas-logo-transparent.png',
+    './assets/logo.png',
+    '/assets/logo.png',
+    'assets/logo.png'
+  ];
+  
+  const logoSrc = possiblePaths[1]; // Usar caminho absoluto por padrão
+  
   debugDiv.innerHTML = `
     <div style="text-align: center;">
       <div class="logo-container" style="position: relative; margin: 0 auto 20px;">
-        <div style="width: 120px; height: 120px; margin: 0 auto; display: flex; align-items: center; justify-content: center; animation: pulse 2s ease-in-out infinite;">
-          <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <!-- Logo CNVidas simplificado -->
-            <circle cx="50" cy="50" r="45" fill="#14b8a6" opacity="0.1"/>
-            <circle cx="50" cy="50" r="40" fill="none" stroke="#14b8a6" stroke-width="2"/>
-            <path d="M50 25 C30 25 25 40 25 50 C25 60 30 75 50 75 C70 75 75 60 75 50 C75 40 70 25 50 25" fill="#14b8a6" opacity="0.2"/>
-            <text x="50" y="55" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#14b8a6">CN</text>
-          </svg>
+        <div style="width: 120px; height: 120px; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative;">
+          <img 
+            src="${logoSrc}" 
+            alt="CNVidas" 
+            style="width: 100px; height: 100px; object-fit: contain; animation: pulse 2s ease-in-out infinite;"
+            onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'width:100px;height:100px;display:flex;align-items:center;justify-content:center;background:rgba(20,184,166,0.1);border-radius:50%;animation:pulse 2s ease-in-out infinite;\\'><span style=\\'font-size:32px;font-weight:bold;color:#14b8a6;\\'>CN</span></div>'"
+          />
         </div>
         <div class="logo-glow" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%); animation: glowPulse 2s ease-in-out infinite; border-radius: 50%; pointer-events: none;"></div>
       </div>
