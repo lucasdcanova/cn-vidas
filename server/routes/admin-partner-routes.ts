@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticateToken } from "../middleware/auth";
 import { db } from "../db";
-import { partners, users, corporateSubscriptions, corporateEmployees, corporateInvites, appointments } from "@db/schema";
+import { partners, users, corporateSubscriptions, corporateEmployees, corporateInvites, appointments } from "../../shared/schema";
 import { eq, and, sql, or, ilike, desc, asc, gte, lte } from "drizzle-orm";
 import { sendEmail } from "../services/email";
 import { adminOnly } from "../middleware/admin";
