@@ -49,6 +49,11 @@ export function debugStartup() {
   
   // Log de eventos importantes
   window.addEventListener('error', (e) => {
+    // Ignorar erro do ResizeObserver que é um falso positivo comum em aplicações React
+    if (e.message && e.message.includes('ResizeObserver loop')) {
+      e.preventDefault();
+      return;
+    }
     console.error('❌ Erro global:', e.message, e.filename, e.lineno, e.colno);
     // Mostrar alerta com erro
     alert(`Erro: ${e.message}\nArquivo: ${e.filename}\nLinha: ${e.lineno}`);

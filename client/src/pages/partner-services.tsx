@@ -209,11 +209,16 @@ const PartnerServicesPage: React.FC = () => {
       
       // Update service addresses if any were selected
       if (addressIds && addressIds.length > 0) {
-        const addressRes = await apiRequest("PUT", `/api/partners/services/${newService.id}/addresses`, {
-          addressIds
-        });
-        if (!addressRes.ok) {
-          console.error("Failed to update service addresses");
+        try {
+          const addressRes = await apiRequest("PUT", `/api/partners/services/${newService.id}/addresses`, {
+            addressIds
+          });
+          if (!addressRes.ok) {
+            console.error("Failed to update service addresses");
+          }
+        } catch (error) {
+          console.error("Error updating service addresses:", error);
+          // Não propagar o erro, pois o serviço já foi criado com sucesso
         }
       }
       
@@ -698,14 +703,14 @@ const PartnerServicesPage: React.FC = () => {
                     <FormLabel>Categoria</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione uma categoria" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="max-h-[300px] overflow-y-auto">
                         <SelectGroup>
                           <SelectLabel>Especialidades Médicas</SelectLabel>
                           <SelectItem value="Alergologia">Alergologia</SelectItem>
@@ -1105,41 +1110,6 @@ const PartnerServicesPage: React.FC = () => {
               {/* Campo escondido para manter compatibilidade */}
               <input type="hidden" {...form.register("isFeatured")} value="false" />
 
-              <FormField
-                control={form.control}
-                name="serviceImage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Imagem do Serviço</FormLabel>
-                    <FormControl>
-                      <div className="flex flex-col gap-2">
-                        <Input
-                          type="text"
-                          placeholder="URL da imagem ou string em base64"
-                          {...field}
-                        />
-                        {field.value && (
-                          <div className="mt-2 rounded-md overflow-hidden border w-full max-w-[200px]">
-                            <img 
-                              src={field.value} 
-                              alt="Preview da imagem do serviço" 
-                              className="w-full h-auto object-cover aspect-video"
-                              onError={(e) => {
-                                // Esconde a imagem se houver erro ao carregá-la
-                                e.currentTarget.style.display = "none";
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormDescription>
-                      Cole uma URL de imagem ou o código base64 da imagem. Se não informado, a imagem do perfil do parceiro será usada.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <DialogFooter>
                 <DialogClose asChild>
