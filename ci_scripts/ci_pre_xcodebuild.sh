@@ -23,11 +23,24 @@ fi
 
 # Build do projeto web
 echo "🔨 Construindo o projeto web..."
+# Limpar build anterior para garantir arquivos frescos
+rm -rf dist/client
+rm -rf ios/App/App/public
+
 if command -v yarn >/dev/null 2>&1; then
     yarn build
 else
     npm run build
 fi
+
+# Verificar se o build foi bem sucedido
+if [ ! -d "dist/client" ]; then
+    echo "❌ Erro: Build falhou - diretório dist/client não foi criado"
+    exit 1
+fi
+
+echo "📂 Conteúdo do dist/client:"
+ls -la dist/client/
 
 # Sincronizar com Capacitor
 echo "📱 Sincronizando com Capacitor..."

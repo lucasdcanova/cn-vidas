@@ -2,6 +2,10 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { registerServiceWorker, initPWAInstall } from "./pwa";
+import { debugStartup } from "./debug-startup";
+
+// Debug para iOS
+const debugDiv = debugStartup();
 
 // Inicializar PWA
 registerServiceWorker();
@@ -33,4 +37,23 @@ ogType.content = "website";
 document.head.appendChild(ogType);
 
 // Render the app
-createRoot(document.getElementById("root")!).render(<App />);
+try {
+  const root = document.getElementById("root");
+  if (!root) {
+    console.error('❌ Elemento root não encontrado!');
+    document.body.innerHTML = '<h1>Erro: Elemento root não encontrado</h1>';
+  } else {
+    console.log('✅ Elemento root encontrado, renderizando app...');
+    createRoot(root).render(<App />);
+    
+    // Remover debug div quando app carregar
+    setTimeout(() => {
+      if (debugDiv?.parentNode) {
+        debugDiv.remove();
+      }
+    }, 1000);
+  }
+} catch (error) {
+  console.error('❌ Erro ao renderizar app:', error);
+  document.body.innerHTML = `<h1>Erro ao carregar aplicação</h1><pre>${error}</pre>`;
+}
