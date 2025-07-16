@@ -10,18 +10,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        #if DEBUG
-        // Habilitar Web Inspector em builds de debug
+        // Habilitar Web Inspector para debug (TestFlight usa configuração Release)
         if #available(iOS 16.4, *) {
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let window = windowScene.windows.first,
-               let webView = window.rootViewController?.view.subviews.first(where: { $0 is WKWebView }) as? WKWebView {
-                webView.isInspectable = true
+            // Tentar habilitar inspeção após um pequeno delay para garantir que a WebView foi criada
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first {
+                    self.enableWebInspector(in: window.rootViewController?.view)
+                }
             }
         }
-        #endif
         
         return true
+    }
+    
+    // Função auxiliar para habilitar Web Inspector recursivamente
+    private func enableWebInspector(in view: UIView?) {
+        guard let view = view else { return }
+        
+        if #available(iOS 16.4, *) {
+            if let webView = view as? WKWebView {
+                webView.isInspectable = true
+                print("✅ Web Inspector habilitado para WebView")
+            }
+        }
+        
+        // Buscar em subviews
+        for subview in view.subviews {
+            enableWebInspector(in: subview)
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
