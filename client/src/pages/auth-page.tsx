@@ -470,6 +470,28 @@ const AuthPage: React.FC = () => {
     }
   }, []);
   
+  // Adicionar Microsoft Clarity
+  useEffect(() => {
+    // Criar e adicionar o script do Clarity
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.innerHTML = `
+      (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "sfza16e2m1");
+    `;
+    document.head.appendChild(script);
+    
+    // Cleanup ao desmontar o componente
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
+  
   // Verificar se há credenciais biométricas salvas ao carregar
   useEffect(() => {
     const checkBiometricCredentials = async () => {
