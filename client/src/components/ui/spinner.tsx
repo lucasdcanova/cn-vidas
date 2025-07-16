@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import { CNVidasLoader } from "./cnvidas-loader";
 
 const spinnerVariants = cva(
   "inline-block animate-spin rounded-full border-2 border-current border-t-transparent",
@@ -31,14 +32,18 @@ export interface SpinnerProps
 
 export const Spinner = React.forwardRef<HTMLDivElement, SpinnerProps>(
   ({ className, size, variant, ...props }, ref) => {
+    // Mapear tamanhos do spinner para o CNVidasLoader
+    const loaderSize = size === 'sm' || size === 'default' ? 'small' : size === 'lg' ? 'medium' : 'large';
+    
     return (
       <div
-        className={cn(spinnerVariants({ size, variant }), className)}
+        className={cn('inline-flex', className)}
         {...props}
         ref={ref}
         role="status"
         aria-label="Carregando"
       >
+        <CNVidasLoader size={loaderSize} />
         <span className="sr-only">Carregando...</span>
       </div>
     );
