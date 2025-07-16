@@ -33,7 +33,8 @@ export type AddressFormValues = z.infer<typeof addressSchema>;
 
 interface AddressFormProps {
   defaultValues?: Partial<AddressFormValues>;
-  onSubmit: (data: AddressFormValues) => void;
+  onSubmit?: (data: AddressFormValues) => void;
+  onChange?: (data: AddressFormValues) => void;
   isSubmitting?: boolean;
   showSubmitButton?: boolean;
   title?: string;
@@ -45,6 +46,7 @@ interface AddressFormProps {
 export function AddressForm({
   defaultValues,
   onSubmit,
+  onChange,
   isSubmitting = false,
   showSubmitButton = true,
   title,
@@ -68,6 +70,16 @@ export function AddressForm({
     },
   });
   
+  // Observar mudanças nos valores do formulário
+  React.useEffect(() => {
+    if (onChange) {
+      const subscription = form.watch((value) => {
+        onChange(value as AddressFormValues);
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [form, onChange]);
+
   // Atualizar o formulário sempre que os defaultValues mudarem
   React.useEffect(() => {
     if (defaultValues) {
