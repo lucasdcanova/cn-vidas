@@ -50,10 +50,13 @@ export function debugStartup() {
   // Log de eventos importantes
   window.addEventListener('error', (e) => {
     console.error('❌ Erro global:', e.message, e.filename, e.lineno, e.colno);
+    // Mostrar alerta com erro
+    alert(`Erro: ${e.message}\nArquivo: ${e.filename}\nLinha: ${e.lineno}`);
   });
   
   window.addEventListener('unhandledrejection', (e) => {
     console.error('❌ Promise rejeitada:', e.reason);
+    alert(`Promise rejeitada: ${e.reason}`);
   });
   
   return debugDiv;

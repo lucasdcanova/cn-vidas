@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import WebKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -8,6 +9,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        #if DEBUG
+        // Habilitar Web Inspector em builds de debug
+        if #available(iOS 16.4, *) {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first,
+               let webView = window.rootViewController?.view.subviews.first(where: { $0 is WKWebView }) as? WKWebView {
+                webView.isInspectable = true
+            }
+        }
+        #endif
+        
         return true
     }
 
