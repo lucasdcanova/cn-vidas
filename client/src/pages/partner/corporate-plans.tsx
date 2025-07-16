@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import logoImg from "@/assets/cnvidas-logo-transparent.png";
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, Building2, Users, AlertCircle, CreditCard, ChevronRight, BadgePercent } from "lucide-react";
+import { Loader2, Check, Building2, Users, AlertCircle, CreditCard, ChevronRight, BadgePercent, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Switch } from "@/components/ui/switch";
@@ -48,6 +48,22 @@ const CorporatePlansPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  
+  // Detectar se é mobile (iOS/Android)
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      const isIOS = isNativeApp();
+      const isSmallScreen = window.innerWidth < 768;
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsMobile(isIOS || (isSmallScreen && isTouchDevice));
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Estados para seleção
   const [selectedPlanType, setSelectedPlanType] = useState<string>("free_corp");
@@ -276,24 +292,84 @@ const CorporatePlansPage: React.FC = () => {
               <Label className="text-base font-medium mb-3 block">
                 Quantos colaboradores sua empresa possui?
               </Label>
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <input
-                  type="range"
-                  min="5"
-                  max="500"
-                  value={selectedEmployeeCount}
-                  onChange={(e) => setSelectedEmployeeCount(parseInt(e.target.value))}
-                  className="flex-1 w-full"
-                />
-                <div className="text-center min-w-[100px]">
-                  <p className="text-2xl font-bold">{selectedEmployeeCount}</p>
-                  <p className="text-sm text-muted-foreground">colaboradores</p>
+              {isMobile ? (
+                // Versão mobile com botões de ajuste rápido
+                <div className="space-y-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedEmployeeCount(Math.max(5, selectedEmployeeCount - 10))}
+                        className="h-10 w-10 p-0"
+                      >
+                        -10
+                      </Button>
+                      <div className="text-center">
+                        <p className="text-3xl font-bold">{selectedEmployeeCount}</p>
+                        <p className="text-sm text-muted-foreground">colaboradores</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedEmployeeCount(Math.min(500, selectedEmployeeCount + 10))}
+                        className="h-10 w-10 p-0"
+                      >
+                        +10
+                      </Button>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="500"
+                      value={selectedEmployeeCount}
+                      onChange={(e) => setSelectedEmployeeCount(parseInt(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                      <span>5 vidas</span>
+                      <span>500+ vidas</span>
+                    </div>
+                  </div>
+                  
+                  {/* Atalhos rápidos */}
+                  <div className="grid grid-cols-4 gap-2">
+                    {[10, 50, 100, 200].map((count) => (
+                      <Button
+                        key={count}
+                        variant={selectedEmployeeCount === count ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedEmployeeCount(count)}
+                        className="text-xs"
+                      >
+                        {count}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>5 vidas</span>
-                <span>500+ vidas</span>
-              </div>
+              ) : (
+                // Versão desktop original
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <input
+                    type="range"
+                    min="5"
+                    max="500"
+                    value={selectedEmployeeCount}
+                    onChange={(e) => setSelectedEmployeeCount(parseInt(e.target.value))}
+                    className="flex-1 w-full"
+                  />
+                  <div className="text-center min-w-[100px]">
+                    <p className="text-2xl font-bold">{selectedEmployeeCount}</p>
+                    <p className="text-sm text-muted-foreground">colaboradores</p>
+                  </div>
+                </div>
+              )}
+              {!isMobile && (
+                <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                  <span>5 vidas</span>
+                  <span>500+ vidas</span>
+                </div>
+              )}
             </div>
 
             {/* Seleção do período de cobrança */}
@@ -302,8 +378,8 @@ const CorporatePlansPage: React.FC = () => {
                 Período de cobrança
               </Label>
               <RadioGroup value={billingPeriod} onValueChange={setBillingPeriod}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <label className="relative flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-1 md:grid-cols-3 gap-4'}`}>
+                  <label className={`relative flex items-center justify-between ${isMobile ? 'p-3' : 'p-4'} border rounded-lg cursor-pointer hover:bg-gray-50 ${billingPeriod === 'monthly' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
                     <div className="flex items-center gap-3">
                       <RadioGroupItem value="monthly" id="monthly" />
                       <div>
@@ -312,7 +388,7 @@ const CorporatePlansPage: React.FC = () => {
                       </div>
                     </div>
                   </label>
-                  <label className="relative flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                  <label className={`relative flex items-center justify-between ${isMobile ? 'p-3' : 'p-4'} border rounded-lg cursor-pointer hover:bg-gray-50 ${billingPeriod === 'semiannual' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
                     <div className="flex items-center gap-3">
                       <RadioGroupItem value="semiannual" id="semiannual" />
                       <div>
@@ -320,11 +396,11 @@ const CorporatePlansPage: React.FC = () => {
                         <p className="text-sm text-green-600 font-medium">5% desconto</p>
                       </div>
                     </div>
-                    <Badge className="absolute top-2 right-2 bg-green-100 text-green-700">
+                    <Badge className={`absolute ${isMobile ? 'top-1 right-1 text-xs' : 'top-2 right-2'} bg-green-100 text-green-700`}>
                       Economize 5%
                     </Badge>
                   </label>
-                  <label className="relative flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                  <label className={`relative flex items-center justify-between ${isMobile ? 'p-3' : 'p-4'} border rounded-lg cursor-pointer hover:bg-gray-50 ${billingPeriod === 'annual' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
                     <div className="flex items-center gap-3">
                       <RadioGroupItem value="annual" id="annual" />
                       <div>
@@ -332,7 +408,7 @@ const CorporatePlansPage: React.FC = () => {
                         <p className="text-sm text-green-600 font-medium">8% desconto</p>
                       </div>
                     </div>
-                    <Badge className="absolute top-2 right-2 bg-green-100 text-green-700">
+                    <Badge className={`absolute ${isMobile ? 'top-1 right-1 text-xs' : 'top-2 right-2'} bg-green-100 text-green-700`}>
                       Maior economia
                     </Badge>
                   </label>
@@ -343,9 +419,9 @@ const CorporatePlansPage: React.FC = () => {
         </Card>
 
         {/* Grid de planos */}
-        <div className="mb-32">
+        <div className={isMobile ? "mb-6" : "mb-32"}>
           <h2 className="text-xl font-semibold mb-6">Escolha o plano ideal para sua empresa</h2>
-          <div className={`grid ${isIOS ? 'gap-5' : 'gap-4 md:gap-6'} grid-cols-1 md:grid-cols-3`}>
+          <div className={`grid ${isMobile ? 'gap-4' : 'gap-4 md:gap-6'} grid-cols-1 md:grid-cols-3`}>
             {/* Planos pagos */}
             {plans && plans.map((plan: CorporatePlan) => {
               const isCurrentPlan = currentSubscription?.planType === plan.planType;
@@ -381,24 +457,44 @@ const CorporatePlansPage: React.FC = () => {
                     </div>
                   )}
                   
-                  <CardHeader className={`${getPlanHeaderClass(plan.planType)} ${isIOS ? 'p-5' : 'p-4 md:p-6'}`}>
-                    <CardTitle className={`flex items-center justify-between ${isIOS ? 'text-[17px]' : 'text-base md:text-lg'}`}>
+                  <CardHeader className={`${getPlanHeaderClass(plan.planType)} ${isMobile ? 'p-4' : 'p-4 md:p-6'}`}>
+                    <CardTitle className={`flex items-center justify-between ${isMobile ? 'text-base' : 'text-base md:text-lg'}`}>
                       <span>{plan.displayName}</span>
-                      <Building2 className={`${isIOS ? 'h-4 w-4' : 'h-4 w-4 md:h-5 md:w-5'} opacity-80`} />
+                      <Building2 className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4 md:h-5 md:w-5'} opacity-80`} />
                     </CardTitle>
                     <CardDescription className="text-white/90 mt-2">
-                      <div>
-                        <span className={`${isIOS ? 'text-[16px]' : 'text-base'} font-medium text-white`}>
-                          R$ {discountedPrice.toFixed(2)}
-                        </span>
-                        <span className={`${isIOS ? 'text-[12px]' : 'text-sm'}`}>/colaborador/mês</span>
-                      </div>
-                      <div className="mt-1">
-                        <span className={`${isIOS ? 'text-[20px]' : 'text-xl'} font-bold text-white`}>
-                          Total: R$ {totalMonthlyPrice.toFixed(2)}
-                        </span>
-                        <span className={`${isIOS ? 'text-[12px]' : 'text-sm'}`}>/mês</span>
-                      </div>
+                      {isMobile ? (
+                        // Versão mobile com layout mais compacto
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-sm text-white/80">Por colaborador:</span>
+                            <span className="text-base font-semibold text-white">
+                              R$ {discountedPrice.toFixed(2)}/mês
+                            </span>
+                          </div>
+                          {discount > 0 && (
+                            <Badge className="bg-white/20 text-white border-white/30 text-xs">
+                              {discount}% de desconto aplicado
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        // Versão desktop original
+                        <>
+                          <div>
+                            <span className="text-base font-medium text-white">
+                              R$ {discountedPrice.toFixed(2)}
+                            </span>
+                            <span className="text-sm">/colaborador/mês</span>
+                          </div>
+                          <div className="mt-1">
+                            <span className="text-xl font-bold text-white">
+                              Total: R$ {totalMonthlyPrice.toFixed(2)}
+                            </span>
+                            <span className="text-sm">/mês</span>
+                          </div>
+                        </>
+                      )}
                     </CardDescription>
                   </CardHeader>
                   
@@ -487,44 +583,72 @@ const CorporatePlansPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Resumo e botão de contratação */}
-        <Card className="sticky bottom-16 sm:bottom-20 border-2 shadow-lg bg-white/95 backdrop-blur-xl z-40">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="text-center md:text-left">
-                <p className="text-sm text-muted-foreground">Plano selecionado</p>
-                <p className="text-xl font-bold">
-                  {selectedPlanType === 'free_corp' ? 'Gratuito' : plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedPlanType === 'free_corp' ? 'Sem limite de colaboradores • ' : `${selectedEmployeeCount} colaboradores • ${getEmployeeTier(selectedEmployeeCount)} vidas • `}
-                  {selectedPlanType === 'free_corp' ? 'Apenas listagem no marketplace' : billingPeriod === 'monthly' ? 'Mensal' : billingPeriod === 'semiannual' ? 'Semestral' : 'Anual'}
-                </p>
-              </div>
-              <div className="text-center md:text-right">
-                <p className="text-sm text-muted-foreground">Total mensal</p>
-                <p className="text-3xl font-bold text-green-600">
-                  {selectedPlanType === 'free_corp' ? 'Gratuito' : `R$ ${finalPrice.toFixed(2)}`}
-                </p>
-                {billingPeriod !== 'monthly' && selectedPlanType !== 'free_corp' && (
-                  <p className="text-sm text-green-600">
-                    Economizando {billingPeriod === 'semiannual' ? '5%' : '8%'}
-                  </p>
+        {/* Resumo e botão de contratação - Desktop sticky, Mobile static */}
+        {isMobile ? (
+          // Versão Mobile - Card estático com design simplificado
+          <Card className="mt-8 border-2 border-primary/20 shadow-sm bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Calculator className="h-5 w-5" />
+                Resumo do Plano
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-white rounded-lg p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-muted-foreground">Plano</span>
+                  <span className="font-semibold">
+                    {selectedPlanType === 'free_corp' ? 'Gratuito' : plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName}
+                  </span>
+                </div>
+                
+                {selectedPlanType !== 'free_corp' && (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-muted-foreground">Colaboradores</span>
+                      <span className="font-semibold">{selectedEmployeeCount}</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-muted-foreground">Período</span>
+                      <span className="font-semibold">
+                        {billingPeriod === 'monthly' ? 'Mensal' : billingPeriod === 'semiannual' ? 'Semestral' : 'Anual'}
+                      </span>
+                    </div>
+                    
+                    {billingPeriod !== 'monthly' && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-muted-foreground">Desconto</span>
+                        <Badge variant="secondary" className="bg-green-100 text-green-700">
+                          {billingPeriod === 'semiannual' ? '5%' : '8%'} OFF
+                        </Badge>
+                      </div>
+                    )}
+                  </>
                 )}
+                
+                <div className="pt-3 border-t">
+                  <div className="flex justify-between items-center">
+                    <span className="text-base font-medium">Total Mensal</span>
+                    <span className="text-2xl font-bold text-primary">
+                      {selectedPlanType === 'free_corp' ? 'Gratuito' : `R$ ${finalPrice.toFixed(2)}`}
+                    </span>
+                  </div>
+                </div>
               </div>
+              
               <Button 
                 size="lg" 
-                className="w-full md:w-auto"
+                className="w-full"
                 onClick={() => {
                   if (selectedPlanType === 'free_corp') {
-                    // Para o plano gratuito, criar automaticamente sem checkout
                     toast({
                       title: "Plano Gratuito",
                       description: "O plano gratuito já está ativo. Você pode começar a usar o marketplace.",
                     });
                   } else {
                     setSelectedPlan({
-                      id: 0, // Será usado apenas para o modal
+                      id: 0,
                       name: plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName || '',
                       price: `R$ ${finalPrice.toFixed(2).replace('.', ',')}`
                     });
@@ -532,12 +656,63 @@ const CorporatePlansPage: React.FC = () => {
                   }
                 }}
               >
-                {selectedPlanType === 'free_corp' ? 'Ativar Plano Gratuito' : 'Contratar Plano Corporativo'}
+                {selectedPlanType === 'free_corp' ? 'Ativar Plano Gratuito' : 'Contratar Plano'}
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : (
+          // Versão Desktop - Badge flutuante original
+          <Card className="sticky bottom-16 sm:bottom-20 border-2 shadow-lg bg-white/95 backdrop-blur-xl z-40">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="text-center md:text-left">
+                  <p className="text-sm text-muted-foreground">Plano selecionado</p>
+                  <p className="text-xl font-bold">
+                    {selectedPlanType === 'free_corp' ? 'Gratuito' : plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedPlanType === 'free_corp' ? 'Sem limite de colaboradores • ' : `${selectedEmployeeCount} colaboradores • ${getEmployeeTier(selectedEmployeeCount)} vidas • `}
+                    {selectedPlanType === 'free_corp' ? 'Apenas listagem no marketplace' : billingPeriod === 'monthly' ? 'Mensal' : billingPeriod === 'semiannual' ? 'Semestral' : 'Anual'}
+                  </p>
+                </div>
+                <div className="text-center md:text-right">
+                  <p className="text-sm text-muted-foreground">Total mensal</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {selectedPlanType === 'free_corp' ? 'Gratuito' : `R$ ${finalPrice.toFixed(2)}`}
+                  </p>
+                  {billingPeriod !== 'monthly' && selectedPlanType !== 'free_corp' && (
+                    <p className="text-sm text-green-600">
+                      Economizando {billingPeriod === 'semiannual' ? '5%' : '8%'}
+                    </p>
+                  )}
+                </div>
+                <Button 
+                  size="lg" 
+                  className="w-full md:w-auto"
+                  onClick={() => {
+                    if (selectedPlanType === 'free_corp') {
+                      toast({
+                        title: "Plano Gratuito",
+                        description: "O plano gratuito já está ativo. Você pode começar a usar o marketplace.",
+                      });
+                    } else {
+                      setSelectedPlan({
+                        id: 0,
+                        name: plans?.find((p: CorporatePlan) => p.planType === selectedPlanType)?.displayName || '',
+                        price: `R$ ${finalPrice.toFixed(2).replace('.', ',')}`
+                      });
+                      setCheckoutOpen(true);
+                    }
+                  }}
+                >
+                  {selectedPlanType === 'free_corp' ? 'Ativar Plano Gratuito' : 'Contratar Plano Corporativo'}
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Modal de checkout */}
