@@ -31,35 +31,41 @@ export function debugStartup() {
             r="55"
             fill="none"
             stroke="#e5e7eb"
-            stroke-width="3"
+            stroke-width="8"
           />
+          <!-- Círculo de base sempre visível -->
           <circle
             cx="60"
             cy="60"
             r="55"
             fill="none"
             stroke="#3b82f6"
-            stroke-width="3"
+            stroke-width="8"
+            class="base-circle"
+          />
+          <!-- Círculo animado -->
+          <circle
+            cx="60"
+            cy="60"
+            r="55"
+            fill="none"
+            stroke="#10b981"
+            stroke-width="8"
             stroke-dasharray="345.575"
             stroke-dashoffset="345.575"
-            style="animation: circleProgress 2s ease-in-out infinite;"
+            style="animation: circleProgress 2s linear infinite;"
           />
         </svg>
         
         <!-- Logo no centro -->
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px;">
           <img 
-            src="/assets/cnvidas-logo-transparent.png" 
+            src="/assets/cnvidas-logo.png" 
             alt="CNVidas" 
             style="width: 100%; height: 100%; object-fit: contain;"
             onerror="this.src='/assets/logo.png'"
           />
         </div>
-      </div>
-      
-      <div class="loading-text" style="margin-bottom: 20px;">
-        <h3 style="margin: 0; font-size: 24px; font-weight: 400; color: #1a202c;">CNVidas</h3>
-        <p style="margin: 8px 0 0 0; font-size: 14px; color: #6b7280;">Carregando...</p>
       </div>
     </div>
   `;
@@ -71,11 +77,24 @@ export function debugStartup() {
       0% {
         stroke-dashoffset: 345.575;
       }
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+    
+    .base-circle {
+      animation: colorChange 4s linear infinite;
+    }
+    
+    @keyframes colorChange {
+      0% {
+        stroke: #3b82f6;
+      }
       50% {
-        stroke-dashoffset: 86.394;
+        stroke: #10b981;
       }
       100% {
-        stroke-dashoffset: 345.575;
+        stroke: #3b82f6;
       }
     }
     

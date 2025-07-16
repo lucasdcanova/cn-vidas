@@ -5,6 +5,7 @@ import { getUserSubscription } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import PatientOnboarding from "@/pages/patient-onboarding";
+import { CNVidasLoader } from "@/components/ui/cnvidas-loader";
 
 export default function FirstSubscriptionGuard() {
   const { user } = useAuth();
@@ -46,10 +47,7 @@ export default function FirstSubscriptionGuard() {
   // Mostrar loading enquanto verifica
   if (canAccess === null || subscriptionLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Verificando assinatura...</span>
-      </div>
+      <CNVidasLoader fullScreen text="Verificando assinatura..." />
     );
   }
 
