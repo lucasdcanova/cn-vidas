@@ -20,42 +20,46 @@ export function debugStartup() {
     justify-content: center;
     backdrop-filter: blur(10px);
   `;
-  // Tentar múltiplos caminhos para garantir que funcione em diferentes contextos
-  const possiblePaths = [
-    './assets/cnvidas-logo-transparent.png',
-    '/assets/cnvidas-logo-transparent.png',
-    'assets/cnvidas-logo-transparent.png',
-    './assets/logo.png',
-    '/assets/logo.png',
-    'assets/logo.png'
-  ];
-  
-  const logoSrc = possiblePaths[1]; // Usar caminho absoluto por padrão
-  
   debugDiv.innerHTML = `
     <div style="text-align: center;">
-      <div class="logo-container" style="position: relative; margin: 0 auto 20px;">
-        <div style="width: 120px; height: 120px; margin: 0 auto; display: flex; align-items: center; justify-content: center; position: relative;">
+      <div class="logo-container" style="position: relative; margin: 0 auto 30px; width: 120px; height: 120px;">
+        <!-- Círculo de progresso -->
+        <svg style="position: absolute; top: 0; left: 0; width: 120px; height: 120px; transform: rotate(-90deg);">
+          <circle
+            cx="60"
+            cy="60"
+            r="55"
+            fill="none"
+            stroke="#e5e7eb"
+            stroke-width="3"
+          />
+          <circle
+            cx="60"
+            cy="60"
+            r="55"
+            fill="none"
+            stroke="#3b82f6"
+            stroke-width="3"
+            stroke-dasharray="345.575"
+            stroke-dashoffset="345.575"
+            style="animation: circleProgress 2s ease-in-out infinite;"
+          />
+        </svg>
+        
+        <!-- Logo no centro -->
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px;">
           <img 
-            src="${logoSrc}" 
+            src="/assets/cnvidas-logo-transparent.png" 
             alt="CNVidas" 
-            style="width: 100px; height: 100px; object-fit: contain; animation: pulse 2s ease-in-out infinite;"
-            onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'width:100px;height:100px;display:flex;align-items:center;justify-content:center;background:rgba(20,184,166,0.1);border-radius:50%;animation:pulse 2s ease-in-out infinite;\\'><span style=\\'font-size:32px;font-weight:bold;color:#14b8a6;\\'>CN</span></div>'"
+            style="width: 100%; height: 100%; object-fit: contain;"
+            onerror="this.src='/assets/logo.png'"
           />
         </div>
-        <div class="logo-glow" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%); animation: glowPulse 2s ease-in-out infinite; border-radius: 50%; pointer-events: none;"></div>
       </div>
-      <div class="loading-text" style="margin-bottom: 30px;">
-        <h3 style="margin: 0; font-size: 24px; font-weight: 300; color: #1a202c; letter-spacing: 2px; animation: fadeInOut 3s ease-in-out infinite;">CNVidas</h3>
-        <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b; animation: slideUp 1s ease-out;">Preparando sua experiência...</p>
-      </div>
-      <div class="loading-indicator" style="position: relative; width: 60px; height: 4px; background: #e2e8f0; border-radius: 2px; margin: 0 auto; overflow: hidden;">
-        <div class="loading-bar" style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, #14b8a6 0%, #0ea5e9 50%, #14b8a6 100%); animation: slideProgress 2s ease-in-out infinite;"></div>
-      </div>
-      <div class="loading-dots" style="margin-top: 20px;">
-        <span style="display: inline-block; width: 8px; height: 8px; margin: 0 3px; background: #14b8a6; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both; animation-delay: -0.32s;"></span>
-        <span style="display: inline-block; width: 8px; height: 8px; margin: 0 3px; background: #14b8a6; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both; animation-delay: -0.16s;"></span>
-        <span style="display: inline-block; width: 8px; height: 8px; margin: 0 3px; background: #14b8a6; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both;"></span>
+      
+      <div class="loading-text" style="margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 24px; font-weight: 400; color: #1a202c;">CNVidas</h3>
+        <p style="margin: 8px 0 0 0; font-size: 14px; color: #6b7280;">Carregando...</p>
       </div>
     </div>
   `;
@@ -63,77 +67,21 @@ export function debugStartup() {
   // Adicionar animação
   const style = document.createElement('style');
   style.textContent = `
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      50% {
-        transform: scale(1.05);
-        opacity: 0.9;
-      }
-    }
-    
-    @keyframes glowPulse {
-      0%, 100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.5;
-      }
-      50% {
-        transform: translate(-50%, -50%) scale(1.2);
-        opacity: 0.8;
-      }
-    }
-    
-    @keyframes fadeInOut {
-      0%, 100% {
-        opacity: 0.5;
-      }
-      50% {
-        opacity: 1;
-      }
-    }
-    
-    @keyframes slideUp {
+    @keyframes circleProgress {
       0% {
-        transform: translateY(10px);
-        opacity: 0;
+        stroke-dashoffset: 345.575;
+      }
+      50% {
+        stroke-dashoffset: 86.394;
       }
       100% {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-    
-    @keyframes slideProgress {
-      0% {
-        left: -100%;
-      }
-      50% {
-        left: 100%;
-      }
-      100% {
-        left: 100%;
-      }
-    }
-    
-    @keyframes bounce {
-      0%, 80%, 100% {
-        transform: scale(0);
-        opacity: 0;
-      }
-      40% {
-        transform: scale(1);
-        opacity: 1;
+        stroke-dashoffset: 345.575;
       }
     }
     
     @media (max-width: 640px) {
-      .logo-container img {
-        width: 100px !important;
-      }
-      .loading-text h3 {
-        font-size: 20px !important;
+      .logo-container {
+        transform: scale(0.9);
       }
     }
   `;
