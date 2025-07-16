@@ -23,7 +23,15 @@ export function debugStartup() {
   debugDiv.innerHTML = `
     <div style="text-align: center;">
       <div class="logo-container" style="position: relative; margin: 0 auto 20px;">
-        <img src="/assets/cnvidas-logo-transparent.png" alt="CNVidas" style="width: 120px; height: auto; animation: pulse 2s ease-in-out infinite;">
+        <div style="width: 120px; height: 120px; margin: 0 auto; display: flex; align-items: center; justify-content: center; animation: pulse 2s ease-in-out infinite;">
+          <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Logo CNVidas simplificado -->
+            <circle cx="50" cy="50" r="45" fill="#14b8a6" opacity="0.1"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#14b8a6" stroke-width="2"/>
+            <path d="M50 25 C30 25 25 40 25 50 C25 60 30 75 50 75 C70 75 75 60 75 50 C75 40 70 25 50 25" fill="#14b8a6" opacity="0.2"/>
+            <text x="50" y="55" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#14b8a6">CN</text>
+          </svg>
+        </div>
         <div class="logo-glow" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%); animation: glowPulse 2s ease-in-out infinite; border-radius: 50%; pointer-events: none;"></div>
       </div>
       <div class="loading-text" style="margin-bottom: 30px;">
