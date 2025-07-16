@@ -4,6 +4,7 @@ import { Redirect, Route } from "wouter";
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { RouteComponentProps } from "wouter";
+import { CNVidasLoader } from "@/components/ui/cnvidas-loader";
 
 type ProtectedRouteProps = {
   path: string;
@@ -33,9 +34,7 @@ export function ProtectedRoute({
   if (isLoading || checkingSubscription) {
     return (
       <Route path={path}>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <CNVidasLoader fullScreen />
       </Route>
     );
   }
