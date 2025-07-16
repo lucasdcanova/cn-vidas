@@ -211,25 +211,21 @@ export function AddressForm({
                           fetchAddressByCep(e.target.value);
                         }
                       }}
-                      className="pr-10"
+                      className={isSearchingCep ? "pr-10" : ""}
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full"
-                      onClick={() => fetchAddressByCep(field.value)}
-                      disabled={isSearchingCep || !field.value || field.value.replace(/\D/g, '').length !== 8}
-                    >
-                      {isSearchingCep ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Search className="h-4 w-4" />
-                      )}
-                    </Button>
+                    {isSearchingCep && (
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
                   </div>
                 </FormControl>
                 <FormMessage />
+                {!cepError && !isSearchingCep && field.value.length < 9 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Digite o CEP completo para buscar o endereço automaticamente
+                  </p>
+                )}
               </FormItem>
             )}
           />
