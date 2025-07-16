@@ -9,31 +9,113 @@ export function debugStartup() {
   const debugDiv = document.createElement('div');
   debugDiv.style.cssText = `
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8f2f7 100%);
     z-index: 9999;
-    text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
   `;
   debugDiv.innerHTML = `
-    <h3 style="margin: 0 0 10px 0; color: #333;">CN Vidas</h3>
-    <p style="margin: 0; color: #666;">Carregando aplicação...</p>
-    <div style="margin-top: 10px;">
-      <div style="width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    <div style="text-align: center;">
+      <div class="logo-container" style="position: relative; margin: 0 auto 20px;">
+        <img src="/assets/cnvidas-logo-transparent.png" alt="CNVidas" style="width: 120px; height: auto; animation: pulse 2s ease-in-out infinite;">
+        <div class="logo-glow" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%); animation: glowPulse 2s ease-in-out infinite; border-radius: 50%; pointer-events: none;"></div>
+      </div>
+      <div class="loading-text" style="margin-bottom: 30px;">
+        <h3 style="margin: 0; font-size: 24px; font-weight: 300; color: #1a202c; letter-spacing: 2px; animation: fadeInOut 3s ease-in-out infinite;">CNVidas</h3>
+        <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b; animation: slideUp 1s ease-out;">Preparando sua experiência...</p>
+      </div>
+      <div class="loading-indicator" style="position: relative; width: 60px; height: 4px; background: #e2e8f0; border-radius: 2px; margin: 0 auto; overflow: hidden;">
+        <div class="loading-bar" style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, #14b8a6 0%, #0ea5e9 50%, #14b8a6 100%); animation: slideProgress 2s ease-in-out infinite;"></div>
+      </div>
+      <div class="loading-dots" style="margin-top: 20px;">
+        <span style="display: inline-block; width: 8px; height: 8px; margin: 0 3px; background: #14b8a6; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both; animation-delay: -0.32s;"></span>
+        <span style="display: inline-block; width: 8px; height: 8px; margin: 0 3px; background: #14b8a6; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both; animation-delay: -0.16s;"></span>
+        <span style="display: inline-block; width: 8px; height: 8px; margin: 0 3px; background: #14b8a6; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both;"></span>
+      </div>
     </div>
   `;
   
   // Adicionar animação
   const style = document.createElement('style');
   style.textContent = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+    }
+    
+    @keyframes glowPulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+      }
+    }
+    
+    @keyframes fadeInOut {
+      0%, 100% {
+        opacity: 0.5;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideUp {
+      0% {
+        transform: translateY(10px);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideProgress {
+      0% {
+        left: -100%;
+      }
+      50% {
+        left: 100%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+    
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .logo-container img {
+        width: 100px !important;
+      }
+      .loading-text h3 {
+        font-size: 20px !important;
+      }
     }
   `;
   document.head.appendChild(style);
