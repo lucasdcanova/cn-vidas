@@ -7,7 +7,7 @@ import multer from 'multer';
 import { promises as fs } from 'fs';
 import path from 'path';
 import FormData from 'form-data';
-import fetch from 'node-fetch';
+import axios from 'axios';
 import OpenAI from 'openai';
 import { storage } from '../storage.js';
 import { PrismaClient } from '@prisma/client';

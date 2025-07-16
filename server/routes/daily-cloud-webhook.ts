@@ -2,12 +2,12 @@ import { Router, Request, Response } from 'express';
 import { db } from '../db.js';
 import { consultationRecordings } from '../../shared/schema.js';
 import { eq } from 'drizzle-orm';
-import fetch from 'node-fetch';
 import OpenAI from 'openai';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { uploadToS3WithRetry, generateS3Key } from '../utils/s3-upload.js';
 import { PrismaClient } from '@prisma/client';
+import axios from 'axios';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -139,8 +139,10 @@ async function handleRecordingReady(payload: any) {
   try {
     // 1. Baixar o arquivo de áudio
     console.log('📥 [Daily Webhook] Baixando gravação...');
-    const response = await fetch(download_link);
-    const buffer = await response.buffer();
+    const response = await axios.get(download_link, {
+      responseType: 'arraybuffer'
+    });
+    const buffer = Buffer.from(response.data);
     
     // 2. Salvar temporariamente
     const tempDir = path.join(process.cwd(), 'temp');
