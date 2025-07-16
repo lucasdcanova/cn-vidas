@@ -4,6 +4,10 @@
 # Este script prepara o ambiente e dependências necessárias
 
 echo "🚀 Iniciando preparação do ambiente para Xcode Cloud..."
+echo "📍 Diretório atual: $(pwd)"
+echo "📂 CI_PRIMARY_REPOSITORY_PATH: $CI_PRIMARY_REPOSITORY_PATH"
+echo "🔢 Node version: $(node -v 2>&1 || echo 'Node não encontrado')"
+echo "📦 NPM version: $(npm -v 2>&1 || echo 'NPM não encontrado')"
 
 # Navegar para o diretório raiz do projeto
 cd $CI_PRIMARY_REPOSITORY_PATH
@@ -42,6 +46,14 @@ fi
 echo "📂 Conteúdo do dist/client:"
 ls -la dist/client/
 
+# Verificar se index.html existe
+if [ ! -f "dist/client/index.html" ]; then
+    echo "❌ Erro: index.html não foi criado no build"
+    exit 1
+fi
+
+echo "✅ index.html encontrado"
+
 # Sincronizar com Capacitor
 echo "📱 Sincronizando com Capacitor..."
 if command -v yarn >/dev/null 2>&1; then
@@ -49,6 +61,17 @@ if command -v yarn >/dev/null 2>&1; then
 else
     npm run cap:sync
 fi
+
+# Verificar se a sincronização foi bem sucedida
+echo "🔍 Verificando arquivos sincronizados no iOS..."
+ls -la ios/App/App/public/
+
+if [ ! -f "ios/App/App/public/index.html" ]; then
+    echo "❌ Erro: Sincronização falhou - index.html não foi copiado para iOS"
+    exit 1
+fi
+
+echo "✅ Sincronização com iOS concluída"
 
 # Criar estrutura do CapacitorKeyboard
 echo "🔧 Criando estrutura do CapacitorKeyboard..."
