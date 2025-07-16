@@ -13,6 +13,47 @@ import { generateQRCode } from '../utils/qr-code';
 const userRouter = express.Router();
 
 /**
+ * Buscar dados do usuário pelo CPF
+ * GET /api/users/by-cpf/:cpf
+ */
+userRouter.get('/by-cpf/:cpf', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { cpf } = req.params;
+    
+    // Verificar se o CPF pertence ao usuário autenticado
+    if (req.user?.cpf !== cpf) {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+    
+    const user = await storage.getUserByCPF(cpf);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    // Retornar apenas dados não sensíveis
+    const publicData = {
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      birthDate: user.birthDate,
+      gender: user.gender,
+      zipcode: user.zipcode,
+      street: user.street,
+      number: user.number,
+      complement: user.complement,
+      neighborhood: user.neighborhood,
+      city: user.city,
+      state: user.state,
+    };
+    
+    return res.json(publicData);
+  } catch (error) {
+    console.error('Erro ao buscar por CPF:', error);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+/**
  * Obter perfil do usuário
  * GET /api/users/profile
  */

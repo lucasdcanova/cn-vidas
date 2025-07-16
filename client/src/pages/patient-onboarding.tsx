@@ -74,13 +74,13 @@ const PatientOnboardingPage: React.FC = () => {
   });
   
   const [addressData, setAddressData] = useState({
-    zipcode: '',
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
-    state: ''
+    zipcode: user?.zipcode || '',
+    street: user?.street || '',
+    number: user?.number || '',
+    complement: user?.complement || '',
+    neighborhood: user?.neighborhood || '',
+    city: user?.city || '',
+    state: user?.state || ''
   });
   
   // Configure status bar for iOS
@@ -96,6 +96,49 @@ const PatientOnboardingPage: React.FC = () => {
       }
     };
   }, []);
+
+  // Buscar dados do usuário pelo CPF se já existir
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?.cpf) {
+        try {
+          const response = await fetch(`/api/users/by-cpf/${user.cpf}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Dados do usuário carregados:', data);
+            
+            // Atualizar dados pessoais
+            setPersonalData(prev => ({
+              ...prev,
+              phone: data.phone || prev.phone,
+              birthDate: data.birthDate || prev.birthDate,
+              gender: data.gender || prev.gender,
+            }));
+            
+            // Atualizar endereço
+            setAddressData({
+              zipcode: data.zipcode || '',
+              street: data.street || '',
+              number: data.number || '',
+              complement: data.complement || '',
+              neighborhood: data.neighborhood || '',
+              city: data.city || '',
+              state: data.state || '',
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao buscar dados do usuário:', error);
+        }
+      }
+    };
+    
+    fetchUserData();
+  }, [user?.cpf]);
 
   // Buscar planos de assinatura disponíveis
   const { data: plans, isLoading: plansLoading } = useQuery({
@@ -205,13 +248,24 @@ const PatientOnboardingPage: React.FC = () => {
       }
       
       // Atualizar dados do usuário
+      console.log('Salvando dados do perfil:', {
+        personalData,
+        addressData
+      });
+      
       const profileResponse = await apiRequest("PUT", "/api/users/profile", {
         phone: personalData.phone,
         birthDate: personalData.birthDate,
         cpf: personalData.cpf,
         gender: personalData.gender,
-        ...addressData,
-        address: addressData.street,
+        zipcode: addressData.zipcode,
+        street: addressData.street,
+        number: addressData.number,
+        complement: addressData.complement,
+        neighborhood: addressData.neighborhood,
+        city: addressData.city,
+        state: addressData.state,
+        address: addressData.street, // Campo legacy
       });
       
       if (!profileResponse.ok) {

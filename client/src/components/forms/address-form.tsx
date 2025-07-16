@@ -168,7 +168,9 @@ export function AddressForm({
     // Log detalhado dos dados que estão sendo enviados
     console.log("Enviando dados de endereço para o servidor:", formattedData);
     
-    onSubmit(formattedData);
+    if (onSubmit) {
+      onSubmit(formattedData);
+    }
   };
 
   const formFields = (
