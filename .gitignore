@@ -49,10 +49,10 @@ Thumbs.db
 # Cache
 .cache/
 
-# iOS build artifacts
-ios/App/App/public/assets/*.js
-ios/App/App/public/assets/*.css
-ios/App/App/public/index.html
+# iOS build artifacts (comentado para Xcode Cloud funcionar)
+# ios/App/App/public/assets/*.js
+# ios/App/App/public/assets/*.css
+# ios/App/App/public/index.html
 .next/
 
 # Server logs
