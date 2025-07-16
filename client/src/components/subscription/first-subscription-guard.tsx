@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUserSubscription } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import FirstSubscriptionPage from "@/pages/first-subscription";
+import PatientOnboarding from "@/pages/patient-onboarding";
 
 export default function FirstSubscriptionGuard() {
   const { user } = useAuth();
@@ -59,5 +59,5 @@ export default function FirstSubscriptionGuard() {
   }
 
   // Se pode acessar, renderizar a página
-  return <FirstSubscriptionPage />;
+  return <PatientOnboarding />;
 }
