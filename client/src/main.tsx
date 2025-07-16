@@ -3,6 +3,7 @@ import App from "./App";
 import "./index.css";
 import { registerServiceWorker, initPWAInstall } from "./pwa";
 import { debugStartup } from "./debug-startup";
+import { remoteLogger } from "./utils/remote-logger";
 
 // Debug para iOS
 const debugDiv = debugStartup();
