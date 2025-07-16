@@ -256,7 +256,7 @@ partnerRouter.post('/services', requireAuth, requirePartner, async (req: Authent
       return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
     }
 
-    const { name, description, category, regularPrice, discountPrice, duration, discountPercentage, isFeatured, isActive, serviceImage } = req.body;
+    const { name, description, category, regularPrice, discountPrice, duration, discountPercentage, isFeatured, isActive, serviceImage, isNational } = req.body;
 
     // Validações básicas
     if (!name || !description || !category) {
@@ -275,6 +275,7 @@ partnerRouter.post('/services', requireAuth, requirePartner, async (req: Authent
       isFeatured: isFeatured || false,
       isActive: isActive !== undefined ? isActive : true,
       serviceImage: serviceImage || null,
+      isNational: isNational || false,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -324,7 +325,7 @@ partnerRouter.put('/services/:id', requireAuth, requirePartner, async (req: Auth
       return res.status(403).json({ error: 'Você só pode editar seus próprios serviços' });
     }
 
-    const { name, description, category, regularPrice, discountPrice, duration, discountPercentage, isFeatured, isActive, serviceImage } = req.body;
+    const { name, description, category, regularPrice, discountPrice, duration, discountPercentage, isFeatured, isActive, serviceImage, isNational } = req.body;
 
     // Garantir que valores numéricos sejam convertidos corretamente
     const parsePrice = (value: any): number => {
@@ -347,6 +348,7 @@ partnerRouter.put('/services/:id', requireAuth, requirePartner, async (req: Auth
       isFeatured: isFeatured !== undefined ? isFeatured : existingService.isFeatured,
       isActive: isActive !== undefined ? isActive : existingService.isActive,
       serviceImage: serviceImage !== undefined ? serviceImage : existingService.serviceImage,
+      isNational: isNational !== undefined ? isNational : existingService.isNational,
       updatedAt: new Date()
     };
 
@@ -857,22 +859,34 @@ partnerRouter.get('/services/:serviceId/addresses', requireAuth, requirePartner,
  */
 partnerRouter.put('/services/:serviceId/addresses', requireAuth, requirePartner, async (req: AuthenticatedRequest, res: Response) => {
   try {
+    console.log('🔍 [PUT /services/:serviceId/addresses] Iniciando atualização de endereços');
     const userId = req.user!.id;
     const serviceId = parseInt(req.params.serviceId);
     const { addressIds } = req.body;
+    
+    console.log('📝 [PUT /services/:serviceId/addresses] Dados recebidos:', {
+      userId,
+      serviceId,
+      addressIds,
+      bodyType: typeof req.body,
+      body: req.body
+    });
 
     if (!Array.isArray(addressIds)) {
+      console.log('❌ [PUT /services/:serviceId/addresses] addressIds não é array:', addressIds);
       return res.status(400).json({ error: 'addressIds deve ser um array' });
     }
 
     const partner = await storage.getPartnerByUserId(userId);
     if (!partner) {
+      console.log('❌ [PUT /services/:serviceId/addresses] Parceiro não encontrado para userId:', userId);
       return res.status(404).json({ error: 'Perfil de parceiro não encontrado' });
     }
 
     // Verificar se o serviço pertence ao parceiro
     const service = await storage.getPartnerService(serviceId);
     if (!service || service.partnerId !== partner.id) {
+      console.log('❌ [PUT /services/:serviceId/addresses] Serviço não encontrado ou não pertence ao parceiro');
       return res.status(404).json({ error: 'Serviço não encontrado' });
     }
 
@@ -883,14 +897,19 @@ partnerRouter.put('/services/:serviceId/addresses', requireAuth, requirePartner,
       const invalidIds = addressIds.filter(id => !validAddressIds.includes(id));
       
       if (invalidIds.length > 0) {
+        console.log('❌ [PUT /services/:serviceId/addresses] Endereços inválidos:', invalidIds);
         return res.status(400).json({ error: 'Um ou mais endereços inválidos' });
       }
     }
 
+    console.log('✅ [PUT /services/:serviceId/addresses] Chamando updateServiceAddresses');
     await storage.updateServiceAddresses(serviceId, addressIds);
+    console.log('✅ [PUT /services/:serviceId/addresses] Endereços atualizados com sucesso');
+    
     res.json({ message: 'Endereços do serviço atualizados com sucesso' });
   } catch (error) {
-    console.error('Erro ao atualizar endereços do serviço:', error);
+    console.error('❌ [PUT /services/:serviceId/addresses] Erro ao atualizar endereços do serviço:', error);
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
