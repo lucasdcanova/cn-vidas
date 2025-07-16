@@ -143,6 +143,10 @@ const FirstSubscriptionPage: React.FC = () => {
             // Como a função getUserSubscription agora extrai o objeto diretamente,
             // vamos salvar o objeto de assinatura diretamente na cache
             queryClient.setQueryData(["/api/subscription/current"], data.subscription);
+            
+            // Também invalidar o cache do usuário para forçar atualização
+            await queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
+            await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
           }
           
           toast({

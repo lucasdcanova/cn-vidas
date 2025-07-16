@@ -74,15 +74,17 @@ const Dashboard: React.FC = () => {
       return;
     }
     
-    // Lógica simplificada: só redirecionar se não tem assinatura E o status não é ativo
-    if (!userSubscription && user.subscriptionStatus !== 'active') {
-      console.log("🆕 Dashboard - Novo usuário sem assinatura, redirecionando para first-subscription");
+    // Lógica simplificada: só redirecionar se não tem assinatura E não tem plano
+    if (!userSubscription && !user.subscriptionPlan) {
+      console.log("🆕 Dashboard - Novo usuário sem assinatura e sem plano, redirecionando para first-subscription");
       console.log("Status do usuário:", user.subscriptionStatus);
+      console.log("Plano do usuário:", user.subscriptionPlan);
       setLocation('/first-subscription');
     } else {
-      console.log("✅ Dashboard - Usuário tem assinatura ou status ativo");
+      console.log("✅ Dashboard - Usuário tem assinatura ou plano ativo");
       console.log("userSubscription:", userSubscription);
       console.log("user.subscriptionStatus:", user.subscriptionStatus);
+      console.log("user.subscriptionPlan:", user.subscriptionPlan);
       setIsFirstLogin(false);
     }
   }, [user, userSubscription, subscriptionLoading, isError, setLocation]);
