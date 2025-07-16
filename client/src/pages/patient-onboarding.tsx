@@ -67,10 +67,10 @@ const PatientOnboardingPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [personalData, setPersonalData] = useState({
-    phone: '',
-    birthDate: '',
-    cpf: '',
-    gender: ''
+    phone: user?.phone || '',
+    birthDate: user?.birthDate || '',
+    cpf: user?.cpf || '',
+    gender: user?.gender || ''
   });
   
   const [addressData, setAddressData] = useState({
@@ -171,7 +171,7 @@ const PatientOnboardingPage: React.FC = () => {
 
   // Função para validar dados pessoais
   const validatePersonalData = () => {
-    if (!personalData.phone || !personalData.birthDate || !personalData.cpf || !personalData.gender) {
+    if (!personalData.phone || !personalData.birthDate || !personalData.gender) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos.",
@@ -580,15 +580,6 @@ const PatientOnboardingPage: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="cpf">CPF</Label>
-                      <Input
-                        id="cpf"
-                        placeholder="000.000.000-00"
-                        value={personalData.cpf}
-                        onChange={(e) => setPersonalData({...personalData, cpf: e.target.value})}
-                      />
-                    </div>
                     
                     <div className="space-y-2">
                       <Label htmlFor="gender">Gênero</Label>
@@ -651,9 +642,9 @@ const PatientOnboardingPage: React.FC = () => {
                 <CardContent>
                   <AddressForm
                     defaultValues={addressData}
-                    onSubmit={(data) => {
+                    onChange={(data) => {
+                      console.log('Endereço atualizado:', data);
                       setAddressData(data);
-                      handleCompleteOnboarding();
                     }}
                     showSubmitButton={false}
                     standAlone={false}

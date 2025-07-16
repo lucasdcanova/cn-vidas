@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 const DAILY_API_KEY = process.env.DAILY_API_KEY;
 const DAILY_API_URL = 'https://api.daily.co/v1';
@@ -29,13 +29,7 @@ export async function startCloudRecording(params: StartRecordingParams): Promise
   try {
     console.log('☁️ [Daily Cloud Recording] Iniciando gravação na nuvem:', params.roomName);
     
-    const response = await fetch(`${DAILY_API_URL}/recordings`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${DAILY_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
+    const response = await axios.post(`${DAILY_API_URL}/recordings`, {
         room_name: params.roomName,
         layout: {
           preset: params.layout || 'default'
@@ -49,15 +43,14 @@ export async function startCloudRecording(params: StartRecordingParams): Promise
           audio_bitrate: 128, // 128kbps para boa qualidade de voz
           video_bitrate: 0, // Sem vídeo
         }
-      })
-    });
+      }, {
+        headers: {
+          'Authorization': `Bearer ${DAILY_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Daily API error: ${response.status} - ${error}`);
-    }
-
-    const data = await response.json();
+    const data = response.data;
     console.log('✅ [Daily Cloud Recording] Gravação iniciada:', data);
     
     return {
@@ -82,17 +75,11 @@ export async function stopCloudRecording(recordingId: string): Promise<void> {
   try {
     console.log('🛑 [Daily Cloud Recording] Parando gravação:', recordingId);
     
-    const response = await fetch(`${DAILY_API_URL}/recordings/${recordingId}/stop`, {
-      method: 'POST',
+    const response = await axios.post(`${DAILY_API_URL}/recordings/${recordingId}/stop`, {}, {
       headers: {
         'Authorization': `Bearer ${DAILY_API_KEY}`
       }
     });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Daily API error: ${response.status} - ${error}`);
-    }
 
     console.log('✅ [Daily Cloud Recording] Gravação parada');
     
@@ -107,18 +94,13 @@ export async function stopCloudRecording(recordingId: string): Promise<void> {
  */
 export async function getRecordingStatus(recordingId: string): Promise<any> {
   try {
-    const response = await fetch(`${DAILY_API_URL}/recordings/${recordingId}`, {
+    const response = await axios.get(`${DAILY_API_URL}/recordings/${recordingId}`, {
       headers: {
         'Authorization': `Bearer ${DAILY_API_KEY}`
       }
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Daily API error: ${response.status} - ${error}`);
-    }
-
-    const data = await response.json();
+    const data = response.data;
     return data;
     
   } catch (error) {
@@ -134,23 +116,16 @@ export async function getRecordingDownloadUrl(recordingId: string): Promise<stri
   try {
     console.log('📥 [Daily Cloud Recording] Obtendo URL de download:', recordingId);
     
-    const response = await fetch(`${DAILY_API_URL}/recordings/${recordingId}/access-link`, {
-      method: 'POST',
+    const response = await axios.post(`${DAILY_API_URL}/recordings/${recordingId}/access-link`, {
+      valid_for_secs: 3600 // URL válida por 1 hora
+    }, {
       headers: {
         'Authorization': `Bearer ${DAILY_API_KEY}`,
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        valid_for_secs: 3600 // URL válida por 1 hora
-      })
+      }
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Daily API error: ${response.status} - ${error}`);
-    }
-
-    const data = await response.json();
+    const data = response.data;
     console.log('✅ [Daily Cloud Recording] URL de download obtida');
     
     return data.download_link;
@@ -168,17 +143,11 @@ export async function deleteCloudRecording(recordingId: string): Promise<void> {
   try {
     console.log('🗑️ [Daily Cloud Recording] Deletando gravação:', recordingId);
     
-    const response = await fetch(`${DAILY_API_URL}/recordings/${recordingId}`, {
-      method: 'DELETE',
+    const response = await axios.delete(`${DAILY_API_URL}/recordings/${recordingId}`, {
       headers: {
         'Authorization': `Bearer ${DAILY_API_KEY}`
       }
     });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Daily API error: ${response.status} - ${error}`);
-    }
 
     console.log('✅ [Daily Cloud Recording] Gravação deletada');
     
