@@ -119,10 +119,9 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
             requestData = {};
             entries.forEach(([key, value]) => {
               if (value instanceof Blob) {
-                // Para o blob, enviar o base64 com o prefixo data:
-                const dataPrefix = `data:${blob.type || 'application/octet-stream'};base64,`;
-                requestData[key] = dataPrefix + base64Data;
-                requestData[`${key}MimeType`] = blob.type || 'application/octet-stream';
+                // Para o blob, enviar apenas o base64 puro (sem prefixo data:)
+                requestData[key] = base64Data;
+                requestData['mimeType'] = blob.type || 'image/jpeg';
               } else {
                 // Para outros valores, enviar como string
                 requestData[key] = value.toString();
