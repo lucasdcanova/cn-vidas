@@ -579,14 +579,23 @@ router.post('/profile/upload-image-base64', requireAuth, async (req, res) => {
   console.log('=== UPLOAD BASE64 DIRETO (iOS) ===');
   console.log('📱 Headers:', {
     'content-type': req.headers['content-type'],
+    'content-length': req.headers['content-length'],
     'authorization': req.headers.authorization ? 'PRESENTE' : 'AUSENTE',
     'x-auth-token': req.headers['x-auth-token'] ? 'PRESENTE' : 'AUSENTE'
   });
+  console.log('📱 Body existe?', !!req.body);
+  console.log('📱 Body type:', typeof req.body);
   console.log('📱 Body keys:', req.body ? Object.keys(req.body) : 'sem body');
+  console.log('📱 Body é objeto vazio?', req.body && Object.keys(req.body).length === 0);
   console.log('📱 User:', req.user ? `ID: ${req.user.id}, Role: ${req.user.role}` : 'NÃO AUTENTICADO');
   
+  // Se o body existir, mostrar conteúdo
+  if (req.body) {
+    console.log('📱 Body completo (primeiros 500 chars):', JSON.stringify(req.body).substring(0, 500));
+  }
+  
   try {
-    const { profileImage, mimeType = 'image/jpeg' } = req.body;
+    const { profileImage, mimeType = 'image/jpeg' } = req.body || {};
     
     if (!profileImage) {
       console.error('❌ Nenhuma imagem base64 foi enviada');
