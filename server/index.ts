@@ -46,7 +46,10 @@ import { APNsService } from "./services/apns-service";
   // Configurações básicas
   // Excluir rotas de upload e webhook do Stripe do parser JSON
   app.use((req, res, next) => {
-    if (req.path.includes('/doctor-profile-image') || 
+    // A rota base64 precisa de JSON parsing
+    if (req.path.includes('/upload-image-base64')) {
+      express.json({ limit: '50mb' })(req, res, next);
+    } else if (req.path.includes('/doctor-profile-image') || 
         req.path.includes('/profile/upload-image') ||
         req.path.includes('profile-image') ||
         req.path.includes('/api/webhooks/stripe')) {
