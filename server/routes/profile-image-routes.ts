@@ -27,6 +27,37 @@ const processBase64Upload = async (req: any, res: any, next: any) => {
   console.log('=== PROCESSBASE64UPLOAD MIDDLEWARE INICIADO ===');
   console.log('🔍 Content-Type:', req.headers['content-type']);
   console.log('🔍 Body existe?', !!req.body);
+  console.log('🔍 Body type:', typeof req.body);
+  console.log('🔍 Body é string?', typeof req.body === 'string');
+  
+  // Se o body está vazio mas é JSON, precisamos fazer parse manual
+  if (!req.body && req.headers['content-type']?.includes('application/json')) {
+    console.log('📝 Body vazio, tentando parse manual...');
+    
+    let rawBody = '';
+    req.on('data', (chunk: any) => {
+      rawBody += chunk.toString();
+    });
+    
+    await new Promise((resolve, reject) => {
+      req.on('end', () => {
+        try {
+          if (rawBody) {
+            req.body = JSON.parse(rawBody);
+            console.log('✅ Parse manual bem-sucedido');
+            console.log('🔍 Body keys após parse:', Object.keys(req.body));
+          }
+          resolve(true);
+        } catch (error) {
+          console.error('❌ Erro no parse manual:', error);
+          reject(error);
+        }
+      });
+      
+      req.on('error', reject);
+    });
+  }
+  
   console.log('🔍 Body keys:', req.body ? Object.keys(req.body) : 'sem body');
   
   if (req.body) {
@@ -104,7 +135,7 @@ const processBase64Upload = async (req: any, res: any, next: any) => {
 };
 
 // Upload de imagem de perfil (paciente)
-router.post('/profile/upload-image', requireAuth, processBase64Upload, async (req, res) => {
+router.post('/profile/upload-image', processBase64Upload, requireAuth, async (req, res) => {
   console.log('=== UPLOAD DE IMAGEM S3 INICIADO ===');
   console.log('🔍 Rota chamada:', req.path);
   console.log('🔍 Método:', req.method);
