@@ -1002,6 +1002,8 @@ select {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     margin-top: 0 !important;
+    /* Adicionar padding-top para status bar no iPad */
+    padding-top: env(safe-area-inset-top, 20px);
   }
   
   /* Forçar remoção do background branco no header iPad */
@@ -1034,10 +1036,7 @@ select {
     }
   }
   
-  /* Ajuste do header no iPad - remover margin-top duplicado */
-  .header-glassmorphism-ipad {
-    margin-top: 0; /* Removido para evitar espaço duplicado */
-  }
+  /* Ajuste do header no iPad - margin-top já foi removido na definição principal */
   
   /* Remover margin-top do header quando não for sticky */
   .header-glassmorphism-ipad:not(.sticky) {
