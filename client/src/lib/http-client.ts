@@ -146,6 +146,14 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
         }
       }
       
+      console.log('[Native HTTP] Enviando requisição com:', {
+        url: fullUrl,
+        method,
+        headers: Object.keys(authHeaders),
+        dataKeys: requestData ? Object.keys(requestData) : 'sem data',
+        dataValues: requestData ? JSON.stringify(requestData).substring(0, 200) : 'sem data'
+      });
+      
       const response = await Http.request({
         url: fullUrl,
         method,
