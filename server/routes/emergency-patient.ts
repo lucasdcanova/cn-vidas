@@ -26,8 +26,11 @@ emergencyPatientRouter.post('/start', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    // Verificar se tem consultas de emergência disponíveis
-    if (user.emergencyConsultationsLeft <= 0) {
+    // Verificar se tem consultas de emergência disponíveis (exceto para planos ilimitados)
+    const unlimitedPlans = ['ultra', 'ultra_family']; // Planos com consultas ilimitadas
+    const hasUnlimitedConsultations = unlimitedPlans.includes(user.subscriptionPlan || '');
+    
+    if (!hasUnlimitedConsultations && user.emergencyConsultationsLeft <= 0) {
       return res.status(400).json({
         success: false,
         error: 'Você não possui consultas de emergência disponíveis',
@@ -36,10 +39,9 @@ emergencyPatientRouter.post('/start', async (req: Request, res: Response) => {
     }
 
     // Verificar se o usuário tem plano ativo
+    const validPlans = ['basic', 'premium', 'ultra', 'family_basic', 'family_plus', 'ultra_family'];
     if (user.subscriptionStatus !== 'active' || 
-        (user.subscriptionPlan !== 'basic' && 
-         user.subscriptionPlan !== 'premium' && 
-         user.subscriptionPlan !== 'ultra')) {
+        !validPlans.includes(user.subscriptionPlan || '')) {
       return res.status(400).json({
         success: false,
         error: 'Plano inativo ou inválido para consultas de emergência',
@@ -48,8 +50,8 @@ emergencyPatientRouter.post('/start', async (req: Request, res: Response) => {
       });
     }
 
-    // Verificar se ainda tem consultas disponíveis
-    if (user.emergencyConsultationsLeft <= 0) {
+    // Verificar se ainda tem consultas disponíveis (para planos não ilimitados)
+    if (!hasUnlimitedConsultations && user.emergencyConsultationsLeft <= 0) {
       return res.status(400).json({
         success: false,
         error: 'Limite de consultas de emergência esgotado para este mês',
@@ -99,12 +101,16 @@ emergencyPatientRouter.post('/start', async (req: Request, res: Response) => {
     
     const appointment = await storage.createAppointment(appointmentData);
     
-    // Decrementar o número de consultas de emergência disponíveis
-    await storage.updateUser(req.user!.id, {
-      emergencyConsultationsLeft: user.emergencyConsultationsLeft - 1
-    });
-    
-    console.log(`Consultas de emergência restantes para usuário ${req.user!.id}: ${user.emergencyConsultationsLeft - 1}`);
+    // Decrementar o número de consultas de emergência disponíveis (apenas para planos não ilimitados)
+    if (!hasUnlimitedConsultations) {
+      await storage.updateUser(req.user!.id, {
+        emergencyConsultationsLeft: user.emergencyConsultationsLeft - 1
+      });
+      
+      console.log(`Consultas de emergência restantes para usuário ${req.user!.id}: ${user.emergencyConsultationsLeft - 1}`);
+    } else {
+      console.log(`Usuário ${req.user!.id} tem plano ilimitado (${user.subscriptionPlan}) - não decrementando consultas`);
+    }
     
     // Enviar notificação para médicos disponíveis
     const notificationsSent = await NotificationService.createEmergencyNotificationForDoctors(
