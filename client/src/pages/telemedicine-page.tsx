@@ -303,7 +303,7 @@ export default function TelemedicinePage() {
   
   // Verificar se o usuário pode iniciar consulta de emergência
   const canUseEmergencyConsultation = () => {
-    if (user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan?.includes('premium')) return true;
+    if (user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan === 'ultra_family' || user?.subscriptionPlan?.includes('premium')) return true;
     if (user?.subscriptionPlan?.includes('basic') && user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0) return true;
     return false;
   };
@@ -311,16 +311,16 @@ export default function TelemedicinePage() {
   // Função para obter texto do plano e preço da consulta para emergências
   const getEmergencyConsultationPriceInfo = (doctor: Doctor) => {
     // Planos Ultra e Premium têm consultas de emergência inclusas
-    if (user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan?.includes('premium')) {
-      const planName = user.subscriptionPlan.includes('ultra') 
-        ? (user.subscriptionPlan.includes('family') ? 'Ultra Família' : 'Ultra')
+    if (user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan === 'ultra_family' || user?.subscriptionPlan?.includes('premium')) {
+      const planName = user.subscriptionPlan.includes('ultra') || user.subscriptionPlan === 'ultra_family'
+        ? (user.subscriptionPlan.includes('family') || user.subscriptionPlan === 'ultra_family' ? 'Ultra Família' : 'Ultra')
         : (user.subscriptionPlan.includes('family') ? 'Premium Família' : 'Premium');
       
       return {
         text: `Incluso no plano ${planName}`,
-        color: user.subscriptionPlan.includes('ultra') ? "text-purple-600" : "text-blue-600",
+        color: user.subscriptionPlan.includes('ultra') || user.subscriptionPlan === 'ultra_family' ? "text-purple-600" : "text-blue-600",
         badge: <Badge variant="outline" className={
-          user.subscriptionPlan.includes('ultra')
+          user.subscriptionPlan.includes('ultra') || user.subscriptionPlan === 'ultra_family'
             ? "bg-purple-50 text-purple-700 border-purple-200"
             : "bg-blue-50 text-blue-700 border-blue-200"
         }>Gratuito</Badge>
@@ -968,17 +968,17 @@ export default function TelemedicinePage() {
                       </p>
                       <p>
                         Consultas de emergência disponíveis: <span className="font-semibold text-green-600">
-                          {user?.emergencyConsultationsLeft === null 
+                          {(user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan === 'ultra_family' || user?.subscriptionPlan?.includes('premium'))
                             ? 'Ilimitadas'
                             : (user?.emergencyConsultationsLeft !== undefined 
                                 ? user.emergencyConsultationsLeft 
                                 : 0)}
                         </span>
                       </p>
-                      <p className={(user?.emergencyConsultationsLeft === null || (user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0))
+                      <p className={(user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan === 'ultra_family' || user?.subscriptionPlan?.includes('premium') || (user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0))
                         ? "text-green-600 font-medium" 
                         : "text-amber-600 font-medium"}>
-                        {(user?.emergencyConsultationsLeft === null || (user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0))
+                        {(user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan === 'ultra_family' || user?.subscriptionPlan?.includes('premium') || (user?.emergencyConsultationsLeft && user.emergencyConsultationsLeft > 0))
                           ? '✓ Esta consulta será gratuita (inclusa no plano)' 
                           : '⚠️ Consulta será cobrada separadamente'}
                       </p>

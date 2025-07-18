@@ -460,8 +460,18 @@ emergencyV2Router.post('/end/:appointmentId', authenticateToken, async (req: Req
     let actualDuration = duration || appointment.duration;
     let shouldDecrementConsultation = false;
     
-    // Por enquanto, sempre decrementar se a consulta foi completada
-    if (appointment.isEmergency && appointment.status === 'in_progress') {
+    // Buscar dados do paciente
+    const patient = await storage.getUser(appointment.userId);
+    if (!patient) {
+      return res.status(404).json({ error: 'Paciente não encontrado' });
+    }
+    
+    // Verificar se o plano tem consultas ilimitadas
+    const unlimitedPlans = ['ultra', 'ultra_family'];
+    const hasUnlimitedConsultations = unlimitedPlans.includes(patient.subscriptionPlan || '');
+    
+    // Só decrementar se a consulta foi completada e o plano não é ilimitado
+    if (appointment.isEmergency && appointment.status === 'in_progress' && !hasUnlimitedConsultations) {
       shouldDecrementConsultation = true;
     }
 
@@ -474,13 +484,14 @@ emergencyV2Router.post('/end/:appointmentId', authenticateToken, async (req: Req
 
     // Decrementar consultas de emergência disponíveis se necessário
     if (shouldDecrementConsultation && appointment.isEmergency) {
-      const patient = await storage.getUser(appointment.userId);
-      if (patient && patient.emergencyConsultationsLeft > 0) {
+      if (patient.emergencyConsultationsLeft > 0) {
         await storage.updateUser(appointment.userId, {
           emergencyConsultationsLeft: patient.emergencyConsultationsLeft - 1
         });
         console.log(`Consulta de emergência decrementada para usuário ${appointment.userId}. Restantes: ${patient.emergencyConsultationsLeft - 1}`);
       }
+    } else if (hasUnlimitedConsultations) {
+      console.log(`Usuário ${appointment.userId} tem plano ilimitado (${patient.subscriptionPlan}) - não decrementando consultas`);
     }
 
     // Limpar notificações de todos os médicos se ainda existirem
@@ -621,15 +632,34 @@ emergencyV2Router.post('/check-time/:appointmentId', authenticateToken, async (r
       });
     }
 
+    // Buscar dados do paciente
+    const patient = await storage.getUser(appointment.userId);
+    if (!patient) {
+      return res.status(404).json({ error: 'Paciente não encontrado' });
+    }
+
+    // Verificar se o plano tem consultas ilimitadas
+    const unlimitedPlans = ['ultra', 'ultra_family'];
+    const hasUnlimitedConsultations = unlimitedPlans.includes(patient.subscriptionPlan || '');
+    
+    // Se tem consultas ilimitadas, não cobrar
+    if (hasUnlimitedConsultations) {
+      console.log(`Usuário ${appointment.userId} tem plano ilimitado (${patient.subscriptionPlan}) - não cobrando consulta`);
+      return res.json({
+        charged: false,
+        unlimited: true,
+        message: 'Seu plano inclui consultas de emergência ilimitadas'
+      });
+    }
+
     // Calcular tempo decorrido baseado na criação da consulta
     const startTime = new Date(appointment.createdAt).getTime();
     const currentTime = new Date().getTime();
     const elapsedMinutes = Math.floor((currentTime - startTime) / (1000 * 60));
 
-    // Se passou 5 minutos ou mais, decrementar
+    // Se passou 5 minutos ou mais, decrementar (apenas para planos não ilimitados)
     if (elapsedMinutes >= 5) {
-      const patient = await storage.getUser(appointment.userId);
-      if (patient && patient.emergencyConsultationsLeft > 0) {
+      if (patient.emergencyConsultationsLeft > 0) {
         await storage.updateUser(appointment.userId, {
           emergencyConsultationsLeft: patient.emergencyConsultationsLeft - 1
         });
