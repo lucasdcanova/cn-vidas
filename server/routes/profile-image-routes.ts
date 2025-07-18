@@ -24,9 +24,22 @@ const upload = multer({
 
 // Middleware para processar base64 quando vindo do iOS
 const processBase64Upload = async (req: any, res: any, next: any) => {
-  console.log('=== VERIFICANDO TIPO DE UPLOAD ===');
-  console.log('Content-Type:', req.headers['content-type']);
-  console.log('Body keys:', req.body ? Object.keys(req.body) : 'sem body');
+  console.log('=== PROCESSBASE64UPLOAD MIDDLEWARE INICIADO ===');
+  console.log('🔍 Content-Type:', req.headers['content-type']);
+  console.log('🔍 Body existe?', !!req.body);
+  console.log('🔍 Body keys:', req.body ? Object.keys(req.body) : 'sem body');
+  
+  if (req.body) {
+    console.log('📊 Body detalhado:');
+    Object.keys(req.body).forEach(key => {
+      const value = req.body[key];
+      if (key === 'profileImage' || key === 'mimeType') {
+        console.log(`  - ${key}: ${typeof value}, length: ${value?.length || 0}, primeiros 100 chars: ${value?.substring(0, 100)}`);
+      } else {
+        console.log(`  - ${key}: ${value}`);
+      }
+    });
+  }
   
   // Se é JSON com base64 (vindo do iOS)
   if (req.headers['content-type']?.includes('application/json') && req.body?.profileImage) {
@@ -34,9 +47,31 @@ const processBase64Upload = async (req: any, res: any, next: any) => {
       console.log('📱 Upload base64 detectado (iOS)');
       const { profileImage: base64Data, mimeType = 'image/jpeg' } = req.body;
       
+      console.log('🖼️ Base64 data info:');
+      console.log('  - Tipo:', typeof base64Data);
+      console.log('  - Length:', base64Data?.length || 0);
+      console.log('  - Primeiros 50 chars:', base64Data?.substring(0, 50));
+      console.log('  - Últimos 50 chars:', base64Data?.substring(base64Data.length - 50));
+      console.log('  - mimeType recebido:', mimeType);
+      
+      // Verificar se o base64 está vazio
+      if (!base64Data || base64Data.length === 0) {
+        console.error('❌ Base64 data está vazio!');
+        return res.status(400).json({ error: 'Dados da imagem estão vazios' });
+      }
+      
       // Converter base64 para Buffer
       const buffer = Buffer.from(base64Data, 'base64');
-      console.log('Buffer criado, tamanho:', buffer.length);
+      console.log('✅ Buffer criado com sucesso:');
+      console.log('  - Tamanho do buffer:', buffer.length, 'bytes');
+      console.log('  - Buffer é válido?', Buffer.isBuffer(buffer));
+      console.log('  - Primeiros 10 bytes:', buffer.slice(0, 10).toString('hex'));
+      
+      // Verificar se o buffer está vazio
+      if (buffer.length === 0) {
+        console.error('❌ Buffer está vazio após conversão!');
+        return res.status(400).json({ error: 'Erro na conversão da imagem' });
+      }
       
       // Simular req.file para compatibilidade
       req.file = {
@@ -47,12 +82,22 @@ const processBase64Upload = async (req: any, res: any, next: any) => {
         fieldname: 'profileImage'
       };
       
+      console.log('📦 req.file criado:', {
+        fieldname: req.file.fieldname,
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        bufferLength: req.file.buffer.length
+      });
+      
       next();
     } catch (error) {
       console.error('❌ Erro ao processar base64:', error);
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
       return res.status(400).json({ error: 'Erro ao processar imagem base64' });
     }
   } else {
+    console.log('📤 Upload normal via FormData detectado');
     // Upload normal via FormData
     upload.single('profileImage')(req, res, next);
   }
@@ -61,6 +106,8 @@ const processBase64Upload = async (req: any, res: any, next: any) => {
 // Upload de imagem de perfil (paciente)
 router.post('/profile/upload-image', requireAuth, processBase64Upload, async (req, res) => {
   console.log('=== UPLOAD DE IMAGEM S3 INICIADO ===');
+  console.log('🔍 Rota chamada:', req.path);
+  console.log('🔍 Método:', req.method);
   console.log('Headers recebidos:', {
     'content-type': req.headers['content-type'],
     'authorization': req.headers.authorization ? 'PRESENTE' : 'AUSENTE',
@@ -68,16 +115,38 @@ router.post('/profile/upload-image', requireAuth, processBase64Upload, async (re
     'x-session-id': req.headers['x-session-id']
   });
   console.log('User autenticado:', req.user ? `ID: ${req.user.id}, Role: ${req.user.role}` : 'NÃO AUTENTICADO');
-  console.log('File recebido:', req.file ? {
-    fieldname: req.file.fieldname,
-    originalname: req.file.originalname,
-    mimetype: req.file.mimetype,
-    size: req.file.size
-  } : 'NENHUM ARQUIVO');
+  
+  console.log('🔍 Estado após processBase64Upload:');
+  console.log('  - req.file existe?', !!req.file);
+  console.log('  - req.body existe?', !!req.body);
+  
+  if (req.file) {
+    console.log('📦 File recebido detalhado:', {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      encoding: req.file.encoding || 'não definido',
+      bufferLength: req.file.buffer ? req.file.buffer.length : 'sem buffer',
+      hasBuffer: !!req.file.buffer
+    });
+    
+    if (req.file.buffer) {
+      console.log('🔍 Buffer details:');
+      console.log('  - É Buffer?', Buffer.isBuffer(req.file.buffer));
+      console.log('  - Tamanho:', req.file.buffer.length);
+      console.log('  - Primeiros 20 bytes (hex):', req.file.buffer.slice(0, 20).toString('hex'));
+      console.log('  - Assinatura JPEG?', req.file.buffer.slice(0, 3).toString('hex') === 'ffd8ff');
+      console.log('  - Assinatura PNG?', req.file.buffer.slice(0, 8).toString('hex') === '89504e470d0a1a0a');
+    }
+  } else {
+    console.log('❌ NENHUM ARQUIVO RECEBIDO APÓS processBase64Upload');
+    console.log('🔍 Body atual:', req.body ? Object.keys(req.body) : 'sem body');
+  }
 
   try {
     if (!req.file) {
-      console.error('❌ Nenhum arquivo foi enviado');
+      console.error('❌ Nenhum arquivo foi enviado - retornando erro 400');
       return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
     }
 
