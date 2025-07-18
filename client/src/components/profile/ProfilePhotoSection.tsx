@@ -85,23 +85,56 @@ export default function ProfilePhotoSection({
     console.log('[ProfilePhotoSection] Is native platform:', Capacitor.isNativePlatform());
 
     try {
-      const formData = new FormData();
+      let response: Response;
       
-      // Criar um novo blob com tipo explícito se necessário
-      const imageBlob = croppedImageBlob.type ? croppedImageBlob : new Blob([croppedImageBlob], { type: 'image/jpeg' });
-      formData.append('profileImage', imageBlob, 'profile.jpg');
+      // Se for iOS/Android, usar a nova rota base64
+      if (Capacitor.isNativePlatform()) {
+        console.log('[ProfilePhotoSection] Usando rota base64 para iOS/Android');
+        
+        // Converter blob para base64
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => {
+            const base64 = reader.result as string;
+            // Remover o prefixo data:image/jpeg;base64,
+            const base64Data = base64.split(',')[1] || base64;
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(croppedImageBlob);
+        
+        const base64Data = await base64Promise;
+        console.log('[ProfilePhotoSection] Base64 length:', base64Data.length);
+        
+        // Usar a nova rota base64
+        const endpoint = '/api/profile/upload-image-base64';
+        console.log('[ProfilePhotoSection] Endpoint base64:', endpoint);
+        
+        response = await apiRequest('POST', endpoint, {
+          profileImage: base64Data,
+          mimeType: croppedImageBlob.type || 'image/jpeg'
+        });
+      } else {
+        // Web - usar FormData normal
+        const formData = new FormData();
+        
+        // Criar um novo blob com tipo explícito se necessário
+        const imageBlob = croppedImageBlob.type ? croppedImageBlob : new Blob([croppedImageBlob], { type: 'image/jpeg' });
+        formData.append('profileImage', imageBlob, 'profile.jpg');
 
-      let endpoint = '/api/profile/upload-image';
-      if (userType === 'doctor') {
-        endpoint = '/api/doctor-profile-image';
-      } else if (userType === 'partner') {
-        endpoint = '/api/partner-profile-image';
+        let endpoint = '/api/profile/upload-image';
+        if (userType === 'doctor') {
+          endpoint = '/api/doctor-profile-image';
+        } else if (userType === 'partner') {
+          endpoint = '/api/partner-profile-image';
+        }
+
+        console.log('[ProfilePhotoSection] Endpoint:', endpoint);
+        console.log('[ProfilePhotoSection] FormData criado, iniciando upload...');
+
+        response = await apiRequest('POST', endpoint, formData);
       }
-
-      console.log('[ProfilePhotoSection] Endpoint:', endpoint);
-      console.log('[ProfilePhotoSection] FormData criado, iniciando upload...');
-
-      const response = await apiRequest('POST', endpoint, formData);
       
       console.log('[ProfilePhotoSection] Response status:', response.status);
       console.log('[ProfilePhotoSection] Response ok:', response.ok);

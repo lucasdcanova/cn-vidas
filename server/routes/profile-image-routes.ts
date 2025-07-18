@@ -574,4 +574,93 @@ router.get('/profile/export-my-data', requireAuth, async (req, res) => {
   }
 });
 
+// Rota específica para upload base64 (iOS/Capacitor) - NOVA IMPLEMENTAÇÃO
+router.post('/profile/upload-image-base64', requireAuth, async (req, res) => {
+  console.log('=== UPLOAD BASE64 DIRETO (iOS) ===');
+  console.log('📱 Headers:', {
+    'content-type': req.headers['content-type'],
+    'authorization': req.headers.authorization ? 'PRESENTE' : 'AUSENTE',
+    'x-auth-token': req.headers['x-auth-token'] ? 'PRESENTE' : 'AUSENTE'
+  });
+  console.log('📱 Body keys:', req.body ? Object.keys(req.body) : 'sem body');
+  console.log('📱 User:', req.user ? `ID: ${req.user.id}, Role: ${req.user.role}` : 'NÃO AUTENTICADO');
+  
+  try {
+    const { profileImage, mimeType = 'image/jpeg' } = req.body;
+    
+    if (!profileImage) {
+      console.error('❌ Nenhuma imagem base64 foi enviada');
+      return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
+    }
+    
+    console.log('🖼️ Dados da imagem:');
+    console.log('  - Tamanho base64:', profileImage.length);
+    console.log('  - MimeType:', mimeType);
+    console.log('  - Primeiros 50 chars:', profileImage.substring(0, 50));
+    
+    // Converter base64 para Buffer
+    const buffer = Buffer.from(profileImage, 'base64');
+    console.log('✅ Buffer criado, tamanho:', buffer.length, 'bytes');
+    
+    if (buffer.length === 0) {
+      console.error('❌ Buffer vazio após conversão');
+      return res.status(400).json({ error: 'Imagem inválida' });
+    }
+    
+    const userId = req.user!.id;
+    
+    // Fazer upload para S3
+    const { url, key } = await SecureStorageService.uploadSecure(
+      buffer,
+      {
+        userId,
+        fileType: 'profile',
+        fileName: 'profile.jpg',
+        contentType: mimeType,
+        metadata: {
+          uploadSource: 'ios_base64_upload',
+          userAgent: req.headers['user-agent'] || 'unknown'
+        }
+      },
+      {
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      }
+    );
+    
+    // Salvar URL no banco
+    await storage.updateUser(userId, { profileImage: url });
+    
+    // Registrar arquivo
+    await storage.createSecureFile({
+      userId,
+      fileKey: key,
+      fileType: 'profile',
+      originalName: 'profile.jpg',
+      contentType: mimeType,
+      sizeBytes: buffer.length,
+      bucketName: 'cnvidas-profile-images',
+      storageClass: 'STANDARD_IA',
+      encryptionType: 'AES256',
+      isEncrypted: false,
+      lgpdConsent: true,
+      consentDate: new Date()
+    });
+    
+    console.log(`✅ Upload base64 concluído. URL: ${url}`);
+    res.json({ 
+      success: true, 
+      imageUrl: url,
+      message: 'Imagem de perfil atualizada com sucesso'
+    });
+    
+  } catch (error) {
+    console.error('❌ Erro no upload base64:', error);
+    res.status(500).json({ 
+      error: 'Erro ao fazer upload da imagem',
+      details: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
+  }
+});
+
 export default router;
