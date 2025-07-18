@@ -21,9 +21,12 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
       'authorization': req.headers.authorization ? 'PRESENTE' : 'AUSENTE',
       'x-request-source': req.headers['x-request-source'],
       'x-platform': req.headers['x-platform'],
-      'x-session-id': req.headers['x-session-id']
+      'x-session-id': req.headers['x-session-id'],
+      'content-type': req.headers['content-type']
     });
     console.log('🔐 requireAuth - Cookies:', req.cookies ? Object.keys(req.cookies) : 'NENHUM');
+    console.log('🔐 requireAuth - Body:', req.body ? Object.keys(req.body) : 'SEM BODY');
+    console.log('🔐 requireAuth - File:', req.file ? 'ARQUIVO PRESENTE' : 'SEM ARQUIVO');
   }
   
   if (!authReq.user) {
