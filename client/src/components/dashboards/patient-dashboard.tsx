@@ -228,7 +228,7 @@ export const PatientDashboard: React.FC = () => {
           footer={
             user?.subscriptionPlan?.includes('basic') ? 
               `${user?.emergencyConsultationsLeft || 0} consultas de emergência restantes` : 
-              user?.subscriptionPlan?.includes('premium') || user?.subscriptionPlan?.includes('ultra') ? 
+              user?.subscriptionPlan?.includes('premium') || user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan === 'ultra_family' ? 
                 "Consultas de emergência ilimitadas" : 
                 undefined
           }
@@ -245,7 +245,7 @@ export const PatientDashboard: React.FC = () => {
           iconColor="text-white"
           title="Telemedicina"
           subtitle="Consultas por mês:"
-          value={user?.subscriptionPlan?.includes('premium') || user?.subscriptionPlan?.includes('ultra') ? 'Ilimitadas' :
+          value={user?.subscriptionPlan?.includes('premium') || user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan === 'ultra_family' ? 'Ilimitadas' :
                  user?.subscriptionPlan?.includes('basic') ? `${user?.emergencyConsultationsLeft || 0}/2 disponíveis` :
                  'Não disponível'}
           status={user?.subscriptionPlan?.includes('basic') || user?.subscriptionPlan?.includes('premium') || user?.subscriptionPlan?.includes('ultra') ? {
@@ -254,7 +254,7 @@ export const PatientDashboard: React.FC = () => {
           } : undefined}
           footer={user?.subscriptionPlan?.includes('basic') ? 
             `Seu plano ${getPlanName(user?.subscriptionPlan || '')} inclui 2 consultas de emergência/mês` : 
-            user?.subscriptionPlan?.includes('premium') || user?.subscriptionPlan?.includes('ultra') ? 
+            user?.subscriptionPlan?.includes('premium') || user?.subscriptionPlan?.includes('ultra') || user?.subscriptionPlan === 'ultra_family' ? 
             `Seu plano ${getPlanName(user?.subscriptionPlan || '')} inclui consultas de emergência ilimitadas` : 
             "Faça upgrade para ter acesso a consultas de emergência"}
           linkText="Acessar telemedicina"
