@@ -389,6 +389,17 @@ const estadosBrasileiros = [
 ];
 
 
+// Lazy load do Stripe quando necessário
+const loadStripe = () => {
+  if (typeof window !== 'undefined' && !(window as any).Stripe) {
+    const script = document.createElement('script');
+    script.src = 'https://js.stripe.com/v3/';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  }
+};
+
 const AuthPage: React.FC = () => {
   const { user, loginMutation, registerMutation } = useAuth();
   const { toast } = useToast();
