@@ -23,6 +23,25 @@ export default defineConfig({
     outDir: path.resolve(__dirname, "dist/client"),
     emptyOutDir: true,
     copyPublicDir: true,
+    // Otimizações de build
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-toast', '@radix-ui/react-tabs'],
+        }
+      }
+    },
+    // Otimização de assets
+    assetsInlineLimit: 4096, // Inline assets menores que 4kb
+    chunkSizeWarningLimit: 1000, // Aviso para chunks maiores que 1MB
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
   },
   publicDir: path.resolve(__dirname, "public"),
   server: {
