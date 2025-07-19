@@ -2179,27 +2179,6 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getSecureFileByUrl(url: string): Promise<any> {
-    console.log('Getting secure file by URL:', url);
-    
-    try {
-      // Extrair a chave do arquivo da URL
-      const urlParts = url.split('/');
-      const fileKey = urlParts.slice(-3).join('/'); // Pegar os últimos 3 segmentos
-      
-      const result = await this.db.query(`
-        SELECT * FROM secure_files 
-        WHERE file_key LIKE $1 
-        AND deleted_at IS NULL
-        LIMIT 1
-      `, [`%${fileKey}%`]);
-      
-      return result.rows[0] || null;
-    } catch (error) {
-      console.error('Erro ao buscar secure file:', error);
-      return null;
-    }
-  }
 
   async createSecureFile(fileData: {
     userId: number;
@@ -2360,14 +2339,14 @@ export class DatabaseStorage implements IStorage {
         db.select({
           total: count(),
           isEmergency: appointments.isEmergency,
-          date: appointments.scheduledAt
+          date: appointments.date
         })
         .from(appointments)
         .innerJoin(partnerCollaborators, eq(appointments.userId, partnerCollaborators.userId))
         .where(and(
           eq(partnerCollaborators.partnerId, partnerId),
-          gte(appointments.scheduledAt, startDate),
-          lte(appointments.scheduledAt, endDate),
+          gte(appointments.date, startDate),
+          lte(appointments.date, endDate),
           ne(appointments.status, 'cancelled')
         ))
       );
@@ -2388,8 +2367,8 @@ export class DatabaseStorage implements IStorage {
         .innerJoin(partnerCollaborators, eq(appointments.userId, partnerCollaborators.userId))
         .where(and(
           eq(partnerCollaborators.partnerId, partnerId),
-          gte(appointments.scheduledAt, startDate),
-          lte(appointments.scheduledAt, endDate),
+          gte(appointments.date, startDate),
+          lte(appointments.date, endDate),
           ne(appointments.status, 'cancelled'),
           sql`rating IS NOT NULL`
         ))
@@ -2451,8 +2430,8 @@ export class DatabaseStorage implements IStorage {
         .where(and(
           eq(partnerCollaborators.partnerId, partnerId),
           eq(partnerCollaborators.status, 'active'),
-          gte(appointments.scheduledAt, startDate),
-          lte(appointments.scheduledAt, endDate)
+          gte(appointments.date, startDate),
+          lte(appointments.date, endDate)
         ))
         .groupBy(partnerCollaborators.userId)
       );
