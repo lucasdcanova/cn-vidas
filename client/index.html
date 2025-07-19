@@ -59,10 +59,6 @@
       fbq('init', '233372230013001');
       fbq('track', 'PageView');
     </script>
-    <noscript>
-      <img height="1" width="1" style="display:none"
-           src="https://www.facebook.com/tr?id=233372230013001&ev=PageView&noscript=1"/>
-    </noscript>
     <!-- End Meta Pixel Code -->
     
     <!-- Preload das fontes críticas -->
@@ -130,6 +126,11 @@
     <!-- <script src="/src/error-handler.js" type="module"></script> -->
   </head>
   <body>
+    <!-- Meta Pixel noscript fallback -->
+    <noscript>
+      <img height="1" width="1" style="display:none"
+           src="https://www.facebook.com/tr?id=233372230013001&ev=PageView&noscript=1"/>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

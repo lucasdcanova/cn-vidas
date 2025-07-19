@@ -2153,33 +2153,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Secure file storage methods
-  async createSecureFile(file: any): Promise<any> {
-    console.log('Creating secure file:', file);
-    
-    try {
-      const result = await this.db.query(`
-        INSERT INTO secure_files (
-          user_id, file_key, file_type, original_name, content_type,
-          size_bytes, bucket_name, storage_class, encryption_type,
-          is_encrypted, lgpd_consent, consent_date, metadata
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-        RETURNING *
-      `, [
-        file.userId, file.fileKey, file.fileType, file.originalName,
-        file.contentType, file.sizeBytes, file.bucketName, file.storageClass,
-        file.encryptionType, file.isEncrypted || false, file.lgpdConsent || false,
-        file.consentDate, JSON.stringify(file.metadata || {})
-      ]);
-      
-      return result.rows[0];
-    } catch (error) {
-      console.error('Erro ao criar secure file:', error);
-      // Por enquanto retornar mock para não quebrar o sistema
-      return { id: 1, ...file };
-    }
-  }
-
-
   async createSecureFile(fileData: {
     userId: number;
     fileKey: string;

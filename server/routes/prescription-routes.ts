@@ -40,35 +40,32 @@ router.get('/appointment/:appointmentId', authenticateToken, async (req: Request
       });
     }
     
-    // Buscar informações da consulta
-    const [appointment] = await db.select({
-      appointment: appointments,
-      doctor: doctors,
-      patient: users
-    })
-    .from(appointments)
-    .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
-    .leftJoin(users, eq(appointments.userId, users.id))
-    .where(eq(appointments.id, appointmentId))
-    .limit(1);
+    // Buscar informações da consulta  
+    const appointmentData = await storage.getAppointmentById(appointmentId);
     
-    if (!appointment) {
+    if (!appointmentData) {
       return res.status(404).json({ error: 'Consulta não encontrada' });
     }
+    
+    // Buscar dados do médico e paciente
+    const [doctorData, patientData] = await Promise.all([
+      appointmentData.doctorId ? storage.getDoctorById(appointmentData.doctorId) : null,
+      storage.getUserById(appointmentData.userId)
+    ]);
     
     // Formatar dados da receita
     const prescriptionData = {
       appointmentId,
       date: recording.createdAt,
       doctor: {
-        name: appointment.doctor?.fullName || appointment.doctor?.name || 'Dr(a).',
-        crm: appointment.doctor?.licenseNumber || '',
-        specialization: appointment.doctor?.specialization || ''
+        name: doctorData?.name || 'Dr(a).',
+        crm: doctorData?.licenseNumber || '',
+        specialization: doctorData?.specialization || ''
       },
       patient: {
-        name: appointment.patient?.fullName || 'Paciente',
-        cpf: appointment.patient?.cpf || '',
-        birthDate: appointment.patient?.birthDate || ''
+        name: patientData?.fullName || 'Paciente',
+        cpf: patientData?.cpf || '',
+        birthDate: patientData?.birthDate || ''
       },
       medications: recording.prescription as Prescription[],
       notes: recording.summary || ''
@@ -100,16 +97,17 @@ router.get('/appointment/:appointmentId/formatted', authenticateToken, async (re
     }
     
     // Buscar informações completas
-    const [appointment] = await db.select({
-      appointment: appointments,
-      doctor: doctors,
-      patient: users
-    })
-    .from(appointments)
-    .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
-    .leftJoin(users, eq(appointments.userId, users.id))
-    .where(eq(appointments.id, appointmentId))
-    .limit(1);
+    const appointmentData = await storage.getAppointmentById(appointmentId);
+    
+    if (!appointmentData) {
+      return res.status(404).json({ error: 'Consulta não encontrada' });
+    }
+    
+    // Buscar dados do médico e paciente
+    const [doctorData, patientData] = await Promise.all([
+      appointmentData.doctorId ? storage.getDoctorById(appointmentData.doctorId) : null,
+      storage.getUserById(appointmentData.userId)
+    ]);
     
     // Gerar HTML formatado da receita
     const medications = recording.prescription as Prescription[];
@@ -118,7 +116,7 @@ router.get('/appointment/:appointmentId/formatted', authenticateToken, async (re
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Receita Médica - ${appointment?.patient?.fullName}</title>
+  <title>Receita Médica - ${patientData?.fullName || 'Paciente'}</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 40px; }
     .header { text-align: center; margin-bottom: 30px; }
@@ -137,14 +135,14 @@ router.get('/appointment/:appointmentId/formatted', authenticateToken, async (re
   </div>
   
   <div class="doctor-info">
-    <h3>${appointment?.doctor?.fullName || appointment?.doctor?.name}</h3>
-    <p>${appointment?.doctor?.specialization || ''}</p>
-    <p>CRM: ${appointment?.doctor?.licenseNumber || ''}</p>
+    <h3>${doctorData?.name || 'Dr(a).'}</h3>
+    <p>${doctorData?.specialization || ''}</p>
+    <p>CRM: ${doctorData?.licenseNumber || ''}</p>
   </div>
   
   <div class="patient-info">
-    <h3>Paciente: ${appointment?.patient?.fullName}</h3>
-    <p>CPF: ${appointment?.patient?.cpf || ''}</p>
+    <h3>Paciente: ${patientData?.fullName || 'Paciente'}</h3>
+    <p>CPF: ${patientData?.cpf || ''}</p>
   </div>
   
   <div class="prescription">
@@ -162,8 +160,8 @@ router.get('/appointment/:appointmentId/formatted', authenticateToken, async (re
   
   <div class="footer">
     <p>_________________________________</p>
-    <p>${appointment?.doctor?.fullName || appointment?.doctor?.name}</p>
-    <p>CRM: ${appointment?.doctor?.licenseNumber || ''}</p>
+    <p>${doctorData?.name || 'Dr(a).'}</p>
+    <p>CRM: ${doctorData?.licenseNumber || ''}</p>
   </div>
 </body>
 </html>
