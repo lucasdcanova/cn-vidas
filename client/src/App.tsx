@@ -14,6 +14,7 @@ import { IOSSessionGuard } from "@/components/ios-session-guard";
 import { IOSAppLifecycle } from "@/components/ios-app-lifecycle";
 import { StatusBarConfig } from "@/utils/statusbar-config";
 import { DebugButton } from "@/components/debug/DebugButton";
+import { CookieConsent } from "@/components/cookie-consent";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
@@ -278,6 +279,7 @@ function AppContent() {
     <>
       <IOSSessionGuard />
       <Router />
+      <CookieConsent />
       <DebugButton />
     </>
   );
