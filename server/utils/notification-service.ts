@@ -121,7 +121,7 @@ export class NotificationService {
       const availableDoctors = await storage.getAvailableDoctors();
       
       console.log(`📢 Enviando notificação de emergência para ${availableDoctors.length} médicos disponíveis`);
-      console.log('📢 Médicos disponíveis:', availableDoctors.map(d => ({ id: d.id, name: d.fullName || d.name, userId: d.userId })));
+      console.log('📢 Médicos disponíveis:', availableDoctors.map(d => ({ id: d.id, name: d.name, userId: d.userId })));
       
       // Criar notificação para cada médico disponível
       const notifications = [];

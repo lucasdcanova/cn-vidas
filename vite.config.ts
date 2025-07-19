@@ -34,14 +34,7 @@ export default defineConfig({
     },
     // Otimização de assets
     assetsInlineLimit: 4096, // Inline assets menores que 4kb
-    chunkSizeWarningLimit: 1000, // Aviso para chunks maiores que 1MB
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    }
+    chunkSizeWarningLimit: 1000 // Aviso para chunks maiores que 1MB
   },
   publicDir: path.resolve(__dirname, "public"),
   server: {
