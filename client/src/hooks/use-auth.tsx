@@ -12,6 +12,7 @@ import { secureStorage } from "@/services/secure-storage";
 import { isNativeApp } from '@/utils/platform';
 import { getApiBaseUrl } from '@/config/api';
 import { sessionManager } from '@/services/session-manager';
+import { metaPixel } from '@/services/meta-pixel';
 
 type AuthContextType = {
   user: UserData | null;
@@ -567,6 +568,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Conta criada com sucesso",
         description: `Bem-vindo(a) ao CN Vidas, ${userData.fullName}!`,
       });
+      
+      // Disparar evento de registro completo para o Meta Pixel
+      try {
+        metaPixel.trackCompleteRegistration({
+          userId: userData.id,
+          role: userData.role,
+          email: userData.email,
+          fullName: userData.fullName,
+          subscriptionPlan: userData.subscriptionPlan || undefined
+        });
+      } catch (error) {
+        console.error("Erro ao disparar evento do Meta Pixel:", error);
+      }
       
       // Redirecionar com base no papel do usuário (login automático)
       if (userData.role === "admin") {
