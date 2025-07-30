@@ -546,24 +546,56 @@ export class DatabaseStorage implements IStorage {
       
       // Excluir registros básicos relacionados
       await this.db.transaction(async (tx) => {
-        // Excluir appointments pendentes/canceladas
-        await tx.delete(appointments)
-          .where(eq(appointments.userId, id));
+        try {
+          // Se for médico, excluir registro de médico primeiro
+          if (existingUser.role === 'doctor') {
+            console.log(`🩺 Excluindo registro de médico para usuário ID ${id}`);
+            await tx.delete(doctors).where(eq(doctors.userId, id));
+          }
           
-        // Excluir medical records vazios
-        await tx.delete(medicalRecords)
-          .where(eq(medicalRecords.patientId, id));
+          // Se for parceiro, excluir registro de parceiro primeiro
+          if (existingUser.role === 'partner') {
+            console.log(`🏢 Excluindo registro de parceiro para usuário ID ${id}`);
+            await tx.delete(partners).where(eq(partners.userId, id));
+          }
           
-        // Excluir dependents
-        await tx.delete(dependents)
-          .where(eq(dependents.userId, id));
-          
-        // Excluir notificações
-        await tx.delete(notifications)
-          .where(eq(notifications.userId, id));
+          // Excluir appointments pendentes/canceladas
+          console.log(`📅 Excluindo appointments para usuário ID ${id}`);
+          await tx.delete(appointments)
+            .where(eq(appointments.userId, id));
+            
+          // Excluir medical records vazios
+          console.log(`📋 Excluindo medical records para usuário ID ${id}`);
+          await tx.delete(medicalRecords)
+            .where(eq(medicalRecords.patientId, id));
+            
+          // Excluir dependents
+          console.log(`👥 Excluindo dependents para usuário ID ${id}`);
+          await tx.delete(dependents)
+            .where(eq(dependents.userId, id));
+            
+          // Excluir notificações
+          console.log(`🔔 Excluindo notificações para usuário ID ${id}`);
+          await tx.delete(notifications)
+            .where(eq(notifications.userId, id));
+            
+          // Excluir tokens de reset de senha
+          console.log(`🔑 Excluindo tokens de reset de senha para usuário ID ${id}`);
+          await tx.delete(passwordResets)
+            .where(eq(passwordResets.userId, id));
+            
+          // Excluir tokens de verificação de email
+          console.log(`📧 Excluindo tokens de verificação de email para usuário ID ${id}`);
+          await tx.delete(emailVerifications)
+            .where(eq(emailVerifications.userId, id));
+        } catch (txError) {
+          console.error(`❌ Erro na transação ao excluir registros relacionados:`, txError);
+          throw txError;
+        }
       });
       
       // Excluir o usuário
+      console.log(`👤 Excluindo usuário ID ${id} da tabela users`);
       const [user] = await this.db.delete(users)
         .where(eq(users.id, id))
         .returning();
@@ -577,6 +609,7 @@ export class DatabaseStorage implements IStorage {
       }
     } catch (error) {
       console.error(`❌ Erro ao excluir usuário ID ${id}:`, error);
+      console.error(`Stack trace:`, error instanceof Error ? error.stack : 'No stack trace');
       throw error;
     }
   }
