@@ -357,7 +357,13 @@ const AdminUsersPage: React.FC = () => {
   const deleteUserMutation = useMutation({
     mutationFn: async (id: number) => {
       const res = await apiRequest("DELETE", `/api/admin/users/${id}`);
-      return await res.json();
+      // Verificar se a resposta tem conteúdo antes de tentar fazer parse
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return await res.json();
+      }
+      // Se não for JSON, retornar um objeto vazio ou null
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
