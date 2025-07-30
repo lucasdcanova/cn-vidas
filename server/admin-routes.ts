@@ -288,33 +288,54 @@ router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => 
   try {
     const { id } = req.params;
     
+    console.log(`[Admin] Delete user request for ID: ${id}`);
+    console.log(`[Admin] Request user:`, req.user);
+    
     // Verificar se o usuário existe
     const user = await storage.getUserById(parseInt(id));
     if (!user) {
+      console.log(`[Admin] User ID ${id} not found`);
       return res.status(404).json({ error: 'User not found' });
     }
     
+    console.log(`[Admin] Found user to delete:`, { id: user.id, email: user.email, role: user.role });
+    
     // Não permitir que admin delete a si mesmo
     if (user.id === req.user?.id) {
+      console.log(`[Admin] Attempted to delete own account`);
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
     
     // Deletar o usuário (com exclusão em cascata)
-    await storage.deleteUser(parseInt(id));
+    console.log(`[Admin] Calling storage.deleteUser for ID: ${id}`);
+    const result = await storage.deleteUser(parseInt(id));
+    console.log(`[Admin] Delete result:`, result);
     
     res.json({ 
       message: 'User deleted successfully', 
-      userId: id 
+      userId: id,
+      success: true
     });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    console.error('Full error object:', JSON.stringify(error, null, 2));
+    console.error('[Admin] Error deleting user:', error);
+    console.error('[Admin] Error type:', typeof error);
+    console.error('[Admin] Error constructor:', error?.constructor?.name);
     
-    // Verificar se é erro de constraint de chave estrangeira
+    // Log detalhado do erro
     if (error instanceof Error) {
-      console.log('Error message:', error.message);
-      console.log('Error name:', error.name);
+      console.error('[Admin] Error message:', error.message);
+      console.error('[Admin] Error stack:', error.stack);
       
+      // Verificar se é erro específico de histórico importante
+      if (error.message === 'User has important history and cannot be deleted') {
+        return res.status(400).json({ 
+          error: 'Não é possível excluir usuário com histórico de consultas ou pagamentos',
+          details: 'Este usuário possui consultas realizadas ou histórico de pagamentos e não pode ser removido.',
+          errorType: 'IMPORTANT_HISTORY'
+        });
+      }
+      
+      // Verificar se é erro de constraint de chave estrangeira
       if (error.message.includes('foreign key constraint') || 
           error.message.includes('violates foreign key') ||
           error.message.includes('constraint') ||
