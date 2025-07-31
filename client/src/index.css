@@ -1415,4 +1415,14 @@ select {
       transform: translateY(0);
     }
   }
+
+  /* Logo animation for auth page */
+  @keyframes logoGlow {
+    0% {
+      filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.25)) drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+    }
+    100% {
+      filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.25)) drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 15px rgba(59, 130, 246, 0.3));
+    }
+  }
 }
