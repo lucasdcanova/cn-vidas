@@ -78,7 +78,7 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
           <img 
             src={cnvidasLogo} 
             alt="CN Vidas" 
-            className={`w-auto ${logoConfig.logoSize}`}
+            className={`w-auto ${logoConfig.logoSize} animate-pulse`}
             loading="eager"
             fetchpriority="high"
             width="200"
@@ -87,7 +87,8 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
               filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.25)) drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1))',
               transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
               willChange: 'transform',
-              objectFit: 'contain'
+              objectFit: 'contain',
+              animation: 'logoGlow 3s ease-in-out infinite alternate'
             }}
           />
         </div>
