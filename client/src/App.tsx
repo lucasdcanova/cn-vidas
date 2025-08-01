@@ -17,6 +17,7 @@ import { DebugButton } from "@/components/debug/DebugButton";
 import { CookieConsent } from "@/components/cookie-consent";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
+import HSJAuthPage from "@/pages/hsj-auth-page";
 import Dashboard from "@/pages/dashboard";
 import Telemedicine from "@/pages/telemedicine";
 import TelemedicinePage from "@/pages/telemedicine-page";
@@ -141,6 +142,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
+      <Route path="/auth/hsj" component={HSJAuthPage} />
       
       {/* Verificação de Email e Redefinição de Senha - Acessíveis sem autenticação */}
       <Route path="/verificar-email" component={VerificarEmail} />
