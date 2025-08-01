@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AdminLayout from "@/components/admin/admin-layout";
+import AdminLayout from "@/components/layouts/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Download, Phone, Calendar, Search } from "lucide-react";
