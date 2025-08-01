@@ -41,7 +41,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // Verificar origem do login (HSJ ou padrão)
   const loginSource = localStorage.getItem('loginSource');
   const isHSJLogin = loginSource === 'hsj';
-  const hsjLogoPath = '/images/partners/hospital-sao-jose-logo.svg';
+  const hsjLogoPath = '/cropped-icone_sao_jose-removebg-preview.png';
   const logoToUse = isHSJLogin ? hsjLogoPath : cnvidasLogo;
   
   // Debug location changes

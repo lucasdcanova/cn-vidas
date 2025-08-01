@@ -509,8 +509,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await new Promise(resolve => setTimeout(resolve, 200));
       }
       
-      // Redirecionar para página de login
-      window.location.href = "/auth";
+      // Verificar se o login foi via HSJ
+      const loginSource = localStorage.getItem('loginSource');
+      
+      // Limpar loginSource do localStorage
+      localStorage.removeItem('loginSource');
+      
+      // Redirecionar para página de login apropriada
+      if (loginSource === 'hsj') {
+        window.location.href = "/auth/hsj";
+      } else {
+        window.location.href = "/auth";
+      }
     },
     onError: (error) => {
       console.error("❌ Erro no logout:", error);
