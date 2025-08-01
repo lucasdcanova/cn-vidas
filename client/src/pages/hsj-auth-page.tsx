@@ -759,7 +759,7 @@ const HSJAuthPage: React.FC = () => {
           <div className="flex items-center justify-center gap-4">
             {/* Logo do Hospital São José */}
             <img 
-              src="/images/partners/hospital-sao-jose-logo.svg" 
+              src="/images/partners/hospital-sao-jose-logo.png" 
               alt="Hospital São José" 
               className="h-16 w-auto"
             />
