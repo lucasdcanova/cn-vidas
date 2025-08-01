@@ -86,11 +86,13 @@ import ReenviarVerificacao from "@/pages/reenviar-verificacao";
 import EsqueciSenha from "@/pages/esqueci-senha";
 import AdminMedicalRecords from "@/pages/admin/medical-records";
 import AdminDoctors from "@/pages/admin/doctors";
+import AdminLeads from "@/pages/admin/leads";
 import DoctorMedicalRecords from "@/pages/doctor/medical-records";
 import DoctorMedicalRecordEdit from "@/pages/doctor/medical-record-edit";
 import ProcessingMedicalRecordPage from "@/pages/doctor/processing-medical-record";
 import TestHeadlessDaily from "@/pages/test-headless-daily";
 import { ProcessingWaitPage } from "@/pages/processing-wait";
+import { CampaignTaquari } from "@/pages/CampaignTaquari";
 
 // Componente de erro boundary
 class ErrorBoundary extends React.Component<
@@ -228,6 +230,9 @@ function Router() {
       {/* Corporate invite route - accessible without authentication */}
       <Route path="/corporate-invite/:token" component={CorporateInvitePage} />
       
+      {/* Campaign pages - accessible without authentication */}
+      <Route path="/campanha/taquari" component={CampaignTaquari} />
+      
       {/* Admin Routes */}
       <ProtectedRoute path="/admin" component={AdminDashboard} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/dashboard" component={AdminDashboard} allowedRoles={["admin"]} />
@@ -243,6 +248,7 @@ function Router() {
       <ProtectedRoute path="/admin/checkout-tracking" component={CheckoutTrackingPage} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/medical-records" component={AdminMedicalRecords} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/doctors" component={AdminDoctors} allowedRoles={["admin"]} />
+      <ProtectedRoute path="/admin/leads" component={AdminLeads} allowedRoles={["admin"]} />
       
       {/* Test routes */}
       <ProtectedRoute path="/test-headless-daily" component={TestHeadlessDaily} />
