@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "../db.js";
-import { campaignLeads, insertCampaignLeadSchema } from "@shared/schema";
+import { campaignLeads, insertCampaignLeadSchema } from "../../shared/schema.js";
 import { requireAdmin } from "../middleware/auth";
 import { desc, eq } from "drizzle-orm";
 
