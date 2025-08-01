@@ -7,6 +7,7 @@
     "dev": "tsx watch server/index.ts",
     "dev:server": "tsx watch server/index.ts",
     "dev:client": "vite",
+    "dev:unified": "NODE_ENV=production tsx watch server/index.ts",
     "migrate": "tsx run-migration-drizzle.ts",
     "migrate:fix-constraints": "node apply-migration.js",
     "build": "npm run build:render",
