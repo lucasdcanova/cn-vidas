@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { 
   User, LogOut, Home, Users, CreditCard, Briefcase, 
-  Activity, ClipboardList, QrCode, TrendingUp, Menu, X, ShoppingCart, Stethoscope
+  Activity, ClipboardList, QrCode, TrendingUp, Menu, X, ShoppingCart, Stethoscope, Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
@@ -45,6 +45,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "Painel Adm
     { href: "/admin/users", icon: Users, label: "Usuários", description: "Gerenciar usuários" },
     { href: "/admin/doctors", icon: Stethoscope, label: "Médicos", description: "Gerenciar médicos" },
     { href: "/admin/partners", icon: Briefcase, label: "Parceiros", description: "Gerenciar parceiros" },
+    { href: "/admin/leads", icon: Target, label: "Leads", description: "Leads de campanhas" },
     { href: "/admin/services", icon: Activity, label: "Serviços", description: "Serviços disponíveis" },
     { href: "/admin/claims", icon: ClipboardList, label: "Sinistros", description: "Gestão de sinistros" },
     { href: "/admin/checkout-tracking", icon: ShoppingCart, label: "Monitorar Checkouts", description: "Acompanhar pagamentos" },
