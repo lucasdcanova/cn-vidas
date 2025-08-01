@@ -50,6 +50,7 @@ import { partnerCollaboratorsRouter } from './partner-collaborators-routes';
 import { partnerSubscriptionRouter } from './partner-subscription-routes';
 import { corporateRouter } from './corporate-routes';
 import adminPartnerRouter from './admin-partner-routes';
+import campaignLeadsRouter from './campaign-leads';
 
 export default async function setupRoutes(app: express.Express) {
   
@@ -176,6 +177,10 @@ export default async function setupRoutes(app: express.Express) {
   // Rotas corporativas
   console.log('Registrando corporateRouter em /api/corporate');
   app.use('/api/corporate', corporateRouter);
+  
+  // Rotas de campaign leads
+  console.log('Registrando campaignLeadsRouter em /api/campaign-leads');
+  app.use('/api/campaign-leads', campaignLeadsRouter);
   
   // Rotas de médicos (autenticadas)
   console.log('Registrando doctorRouter em /api/doctors');
