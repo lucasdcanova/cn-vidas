@@ -1,5 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, json, date, varchar, decimal } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations, InferSelectModel, InferInsertModel, sql } from "drizzle-orm";
 
@@ -961,3 +961,18 @@ export type CorporateUsageReport = InferSelectModel<typeof corporateUsageReports
 export type InsertCorporateUsageReport = InferInsertModel<typeof corporateUsageReports>;
 export type MedicalCertificate = InferSelectModel<typeof medicalCertificates>;
 export type InsertMedicalCertificate = InferInsertModel<typeof medicalCertificates>;
+
+// Campaign Leads table
+export const campaignLeads = pgTable("campaign_leads", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
+  campaign: varchar("campaign", { length: 100 }).notNull().default("taquari-hospital-sao-jose"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCampaignLeadSchema = createInsertSchema(campaignLeads);
+export const selectCampaignLeadSchema = createSelectSchema(campaignLeads);
+
+export type CampaignLead = InferSelectModel<typeof campaignLeads>;
+export type InsertCampaignLead = InferInsertModel<typeof campaignLeads>;
