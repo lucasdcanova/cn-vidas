@@ -38,6 +38,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [isIOSDevice, setIsIOSDevice] = useState(false);
   const [isIPhoneDevice, setIsIPhoneDevice] = useState(false);
   
+  // Verificar origem do login (HSJ ou padrão)
+  const loginSource = localStorage.getItem('loginSource');
+  const isHSJLogin = loginSource === 'hsj';
+  const hsjLogoPath = '/images/partners/hospital-sao-jose-logo.svg';
+  const logoToUse = isHSJLogin ? hsjLogoPath : cnvidasLogo;
+  
   // Debug location changes
   useEffect(() => {
     console.log("Current location:", location);
@@ -210,9 +216,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <div className="flex items-center space-x-2">
               {/* Logo */}
               <img 
-                src={cnvidasLogo} 
-                alt="CN Vidas" 
-                className="h-9 w-auto" 
+                src={logoToUse} 
+                alt={isHSJLogin ? "Hospital São José" : "CN Vidas"} 
+                className={isHSJLogin ? "h-10 w-auto" : "h-9 w-auto"} 
               />
               
               
@@ -258,9 +264,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               )}
               <div className={shouldShowSidebar ? "ml-3 flex items-center space-x-2" : "flex items-center space-x-2"}>
                 <img 
-                  src={cnvidasLogo} 
-                  alt="CN Vidas" 
-                  className="h-8 w-auto" 
+                  src={logoToUse} 
+                  alt={isHSJLogin ? "Hospital São José" : "CN Vidas"} 
+                  className={isHSJLogin ? "h-9 w-auto" : "h-8 w-auto"} 
                 />
               </div>
             </div>
@@ -375,9 +381,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Logo CNVidas para iPad */}
               {isIPadDevice && (
                 <img 
-                  src={cnvidasLogo} 
-                  alt="CN Vidas" 
-                  className="h-8 w-auto mr-2 drop-shadow-sm" 
+                  src={logoToUse} 
+                  alt={isHSJLogin ? "Hospital São José" : "CN Vidas"} 
+                  className={isHSJLogin ? "h-9 w-auto mr-2 drop-shadow-sm" : "h-8 w-auto mr-2 drop-shadow-sm"} 
                 />
               )}
               <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
