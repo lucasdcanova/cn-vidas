@@ -607,6 +607,9 @@ const HSJAuthPage: React.FC = () => {
       // O redirecionamento será feito automaticamente pelo useAuth hook
       console.log("Login processado, aguardando redirecionamento automático...");
       
+      // Salvar origem do login como HSJ
+      localStorage.setItem('loginSource', 'hsj');
+      
       // Salvar credenciais biométricas se habilitado
       if (enableBiometric && isBiometricAvailable) {
         await saveBiometricCredentials(data.email, data.password);
@@ -706,6 +709,9 @@ const HSJAuthPage: React.FC = () => {
       
       await registerMutation.mutateAsync(registerData);
       console.log("Registration successful, redirection will be handled by mutation hook");
+      
+      // Salvar origem do login como HSJ para novos registros
+      localStorage.setItem('loginSource', 'hsj');
     } catch (error: any) {
       // Additional error logging
       console.error("Registration error:", error);
