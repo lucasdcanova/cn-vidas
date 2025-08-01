@@ -126,17 +126,23 @@ export function CampaignTaquari() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Logos */}
-        <div className="flex justify-center items-center gap-8 mb-8">
+        <div className="flex items-center justify-center gap-4 mb-8">
+          {/* Logo do Hospital São José */}
           <img 
-            src="/cnvidas-logo.png" 
-            alt="CNVidas" 
-            className="h-16 object-contain"
+            src="/cropped-icone_sao_jose-removebg-preview.png" 
+            alt="Hospital São José" 
+            className="h-16 w-auto"
           />
-          <div className="text-2xl font-bold text-gray-400">+</div>
-          <div className="text-center">
-            <div className="text-xl font-bold text-blue-900">Hospital São José</div>
-            <div className="text-sm text-gray-600">Taquari/RS</div>
-          </div>
+          
+          {/* Separador */}
+          <div className="h-12 w-px bg-gray-300"></div>
+          
+          {/* Logo do CN Vidas */}
+          <img 
+            src="/images/logo.png" 
+            alt="CN Vidas" 
+            className="h-12 w-auto"
+          />
         </div>
 
         {/* Card Principal */}
