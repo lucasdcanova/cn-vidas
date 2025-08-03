@@ -157,7 +157,7 @@ export function CampaignBrasilia() {
                 CNVidas chega ao Plano Piloto e região!
               </h1>
               <p className="text-green-100 text-sm sm:text-base md:text-lg">
-                Telemedicina premium para servidores públicos e moradores do DF
+                Telemedicina premium para moradores do DF e região
               </p>
             </div>
           </CardHeader>
@@ -174,9 +174,9 @@ export function CampaignBrasilia() {
               </div>
               <div className="text-center">
                 <Shield className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mx-auto mb-2 sm:mb-3" />
-                <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Plano Servidor</h3>
+                <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Planos Completos</h3>
                 <p className="text-xs sm:text-sm text-gray-600">
-                  Desconto especial para servidores públicos federais
+                  Consultas ilimitadas e especialistas disponíveis
                 </p>
               </div>
               <div className="text-center">
