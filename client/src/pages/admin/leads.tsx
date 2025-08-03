@@ -115,6 +115,7 @@ export default function AdminLeads() {
   const getCampaignBadge = (campaign: string) => {
     const campaignMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
       "taquari-hospital-sao-jose": { label: "Taquari - Hospital São José", variant: "default" },
+      "brasilia-plano-piloto": { label: "Brasília - Plano Piloto", variant: "secondary" },
     };
 
     const config = campaignMap[campaign] || { label: campaign, variant: "outline" as const };
@@ -129,6 +130,7 @@ export default function AdminLeads() {
   const stats = {
     total: leads.length,
     taquari: leads.filter(l => l.campaign === "taquari-hospital-sao-jose").length,
+    brasilia: leads.filter(l => l.campaign === "brasilia-plano-piloto").length,
     today: leads.filter(l => {
       const leadDate = new Date(l.createdAt);
       const today = new Date();
@@ -153,7 +155,7 @@ export default function AdminLeads() {
         </div>
 
         {/* Cards de estatísticas */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total de Leads</CardTitle>
@@ -169,6 +171,15 @@ export default function AdminLeads() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.taquari}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Campanha Brasília</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.brasilia}</div>
             </CardContent>
           </Card>
 
