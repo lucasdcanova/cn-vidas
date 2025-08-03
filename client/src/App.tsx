@@ -93,6 +93,7 @@ import ProcessingMedicalRecordPage from "@/pages/doctor/processing-medical-recor
 import TestHeadlessDaily from "@/pages/test-headless-daily";
 import { ProcessingWaitPage } from "@/pages/processing-wait";
 import { CampaignTaquari } from "@/pages/CampaignTaquari";
+import { CampaignBrasilia } from "@/pages/CampaignBrasilia";
 
 // Componente de erro boundary
 class ErrorBoundary extends React.Component<
@@ -232,6 +233,7 @@ function Router() {
       
       {/* Campaign pages - accessible without authentication */}
       <Route path="/campanha/taquari" component={CampaignTaquari} />
+      <Route path="/campanha/brasilia" component={CampaignBrasilia} />
       
       {/* Admin Routes */}
       <ProtectedRoute path="/admin" component={AdminDashboard} allowedRoles={["admin"]} />
