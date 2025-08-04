@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, Users, Globe, Shield, Building2, Clock, Stethoscope } from "lucide-react";
+import { metaPixel } from "@/services/meta-pixel";
 
 export function CampaignBrasilia() {
   const [name, setName] = useState("");
@@ -22,6 +23,33 @@ export function CampaignBrasilia() {
       viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
       document.head.appendChild(viewport);
     }
+
+    // Disparar evento de visualização de conteúdo do Meta Pixel
+    metaPixel.trackViewContent({
+      contentId: 'campaign-brasilia',
+      contentName: 'Campanha CNVidas Brasília',
+      contentCategory: 'landing-page',
+      value: 139.90 // Valor do plano básico
+    });
+
+    // Adicionar Microsoft Clarity
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.innerHTML = `
+      (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "sfzv6avsfo");
+    `;
+    document.head.appendChild(script);
+    
+    // Cleanup ao desmontar o componente
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
   }, []);
 
   const formatWhatsApp = (value: string) => {
@@ -91,6 +119,14 @@ export function CampaignBrasilia() {
       toast({
         title: "Cadastro realizado!",
         description: "Entraremos em contato em breve pelo WhatsApp.",
+      });
+
+      // Disparar evento de lead gerado para o Meta Pixel com valor de 80 BRL
+      metaPixel.trackCampaignLead({
+        campaignId: 'brasilia-plano-piloto',
+        campaignName: 'Campanha CNVidas Brasília',
+        leadName: name.trim(),
+        value: 80 // Valor específico de 80 BRL para leads de Brasília
       });
     } catch (error) {
       console.error("Erro:", error);

@@ -208,6 +208,29 @@ class MetaPixelService {
   }
 
   /**
+   * Evento de lead de campanha
+   * Para rastrear leads de páginas de campanha com valor específico
+   */
+  trackCampaignLead(leadData: {
+    campaignId: string;
+    campaignName: string;
+    leadName: string;
+    value?: number;
+  }): void {
+    const eventData: MetaPixelEvent = {
+      value: leadData.value || 80, // Valor padrão de 80 BRL para leads
+      currency: 'BRL',
+      content_name: leadData.campaignName,
+      content_category: 'campaign-lead',
+      content_ids: [leadData.campaignId],
+      content_type: 'lead',
+      num_items: 1
+    };
+
+    this.trackEvent('CompleteRegistration', eventData);
+  }
+
+  /**
    * Evento customizado para rastrear consultas agendadas
    */
   trackScheduleAppointment(appointmentData: {
