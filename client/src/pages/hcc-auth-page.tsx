@@ -98,7 +98,7 @@ const HCCAuthPage: React.FC = () => {
         {/* Header */}
         <div className="pb-6 text-center">
           <div className="flex items-center justify-center gap-4">
-            <img src="/Untitled design.png" alt="Hospital de Caridade de Crissiumal" className="h-16 w-auto drop-shadow-md" />
+            <img src="/hcc-logo.png" alt="Hospital de Caridade de Crissiumal" className="h-16 w-auto drop-shadow-md" />
             <div className="h-12 w-px bg-white/30"></div>
             <img src="/images/logo.png" alt="CN Vidas" className="h-12 w-auto drop-shadow" />
           </div>
