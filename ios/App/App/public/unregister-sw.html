@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Desregistrar Service Worker</title>
+</head>
+<body>
+    <h1>Desregistrando Service Worker...</h1>
+    <div id="status"></div>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        
+        async function unregisterAllServiceWorkers() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    
+                    if (registrations.length === 0) {
+                        statusDiv.innerHTML += '<p>Nenhum Service Worker encontrado.</p>';
+                    } else {
+                        for (let registration of registrations) {
+                            try {
+                                await registration.unregister();
+                                statusDiv.innerHTML += '<p>✅ Service Worker desregistrado: ' + registration.scope + '</p>';
+                            } catch (error) {
+                                statusDiv.innerHTML += '<p>❌ Erro ao desregistrar: ' + error + '</p>';
+                            }
+                        }
+                    }
+                    
+                    // Limpar caches
+                    const cacheNames = await caches.keys();
+                    for (let cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        statusDiv.innerHTML += '<p>✅ Cache deletado: ' + cacheName + '</p>';
+                    }
+                    
+                    statusDiv.innerHTML += '<h2>✅ Tudo limpo! Agora:</h2>';
+                    statusDiv.innerHTML += '<ol>';
+                    statusDiv.innerHTML += '<li>Feche esta aba</li>';
+                    statusDiv.innerHTML += '<li>Volte para http://localhost:3000</li>';
+                    statusDiv.innerHTML += '<li>Faça um hard refresh (Ctrl+Shift+R ou Cmd+Shift+R)</li>';
+                    statusDiv.innerHTML += '</ol>';
+                    
+                } catch (error) {
+                    statusDiv.innerHTML += '<p>❌ Erro geral: ' + error + '</p>';
+                }
+            } else {
+                statusDiv.innerHTML += '<p>Service Workers não são suportados neste navegador.</p>';
+            }
+        }
+        
+        unregisterAllServiceWorkers();
+    </script>
+</body>
+</html>
