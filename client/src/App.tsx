@@ -95,6 +95,7 @@ import TestHeadlessDaily from "@/pages/test-headless-daily";
 import { ProcessingWaitPage } from "@/pages/processing-wait";
 import { CampaignTaquari } from "@/pages/CampaignTaquari";
 import { CampaignBrasilia } from "@/pages/CampaignBrasilia";
+import HospitalBriefing from "@/pages/hospital-briefing";
 
 // Componente de erro boundary
 class ErrorBoundary extends React.Component<
@@ -236,6 +237,9 @@ function Router() {
       {/* Campaign pages - accessible without authentication */}
       <Route path="/campanha/taquari" component={CampaignTaquari} />
       <Route path="/campanha/brasilia" component={CampaignBrasilia} />
+      
+      {/* Hospital briefing page - accessible without authentication */}
+      <Route path="/hospital-briefing" component={HospitalBriefing} />
       
       {/* Admin Routes */}
       <ProtectedRoute path="/admin" component={AdminDashboard} allowedRoles={["admin"]} />
