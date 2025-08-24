@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useAnimation, useInView } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,101 +25,52 @@ import {
   Building2
 } from 'lucide-react';
 
-const AnimatedCounter = ({ end, duration = 2000, prefix = '', suffix = '' }: {
-  end: number;
-  duration?: number;
-  prefix?: string;
-  suffix?: string;
-}) => {
-  const [count, setCount] = useState(0);
-  const controls = useAnimation();
-  const ref = React.useRef(null);
-  const inView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (inView) {
-      let startTime: number;
-      let animationId: number;
-
-      const animate = (currentTime: number) => {
-        if (!startTime) startTime = currentTime;
-        const progress = Math.min((currentTime - startTime) / duration, 1);
-        
-        setCount(Math.floor(progress * end));
-        
-        if (progress < 1) {
-          animationId = requestAnimationFrame(animate);
-        }
-      };
-
-      animationId = requestAnimationFrame(animate);
-      return () => cancelAnimationFrame(animationId);
-    }
-  }, [inView, end, duration]);
-
+const SimpleCounter = ({ value }: { value: string }) => {
   return (
-    <span ref={ref} className="font-bold">
-      {prefix}{count.toLocaleString()}{suffix}
+    <span className="font-bold">
+      {value}
     </span>
   );
 };
 
-const FeatureCard = ({ icon: Icon, title, description, delay = 0 }: {
+const FeatureCard = ({ icon: Icon, title, description }: {
   icon: any;
   title: string;
   description: string;
-  delay?: number;
 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 50 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, delay }}
-    viewport={{ once: true }}
-    className="group"
-  >
-    <Card className="h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200 group-hover:scale-105">
-      <CardHeader className="text-center">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-          <Icon className="w-8 h-8 text-white" />
-        </div>
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-gray-600 text-center">{description}</p>
-      </CardContent>
-    </Card>
-  </motion.div>
+  <Card className="h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200">
+    <CardHeader className="text-center">
+      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mb-4">
+        <Icon className="w-8 h-8 text-white" />
+      </div>
+      <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-gray-600 text-center">{description}</p>
+    </CardContent>
+  </Card>
 );
 
-const StatCard = ({ icon: Icon, value, label, color = "blue", delay = 0 }: {
+const StatCard = ({ icon: Icon, value, label, color = "blue" }: {
   icon: any;
   value: string;
   label: string;
   color?: string;
-  delay?: number;
 }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.8 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.6, delay }}
-    viewport={{ once: true }}
-    className="group"
-  >
-    <Card className="text-center hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-      <CardContent className="pt-6">
-        <div className={`mx-auto w-12 h-12 bg-gradient-to-br from-${color}-500 to-${color}-700 rounded-full flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-300`}>
-          <Icon className="w-6 h-6 text-white" />
-        </div>
-        <div className="text-3xl font-bold text-gray-800">{value}</div>
-        <div className="text-sm text-gray-600 mt-1">{label}</div>
-      </CardContent>
-    </Card>
-  </motion.div>
+  <Card className="text-center hover:shadow-lg transition-all duration-300">
+    <CardContent className="pt-6">
+      <div className={`mx-auto w-12 h-12 bg-gradient-to-br from-${color}-500 to-${color}-700 rounded-full flex items-center justify-center mb-4`}>
+        <Icon className="w-6 h-6 text-white" />
+      </div>
+      <div className="text-3xl font-bold text-gray-800">{value}</div>
+      <div className="text-sm text-gray-600 mt-1">{label}</div>
+    </CardContent>
+  </Card>
 );
 
 const ROICalculator = () => {
-  const [leitos, setLeitos] = useState('');
-  const [cartoesMes, setCartoesMes] = useState('');
+  const [leitos, setLeitos] = useState('100');
+  const [cartoesMes, setCartoesMes] = useState('500');
   const [percentualFamiliar, setPercentualFamiliar] = useState(30);
   
   const calcularROI = () => {
@@ -148,13 +98,7 @@ const ROICalculator = () => {
   const resultado = calcularROI();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      viewport={{ once: true }}
-      className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8"
-    >
+    <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8">
       <div className="text-center mb-8">
         <h3 className="text-3xl font-bold text-gray-800 mb-4">
           Calculadora de Retorno Financeiro
@@ -248,12 +192,27 @@ const ROICalculator = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 export default function HospitalBriefing() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [showROICalculator, setShowROICalculator] = useState(false);
+
+  const scrollToROI = () => {
+    console.log('Clicou no botão Calcular ROI');
+    // Rolar até a seção de ROI dentro do contêiner rolável da página
+    const el = document.getElementById('roi-calculator');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const openDemo = () => {
+    console.log('Clicou no botão Ver Demonstração');
+    window.open('https://www.homologacao.cnvidas.com.br', '_blank');
+  };
 
   const beneficios = [
     {
@@ -322,41 +281,39 @@ export default function HospitalBriefing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    // Contêiner rolável próprio da página para contornar body/html com overflow hidden
+    <div className="w-full h-screen overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -100 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50"
-      >
+      <header className="bg-white/95 backdrop-blur-md shadow-lg">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
+              <img 
+                src="/assets/Logotipo_cnvidas_comprido_transparent_advanced_fuzz3.png" 
+                alt="CNVidas"
+                className="h-12 w-auto"
+              />
               <div>
-                <h1 className="text-2xl font-bold text-gray-800">CNVidas</h1>
                 <p className="text-sm text-gray-600">Whitelabel para Hospitais</p>
               </div>
             </div>
-            <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+            <Button 
+              onClick={() => {
+                console.log('Botão Header clicado!');
+                openDemo();
+              }}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 cursor-pointer"
+            >
               Solicitar Demonstração
             </Button>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* Hero Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mb-12"
-          >
+          <div className="mb-12">
             <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-green-100 text-blue-800 text-sm px-4 py-2">
               Solução Whitelabel Premium
             </Badge>
@@ -371,53 +328,67 @@ export default function HospitalBriefing() {
               O CNVidas oferece uma solução completa de telemedicina com sua marca, 
               gerando receita recorrente sem investimento inicial para hospitais visionários.
             </p>
+            
+            {/* Botões de debug removidos: usavam scroll da window e não do contêiner */}
+            
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                onClick={() => {
+                  console.log('Botão Ver Demonstração clicado!');
+                  openDemo();
+                }}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-8 py-4 text-lg cursor-pointer"
+              >
                 <Building className="w-5 h-5 mr-2" />
                 Ver Demonstração
               </Button>
-              <Button variant="outline" size="lg" className="border-2 border-blue-600 text-blue-700 hover:bg-blue-50 px-8 py-4 text-lg">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => {
+                  console.log('Botão Calcular ROI clicado!');
+                  scrollToROI();
+                }}
+                className="border-2 border-blue-600 text-blue-700 hover:bg-blue-50 px-8 py-4 text-lg cursor-pointer"
+              >
                 <BarChart3 className="w-5 h-5 mr-2" />
                 Calcular ROI
               </Button>
             </div>
-          </motion.div>
+          </div>
 
           {/* Statistics */}
           <div className="grid md:grid-cols-4 gap-8 mb-16">
             <StatCard
               icon={Users}
-              value={<AnimatedCounter end={50000} suffix="+" />}
+              value="50.000+"
               label="Vidas Ativas"
-              delay={0.1}
             />
             <StatCard
               icon={Building}
-              value={<AnimatedCounter end={15} suffix="+" />}
+              value="15+"
               label="Hospitais Parceiros"
               color="green"
-              delay={0.2}
             />
             <StatCard
               icon={DollarSign}
-              value={<AnimatedCounter end={2.5} prefix="R$ " suffix="M+" />}
+              value="R$ 2.5M+"
               label="Receita Gerada"
               color="purple"
-              delay={0.3}
             />
             <StatCard
               icon={Stethoscope}
-              value={<AnimatedCounter end={95} suffix="%" />}
+              value="95%"
               label="Satisfação Médica"
               color="orange"
-              delay={0.4}
             />
           </div>
         </div>
       </section>
 
       {/* ROI Calculator */}
-      <section className="py-16 px-6">
+      <section id="roi-calculator" className="py-16 px-6">
         <div className="container mx-auto">
           <ROICalculator />
         </div>
@@ -426,13 +397,7 @@ export default function HospitalBriefing() {
       {/* Benefits Section */}
       <section className="py-20 px-6 bg-white/50">
         <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
+          <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-800 mb-6">
               Por que escolher o CNVidas?
             </h2>
@@ -440,7 +405,7 @@ export default function HospitalBriefing() {
               Uma parceria estratégica que transforma seu hospital em uma plataforma 
               digital de saúde, gerando receita recorrente e fidelizando pacientes.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {beneficios.map((beneficio, index) => (
@@ -449,7 +414,6 @@ export default function HospitalBriefing() {
                 icon={beneficio.icon}
                 title={beneficio.title}
                 description={beneficio.description}
-                delay={index * 0.1}
               />
             ))}
           </div>
@@ -459,13 +423,7 @@ export default function HospitalBriefing() {
       {/* Features Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
+          <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-800 mb-6">
               Funcionalidades Completas
             </h2>
@@ -473,7 +431,7 @@ export default function HospitalBriefing() {
               Plataforma completa de telemedicina com tecnologia de ponta 
               para oferecer o melhor cuidado aos seus pacientes.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {funcionalidades.map((funcionalidade, index) => (
@@ -482,7 +440,6 @@ export default function HospitalBriefing() {
                 icon={funcionalidade.icon}
                 title={funcionalidade.title}
                 description={funcionalidade.description}
-                delay={index * 0.1}
               />
             ))}
           </div>
@@ -492,12 +449,7 @@ export default function HospitalBriefing() {
       {/* CTA Section */}
       <section className="py-20 px-6 bg-gradient-to-r from-blue-600 to-blue-800">
         <div className="container mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
+          <div>
             <h2 className="text-4xl font-bold text-white mb-6">
               Pronto para Transformar seu Hospital?
             </h2>
@@ -506,11 +458,21 @@ export default function HospitalBriefing() {
               com nossa plataforma de telemedicina whitelabel.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="bg-white text-blue-700 hover:bg-blue-50 px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                onClick={openDemo}
+                className="bg-white text-blue-700 hover:bg-blue-50 px-8 py-4 text-lg"
+              >
                 <ArrowRight className="w-5 h-5 mr-2" />
                 Agendar Reunião
               </Button>
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-blue-700 px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                onClick={() => window.open('https://www.cnvidas.com.br', '_blank')}
+                className="border-2 border-white text-white hover:bg-white hover:text-blue-700 px-8 py-4 text-lg"
+              >
                 <Globe className="w-5 h-5 mr-2" />
                 Visitar Site CNVidas
               </Button>
@@ -518,7 +480,7 @@ export default function HospitalBriefing() {
             <p className="text-sm text-blue-200 mt-6">
               Implementação gratuita • Suporte 24/7 • Sem compromisso
             </p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -528,10 +490,11 @@ export default function HospitalBriefing() {
           <div className="grid md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center">
-                  <Heart className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold">CNVidas</h3>
+                <img 
+                  src="/assets/cnvidas-logo-transparent.png" 
+                  alt="CNVidas"
+                  className="h-10 w-auto filter brightness-0 invert"
+                />
               </div>
               <p className="text-gray-400">
                 Transformando o cuidado em saúde através da tecnologia e inovação.
