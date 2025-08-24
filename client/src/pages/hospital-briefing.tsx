@@ -38,9 +38,9 @@ const FeatureCard = ({ icon: Icon, title, description }: {
   title: string;
   description: string;
 }) => (
-  <Card className="h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200">
+  <Card className="h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200 transform hover:-translate-y-1 hover:scale-105">
     <CardHeader className="text-center">
-      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mb-4">
+      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mb-4 transform transition-transform duration-300 hover:rotate-12">
         <Icon className="w-8 h-8 text-white" />
       </div>
       <CardTitle className="text-lg font-semibold">{title}</CardTitle>
@@ -57,12 +57,12 @@ const StatCard = ({ icon: Icon, value, label, color = "blue" }: {
   label: string;
   color?: string;
 }) => (
-  <Card className="text-center hover:shadow-lg transition-all duration-300">
+  <Card className="text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
     <CardContent className="pt-6">
-      <div className={`mx-auto w-12 h-12 bg-gradient-to-br from-${color}-500 to-${color}-700 rounded-full flex items-center justify-center mb-4`}>
+      <div className={`mx-auto w-12 h-12 bg-gradient-to-br from-${color}-500 to-${color}-700 rounded-full flex items-center justify-center mb-4 animate-pulse`}>
         <Icon className="w-6 h-6 text-white" />
       </div>
-      <div className="text-3xl font-bold text-gray-800">{value}</div>
+      <div className="text-3xl font-bold text-gray-800 transition-all duration-300 hover:scale-110">{value}</div>
       <div className="text-sm text-gray-600 mt-1">{label}</div>
     </CardContent>
   </Card>
@@ -70,35 +70,62 @@ const StatCard = ({ icon: Icon, value, label, color = "blue" }: {
 
 const ROICalculator = () => {
   const [leitos, setLeitos] = useState('100');
-  const [cartoesMes, setCartoesMes] = useState('500');
-  const [percentualFamiliar, setPercentualFamiliar] = useState(30);
+  const [planosVendidosMes1, setPlanosVendidosMes1] = useState('50');
+  const [planosVendidosMes2, setPlanosVendidosMes2] = useState('70');
+  const [planosVendidosMes3, setPlanosVendidosMes3] = useState('80');
+  const [mesesProjecao, setMesesProjecao] = useState(12);
   
   const calcularROI = () => {
     const numLeitos = parseInt(leitos) || 0;
-    const numCartoes = parseInt(cartoesMes) || 0;
-    const percFamiliar = percentualFamiliar / 100;
+    const mes1 = parseInt(planosVendidosMes1) || 0;
+    const mes2 = parseInt(planosVendidosMes2) || 0;
+    const mes3 = parseInt(planosVendidosMes3) || 0;
     
-    const cartoesIndividuais = Math.floor(numCartoes * (1 - percFamiliar));
-    const cartoesFamiliares = Math.floor(numCartoes * percFamiliar);
+    // Valor fixo por plano ativo
+    const valorPorPlano = 25;
     
-    const receitaMensal = (cartoesIndividuais * 20) + (cartoesFamiliares * 30);
-    const receitaAnual = receitaMensal * 12;
+    // Calculando planos ativos acumulados
+    const planosAtivos = {
+      mes1: mes1,
+      mes2: mes1 + mes2,
+      mes3: mes1 + mes2 + mes3,
+      mes6: mes1 + mes2 + mes3 + (mes3 * 3), // Assumindo mesma taxa do mês 3
+      mes12: mes1 + mes2 + mes3 + (mes3 * 9) // Assumindo mesma taxa do mês 3
+    };
     
-    const receitaPorLeito = numLeitos > 0 ? Math.floor(receitaAnual / numLeitos) : 0;
+    // Receitas mensais
+    const receitaMes1 = planosAtivos.mes1 * valorPorPlano;
+    const receitaMes3 = planosAtivos.mes3 * valorPorPlano;
+    const receitaMes6 = planosAtivos.mes6 * valorPorPlano;
+    const receitaMes12 = planosAtivos.mes12 * valorPorPlano;
+    
+    // Receita anual (soma de todos os meses)
+    let receitaAnualTotal = 0;
+    for (let i = 1; i <= 12; i++) {
+      if (i === 1) receitaAnualTotal += planosAtivos.mes1 * valorPorPlano;
+      else if (i === 2) receitaAnualTotal += (mes1 + mes2) * valorPorPlano;
+      else if (i === 3) receitaAnualTotal += planosAtivos.mes3 * valorPorPlano;
+      else receitaAnualTotal += (planosAtivos.mes3 + (mes3 * (i - 3))) * valorPorPlano;
+    }
+    
+    const receitaPorLeito = numLeitos > 0 ? Math.floor(receitaAnualTotal / numLeitos) : 0;
     
     return {
-      receitaMensal,
-      receitaAnual,
+      receitaMes1,
+      receitaMes3,
+      receitaMes6,
+      receitaMes12,
+      receitaAnualTotal,
       receitaPorLeito,
-      cartoesIndividuais,
-      cartoesFamiliares
+      planosAtivos,
+      valorPorPlano
     };
   };
 
   const resultado = calcularROI();
 
   return (
-    <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8">
+    <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8 shadow-xl transition-all duration-500 hover:shadow-2xl">
       <div className="text-center mb-8">
         <h3 className="text-3xl font-bold text-gray-800 mb-4">
           Calculadora de Retorno Financeiro
@@ -119,76 +146,129 @@ const ROICalculator = () => {
               placeholder="Ex: 100"
               value={leitos}
               onChange={(e) => setLeitos(e.target.value)}
-              className="text-lg"
+              className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Meta de cartões vendidos por mês
-            </label>
-            <Input
-              type="number"
-              placeholder="Ex: 500"
-              value={cartoesMes}
-              onChange={(e) => setCartoesMes(e.target.value)}
-              className="text-lg"
-            />
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-semibold text-gray-800 mb-3">Projeção de vendas mensais</h4>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mês 1 - Novos planos
+                </label>
+                <Input
+                  type="number"
+                  placeholder="Ex: 50"
+                  value={planosVendidosMes1}
+                  onChange={(e) => setPlanosVendidosMes1(e.target.value)}
+                  className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mês 2 - Novos planos
+                </label>
+                <Input
+                  type="number"
+                  placeholder="Ex: 70"
+                  value={planosVendidosMes2}
+                  onChange={(e) => setPlanosVendidosMes2(e.target.value)}
+                  className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mês 3+ - Novos planos/mês
+                </label>
+                <Input
+                  type="number"
+                  placeholder="Ex: 80"
+                  value={planosVendidosMes3}
+                  onChange={(e) => setPlanosVendidosMes3(e.target.value)}
+                  className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Percentual de planos familiares: {percentualFamiliar}%
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="70"
-              value={percentualFamiliar}
-              onChange={(e) => setPercentualFamiliar(parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            />
+          <div className="bg-green-50 p-4 rounded-lg">
+            <p className="text-sm font-medium text-gray-700">
+              <strong>Modelo de receita:</strong> R$ 25 por plano ativo/mês
+            </p>
+            <p className="text-xs text-gray-600 mt-2">
+              Receita recorrente acumulativa - cada plano vendido gera R$ 25/mês indefinidamente
+            </p>
           </div>
         </div>
 
         <div className="space-y-4">
-          <Card className="bg-white/70 backdrop-blur">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-green-600">
-                    R$ {resultado.receitaMensal.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-600">Receita Mensal</div>
+          <Card className="bg-white/90 backdrop-blur shadow-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Evolução da Receita Mensal</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                  <span className="text-sm text-gray-600">Mês 1</span>
+                  <span className="font-semibold text-gray-800">
+                    {resultado.planosAtivos.mes1} planos = R$ {resultado.receitaMes1.toLocaleString()}
+                  </span>
                 </div>
-                <div className="text-center">
-                  <TrendingUp className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-blue-600">
-                    R$ {resultado.receitaAnual.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-600">Receita Anual</div>
+                <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+                  <span className="text-sm text-gray-600">Mês 3</span>
+                  <span className="font-semibold text-blue-700">
+                    {resultado.planosAtivos.mes3} planos = R$ {resultado.receitaMes3.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-green-50 rounded">
+                  <span className="text-sm text-gray-600">Mês 6</span>
+                  <span className="font-semibold text-green-700">
+                    {resultado.planosAtivos.mes6} planos = R$ {resultado.receitaMes6.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-purple-50 rounded">
+                  <span className="text-sm font-medium text-gray-700">Mês 12</span>
+                  <span className="font-bold text-purple-700 text-lg">
+                    {resultado.planosAtivos.mes12} planos = R$ {resultado.receitaMes12.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <TrendingUp className="w-12 h-12 mx-auto mb-3 animate-pulse" />
+                <div className="text-3xl font-bold mb-2">
+                  R$ {resultado.receitaAnualTotal.toLocaleString()}
+                </div>
+                <div className="text-sm opacity-90">Receita Total no Primeiro Ano</div>
+              </div>
+            </CardContent>
+          </Card>
+
           {resultado.receitaPorLeito > 0 && (
-            <Card className="bg-gradient-to-r from-purple-50 to-pink-50">
+            <Card className="bg-gradient-to-r from-amber-50 to-orange-50">
               <CardContent className="pt-6 text-center">
-                <Award className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-purple-600">
+                <Award className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-orange-700">
                   R$ {resultado.receitaPorLeito.toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-600">Receita por leito/ano</div>
+                <div className="text-sm text-gray-600">Receita por leito no primeiro ano</div>
               </CardContent>
             </Card>
           )}
 
-          <div className="text-xs text-gray-500 space-y-1">
-            <div>• {resultado.cartoesIndividuais} cartões individuais (R$20/mês cada)</div>
-            <div>• {resultado.cartoesFamiliares} cartões familiares (R$30/mês cada)</div>
-            <div>• Hospital recebe 100% da comissão por vida ativa</div>
+          <div className="bg-gray-100 rounded-lg p-3">
+            <p className="text-xs text-gray-600 font-medium mb-2">💡 Como funciona:</p>
+            <div className="text-xs text-gray-500 space-y-1">
+              <div>• Cada plano vendido gera R$ {resultado.valorPorPlano}/mês</div>
+              <div>• Receita é acumulativa (planos não cancelam)</div>
+              <div>• Hospital recebe 100% da comissão</div>
+              <div>• Pagamento mensal direto na conta do hospital</div>
+            </div>
           </div>
         </div>
       </div>
@@ -197,8 +277,11 @@ const ROICalculator = () => {
 };
 
 export default function HospitalBriefing() {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [showROICalculator, setShowROICalculator] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const scrollToROI = () => {
     console.log('Clicou no botão Calcular ROI');
@@ -218,7 +301,7 @@ export default function HospitalBriefing() {
     {
       icon: DollarSign,
       title: "Receita Recorrente",
-      description: "R$ 20 por vida individual e R$ 30 por vida familiar, mensalmente, para sempre."
+      description: "R$ 25 por plano ativo mensalmente, receita acumulativa e vitalícia."
     },
     {
       icon: Zap,
@@ -312,14 +395,14 @@ export default function HospitalBriefing() {
 
       {/* Hero Section */}
       <section className="py-20 px-6">
-        <div className="container mx-auto text-center">
+        <div className={`container mx-auto text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="mb-12">
-            <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-green-100 text-blue-800 text-sm px-4 py-2">
+            <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-green-100 text-blue-800 text-sm px-4 py-2 animate-bounce">
               Solução Whitelabel Premium
             </Badge>
             <h1 className="text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight">
               Transforme seu
-              <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent animate-gradient-x">
                 {" "}Hospital
               </span>
               <br />em uma Plataforma Digital
@@ -338,7 +421,7 @@ export default function HospitalBriefing() {
                   console.log('Botão Ver Demonstração clicado!');
                   openDemo();
                 }}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-8 py-4 text-lg cursor-pointer"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-8 py-4 text-lg cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
               >
                 <Building className="w-5 h-5 mr-2" />
                 Ver Demonstração
@@ -350,7 +433,7 @@ export default function HospitalBriefing() {
                   console.log('Botão Calcular ROI clicado!');
                   scrollToROI();
                 }}
-                className="border-2 border-blue-600 text-blue-700 hover:bg-blue-50 px-8 py-4 text-lg cursor-pointer"
+                className="border-2 border-blue-600 text-blue-700 hover:bg-blue-50 px-8 py-4 text-lg cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
               >
                 <BarChart3 className="w-5 h-5 mr-2" />
                 Calcular ROI
@@ -359,7 +442,7 @@ export default function HospitalBriefing() {
           </div>
 
           {/* Statistics */}
-          <div className="grid md:grid-cols-4 gap-8 mb-16">
+          <div className={`grid md:grid-cols-4 gap-8 mb-16 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <StatCard
               icon={Users}
               value="50.000+"
@@ -389,8 +472,226 @@ export default function HospitalBriefing() {
 
       {/* ROI Calculator */}
       <section id="roi-calculator" className="py-16 px-6">
-        <div className="container mx-auto">
+        <div className="container mx-auto animate-fade-in">
           <ROICalculator />
+        </div>
+      </section>
+
+      {/* Pricing Table Section */}
+      <section className="py-16 px-6 bg-gradient-to-br from-gray-50 to-white">
+        <div className="container mx-auto animate-fade-in">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-800 mb-6">
+              Tabela de Valores dos Planos
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Valores que os pacientes pagarão diretamente pelo app do hospital
+            </p>
+          </div>
+
+          {/* Planos Individuais */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-gray-700 mb-6 text-center">Planos Individuais</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-200 transform hover:-translate-y-2 hover:scale-105">
+                <CardHeader className="bg-gradient-to-br from-gray-50 to-gray-100">
+                  <CardTitle className="text-xl">Básico</CardTitle>
+                  <div className="text-3xl font-bold text-gray-800 mt-2">
+                    R$ 89,90<span className="text-base font-normal">/mês</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">2 teleconsultas de emergência/mês</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">30% desconto em especialistas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">R$ 300/dia seguro hospitalar</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-300 relative">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-1">
+                    Mais Popular
+                  </Badge>
+                </div>
+                <CardHeader className="bg-gradient-to-br from-blue-50 to-blue-100">
+                  <CardTitle className="text-xl">Premium</CardTitle>
+                  <div className="text-3xl font-bold text-blue-700 mt-2">
+                    R$ 129,90<span className="text-base font-normal">/mês</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm font-medium">Teleconsultas ilimitadas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">50% desconto em especialistas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">Agendamento prioritário</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">R$ 300/dia seguro hospitalar</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-purple-200 transform hover:-translate-y-2 hover:scale-105">
+                <CardHeader className="bg-gradient-to-br from-purple-50 to-purple-100">
+                  <CardTitle className="text-xl">Ultra</CardTitle>
+                  <div className="text-3xl font-bold text-purple-700 mt-2">
+                    R$ 169,90<span className="text-base font-normal">/mês</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm font-medium">Teleconsultas ilimitadas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm font-medium">70% desconto em especialistas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">Prioridade máxima agendamento</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm font-medium">R$ 500/dia seguro hospitalar</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Planos Familiares */}
+          <div>
+            <h3 className="text-2xl font-bold text-gray-700 mb-6 text-center">Planos Familiares</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-green-200">
+                <CardHeader className="bg-gradient-to-br from-green-50 to-green-100">
+                  <CardTitle className="text-xl">Básico Familiar</CardTitle>
+                  <div className="text-3xl font-bold text-green-700 mt-2">
+                    R$ 149,90<span className="text-base font-normal">/mês</span>
+                  </div>
+                  <Badge className="mt-2 bg-green-200 text-green-800">Até 4 pessoas</Badge>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">2 teleconsultas/mês por pessoa</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">30% desconto em especialistas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">R$ 300/dia seguro hospitalar</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-300 relative">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-1">
+                    Melhor Custo-Benefício
+                  </Badge>
+                </div>
+                <CardHeader className="bg-gradient-to-br from-blue-50 to-blue-100">
+                  <CardTitle className="text-xl">Premium Familiar</CardTitle>
+                  <div className="text-3xl font-bold text-blue-700 mt-2">
+                    R$ 199,90<span className="text-base font-normal">/mês</span>
+                  </div>
+                  <Badge className="mt-2 bg-blue-200 text-blue-800">Até 4 pessoas</Badge>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm font-medium">Teleconsultas ilimitadas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">50% desconto em especialistas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">Agendamento prioritário</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">R$ 300/dia seguro hospitalar</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-purple-200 transform hover:-translate-y-2 hover:scale-105">
+                <CardHeader className="bg-gradient-to-br from-purple-50 to-purple-100">
+                  <CardTitle className="text-xl">Ultra Familiar</CardTitle>
+                  <div className="text-3xl font-bold text-purple-700 mt-2">
+                    R$ 239,90<span className="text-base font-normal">/mês</span>
+                  </div>
+                  <Badge className="mt-2 bg-purple-200 text-purple-800">Até 4 pessoas</Badge>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <ul className="space-y-3">
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm font-medium">Teleconsultas ilimitadas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm font-medium">70% desconto em especialistas</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm">Prioridade máxima agendamento</span>
+                    </li>
+                    <li className="flex items-start">
+                      <CheckCircle className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm font-medium">R$ 500/dia seguro hospitalar</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+              <CardContent className="pt-6">
+                <p className="text-lg font-medium text-gray-800 mb-2">
+                  💰 Hospital recebe R$ 25 por plano ativo mensalmente
+                </p>
+                <p className="text-sm text-gray-600">
+                  Receita recorrente garantida enquanto o cliente permanecer ativo no sistema
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
@@ -485,15 +786,16 @@ export default function HospitalBriefing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-6">
-        <div className="container mx-auto">
+      <footer className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"></div>
+        <div className="container mx-auto relative z-10">
           <div className="grid md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-4">
                 <img 
-                  src="/assets/cnvidas-logo-transparent.png" 
+                  src="/assets/Logotipo_cnvidas_comprido_transparent_advanced_fuzz3.png" 
                   alt="CNVidas"
-                  className="h-10 w-auto filter brightness-0 invert"
+                  className="h-10 w-auto filter brightness-0 invert transform transition-transform duration-300 hover:scale-110"
                 />
               </div>
               <p className="text-gray-400">
