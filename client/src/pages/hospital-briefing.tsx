@@ -38,15 +38,15 @@ const FeatureCard = ({ icon: Icon, title, description }: {
   title: string;
   description: string;
 }) => (
-  <Card className="h-full hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200 transform hover:-translate-y-1 hover:scale-105">
-    <CardHeader className="text-center">
-      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mb-4 transform transition-transform duration-300 hover:rotate-12">
+  <Card className="h-full hover:shadow-xl transition-all duration-300 border-2 border-gray-200 hover:border-blue-400 transform hover:-translate-y-2 bg-white">
+    <CardHeader className="text-center pb-4">
+      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mb-4 transform transition-transform duration-300 hover:rotate-6 shadow-lg">
         <Icon className="w-8 h-8 text-white" />
       </div>
-      <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+      <CardTitle className="text-xl font-bold text-gray-800">{title}</CardTitle>
     </CardHeader>
-    <CardContent>
-      <p className="text-gray-600 text-center">{description}</p>
+    <CardContent className="px-6">
+      <p className="text-gray-600 text-center leading-relaxed">{description}</p>
     </CardContent>
   </Card>
 );
@@ -56,17 +56,29 @@ const StatCard = ({ icon: Icon, value, label, color = "blue" }: {
   value: string;
   label: string;
   color?: string;
-}) => (
-  <Card className="text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-    <CardContent className="pt-6">
-      <div className={`mx-auto w-12 h-12 bg-gradient-to-br from-${color}-500 to-${color}-700 rounded-full flex items-center justify-center mb-4 animate-pulse`}>
-        <Icon className="w-6 h-6 text-white" />
-      </div>
-      <div className="text-3xl font-bold text-gray-800 transition-all duration-300 hover:scale-110">{value}</div>
-      <div className="text-sm text-gray-600 mt-1">{label}</div>
-    </CardContent>
-  </Card>
-);
+}) => {
+  // Define gradient classes explicitly to avoid dynamic class issues
+  const gradientClasses = {
+    blue: "from-blue-500 to-blue-700",
+    green: "from-green-500 to-green-700",
+    purple: "from-purple-500 to-purple-700",
+    orange: "from-orange-500 to-orange-700"
+  };
+  
+  const bgGradient = gradientClasses[color as keyof typeof gradientClasses] || gradientClasses.blue;
+  
+  return (
+    <Card className="text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+      <CardContent className="pt-6">
+        <div className={`mx-auto w-12 h-12 bg-gradient-to-br ${bgGradient} rounded-full flex items-center justify-center mb-4 animate-pulse`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+        <div className="text-3xl font-bold text-gray-800 transition-all duration-300 hover:scale-110">{value}</div>
+        <div className="text-sm text-gray-600 mt-1">{label}</div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const ROICalculator = () => {
   const [vidasAtivas, setVidasAtivas] = useState('200');
@@ -370,6 +382,7 @@ export default function HospitalBriefing() {
               icon={Users}
               value="50.000+"
               label="Vidas Ativas"
+              color="blue"
             />
             <StatCard
               icon={Building}
@@ -378,13 +391,13 @@ export default function HospitalBriefing() {
               color="green"
             />
             <StatCard
-              icon={DollarSign}
+              icon={TrendingUp}
               value="R$ 2.5M+"
               label="Receita Gerada"
               color="purple"
             />
             <StatCard
-              icon={Stethoscope}
+              icon={Heart}
               value="95%"
               label="Satisfação Médica"
               color="orange"
@@ -622,8 +635,14 @@ export default function HospitalBriefing() {
       <section className="py-20 px-6 bg-white/50">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-6">
-              Por que escolher o CNVidas?
+            <h2 className="text-4xl font-bold text-gray-800 mb-6 flex items-center justify-center gap-3">
+              Por que escolher o 
+              <img 
+                src="/assets/Logotipo_cnvidas_comprido_transparent_advanced_fuzz3.png" 
+                alt="CNVidas"
+                className="h-12 w-auto inline-block"
+              />
+              ?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Uma parceria estratégica que transforma seu hospital em uma plataforma 
@@ -715,11 +734,13 @@ export default function HospitalBriefing() {
           <div className="grid md:grid-cols-3 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <img 
-                  src="/assets/Logotipo_cnvidas_comprido_transparent_advanced_fuzz3.png" 
-                  alt="CNVidas"
-                  className="h-10 w-auto filter brightness-0 invert transform transition-transform duration-300 hover:scale-110"
-                />
+                <div className="bg-white rounded-lg px-3 py-1.5 inline-block">
+                  <img 
+                    src="/assets/Logotipo_cnvidas_comprido_transparent_advanced_fuzz3.png" 
+                    alt="CNVidas"
+                    className="h-8 w-auto transform transition-transform duration-300 hover:scale-110"
+                  />
+                </div>
               </div>
               <p className="text-gray-400">
                 Transformando o cuidado em saúde através da tecnologia e inovação.
