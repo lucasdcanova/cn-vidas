@@ -69,55 +69,26 @@ const StatCard = ({ icon: Icon, value, label, color = "blue" }: {
 );
 
 const ROICalculator = () => {
-  const [leitos, setLeitos] = useState('100');
-  const [planosVendidosMes1, setPlanosVendidosMes1] = useState('50');
-  const [planosVendidosMes2, setPlanosVendidosMes2] = useState('70');
-  const [planosVendidosMes3, setPlanosVendidosMes3] = useState('80');
-  const [mesesProjecao, setMesesProjecao] = useState(12);
+  const [vidasAtivas, setVidasAtivas] = useState('200');
   
   const calcularROI = () => {
-    const numLeitos = parseInt(leitos) || 0;
-    const mes1 = parseInt(planosVendidosMes1) || 0;
-    const mes2 = parseInt(planosVendidosMes2) || 0;
-    const mes3 = parseInt(planosVendidosMes3) || 0;
+    const totalVidas = parseInt(vidasAtivas) || 0;
     
     // Valor fixo por plano ativo
     const valorPorPlano = 25;
     
-    // Calculando planos ativos acumulados
-    const planosAtivos = {
-      mes1: mes1,
-      mes2: mes1 + mes2,
-      mes3: mes1 + mes2 + mes3,
-      mes6: mes1 + mes2 + mes3 + (mes3 * 3), // Assumindo mesma taxa do mês 3
-      mes12: mes1 + mes2 + mes3 + (mes3 * 9) // Assumindo mesma taxa do mês 3
-    };
-    
-    // Receitas mensais
-    const receitaMes1 = planosAtivos.mes1 * valorPorPlano;
-    const receitaMes3 = planosAtivos.mes3 * valorPorPlano;
-    const receitaMes6 = planosAtivos.mes6 * valorPorPlano;
-    const receitaMes12 = planosAtivos.mes12 * valorPorPlano;
-    
-    // Receita anual (soma de todos os meses)
-    let receitaAnualTotal = 0;
-    for (let i = 1; i <= 12; i++) {
-      if (i === 1) receitaAnualTotal += planosAtivos.mes1 * valorPorPlano;
-      else if (i === 2) receitaAnualTotal += (mes1 + mes2) * valorPorPlano;
-      else if (i === 3) receitaAnualTotal += planosAtivos.mes3 * valorPorPlano;
-      else receitaAnualTotal += (planosAtivos.mes3 + (mes3 * (i - 3))) * valorPorPlano;
-    }
-    
-    const receitaPorLeito = numLeitos > 0 ? Math.floor(receitaAnualTotal / numLeitos) : 0;
+    // Receitas mensais baseadas no total de vidas ativas
+    const receitaMensal = totalVidas * valorPorPlano;
+    const receitaTrimestral = receitaMensal * 3;
+    const receitaSemestral = receitaMensal * 6;
+    const receitaAnual = receitaMensal * 12;
     
     return {
-      receitaMes1,
-      receitaMes3,
-      receitaMes6,
-      receitaMes12,
-      receitaAnualTotal,
-      receitaPorLeito,
-      planosAtivos,
+      receitaMensal,
+      receitaTrimestral,
+      receitaSemestral,
+      receitaAnual,
+      totalVidas,
       valorPorPlano
     };
   };
@@ -137,58 +108,22 @@ const ROICalculator = () => {
 
       <div className="grid md:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Número de leitos do hospital
-            </label>
-            <Input
-              type="number"
-              placeholder="Ex: 100"
-              value={leitos}
-              onChange={(e) => setLeitos(e.target.value)}
-              className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
-            />
-          </div>
-
           <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-gray-800 mb-3">Projeção de vendas mensais</h4>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mês 1 - Novos planos
-                </label>
-                <Input
-                  type="number"
-                  placeholder="Ex: 50"
-                  value={planosVendidosMes1}
-                  onChange={(e) => setPlanosVendidosMes1(e.target.value)}
-                  className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mês 2 - Novos planos
-                </label>
-                <Input
-                  type="number"
-                  placeholder="Ex: 70"
-                  value={planosVendidosMes2}
-                  onChange={(e) => setPlanosVendidosMes2(e.target.value)}
-                  className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mês 3+ - Novos planos/mês
-                </label>
-                <Input
-                  type="number"
-                  placeholder="Ex: 80"
-                  value={planosVendidosMes3}
-                  onChange={(e) => setPlanosVendidosMes3(e.target.value)}
-                  className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
-                />
-              </div>
+            <h4 className="font-semibold text-gray-800 mb-3">Base de clientes ativos</h4>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Total de vidas ativas no sistema
+              </label>
+              <Input
+                type="number"
+                placeholder="Ex: 200"
+                value={vidasAtivas}
+                onChange={(e) => setVidasAtivas(e.target.value)}
+                className="text-lg transition-all duration-300 focus:scale-105 focus:shadow-lg"
+              />
+              <p className="text-xs text-gray-600 mt-2">
+                Quantidade de planos ativos que o hospital comercializará
+              </p>
             </div>
           </div>
 
@@ -205,67 +140,55 @@ const ROICalculator = () => {
         <div className="space-y-4">
           <Card className="bg-white/90 backdrop-blur shadow-lg">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Evolução da Receita Mensal</CardTitle>
+              <CardTitle className="text-lg">Projeção de Receitas</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                  <span className="text-sm text-gray-600">Mês 1</span>
+                  <span className="text-sm text-gray-600">Receita Mensal</span>
                   <span className="font-semibold text-gray-800">
-                    {resultado.planosAtivos.mes1} planos = R$ {resultado.receitaMes1.toLocaleString()}
+                    R$ {resultado.receitaMensal.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                  <span className="text-sm text-gray-600">Mês 3</span>
+                  <span className="text-sm text-gray-600">Receita Trimestral</span>
                   <span className="font-semibold text-blue-700">
-                    {resultado.planosAtivos.mes3} planos = R$ {resultado.receitaMes3.toLocaleString()}
+                    R$ {resultado.receitaTrimestral.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-                  <span className="text-sm text-gray-600">Mês 6</span>
+                  <span className="text-sm text-gray-600">Receita Semestral</span>
                   <span className="font-semibold text-green-700">
-                    {resultado.planosAtivos.mes6} planos = R$ {resultado.receitaMes6.toLocaleString()}
+                    R$ {resultado.receitaSemestral.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-2 bg-purple-50 rounded">
-                  <span className="text-sm font-medium text-gray-700">Mês 12</span>
+                  <span className="text-sm font-medium text-gray-700">Receita Anual</span>
                   <span className="font-bold text-purple-700 text-lg">
-                    {resultado.planosAtivos.mes12} planos = R$ {resultado.receitaMes12.toLocaleString()}
+                    R$ {resultado.receitaAnual.toLocaleString()}
                   </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl">
             <CardContent className="pt-6">
               <div className="text-center">
                 <TrendingUp className="w-12 h-12 mx-auto mb-3 animate-pulse" />
-                <div className="text-3xl font-bold mb-2">
-                  R$ {resultado.receitaAnualTotal.toLocaleString()}
+                <div className="text-3xl font-bold mb-2 drop-shadow-md">
+                  R$ {resultado.receitaAnual.toLocaleString()}
                 </div>
-                <div className="text-sm opacity-90">Receita Total no Primeiro Ano</div>
+                <div className="text-base font-medium">Receita Anual Recorrente</div>
               </div>
             </CardContent>
           </Card>
-
-          {resultado.receitaPorLeito > 0 && (
-            <Card className="bg-gradient-to-r from-amber-50 to-orange-50">
-              <CardContent className="pt-6 text-center">
-                <Award className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-orange-700">
-                  R$ {resultado.receitaPorLeito.toLocaleString()}
-                </div>
-                <div className="text-sm text-gray-600">Receita por leito no primeiro ano</div>
-              </CardContent>
-            </Card>
-          )}
 
           <div className="bg-gray-100 rounded-lg p-3">
             <p className="text-xs text-gray-600 font-medium mb-2">💡 Como funciona:</p>
             <div className="text-xs text-gray-500 space-y-1">
-              <div>• Cada plano vendido gera R$ {resultado.valorPorPlano}/mês</div>
-              <div>• Receita é acumulativa (planos não cancelam)</div>
+              <div>• {resultado.totalVidas} vidas ativas × R$ {resultado.valorPorPlano}/mês</div>
+              <div>• Receita recorrente mensal garantida</div>
               <div>• Hospital recebe 100% da comissão</div>
               <div>• Pagamento mensal direto na conta do hospital</div>
             </div>
@@ -294,7 +217,7 @@ export default function HospitalBriefing() {
 
   const openDemo = () => {
     console.log('Clicou no botão Ver Demonstração');
-    window.open('https://www.homologacao.cnvidas.com.br', '_blank');
+    window.open('https://www.homologacao.cnvidas.com.br/auth/hsj', '_blank');
   };
 
   const beneficios = [
