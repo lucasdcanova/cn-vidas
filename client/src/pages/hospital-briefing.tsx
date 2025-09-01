@@ -329,7 +329,7 @@ export default function HospitalBriefing() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-6">
+      <section className="py-12 px-6">
         <div className={`container mx-auto text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="mb-12">
             <Badge className="mb-6 bg-gradient-to-r from-blue-100 to-green-100 text-blue-800 text-sm px-4 py-2 animate-bounce">
@@ -407,7 +407,7 @@ export default function HospitalBriefing() {
       </section>
 
       {/* ROI Calculator */}
-      <section id="roi-calculator" className="py-16 px-6">
+      <section id="roi-calculator" className="py-8 px-6">
         <div className="container mx-auto animate-fade-in">
           <ROICalculator />
         </div>
