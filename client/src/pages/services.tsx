@@ -248,9 +248,10 @@ const Services: React.FC = () => {
           {isLoading ? (
             <div className="col-span-3 py-12 space-y-10">
               <div className="flex flex-col items-center justify-center text-center">
-                <div className="relative h-12 w-12 mb-6">
-                  <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                  <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" />
+                <div className="relative mb-6 h-16 w-16">
+                  <span className="absolute inset-0 rounded-full border-[3px] border-primary/20" />
+                  <span className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-primary border-r-primary/60 animate-[spin_1.8s_linear_infinite]" />
+                  <Loader2 className="absolute inset-3 h-10 w-10 text-primary animate-[spin_1.2s_linear_infinite]" />
                 </div>
                 <p className="text-gray-600 font-medium mb-2">
                   Aguarde enquanto localizamos os serviços...
