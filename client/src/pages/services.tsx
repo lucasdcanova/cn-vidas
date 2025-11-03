@@ -246,15 +246,37 @@ const Services: React.FC = () => {
         {/* Service cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
-            <div className="col-span-3 text-center py-12">
-              <div className="flex flex-col items-center justify-center">
-                <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+            <div className="col-span-3 py-12 space-y-10">
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="relative h-12 w-12 mb-6">
+                  <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                  <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" />
+                </div>
                 <p className="text-gray-600 font-medium mb-2">
                   Aguarde enquanto localizamos os serviços...
                 </p>
                 <p className="text-gray-500 text-sm">
                   Buscando parceiros disponíveis na sua região
                 </p>
+              </div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="rounded-xl border border-gray-200 bg-white/80 p-4 shadow-sm animate-pulse"
+                  >
+                    <div className="h-40 rounded-lg bg-slate-200" />
+                    <div className="mt-4 space-y-3">
+                      <div className="h-4 w-3/4 rounded bg-slate-200" />
+                      <div className="h-3 w-1/2 rounded bg-slate-100" />
+                      <div className="flex items-center space-x-3 pt-2">
+                        <div className="h-4 w-1/3 rounded bg-slate-100" />
+                        <div className="h-4 w-1/4 rounded bg-slate-100" />
+                      </div>
+                      <div className="h-10 w-full rounded bg-slate-200" />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ) : filteredServices.length > 0 ? (
