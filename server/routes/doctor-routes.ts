@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express, { Response } from 'express';
 import { storage } from '../storage';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth';

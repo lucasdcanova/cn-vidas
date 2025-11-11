@@ -34,7 +34,8 @@
     "node_modules",
     "dist",
     "client",
+    "server/tests/**/*",
     "**/*.test.ts",
     "**/*.spec.ts"
   ]
-} 
+}
