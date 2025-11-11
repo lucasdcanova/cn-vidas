@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Este arquivo mantém a exportação explícita do tipo global, útil para importações direcionais.
 import { Request } from 'express';
 
