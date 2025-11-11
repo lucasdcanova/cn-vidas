@@ -1,6 +1,8 @@
 import { storage } from '../storage';
 import stripe from './stripe-instance';
 import type Stripe from 'stripe';
+import type { User } from '../types/authenticated-request';
+import { AppError } from './app-error';
 
 /**
  * Configurações para os métodos de pagamento brasileiros
@@ -174,7 +176,8 @@ export function shouldChargeForEmergencyConsultation(
 export async function createSubscriptionPaymentSession(
   planId: string,
   customerId: string,
-  paymentMethod: 'card' | 'pix' | 'boleto'
+  paymentMethod: 'card' | 'pix' | 'boleto',
+  user: User
 ): Promise<{
   clientSecret: string;
   paymentMethod: string;
@@ -188,6 +191,49 @@ export async function createSubscriptionPaymentSession(
       throw new Error('Plano não encontrado');
     }
 
+    const sanitizeDigits = (value?: string | null) => (value ? value.replace(/\D/g, '') : '');
+
+    const ensureTaxId = (): string => {
+      const digits = sanitizeDigits(user.cpf);
+      if (!digits) {
+        throw new AppError('Para pagar com boleto é necessário informar um CPF válido no seu perfil.', 400);
+      }
+      if (digits.length !== 11 && digits.length !== 14) {
+        throw new AppError('CPF/CNPJ inválido. Atualize seus dados para continuar.', 400);
+      }
+      return digits;
+    };
+
+    const normalizeState = () => (user.state?.trim().toUpperCase() || 'SP').slice(0, 2);
+    const normalizePostalCode = () => {
+      const digits = sanitizeDigits(user.zipcode);
+      if (!digits) return '00000000';
+      return digits.padEnd(8, '0').slice(0, 8);
+    };
+
+    const buildAddress = (): Stripe.AddressParam => {
+      const line1 = user.street?.trim() || user.address?.trim() || 'Endereço não informado';
+      const line2Parts: string[] = [];
+      if (user.number) line2Parts.push(`Nº ${user.number}`);
+      if (user.complement) line2Parts.push(user.complement.trim());
+
+      return {
+        line1,
+        line2: line2Parts.length ? line2Parts.join(' ') : undefined,
+        city: user.city?.trim() || 'São Paulo',
+        state: normalizeState(),
+        country: 'BR',
+        postal_code: normalizePostalCode(),
+      };
+    };
+
+    const billingName = user.fullName || user.username || user.email;
+    const billingEmail = user.email;
+
+    if (!billingEmail) {
+      throw new AppError('Não foi possível localizar um e-mail válido para emissão do pagamento.', 400);
+    }
+
     // Configuração base para todos os métodos
     const baseOptions: Stripe.PaymentIntentCreateParams = {
       amount: plan.price,
@@ -197,56 +243,104 @@ export async function createSubscriptionPaymentSession(
         planId,
         planName: plan.name,
         planType: 'subscription',
+        userId: user.id.toString(),
       },
       description: `Assinatura do plano ${plan.displayName}`,
+      receipt_email: billingEmail,
     };
     
     // Adicionar configurações específicas para cada método de pagamento
     if (paymentMethod === 'pix') {
       // Configuração específica para PIX
+      const pixExpiresSeconds = brazilianPaymentOptions.pix.expires_in;
       const paymentIntent = await stripe.paymentIntents.create({
         ...baseOptions,
-        payment_method_types: ['pix']
-        // Removido payment_method_options que é incompatível com assinaturas
+        payment_method_types: ['pix'],
+        payment_method_data: {
+          type: 'pix',
+        } as Stripe.PaymentIntentCreateParams.PaymentMethodData,
+        payment_method_options: {
+          pix: {
+            expires_after_seconds: pixExpiresSeconds,
+          },
+        },
+        confirm: true,
       });
       
-      // Formatação da data de expiração
-      const expiresAt = new Date();
-      expiresAt.setSeconds(expiresAt.getSeconds() + brazilianPaymentOptions.pix.expires_in);
+      const pixAction = paymentIntent.next_action?.pix_display_qr_code;
+      if (!pixAction) {
+        throw new Error('Não foi possível gerar o QR Code PIX.');
+      }
+
+      const pixExpiresAt = pixAction.expires_at
+        ? new Date(pixAction.expires_at * 1000).toISOString()
+        : new Date(Date.now() + pixExpiresSeconds * 1000).toISOString();
       
       // Retornar dados específicos do PIX
       return {
         clientSecret: paymentIntent.client_secret as string,
         paymentMethod: 'pix',
         pixInfo: {
-          qrCodeText: paymentIntent.next_action?.pix_display_qr_code?.data || '',
-          qrCodeUrl: paymentIntent.next_action?.pix_display_qr_code?.image_url_png || '',
+          qrCodeText: pixAction.data || '',
+          qrCodeUrl: pixAction.image_url_png || '',
           amount: plan.price / 100,
-          expiresAt: expiresAt.toISOString()
+          expiresAt: pixExpiresAt
         }
       };
     } else if (paymentMethod === 'boleto') {
+      const taxId = ensureTaxId();
+      const billingAddress = buildAddress();
+      const boletoExpiresDays = Math.max(
+        1,
+        Math.round(brazilianPaymentOptions.boleto.expires_in / (24 * 60 * 60))
+      );
+
       // Configuração específica para boleto
       const paymentIntent = await stripe.paymentIntents.create({
         ...baseOptions,
-        payment_method_types: ['boleto']
-        // Removido payment_method_options que é incompatível com assinaturas
+        payment_method_types: ['boleto'],
+        payment_method_data: {
+          type: 'boleto',
+          billing_details: {
+            name: billingName,
+            email: billingEmail,
+            address: billingAddress,
+            phone: user.phone || undefined,
+          },
+          boleto: {
+            tax_id: taxId,
+          },
+        } as unknown as Stripe.PaymentIntentCreateParams.PaymentMethodData,
+        payment_method_options: {
+          boleto: {
+            expires_after_days: boletoExpiresDays,
+          },
+        },
+        shipping: {
+          name: billingName,
+          address: billingAddress,
+        },
+        confirm: true,
       });
       
-      // Formatação da data de expiração
-      const expiresAt = new Date();
-      expiresAt.setSeconds(expiresAt.getSeconds() + brazilianPaymentOptions.boleto.expires_in);
+      const boletoDetails = paymentIntent.next_action?.boleto_display_details;
+      if (!boletoDetails) {
+        throw new Error('Não foi possível gerar o boleto bancário.');
+      }
+      
+      const boletoExpiresAt = boletoDetails.expires_at
+        ? new Date(boletoDetails.expires_at * 1000).toISOString()
+        : new Date(Date.now() + boletoExpiresDays * 24 * 60 * 60 * 1000).toISOString();
       
       // Retornar dados específicos do boleto
       return {
         clientSecret: paymentIntent.client_secret as string,
         paymentMethod: 'boleto',
         boletoInfo: {
-          // Adaptando para os campos corretos da API atual do Stripe
-          code: paymentIntent.next_action?.boleto_display_details?.number || '',
-          url: paymentIntent.next_action?.boleto_display_details?.hosted_voucher_url || '',
+          code: boletoDetails.number || '',
+          url: boletoDetails.hosted_voucher_url || '',
           amount: plan.price / 100,
-          expiresAt: expiresAt.toISOString()
+          expiresAt: boletoExpiresAt
         }
       };
     } else {

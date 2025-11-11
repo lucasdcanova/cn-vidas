@@ -1,9 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { eq, desc } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 import { db } from '../db.js';
 import { subscriptionPlans, userSubscriptions, users } from '../../shared/schema';
 import { AuthenticatedRequest } from '../types/authenticated-request';
+import { applyScheduledDowngradeIfEligible } from '../utils/subscription-helpers';
 
 const router = Router();
 
@@ -173,26 +174,24 @@ router.get('/current', isAuthenticated, async (req: Request, res: Response) => {
   try {
     console.log(`🔍 Buscando assinatura atual para usuário ${user.email} (ID: ${user.id})`);
     
-    // Buscar a assinatura mais recente do usuário no banco
-    // Não filtrar por status aqui para pegar qualquer assinatura
-    const userSubscription = await db
-      .select({
-        subscription: userSubscriptions,
-        plan: subscriptionPlans
-      })
-      .from(userSubscriptions)
-      .leftJoin(subscriptionPlans, eq(userSubscriptions.planId, subscriptionPlans.id))
-      .where(eq(userSubscriptions.userId, user.id))
-      .orderBy(desc(userSubscriptions.createdAt))
-      .limit(1);
+    const subscriptionRecord = await applyScheduledDowngradeIfEligible(user.id);
 
-    if (userSubscription.length > 0) {
-      const subscription = userSubscription[0];
+    if (subscriptionRecord) {
+      const subscription = subscriptionRecord;
       console.log(`✅ Assinatura encontrada:`);
       console.log(`   - ID: ${subscription.subscription.id}`);
       console.log(`   - Status: ${subscription.subscription.status}`);
       console.log(`   - Plano: ${subscription.plan?.name}`);
       console.log(`   - Data criação: ${subscription.subscription.createdAt}`);
+
+      let scheduledPlanDetail = null;
+      if (subscription.subscription.scheduledPlanId) {
+        const [scheduledPlan] = await db
+          .select()
+          .from(subscriptionPlans)
+          .where(eq(subscriptionPlans.id, subscription.subscription.scheduledPlanId));
+        scheduledPlanDetail = scheduledPlan || null;
+      }
       
       // **CORREÇÃO: Sincronizar subscriptionPlan na tabela users**
       if (subscription.plan && subscription.subscription.status === 'active') {
@@ -222,7 +221,11 @@ router.get('/current', isAuthenticated, async (req: Request, res: Response) => {
           status: subscription.subscription.status,
           startDate: subscription.subscription.startDate,
           endDate: subscription.subscription.endDate,
-          plan: subscription.plan
+          plan: subscription.plan,
+          cancelAtPeriodEnd: subscription.subscription.cancelAtPeriodEnd,
+          scheduledPlanId: subscription.subscription.scheduledPlanId,
+          scheduledPlanApplied: subscription.subscription.scheduledPlanApplied,
+          scheduledPlan: scheduledPlanDetail
         }
       });
     } else {

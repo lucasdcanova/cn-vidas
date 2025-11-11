@@ -410,6 +410,9 @@ export const userSubscriptions = pgTable("user_subscriptions", {
   price: integer("price").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
+  scheduledPlanId: integer("scheduled_plan_id").references(() => subscriptionPlans.id),
+  scheduledPlanApplied: boolean("scheduled_plan_applied").default(false).notNull(),
 });
 
 export const qrAuthLogs = pgTable("qr_auth_logs", {
