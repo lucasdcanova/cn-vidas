@@ -275,6 +275,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'pix' | 'boleto'>('card');
   const [pixInfo, setPixInfo] = useState<{
     qrCodeUrl?: string;
+    qrCodeText?: string;
     expiresAt?: string;
     amount?: number;
   } | null>(null);

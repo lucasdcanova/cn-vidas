@@ -8,6 +8,7 @@ import { ptBR } from 'date-fns/locale';
 interface PixPaymentFormProps {
   pixInfo: {
     qrCodeUrl?: string;
+    qrCodeText?: string;
     expiresAt?: string;
     amount?: number;
   } | null;
@@ -42,7 +43,7 @@ export const PixPaymentForm: React.FC<PixPaymentFormProps> = ({
   });
   
   // Código PIX placeholder para uso temporário
-  const pixCode = "00020126330014BR.GOV.BCB.PIX0111062268263520214Pagamento CN Vidas5204000053039865406123.455802BR5925PAGAMENTO CN VIDAS SAUDE6009SAO PAULO62140510CNVIDAS123063044CBD";
+  const pixCode = pixInfo?.qrCodeText || "00020126330014BR.GOV.BCB.PIX0111062268263520214Pagamento CN Vidas5204000053039865406123.455802BR5925PAGAMENTO CN VIDAS SAUDE6009SAO PAULO62140510CNVIDAS123063044CBD";
   
   // Copiar código PIX
   const copyToClipboard = () => {
