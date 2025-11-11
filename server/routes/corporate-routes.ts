@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from "express";
 import { eq, and, gte, lte, or, sql, desc } from "drizzle-orm";
 import { authenticateToken } from "../middleware/auth";

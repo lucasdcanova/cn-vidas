@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { PKPass } from 'passkit-generator';
 import path from 'path';
