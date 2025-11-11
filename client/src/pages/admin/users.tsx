@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SearchIcon, UserPlus, Edit, Trash2, AlertCircle, Check, X, Eye, Shield, CreditCard, Star, Calendar, Video, Settings, Hammer, Building2, Stethoscope, Users } from "lucide-react";
+import { SearchIcon, UserPlus, Edit, Trash2, AlertCircle, Check, X, Eye, Shield, CreditCard, Star, Calendar, Video, Settings, Hammer, Building2, Stethoscope, Users, AlertTriangle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -95,6 +95,17 @@ interface DoctorFormData {
 
 interface UserWithDoctor extends User {
   doctor?: Doctor;
+}
+
+type HistoryDetails = {
+  appointments?: number;
+  payments?: number;
+  [key: string]: number | undefined;
+};
+
+interface ForceDeleteContext {
+  user: UserWithDoctor;
+  historyDetails?: HistoryDetails;
 }
 
 // Schema para criação e edição de usuários
@@ -169,6 +180,8 @@ const AdminUsersPage: React.FC = () => {
   const [currentDoctor, setCurrentDoctor] = useState<Doctor | null>(null);
   const [filterRole, setFilterRole] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [forceDeleteDialogOpen, setForceDeleteDialogOpen] = useState(false);
+  const [forceDeleteContext, setForceDeleteContext] = useState<ForceDeleteContext | null>(null);
 
   // Buscar lista de usuários
   const { data: users = [], isLoading } = useQuery<UserWithDoctor[], Error>({
@@ -353,10 +366,17 @@ const AdminUsersPage: React.FC = () => {
     },
   });
 
-  // Mutation para deletar usuário
-  const deleteUserMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await apiRequest("DELETE", `/api/admin/users/${id}`);
+  type DeleteUserVariables = {
+    id: number;
+    force?: boolean;
+    user?: UserWithDoctor;
+  };
+  
+  // Mutation para deletar usuário (normal ou forçado)
+  const deleteUserMutation = useMutation<unknown, unknown, DeleteUserVariables>({
+    mutationFn: async ({ id, force }: DeleteUserVariables) => {
+      const forceQuery = force ? "?force=true" : "";
+      const res = await apiRequest("DELETE", `/api/admin/users/${id}${forceQuery}`);
       // Verificar se a resposta tem conteúdo antes de tentar fazer parse
       const contentType = res.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
@@ -365,39 +385,87 @@ const AdminUsersPage: React.FC = () => {
       // Se não for JSON, retornar um objeto vazio ou null
       return { success: true };
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
         title: "Usuário removido",
-        description: "O usuário foi removido com sucesso!",
+        description: variables?.force
+          ? "Usuário e todo o histórico associado foram removidos permanentemente."
+          : "O usuário foi removido com sucesso!",
       });
+      setForceDeleteDialogOpen(false);
+      setForceDeleteContext(null);
     },
-    onError: (error: unknown) => {
-      let description = "Ocorreu um erro ao remover o usuário.";
-
+    onError: (error: unknown, variables) => {
       if (error instanceof ApiError) {
         if (error.data && typeof error.data === "object") {
           const errorData = error.data as Record<string, unknown>;
+          const errorType = typeof errorData.errorType === "string" ? errorData.errorType : undefined;
+          
+          if (errorType === "IMPORTANT_HISTORY" && !variables?.force) {
+            const historyDetails = (() => {
+              if (errorData.historyDetails && typeof errorData.historyDetails === "object") {
+                const entries = Object.entries(errorData.historyDetails as Record<string, unknown>)
+                  .filter(([, value]) => typeof value === "number");
+                if (entries.length > 0) {
+                  return Object.fromEntries(entries) as HistoryDetails;
+                }
+              }
+              return undefined;
+            })();
+            
+            const userForDialog = variables?.user || users.find((u) => u.id === variables?.id);
+            if (userForDialog) {
+              setForceDeleteContext({
+                user: userForDialog,
+                historyDetails,
+              });
+              setForceDeleteDialogOpen(true);
+            }
+            
+            toast({
+              title: "Usuário com histórico importante",
+              description: "Este usuário possui consultas realizadas ou pagamentos registrados. Você pode forçar a exclusão para remover tudo definitivamente.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          let description = "Ocorreu um erro ao remover o usuário.";
           if (typeof errorData.details === "string") {
             description = errorData.details;
           } else if (typeof errorData.error === "string") {
             description = errorData.error;
+          } else if (error.message) {
+            description = error.message;
           }
-
-          const errorType = typeof errorData.errorType === "string" ? errorData.errorType : undefined;
-          if (errorType === "IMPORTANT_HISTORY") {
-            description = "Este usuário possui consultas realizadas ou pagamentos registrados e, por segurança, não pode ser removido.";
-          }
+          
+          toast({
+            title: "Erro ao remover usuário",
+            description,
+            variant: "destructive",
+          });
+          return;
         } else if (error.message) {
-          description = error.message;
+          toast({
+            title: "Erro ao remover usuário",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
         }
       } else if (error instanceof Error && error.message) {
-        description = error.message;
+        toast({
+          title: "Erro ao remover usuário",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
-
+    
       toast({
         title: "Erro ao remover usuário",
-        description,
+        description: "Ocorreu um erro ao remover o usuário.",
         variant: "destructive",
       });
     },
@@ -522,8 +590,13 @@ const AdminUsersPage: React.FC = () => {
   };
 
   // Função para deletar usuário
-  const handleDeleteUser = (id: number) => {
-    deleteUserMutation.mutate(id);
+  const handleDeleteUser = (user: UserWithDoctor) => {
+    deleteUserMutation.mutate({ id: user.id, user });
+  };
+
+  const handleConfirmForceDelete = () => {
+    if (!forceDeleteContext?.user) return;
+    deleteUserMutation.mutate({ id: forceDeleteContext.user.id, force: true, user: forceDeleteContext.user });
   };
 
   return (
@@ -928,10 +1001,11 @@ const AdminUsersPage: React.FC = () => {
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                     <AlertDialogAction 
-                                      onClick={() => handleDeleteUser(user.id)}
+                                      onClick={() => handleDeleteUser(user)}
                                       className="bg-red-500 hover:bg-red-600"
+                                      disabled={deleteUserMutation.isPending && deleteUserMutation.variables?.id === user.id}
                                     >
-                                      Excluir
+                                      {deleteUserMutation.isPending && deleteUserMutation.variables?.id === user.id ? 'Excluindo...' : 'Excluir'}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -1367,6 +1441,70 @@ const AdminUsersPage: React.FC = () => {
             </Form>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog
+          open={forceDeleteDialogOpen}
+          onOpenChange={(open) => {
+            setForceDeleteDialogOpen(open);
+            if (!open) {
+              setForceDeleteContext(null);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Forçar exclusão
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                O usuário{" "}
+                <span className="font-semibold">
+                  {forceDeleteContext?.user.fullName}
+                </span>{" "}
+                possui histórico de consultas ou pagamentos. Forçar a exclusão removerá definitivamente todos os dados associados.
+              </AlertDialogDescription>
+              <p className="text-sm text-muted-foreground">
+                Esta ação não pode ser desfeita. Continue apenas se tiver certeza.
+              </p>
+              {forceDeleteContext?.historyDetails && (
+                <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  <p className="font-semibold mb-1">Histórico detectado:</p>
+                  <ul className="space-y-1 list-disc pl-4">
+                    {typeof forceDeleteContext.historyDetails.appointments === "number" && (
+                      <li>Consultas registradas: {forceDeleteContext.historyDetails.appointments}</li>
+                    )}
+                    {typeof forceDeleteContext.historyDetails.payments === "number" && (
+                      <li>Pagamentos/assinaturas: {forceDeleteContext.historyDetails.payments}</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => {
+                  setForceDeleteDialogOpen(false);
+                  setForceDeleteContext(null);
+                }}
+              >
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmForceDelete}
+                className="bg-red-600 hover:bg-red-700"
+                disabled={
+                  deleteUserMutation.isPending &&
+                  deleteUserMutation.variables?.id === forceDeleteContext?.user.id
+                }
+              >
+                {deleteUserMutation.isPending && deleteUserMutation.variables?.id === forceDeleteContext?.user.id
+                  ? "Excluindo..."
+                  : "Excluir definitivamente"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

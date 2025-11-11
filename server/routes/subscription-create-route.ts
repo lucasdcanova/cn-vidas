@@ -105,14 +105,34 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
     
     // Se o plano for gratuito, ativamos sem processar pagamento
     if (plan.price === 0) {
+      const now = new Date();
+      const endDate = new Date(now.getTime());
+      endDate.setMonth(endDate.getMonth() + 1);
+
       // Atualizar o usuário com o plano gratuito
       await db.update(users)
         .set({
           subscriptionPlan: plan.name,
           subscriptionStatus: 'active',
-          emergencyConsultationsLeft: 0
+          emergencyConsultationsLeft: 0,
+          subscriptionPlanId: plan.id,
+          subscriptionStartDate: now,
+          subscriptionEndDate: endDate,
+          subscriptionChangedAt: now,
         })
         .where(eq(users.id, user.id));
+      
+      await db.insert(userSubscriptions).values({
+        userId: user.id,
+        planId: plan.id,
+        status: 'active',
+        startDate: now,
+        endDate,
+        paymentMethod: 'free',
+        price: plan.price,
+        createdAt: now,
+        updatedAt: now,
+      });
       
       return res.json({
         message: "Plano gratuito ativado com sucesso",

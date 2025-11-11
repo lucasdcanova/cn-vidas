@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,7 @@ import { apiRequest } from "@/lib/queryClient";
 import PaymentMethods from "@/components/payment/payment-methods";
 import TransactionHistory from "@/components/payment/transaction-history";
 import { Capacitor } from '@capacitor/core';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 // Definição do tipo de plano de assinatura
 interface SubscriptionPlan {
@@ -50,11 +51,14 @@ interface UserSubscription {
 
 const SubscriptionPage: React.FC = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const [showFamilyPlans, setShowFamilyPlans] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{id: number, name: string, price: string} | null>(null);
   const [activeTab, setActiveTab] = useState("plans");
+  const [planChangeLoadingId, setPlanChangeLoadingId] = useState<number | null>(null);
+  const [confirmDowngradePlan, setConfirmDowngradePlan] = useState<SubscriptionPlan | null>(null);
   
   // Detectar se está no iOS
   const isIOS = Capacitor.getPlatform() === 'ios';
@@ -202,6 +206,70 @@ const SubscriptionPage: React.FC = () => {
     setSelectedPlan(null);
   };
 
+  const handlePlanSelection = async (plan: SubscriptionPlan) => {
+    if (plan.price === 0) {
+      try {
+        setPlanChangeLoadingId(plan.id);
+        const response = await apiRequest("POST", "/api/subscription/create-session", {
+          planId: plan.id.toString(),
+          paymentMethod: "card"
+        });
+        let data: any = null;
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+        if (!response.ok) {
+          throw new Error(data?.message || "Não foi possível ativar o plano gratuito.");
+        }
+
+        toast({
+          title: "Plano gratuito ativado",
+          description: data?.message || "Você agora está no plano gratuito da CN Vidas.",
+        });
+
+        await refetchSubscription();
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+      } catch (error: any) {
+        console.error("Erro ao ativar plano gratuito:", error);
+        toast({
+          title: "Erro ao trocar de plano",
+          description: error?.message || "Não foi possível ativar o plano gratuito. Tente novamente.",
+          variant: "destructive",
+        });
+      } finally {
+        setPlanChangeLoadingId(null);
+      }
+      return;
+    }
+
+    setSelectedPlan({
+      id: plan.id,
+      name: getPlanName(plan.name),
+      price: `R$ ${(plan.price / 100).toFixed(2).replace('.', ',')}`
+    });
+    setCheckoutOpen(true);
+  };
+
+  const handlePlanButtonClick = (plan: SubscriptionPlan, isDowngrade: boolean) => {
+    if (plan.price === 0 && isDowngrade) {
+      setConfirmDowngradePlan(plan);
+      return;
+    }
+    void handlePlanSelection(plan);
+  };
+
+  const handleConfirmDowngrade = async () => {
+    if (!confirmDowngradePlan) return;
+    const planToDowngrade = confirmDowngradePlan;
+    setConfirmDowngradePlan(null);
+    await handlePlanSelection(planToDowngrade);
+  };
+
+  const handleCloseDowngradeDialog = () => setConfirmDowngradePlan(null);
+
   // Conteúdo dos planos
   const PlansContent = () => (
     <>
@@ -314,6 +382,11 @@ const SubscriptionPage: React.FC = () => {
             const isCurrentPlan = currentSubscription?.plan?.id === plan.id;
             const isDowngrade = currentSubscription?.plan && 
                               currentSubscription.plan.price > plan.price;
+            const isFreePlan = plan.price === 0;
+            const isProcessingFreePlan = planChangeLoadingId === plan.id;
+            const buttonLabel = isFreePlan
+              ? (isDowngrade ? "Migrar para Plano Gratuito" : "Ativar Plano Gratuito")
+              : (isDowngrade ? "Fazer Downgrade" : "Assinar Plano");
             
             // Função para obter as cores do plano
             const getPlanColorClass = (planName: string) => {
@@ -427,17 +500,18 @@ const SubscriptionPage: React.FC = () => {
                           'bg-gradient-to-r from-indigo-600 to-slate-700 hover:from-indigo-700 hover:to-slate-800 text-white border-0' :
                         ''
                       }`}
-                      onClick={() => {
-                        setSelectedPlan({
-                          id: plan.id,
-                          name: getPlanName(plan.name),
-                          price: `R$ ${(plan.price / 100).toFixed(2).replace('.', ',')}`
-                        });
-                        setCheckoutOpen(true);
-                      }}
-                      variant={isDowngrade ? "outline" : "default"}
+                      onClick={() => handlePlanButtonClick(plan, Boolean(isDowngrade))}
+                      variant={isDowngrade || isFreePlan ? "outline" : "default"}
+                      disabled={isProcessingFreePlan}
                     >
-                      {isDowngrade ? "Fazer Downgrade" : "Assinar Plano"}
+                      {isProcessingFreePlan ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processando...
+                        </>
+                      ) : (
+                        buttonLabel
+                      )}
                     </Button>
                   )}
                 </CardFooter>
@@ -527,6 +601,8 @@ const SubscriptionPage: React.FC = () => {
       </Card>
     </div>
   );
+
+  const downgradePlanLabel = confirmDowngradePlan ? getPlanName(confirmDowngradePlan.name) : "Plano Gratuito";
   
   return (
     <DashboardLayout title="Gerenciar Planos">
@@ -570,6 +646,30 @@ const SubscriptionPage: React.FC = () => {
           }}
         />
       )}
+
+      <AlertDialog
+        open={Boolean(confirmDowngradePlan)}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCloseDowngradeDialog();
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar downgrade</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a alternar para {downgradePlanLabel}. Ao confirmar, benefícios do plano atual serão removidos e consultas futuras serão cobradas integralmente. Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCloseDowngradeDialog}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDowngrade}>
+              Confirmar downgrade
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
