@@ -1,11 +1,51 @@
 import { QueryClient, QueryFunction, useQuery, useMutation } from "@tanstack/react-query";
-import { API_BASE_URL } from "@/config/api";
 import { httpRequest } from "./http-client";
+
+export class ApiError extends Error {
+  status: number;
+  data?: unknown;
+
+  constructor(status: number, message: string, data?: unknown) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.data = data;
+  }
+}
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    const contentType = res.headers.get("content-type") || "";
+    const rawBody = await res.text();
+    let parsedBody: unknown = null;
+
+    if (contentType.includes("application/json") && rawBody) {
+      try {
+        parsedBody = JSON.parse(rawBody);
+      } catch (parseError) {
+        console.warn("Failed to parse error response as JSON:", parseError);
+      }
+    }
+
+    let messageFromBody: string | null = null;
+    if (parsedBody && typeof parsedBody === "object") {
+      const parsedRecord = parsedBody as Record<string, unknown>;
+      if (typeof parsedRecord.details === "string") {
+        messageFromBody = parsedRecord.details;
+      } else if (typeof parsedRecord.error === "string") {
+        messageFromBody = parsedRecord.error;
+      } else if (typeof parsedRecord.message === "string") {
+        messageFromBody = parsedRecord.message;
+      }
+    }
+
+    const finalMessage =
+      messageFromBody ||
+      rawBody ||
+      res.statusText ||
+      `Request failed with status ${res.status}`;
+
+    throw new ApiError(res.status, finalMessage, parsedBody ?? rawBody);
   }
 }
 
