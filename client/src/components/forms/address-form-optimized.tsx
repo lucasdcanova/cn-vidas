@@ -18,6 +18,8 @@ import { Loader2, Search } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+const normalizeCepValue = (value: string) => value.replace(/\D/g, '').slice(0, 8);
+
 // Esquema de validação para endereço
 const addressSchema = z.object({
   zipcode: z.string().min(8, 'CEP deve ter 8 dígitos').max(9, 'CEP deve ter no máximo 9 caracteres'),
@@ -69,7 +71,7 @@ export const AddressFormOptimized = memo(({
   const internalForm = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
-      zipcode: defaultValues?.zipcode || '',
+      zipcode: defaultValues?.zipcode ? normalizeCepValue(defaultValues.zipcode) : '',
       street: defaultValues?.street || '',
       number: defaultValues?.number || '',
       complement: defaultValues?.complement || '',
@@ -225,12 +227,11 @@ export const AddressFormOptimized = memo(({
                       disabled={isSubmitting || isReadOnly}
                       value={field.value ? formatCep(field.value) : ''}
                       onChange={(e) => {
-                        const formatted = formatCep(e.target.value);
-                        field.onChange(formatted);
-                        
-                        // Se o CEP tiver 8 dígitos, buscar endereço automaticamente
-                        if (e.target.value.replace(/\D/g, '').length === 8) {
-                          fetchAddressByCep(e.target.value);
+                        const digits = normalizeCepValue(e.target.value);
+                        field.onChange(digits);
+
+                        if (digits.length === 8) {
+                          fetchAddressByCep(digits);
                         }
                       }}
                       className="pr-10 transition-all duration-300 hover:shadow-sm focus:shadow-md"
@@ -240,8 +241,8 @@ export const AddressFormOptimized = memo(({
                       variant="ghost"
                       size="icon"
                       className="absolute right-0 top-0 h-full"
-                      onClick={() => fetchAddressByCep(field.value)}
-                      disabled={isSearchingCep || !field.value || field.value.replace(/\D/g, '').length !== 8}
+                      onClick={() => fetchAddressByCep(field.value || '')}
+                      disabled={isSearchingCep || !field.value || field.value.length !== 8}
                     >
                       {isSearchingCep ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
