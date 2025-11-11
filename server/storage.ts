@@ -69,7 +69,7 @@ export interface IStorage {
   getUsersWithProfileImages(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, data: Partial<InsertUser>): Promise<User>;
-  deleteUser(id: number): Promise<boolean>;
+  deleteUser(id: number, options?: { force?: boolean }): Promise<boolean>;
   getUsersByRole(role: "patient" | "partner" | "admin" | "doctor"): Promise<User[]>;
   updateUserPassword(id: number, password: string): Promise<User>;
   
@@ -517,9 +517,10 @@ export class DatabaseStorage implements IStorage {
     return dependencies;
   }
 
-  async deleteUser(id: number): Promise<boolean> {
+  async deleteUser(id: number, options?: { force?: boolean }): Promise<boolean> {
     try {
-      console.log(`🗑️ Tentando excluir usuário ID: ${id}`);
+      const forceDelete = options?.force ?? false;
+      console.log(`🗑️ Tentando excluir usuário ID: ${id} (force: ${forceDelete})`);
       
       // Verificar se o usuário existe primeiro
       const existingUser = await this.getUser(id);
@@ -531,17 +532,28 @@ export class DatabaseStorage implements IStorage {
       console.log(`✅ Usuário encontrado: ${existingUser.fullName} (${existingUser.email})`);
       
       // Verificar se o usuário tem histórico importante (consultas realizadas ou pagamentos)
-      const hasAppointments = await this.db.execute(
+      const appointmentsResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM appointments WHERE user_id = ${id} AND status IN ('completed', 'in_progress')`
       );
       
-      const hasPayments = await this.db.execute(
+      const paymentsResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM user_subscriptions WHERE user_id = ${id}`
       );
       
-      if (Number(hasAppointments.rows[0]?.count || 0) > 0 || Number(hasPayments.rows[0]?.count || 0) > 0) {
-        console.log(`❌ Usuário ID ${id} tem histórico importante e não pode ser excluído`);
-        throw new Error('User has important history and cannot be deleted');
+      const appointmentHistoryCount = Number(appointmentsResult.rows[0]?.count || 0);
+      const paymentHistoryCount = Number(paymentsResult.rows[0]?.count || 0);
+      const hasImportantHistory = appointmentHistoryCount > 0 || paymentHistoryCount > 0;
+      const historyDetails = { appointments: appointmentHistoryCount, payments: paymentHistoryCount };
+      
+      if (hasImportantHistory && !forceDelete) {
+        console.log(`❌ Usuário ID ${id} tem histórico importante e não pode ser excluído (consultas: ${appointmentHistoryCount}, pagamentos: ${paymentHistoryCount})`);
+        const error = new Error('User has important history and cannot be deleted');
+        (error as Error & { historyDetails?: typeof historyDetails }).historyDetails = historyDetails;
+        throw error;
+      }
+
+      if (hasImportantHistory && forceDelete) {
+        console.warn(`⚠️ Forçando exclusão do usuário ID ${id} com histórico importante`, historyDetails);
       }
       
       // Excluir registros básicos relacionados
@@ -558,6 +570,21 @@ export class DatabaseStorage implements IStorage {
             console.log(`🏢 Excluindo registro de parceiro para usuário ID ${id}`);
             await tx.delete(partners).where(eq(partners.userId, id));
           }
+          
+          // Excluir logs de autenticação por QR Code
+          console.log(`🪪 Excluindo QR auth logs para usuário ID ${id}`);
+          await tx.delete(qrAuthLogs)
+            .where(
+              or(
+                eq(qrAuthLogs.scannerUserId, id),
+                eq(qrAuthLogs.tokenUserId, id)
+              )
+            );
+          
+          // Excluir tokens de QR code
+          console.log(`🔐 Excluindo QR tokens para usuário ID ${id}`);
+          await tx.delete(qrTokens)
+            .where(eq(qrTokens.userId, id));
           
           // Excluir appointments pendentes/canceladas
           console.log(`📅 Excluindo appointments para usuário ID ${id}`);

@@ -49,7 +49,7 @@ export interface IStorage {
   getUserBySessionId(sessionId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | null>;
-  deleteUser(id: number): Promise<boolean>;
+  deleteUser(id: number, options?: { force?: boolean }): Promise<boolean>;
   getUsersByRole(role: "patient" | "partner" | "admin" | "doctor"): Promise<User[]>;
   updateUserPassword(id: number, password: string): Promise<User>;
   

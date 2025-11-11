@@ -49,7 +49,7 @@ export default defineConfig({
       },
     },
     hmr: {
-      port: 3000,
+      port: parseInt(process.env.PORT || '8080', 10),
       host: 'localhost',
     },
   },
