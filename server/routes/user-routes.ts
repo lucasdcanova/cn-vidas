@@ -101,6 +101,37 @@ userRouter.put('/profile', requireAuth, async (req: AuthenticatedRequest, res: R
 
     const { fullName, username, email, phone, birthDate, address, city, state, zipcode, number, complement, neighborhood, street } = req.body;
 
+    const sanitizeString = (value: unknown) => {
+      if (value === undefined) return undefined;
+      if (value === null) return null;
+      if (typeof value !== 'string') return undefined;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    };
+
+    const sanitizeZipcode = (value: unknown) => {
+      if (value === undefined) return undefined;
+      if (value === null) return null;
+      if (typeof value !== 'string') return undefined;
+      const digits = value.replace(/\D/g, '').slice(0, 8);
+      return digits.length > 0 ? digits : null;
+    };
+
+    const sanitizeState = (value: unknown) => {
+      if (value === undefined) return undefined;
+      if (value === null) return null;
+      if (typeof value !== 'string') return undefined;
+      const trimmed = value.trim().toUpperCase().slice(0, 2);
+      return trimmed.length > 0 ? trimmed : null;
+    };
+
+    const sanitizeRequiredString = (value: unknown) => {
+      if (value === undefined || value === null) return undefined;
+      if (typeof value !== 'string') return undefined;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    };
+
     console.log('📥 Dados recebidos no backend:', {
       street,
       address,
@@ -115,19 +146,43 @@ userRouter.put('/profile', requireAuth, async (req: AuthenticatedRequest, res: R
     const updateData: any = {};
     
     // Incluir apenas campos que tenham valores válidos
-    if (fullName !== undefined && fullName !== null) updateData.fullName = fullName;
-    if (username !== undefined && username !== null) updateData.username = username;
-    if (email !== undefined && email !== null) updateData.email = email;
-    if (phone !== undefined && phone !== null) updateData.phone = phone;
-    if (birthDate !== undefined && birthDate !== null) updateData.birthDate = birthDate;
-    if (address !== undefined && address !== null) updateData.address = address;
-    if (city !== undefined && city !== null) updateData.city = city;
-    if (state !== undefined && state !== null) updateData.state = state;
-    if (zipcode !== undefined && zipcode !== null) updateData.zipcode = zipcode;
-    if (number !== undefined && number !== null) updateData.number = number;
-    if (complement !== undefined && complement !== null) updateData.complement = complement;
-    if (neighborhood !== undefined && neighborhood !== null) updateData.neighborhood = neighborhood;
-    if (street !== undefined && street !== null) updateData.street = street;
+    const sanitizedFullName = sanitizeRequiredString(fullName);
+    if (sanitizedFullName !== undefined) updateData.fullName = sanitizedFullName;
+
+    const sanitizedUsername = sanitizeRequiredString(username);
+    if (sanitizedUsername !== undefined) updateData.username = sanitizedUsername;
+
+    const sanitizedEmail = sanitizeRequiredString(email);
+    if (sanitizedEmail !== undefined) updateData.email = sanitizedEmail;
+    const sanitizedPhone = sanitizeString(phone);
+    if (sanitizedPhone !== undefined) updateData.phone = sanitizedPhone;
+
+    const sanitizedBirthDate = sanitizeString(birthDate);
+    if (sanitizedBirthDate !== undefined) updateData.birthDate = sanitizedBirthDate;
+
+    const sanitizedAddress = sanitizeString(address);
+    if (sanitizedAddress !== undefined) updateData.address = sanitizedAddress;
+
+    const sanitizedCity = sanitizeString(city);
+    if (sanitizedCity !== undefined) updateData.city = sanitizedCity;
+
+    const sanitizedState = sanitizeState(state);
+    if (sanitizedState !== undefined) updateData.state = sanitizedState;
+
+    const sanitizedZipcode = sanitizeZipcode(zipcode);
+    if (sanitizedZipcode !== undefined) updateData.zipcode = sanitizedZipcode;
+
+    const sanitizedNumber = sanitizeString(number);
+    if (sanitizedNumber !== undefined) updateData.number = sanitizedNumber;
+
+    const sanitizedComplement = sanitizeString(complement);
+    if (sanitizedComplement !== undefined) updateData.complement = sanitizedComplement;
+
+    const sanitizedNeighborhood = sanitizeString(neighborhood);
+    if (sanitizedNeighborhood !== undefined) updateData.neighborhood = sanitizedNeighborhood;
+
+    const sanitizedStreet = sanitizeString(street);
+    if (sanitizedStreet !== undefined) updateData.street = sanitizedStreet;
 
     // Verificar se há pelo menos um campo para atualizar
     if (Object.keys(updateData).length === 0) {
