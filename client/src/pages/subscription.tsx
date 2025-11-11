@@ -46,6 +46,9 @@ interface UserSubscription {
   startDate: string;
   endDate: string;
   cancelAtPeriodEnd?: boolean;
+  scheduledPlanId?: number | null;
+  scheduledPlan?: SubscriptionPlan | null;
+  scheduledPlanApplied?: boolean;
   plan?: SubscriptionPlan;
 }
 
@@ -59,6 +62,7 @@ const SubscriptionPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("plans");
   const [planChangeLoadingId, setPlanChangeLoadingId] = useState<number | null>(null);
   const [confirmDowngradePlan, setConfirmDowngradePlan] = useState<SubscriptionPlan | null>(null);
+  const [downgradeEffectiveDate, setDowngradeEffectiveDate] = useState<Date | null>(null);
   
   // Detectar se está no iOS
   const isIOS = Capacitor.getPlatform() === 'ios';
@@ -140,6 +144,10 @@ const SubscriptionPage: React.FC = () => {
 
   // Extrair dados da assinatura atual
   const currentSubscription = userSubscription ? getSubscriptionData(userSubscription) : null;
+  const isDowngradePlan = (plan: SubscriptionPlan) => {
+    if (!currentSubscription?.plan) return false;
+    return currentSubscription.plan.price > plan.price;
+  };
 
   // Debug: Log subscription data
   useEffect(() => {
@@ -206,8 +214,55 @@ const SubscriptionPage: React.FC = () => {
     setSelectedPlan(null);
   };
 
-  const handlePlanSelection = async (plan: SubscriptionPlan) => {
-    if (plan.price === 0) {
+  const handlePlanSelection = async (plan: SubscriptionPlan, options?: { isDowngrade?: boolean }) => {
+    const downgradeRequest = options?.isDowngrade ?? isDowngradePlan(plan);
+    const isFreePlan = plan.price === 0;
+    const shouldScheduleDowngrade = downgradeRequest;
+
+    if (shouldScheduleDowngrade) {
+      try {
+        setPlanChangeLoadingId(plan.id);
+        const response = await apiRequest("POST", "/api/subscription/create-session", {
+          planId: plan.id.toString(),
+          paymentMethod: "card"
+        });
+
+        let data: any = null;
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+
+        if (!response.ok) {
+          throw new Error(data?.message || "Não foi possível agendar o downgrade.");
+        }
+
+        const effectiveDate = data?.effectiveDate ? new Date(data.effectiveDate) : currentSubscription?.endDate ? new Date(currentSubscription.endDate) : null;
+        toast({
+          title: "Downgrade agendado",
+          description: effectiveDate
+            ? `Seu plano atual permanece ativo até ${effectiveDate.toLocaleDateString("pt-BR")}. Depois disso você passará para ${plan.displayName || getPlanName(plan.name)}.`
+            : "Seu plano atual permanece ativo até o fim do ciclo vigente.",
+        });
+
+        await refetchSubscription();
+      } catch (error: any) {
+        console.error("Erro ao agendar downgrade:", error);
+        toast({
+          title: "Erro ao agendar downgrade",
+          description: error?.message || "Não foi possível agendar a alteração de plano. Tente novamente.",
+          variant: "destructive",
+        });
+      } finally {
+        setPlanChangeLoadingId(null);
+        setConfirmDowngradePlan(null);
+        setDowngradeEffectiveDate(null);
+      }
+      return;
+    }
+
+    if (isFreePlan) {
       try {
         setPlanChangeLoadingId(plan.id);
         const response = await apiRequest("POST", "/api/subscription/create-session", {
@@ -254,8 +309,9 @@ const SubscriptionPage: React.FC = () => {
   };
 
   const handlePlanButtonClick = (plan: SubscriptionPlan, isDowngrade: boolean) => {
-    if (plan.price === 0 && isDowngrade) {
+    if (isDowngrade) {
       setConfirmDowngradePlan(plan);
+      setDowngradeEffectiveDate(currentSubscription?.endDate ? new Date(currentSubscription.endDate) : null);
       return;
     }
     void handlePlanSelection(plan);
@@ -265,10 +321,13 @@ const SubscriptionPage: React.FC = () => {
     if (!confirmDowngradePlan) return;
     const planToDowngrade = confirmDowngradePlan;
     setConfirmDowngradePlan(null);
-    await handlePlanSelection(planToDowngrade);
+    await handlePlanSelection(planToDowngrade, { isDowngrade: true });
   };
 
-  const handleCloseDowngradeDialog = () => setConfirmDowngradePlan(null);
+  const handleCloseDowngradeDialog = () => {
+    setConfirmDowngradePlan(null);
+    setDowngradeEffectiveDate(null);
+  };
 
   // Conteúdo dos planos
   const PlansContent = () => (
@@ -337,9 +396,16 @@ const SubscriptionPage: React.FC = () => {
                 {currentSubscription.cancelAtPeriodEnd && (
                   <Alert variant="warning">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Cancelamento pendente</AlertTitle>
+                    <AlertTitle>Downgrade agendado</AlertTitle>
                     <AlertDescription>
-                      Sua assinatura será cancelada em {new Date(currentSubscription.endDate).toLocaleDateString('pt-BR')}
+                      Você continuará com {getPlanName(currentSubscription.plan.name)} até{" "}
+                      {currentSubscription.endDate
+                        ? new Date(currentSubscription.endDate).toLocaleDateString("pt-BR")
+                        : "o fim do ciclo vigente"}
+                      . Depois disso, migra automaticamente para{" "}
+                      {currentSubscription.scheduledPlan
+                        ? getPlanName(currentSubscription.scheduledPlan.name)
+                        : "o plano selecionado"}.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -380,13 +446,19 @@ const SubscriptionPage: React.FC = () => {
           })
           .map((plan) => {
             const isCurrentPlan = currentSubscription?.plan?.id === plan.id;
-            const isDowngrade = currentSubscription?.plan && 
-                              currentSubscription.plan.price > plan.price;
+            const isDowngrade = isDowngradePlan(plan);
             const isFreePlan = plan.price === 0;
-            const isProcessingFreePlan = planChangeLoadingId === plan.id;
-            const buttonLabel = isFreePlan
-              ? (isDowngrade ? "Migrar para Plano Gratuito" : "Ativar Plano Gratuito")
-              : (isDowngrade ? "Fazer Downgrade" : "Assinar Plano");
+            const isActionLoading = planChangeLoadingId === plan.id;
+            const isScheduledDowngradeTarget = Boolean(
+              currentSubscription?.cancelAtPeriodEnd &&
+              currentSubscription?.scheduledPlanId &&
+              currentSubscription.scheduledPlanId === plan.id
+            );
+            const buttonLabel = isScheduledDowngradeTarget
+              ? "Downgrade agendado"
+              : isFreePlan
+                ? (isDowngrade ? "Migrar para Plano Gratuito" : "Ativar Plano Gratuito")
+                : (isDowngrade ? "Agendar downgrade" : "Assinar Plano");
             
             // Função para obter as cores do plano
             const getPlanColorClass = (planName: string) => {
@@ -449,6 +521,11 @@ const SubscriptionPage: React.FC = () => {
                     Plano Atual
                   </div>
                 )}
+                {isScheduledDowngradeTarget && !isCurrentPlan && (
+                  <div className="absolute top-0 left-0 bg-amber-500 text-white px-2 py-1 text-xs md:text-sm font-medium rounded-br-lg z-10">
+                    Downgrade agendado
+                  </div>
+                )}
                 
                 <CardHeader className={`${getPlanHeaderClass(plan.name)} ${isIOS ? 'p-5' : 'p-4 md:p-6'}`}>
                   <CardTitle className={`flex items-center justify-between ${isIOS ? 'text-[17px]' : 'text-base md:text-lg'}`}>
@@ -500,11 +577,11 @@ const SubscriptionPage: React.FC = () => {
                           'bg-gradient-to-r from-indigo-600 to-slate-700 hover:from-indigo-700 hover:to-slate-800 text-white border-0' :
                         ''
                       }`}
-                      onClick={() => handlePlanButtonClick(plan, Boolean(isDowngrade))}
-                      variant={isDowngrade || isFreePlan ? "outline" : "default"}
-                      disabled={isProcessingFreePlan}
+                      onClick={() => handlePlanButtonClick(plan, isDowngrade)}
+                      variant={isScheduledDowngradeTarget || isDowngrade || isFreePlan ? "outline" : "default"}
+                      disabled={isActionLoading || isScheduledDowngradeTarget}
                     >
-                      {isProcessingFreePlan ? (
+                      {isActionLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Processando...
@@ -602,7 +679,9 @@ const SubscriptionPage: React.FC = () => {
     </div>
   );
 
-  const downgradePlanLabel = confirmDowngradePlan ? getPlanName(confirmDowngradePlan.name) : "Plano Gratuito";
+  const downgradePlanLabel = confirmDowngradePlan
+    ? confirmDowngradePlan.displayName || getPlanName(confirmDowngradePlan.name)
+    : "Plano selecionado";
   
   return (
     <DashboardLayout title="Gerenciar Planos">
@@ -659,7 +738,11 @@ const SubscriptionPage: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar downgrade</AlertDialogTitle>
             <AlertDialogDescription>
-              Você está prestes a alternar para {downgradePlanLabel}. Ao confirmar, benefícios do plano atual serão removidos e consultas futuras serão cobradas integralmente. Deseja continuar?
+              Você permanecerá no plano atual até{" "}
+              {downgradeEffectiveDate
+                ? downgradeEffectiveDate.toLocaleDateString("pt-BR")
+                : "o fim do ciclo vigente"}
+              . Após essa data, migra automaticamente para {downgradePlanLabel}. Deseja continuar?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -8,6 +8,7 @@ import { AppError } from '../utils/app-error';
 import { storage } from '../storage';
 import { toNumberOrThrow } from '../utils/id-converter';
 import { AuthenticatedRequest } from '../types/authenticated-request';
+import { scheduleDowngradeIfNeeded } from '../utils/subscription-helpers';
 
 const router = Router();
 
@@ -103,6 +104,17 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
       return res.status(404).json({ message: "Plano não encontrado" });
     }
     
+    const downgradeResult = await scheduleDowngradeIfNeeded(user.id, plan);
+    if (downgradeResult.scheduled) {
+      return res.json({
+        message: `Downgrade para ${plan.displayName || plan.name} agendado com sucesso. O plano atual permanecerá ativo até o fim do ciclo vigente.`,
+        planId: plan.id,
+        planType: plan.name,
+        status: 'scheduled',
+        effectiveDate: downgradeResult.effectiveDate?.toISOString(),
+      });
+    }
+
     // Se o plano for gratuito, ativamos sem processar pagamento
     if (plan.price === 0) {
       const now = new Date();

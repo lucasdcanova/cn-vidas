@@ -189,6 +189,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'pix' | 'boleto'>('card');
   const [pixInfo, setPixInfo] = useState<{
     qrCodeUrl?: string;
+    qrCodeText?: string;
     expiresAt?: string;
     amount?: number;
   } | null>(null);
@@ -539,7 +540,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         ) : clientSecret && paymentMethod === 'boleto' ? (
           <div className="py-4">
             <BoletoPaymentForm
-              boletoInfo={{ amount: Number(planPrice.replace(/[^0-9.,]/g, '').replace(',', '.')) }}
+              boletoInfo={boletoInfo || { amount: Number(planPrice.replace(/[^0-9.,]/g, '').replace(',', '.')) }}
               onSuccess={onSuccess}
               onClose={onClose}
             />
