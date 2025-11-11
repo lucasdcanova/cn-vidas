@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/select";
 import { SearchIcon, UserPlus, Edit, Trash2, AlertCircle, Check, X, Eye, Shield, CreditCard, Star, Calendar, Video, Settings, Hammer, Building2, Stethoscope, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, ApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -372,10 +372,32 @@ const AdminUsersPage: React.FC = () => {
         description: "O usuário foi removido com sucesso!",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      let description = "Ocorreu um erro ao remover o usuário.";
+
+      if (error instanceof ApiError) {
+        if (error.data && typeof error.data === "object") {
+          const errorData = error.data as Record<string, unknown>;
+          if (typeof errorData.details === "string") {
+            description = errorData.details;
+          } else if (typeof errorData.error === "string") {
+            description = errorData.error;
+          }
+
+          const errorType = typeof errorData.errorType === "string" ? errorData.errorType : undefined;
+          if (errorType === "IMPORTANT_HISTORY") {
+            description = "Este usuário possui consultas realizadas ou pagamentos registrados e, por segurança, não pode ser removido.";
+          }
+        } else if (error.message) {
+          description = error.message;
+        }
+      } else if (error instanceof Error && error.message) {
+        description = error.message;
+      }
+
       toast({
         title: "Erro ao remover usuário",
-        description: error.message || "Ocorreu um erro ao remover o usuário.",
+        description,
         variant: "destructive",
       });
     },
