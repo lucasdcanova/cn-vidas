@@ -12,6 +12,7 @@ import { AppError } from '../utils/app-error';
 import { DatabaseStorage } from '../storage';
 import { AuthenticatedRequest } from '../types/authenticated-request';
 import { NotificationService } from '../utils/notification-service';
+import { scheduleDowngradeIfNeeded } from '../utils/subscription-helpers';
 
 const subscriptionPaymentRouter = Router();
 
@@ -51,7 +52,8 @@ subscriptionPaymentRouter.post("/create-session", requireAuth, async (req: Reque
     }
 
     const { planId, paymentMethod } = validationResult.data;
-    const user = req.user!;
+    const authReq = req as AuthenticatedRequest;
+    const user = authReq.user!;
     
     // Buscar o plano de assinatura pelo ID
     const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, parseInt(planId)));
@@ -60,6 +62,19 @@ subscriptionPaymentRouter.post("/create-session", requireAuth, async (req: Reque
       return res.status(404).json({ message: "Plano não encontrado" });
     }
     
+    const downgradeResult = await scheduleDowngradeIfNeeded(user.id, plan);
+    if (downgradeResult.scheduled) {
+      return res.json({
+        message: `Downgrade para ${plan.displayName || plan.name} agendado com sucesso. O plano atual permanecerá ativo até o fim do ciclo vigente.`,
+        subscription: {
+          planId: plan.id,
+          planType: plan.name,
+          status: 'scheduled',
+          effectiveDate: downgradeResult.effectiveDate?.toISOString(),
+        }
+      });
+    }
+
     // Se o plano for gratuito, não precisamos processar o pagamento
     if (plan.price === 0) {
       const now = new Date();
@@ -126,7 +141,8 @@ subscriptionPaymentRouter.post("/create-session", requireAuth, async (req: Reque
     const paymentSession = await createSubscriptionPaymentSession(
       planId.toString(),
       customerId,
-      paymentMethod
+      paymentMethod,
+      user
     );
     
     // Atualizar o status de assinatura do usuário para 'pending'
@@ -149,6 +165,11 @@ subscriptionPaymentRouter.post("/create-session", requireAuth, async (req: Reque
     
   } catch (error: any) {
     console.error("Erro ao criar sessão de pagamento para assinatura:", error);
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ 
+        message: error.message
+      });
+    }
     return res.status(500).json({ 
       message: `Erro ao processar pagamento: ${error.message}`,
       error: error.toString()
