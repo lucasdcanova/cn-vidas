@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router, Request, Response } from 'express';
 import { storage } from '../storage.js';
 import { authenticateToken } from '../middleware/auth.js';

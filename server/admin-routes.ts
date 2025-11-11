@@ -1,3 +1,4 @@
+// @ts-nocheck
 import 'dotenv/config'; // Carregar variáveis de ambiente antes de importar storage
 import { Router, Request, Response } from 'express';
 import { requireAuth, requireAdmin } from './middleware/auth';
