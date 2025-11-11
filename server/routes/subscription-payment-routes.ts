@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { db } from '../db.js';
-import { users, subscriptionPlans } from '../../shared/schema';
+import { users, subscriptionPlans, userSubscriptions } from '../../shared/schema';
 import { storage } from '../storage.js';
 import { createSubscriptionPaymentSession } from '../utils/stripe-payment.js';
 import stripe from '../utils/stripe-instance.js';
@@ -62,14 +62,34 @@ subscriptionPaymentRouter.post("/create-session", requireAuth, async (req: Reque
     
     // Se o plano for gratuito, não precisamos processar o pagamento
     if (plan.price === 0) {
+      const now = new Date();
+      const endDate = new Date(now.getTime());
+      endDate.setMonth(endDate.getMonth() + 1);
+
       // Para o plano gratuito, definimos 0 consultas de emergência
       await db.update(users)
         .set({
           subscriptionPlan: plan.name,
           subscriptionStatus: 'active',
-          emergencyConsultationsLeft: 0
+          emergencyConsultationsLeft: 0,
+          subscriptionPlanId: plan.id,
+          subscriptionStartDate: now,
+          subscriptionEndDate: endDate,
+          subscriptionChangedAt: now,
         })
         .where(eq(users.id, user.id));
+      
+      await db.insert(userSubscriptions).values({
+        userId: user.id,
+        planId: plan.id,
+        status: 'active',
+        startDate: now,
+        endDate,
+        paymentMethod: 'free',
+        price: plan.price,
+        createdAt: now,
+        updatedAt: now,
+      });
       
       return res.json({
         message: "Plano gratuito ativado com sucesso",

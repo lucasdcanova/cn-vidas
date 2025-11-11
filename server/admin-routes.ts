@@ -287,8 +287,9 @@ async function updateUserHandler(req: Request, res: Response) {
 router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const forceDelete = req.query.force === 'true';
     
-    console.log(`[Admin] Delete user request for ID: ${id}`);
+    console.log(`[Admin] Delete user request for ID: ${id} (force: ${forceDelete})`);
     console.log(`[Admin] Request user:`, req.user);
     
     // Verificar se o usuário existe
@@ -307,14 +308,15 @@ router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => 
     }
     
     // Deletar o usuário (com exclusão em cascata)
-    console.log(`[Admin] Calling storage.deleteUser for ID: ${id}`);
-    const result = await storage.deleteUser(parseInt(id));
+    console.log(`[Admin] Calling storage.deleteUser for ID: ${id} (force: ${forceDelete})`);
+    const result = await storage.deleteUser(parseInt(id), { force: forceDelete });
     console.log(`[Admin] Delete result:`, result);
     
     res.json({ 
-      message: 'User deleted successfully', 
+      message: forceDelete ? 'User force deleted successfully' : 'User deleted successfully', 
       userId: id,
-      success: true
+      success: true,
+      forced: forceDelete
     });
   } catch (error) {
     console.error('[Admin] Error deleting user:', error);
@@ -328,10 +330,13 @@ router.delete('/users/:id', async (req: AuthenticatedRequest, res: Response) => 
       
       // Verificar se é erro específico de histórico importante
       if (error.message === 'User has important history and cannot be deleted') {
+        const historyDetails = (error as Error & { historyDetails?: Record<string, number> }).historyDetails;
         return res.status(400).json({ 
           error: 'Não é possível excluir usuário com histórico de consultas ou pagamentos',
-          details: 'Este usuário possui consultas realizadas ou histórico de pagamentos e não pode ser removido.',
-          errorType: 'IMPORTANT_HISTORY'
+          details: 'Este usuário possui consultas realizadas ou histórico de pagamentos e não pode ser removido sem apagar esse histórico.',
+          errorType: 'IMPORTANT_HISTORY',
+          canForceDelete: true,
+          historyDetails
         });
       }
       
