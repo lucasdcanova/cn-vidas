@@ -311,7 +311,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         description: error.message || "Ocorreu um erro ao criar sua assinatura. Tente novamente.",
         variant: "destructive",
       });
-      onClose();
+      setClientSecret(null);
+      setBoletoInfo(null);
+      setPixInfo(null);
+      setPaymentMethod('card');
+      setCheckoutUrl(null);
     } finally {
       setIsLoading(false);
     }
@@ -453,7 +457,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     if (checkoutId && !clientSecret && !checkoutUrl) {
       trackCheckoutAbandoned();
     }
-    onClose();
+      setClientSecret(null);
+      setPixInfo(null);
+      setBoletoInfo(null);
+      setCheckoutUrl(null);
+      setPaymentMethod('card');
   };
 
   return (
