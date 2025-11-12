@@ -4,9 +4,23 @@ import jwt from 'jsonwebtoken';
 import { db } from '../db.js';
 import { subscriptionPlans, userSubscriptions, users } from '../../shared/schema';
 import { AuthenticatedRequest } from '../types/authenticated-request';
-import { applyScheduledDowngradeIfEligible } from '../utils/subscription-helpers';
+import { applyScheduledDowngradeIfEligible, getLatestSubscription } from '../utils/subscription-helpers';
 
 const router = Router();
+
+const addOneMonth = (date: Date) => {
+  const result = new Date(date.getTime());
+  result.setMonth(result.getMonth() + 1);
+  return result;
+};
+
+const parseEmergencyConsultations = (value?: string | null) => {
+  if (!value || value === "unlimited") {
+    return null;
+  }
+  const parsed = parseInt(value, 10);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
 
 // Rota pública para buscar planos de assinatura disponíveis
 router.get('/plans', async (req: Request, res: Response) => {
@@ -101,36 +115,98 @@ router.post('/activate-free', async (req: Request, res: Response) => {
       });
     }
 
-    // Ativar o plano gratuito realmente
-    console.log(`✅ Ativando plano gratuito para usuário ${userEmail || userId}`);
+    const [userRecord] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!userRecord) {
+      console.log(`❌ Usuário ${userId} não encontrado no banco de dados`);
+      return res.status(404).json({
+        success: false,
+        message: "Usuário não encontrado",
+      });
+    }
+
+    const latestSubscription = await getLatestSubscription(userRecord.id);
+    if (latestSubscription?.subscription && latestSubscription.subscription.status === 'active') {
+      console.log(`ℹ️ Usuário ${userRecord.email} já possui assinatura ativa. Retornando assinatura existente.`);
+      return res.json({
+        success: true,
+        message: "Plano já estava ativo",
+        subscription: {
+          ...latestSubscription.subscription,
+          plan: latestSubscription.plan,
+        },
+        redirect: "/dashboard",
+      });
+    }
+
+    const [freePlan] = await db
+      .select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.name, 'free'))
+      .limit(1);
+
+    if (!freePlan) {
+      console.error('❌ Plano gratuito não encontrado na tabela subscription_plans');
+      return res.status(500).json({
+        success: false,
+        message: "Plano gratuito não está configurado",
+      });
+    }
+
+    // Ativar o plano gratuito de fato
+    console.log(`✅ Ativando plano gratuito no banco para usuário ${userEmail || userRecord.email || userRecord.id}`);
+
+    const now = new Date();
+    const endDate = addOneMonth(now);
+
+    const [createdSubscription] = await db.insert(userSubscriptions).values({
+      userId: userRecord.id,
+      planId: freePlan.id,
+      status: 'active',
+      startDate: now,
+      endDate,
+      paymentMethod: 'free',
+      price: freePlan.price,
+      cancelAtPeriodEnd: false,
+      scheduledPlanId: null,
+      scheduledPlanApplied: false,
+      createdAt: now,
+      updatedAt: now,
+    }).returning();
     
-    // Para simplificar, vamos apenas retornar sucesso sem tocar no banco
-    // O importante é que o frontend receba confirmação de ativação
+    const emergencyConsultationsLeft =
+      freePlan.price === 0 ? 0 : parseEmergencyConsultations(freePlan.emergencyConsultations) ?? 0;
+
+    await db.update(users)
+      .set({
+        subscriptionPlan: freePlan.name,
+        subscriptionStatus: 'active',
+        subscriptionPlanId: freePlan.id,
+        subscriptionStartDate: now,
+        subscriptionEndDate: endDate,
+        subscriptionChangedAt: now,
+        emergencyConsultationsLeft,
+      })
+      .where(eq(users.id, userRecord.id));
+
     return res.json({
       success: true,
       message: "Plano gratuito ativado com sucesso",
       subscription: {
-        id: Date.now(), // ID temporário baseado no timestamp
-        userId: userId,
-        planId: 4,
-        status: "active",
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 ano
-        plan: {
-          id: 4,
-          name: 'free',
-          displayName: 'Gratuito',
-          price: 0,
-          emergencyConsultations: '0',
-          specialistDiscount: 0,
-          insuranceCoverage: false,
-          features: [
-            'Acesso ao marketplace',
-            'Pagamento integral pelos serviços',
-            '0 teleconsultas de emergência por mês',
-            'Sem descontos e sem cobertura de seguro'
-          ]
-        }
+        id: createdSubscription.id,
+        userId: createdSubscription.userId,
+        planId: createdSubscription.planId,
+        status: createdSubscription.status,
+        startDate: createdSubscription.startDate,
+        endDate: createdSubscription.endDate,
+        plan: freePlan,
+        cancelAtPeriodEnd: createdSubscription.cancelAtPeriodEnd,
+        scheduledPlanId: createdSubscription.scheduledPlanId,
+        scheduledPlanApplied: createdSubscription.scheduledPlanApplied,
       },
       redirect: "/dashboard"
     });
