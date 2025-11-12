@@ -37,6 +37,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [isIPadDevice, setIsIPadDevice] = useState(false);
   const [isIOSDevice, setIsIOSDevice] = useState(false);
   const [isIPhoneDevice, setIsIPhoneDevice] = useState(false);
+  const [recentlyActivated, setRecentlyActivated] = useState(() => {
+    return sessionStorage.getItem('subscription-just-activated') === 'true';
+  });
   
   // Verificar origem do login (HSJ ou padrão)
   const loginSource = localStorage.getItem('loginSource');
@@ -48,6 +51,33 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   useEffect(() => {
     console.log("Current location:", location);
   }, [location]);
+  
+  useEffect(() => {
+    if (!user) return;
+    
+    if (recentlyActivated && user.birthDate && user.cpf) {
+      sessionStorage.removeItem('subscription-just-activated');
+      setRecentlyActivated(false);
+      return;
+    }
+    
+    const needsPersonalData =
+      user.role === 'patient' &&
+      (
+        !user.birthDate ||
+        user.birthDate === '' ||
+        !user.cpf ||
+        user.cpf.trim() === ''
+      );
+    
+    if (!recentlyActivated && needsPersonalData && location !== '/first-subscription') {
+      toast({
+        title: 'Complete seus dados',
+        description: 'Informe CPF e data de nascimento para continuar usando o CN Vidas.',
+      });
+      window.location.href = '/first-subscription';
+    }
+  }, [user, location, toast, recentlyActivated]);
   
   // Use o hook para garantir dados frescos do usuário ao montar o componente
   useFreshUserData();

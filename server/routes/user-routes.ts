@@ -99,7 +99,7 @@ userRouter.put('/profile', requireAuth, async (req: AuthenticatedRequest, res: R
       return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
-    const { fullName, username, email, phone, birthDate, address, city, state, zipcode, number, complement, neighborhood, street } = req.body;
+    const { fullName, username, email, phone, birthDate, address, city, state, zipcode, number, complement, neighborhood, street, cpf } = req.body;
 
     const sanitizeString = (value: unknown) => {
       if (value === undefined) return undefined;
@@ -130,6 +130,14 @@ userRouter.put('/profile', requireAuth, async (req: AuthenticatedRequest, res: R
       if (typeof value !== 'string') return undefined;
       const trimmed = value.trim();
       return trimmed.length > 0 ? trimmed : undefined;
+    };
+
+    const sanitizeCPF = (value: unknown) => {
+      if (value === undefined) return undefined;
+      if (value === null) return null;
+      if (typeof value !== 'string') return undefined;
+      const digits = value.replace(/\D/g, '').slice(0, 11);
+      return digits.length === 11 ? digits : digits.length === 0 ? null : undefined;
     };
 
     console.log('📥 Dados recebidos no backend:', {
@@ -183,6 +191,9 @@ userRouter.put('/profile', requireAuth, async (req: AuthenticatedRequest, res: R
 
     const sanitizedStreet = sanitizeString(street);
     if (sanitizedStreet !== undefined) updateData.street = sanitizedStreet;
+
+    const sanitizedCPF = sanitizeCPF(cpf);
+    if (sanitizedCPF !== undefined) updateData.cpf = sanitizedCPF;
 
     // Verificar se há pelo menos um campo para atualizar
     if (Object.keys(updateData).length === 0) {

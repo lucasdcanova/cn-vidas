@@ -9,7 +9,15 @@ import ProfilePhotoSection from "@/components/profile/ProfilePhotoSection";
 import ProfileCard from "@/components/profile/ProfileCard";
 import ProfileFormField from "@/components/profile/ProfileFormField";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { 
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -73,6 +81,7 @@ const patientProfileSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   birthDate: z.string().optional(),
+  cpf: z.string().optional(),
 });
 
 const doctorProfileSchema = z.object({
@@ -221,18 +230,19 @@ const ProfileV2: React.FC = () => {
       patientForm.reset({
         fullName: profileData.fullName || "",
         username: profileData.username || "",
-        email: profileData.email || "",
-        phone: profileData.phone || "",
-        address: profileData.address || "",
-        zipcode: profileData.zipcode || "",
-        street: profileData.street || "",
-        number: profileData.number || "",
-        complement: profileData.complement || "",
-        neighborhood: profileData.neighborhood || "",
-        city: profileData.city || "",
-        state: profileData.state || "",
-        birthDate: profileData.birthDate ? new Date(profileData.birthDate).toISOString().split('T')[0] : "",
-      });
+      email: profileData.email || "",
+      phone: profileData.phone || "",
+      address: profileData.address || "",
+      zipcode: profileData.zipcode || "",
+      street: profileData.street || "",
+      number: profileData.number || "",
+      complement: profileData.complement || "",
+      neighborhood: profileData.neighborhood || "",
+      city: profileData.city || "",
+      state: profileData.state || "",
+      birthDate: profileData.birthDate ? new Date(profileData.birthDate).toISOString().split('T')[0] : "",
+      cpf: profileData.cpf || "",
+    });
     }
   }, [profileData, user?.role, patientForm]);
 
@@ -387,6 +397,11 @@ const ProfileV2: React.FC = () => {
       updateData.fullName = data.fullName;
       updateData.username = data.username;
       updateData.email = data.email;
+    }
+    
+    if (data.cpf !== undefined) {
+      const cleanCpf = data.cpf ? data.cpf.replace(/\D/g, '') : "";
+      updateData.cpf = cleanCpf.length === 11 ? cleanCpf : null;
     }
 
     updateProfileMutation.mutate(updateData);
@@ -569,6 +584,29 @@ const ProfileV2: React.FC = () => {
                           placeholder="(00) 00000-0000"
                           icon={Phone}
                           disabled={!isEditMode}
+                        />
+                        
+                        <FormField
+                          control={patientForm.control}
+                          name="cpf"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>CPF</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="000.000.000-00"
+                                  value={formatCpf(field.value || "")}
+                                  onChange={(e) => {
+                                    const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+                                    field.onChange(digits);
+                                  }}
+                                  disabled={!isEditMode}
+                                  readOnly={!isEditMode}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
                         
                         <ProfileFormField
@@ -1232,3 +1270,10 @@ const ProfileV2: React.FC = () => {
 };
 
 export default ProfileV2;
+  const formatCpf = (value: string) => {
+    const digits = (value || '').replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
