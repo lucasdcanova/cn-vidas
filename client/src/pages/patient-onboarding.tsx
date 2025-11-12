@@ -272,6 +272,10 @@ const PatientOnboardingPage: React.FC = () => {
         throw new Error("Falha ao atualizar perfil");
       }
       
+      const updatedUser = await profileResponse.json();
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
       toast({
         title: "Bem-vindo ao CN Vidas!",
         description: "Seu cadastro foi concluído com sucesso.",
