@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 import { db } from '../db.js';
 import { subscriptionPlans, userSubscriptions, users } from '../../shared/schema';
@@ -173,20 +173,52 @@ router.post('/activate-free', async (req: Request, res: Response) => {
     const now = new Date();
     const endDate = addOneMonth(now);
 
-    const [createdSubscription] = await db.insert(userSubscriptions).values({
-      userId: userRecord.id,
-      planId: freePlan.id,
-      status: 'active',
-      startDate: now,
-      endDate,
-      paymentMethod: 'free',
-      price: freePlan.price,
-      cancelAtPeriodEnd: false,
-      scheduledPlanId: null,
-      scheduledPlanApplied: false,
-      createdAt: now,
-      updatedAt: now,
-    }).returning();
+    let createdSubscription: any = null;
+    try {
+      [createdSubscription] = await db.insert(userSubscriptions).values({
+        userId: userRecord.id,
+        planId: freePlan.id,
+        status: 'active',
+        startDate: now,
+        endDate,
+        paymentMethod: 'free',
+        price: freePlan.price,
+        cancelAtPeriodEnd: false,
+        scheduledPlanId: null,
+        scheduledPlanApplied: false,
+        createdAt: now,
+        updatedAt: now,
+      }).returning();
+    } catch (insertError) {
+      const errorMessage = (insertError as Error)?.message || '';
+      
+      if (errorMessage.includes('cancel_at_period_end') || errorMessage.includes('scheduled_plan_id')) {
+        console.warn('⚠️ Estrutura antiga detectada em user_subscriptions - aplicando insert de compatibilidade', errorMessage);
+        
+        const fallbackResult = await db.execute(sql`
+          INSERT INTO user_subscriptions (user_id, plan_id, status, start_date, end_date, payment_method, price, created_at, updated_at)
+          VALUES (${userRecord.id}, ${freePlan.id}, 'active', ${now}, ${endDate}, 'free', ${freePlan.price}, ${now}, ${now})
+          RETURNING id, user_id, plan_id, status, start_date, end_date
+        `);
+        
+        const fallbackRow = fallbackResult.rows[0];
+        createdSubscription = {
+          id: fallbackRow.id,
+          userId: fallbackRow.user_id,
+          planId: fallbackRow.plan_id,
+          status: fallbackRow.status,
+          startDate: fallbackRow.start_date ? new Date(fallbackRow.start_date) : now,
+          endDate: fallbackRow.end_date ? new Date(fallbackRow.end_date) : endDate,
+          paymentMethod: 'free',
+          price: freePlan.price,
+          cancelAtPeriodEnd: false,
+          scheduledPlanId: null,
+          scheduledPlanApplied: false,
+        };
+      } else {
+        throw insertError;
+      }
+    }
     
     const emergencyConsultationsLeft =
       freePlan.price === 0 ? 0 : parseEmergencyConsultations(freePlan.emergencyConsultations) ?? 0;
@@ -214,9 +246,9 @@ router.post('/activate-free', async (req: Request, res: Response) => {
         startDate: createdSubscription.startDate,
         endDate: createdSubscription.endDate,
         plan: freePlan,
-        cancelAtPeriodEnd: createdSubscription.cancelAtPeriodEnd,
-        scheduledPlanId: createdSubscription.scheduledPlanId,
-        scheduledPlanApplied: createdSubscription.scheduledPlanApplied,
+        cancelAtPeriodEnd: createdSubscription.cancelAtPeriodEnd ?? false,
+        scheduledPlanId: createdSubscription.scheduledPlanId ?? null,
+        scheduledPlanApplied: createdSubscription.scheduledPlanApplied ?? false,
       },
       redirect: "/dashboard"
     });
