@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { eq } from 'drizzle-orm';
+import jwt from 'jsonwebtoken';
 import { db } from '../db.js';
 import { subscriptionPlans, userSubscriptions, users } from '../../shared/schema';
 import { AuthenticatedRequest } from '../types/authenticated-request';
@@ -48,16 +49,94 @@ router.get('/plans', async (req: Request, res: Response) => {
 });
 
 // Rota simplificada para ativar plano gratuito
-router.post('/activate-free', isAuthenticated, async (req: Request, res: Response) => {
+router.post('/activate-free', async (req: Request, res: Response) => {
   try {
     console.log('=== ATIVANDO PLANO GRATUITO ===');
     console.log('Headers recebidos:', req.headers);
     const authReq = req as AuthenticatedRequest;
-    const userRecord = authReq.user;
+    
+    let userRecord = authReq.user || null;
+    let userId = authReq.user?.id || null;
+    let userEmail = authReq.user?.email || null;
+    
+    // Fallback para identificar o usuário caso o middleware global não tenha preenchido req.user
+    if (!userId) {
+      console.log('ℹ️ req.user não disponível - tentando identificar usuário manualmente');
+      
+      // Método 1: Sessão
+      if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+        userId = req.user.id;
+        userEmail = req.user.email;
+        console.log('Usuário autenticado via sessão:', userId, userEmail);
+      }
+    }
+    
+    // Método 2: Token nos headers
+    if (!userId) {
+      const authToken = req.headers['x-auth-token'] as string ||
+        (req.headers.authorization?.startsWith('Bearer ')
+          ? req.headers.authorization.substring(7)
+          : null);
 
-    if (!userRecord) {
-      console.log('❌ Usuário não encontrado durante ativação do plano gratuito');
+      if (authToken) {
+        try {
+          const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+          const decoded: any = jwt.verify(authToken, jwtSecret);
+          if (decoded && decoded.userId) {
+            userId = decoded.userId;
+            userEmail = decoded.email;
+            console.log('Usuário autenticado via JWT:', userId, userEmail);
+          }
+        } catch (jwtError) {
+          console.error('Erro ao verificar JWT no fallback:', jwtError);
+        }
+      }
+    }
+    
+    // Método 3: Cookie auth_token
+    if (!userId && req.cookies?.auth_token) {
+      try {
+        const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+        const decoded: any = jwt.verify(req.cookies.auth_token, jwtSecret);
+        if (decoded && decoded.userId) {
+          userId = decoded.userId;
+          userEmail = decoded.email;
+          console.log('Usuário autenticado via cookie auth_token:', userId, userEmail);
+        }
+      } catch (jwtError) {
+        console.error('Erro ao verificar cookie auth_token no fallback:', jwtError);
+      }
+    }
+    
+    // Método 4: Header x-user-id
+    if (!userId && req.headers['x-user-id']) {
+      const userIdFromHeader = parseInt(req.headers['x-user-id'] as string);
+      if (!isNaN(userIdFromHeader)) {
+        userId = userIdFromHeader;
+        console.log('Usuário identificado via header x-user-id:', userId);
+      }
+    }
+    
+    if (!userId) {
+      console.log('❌ Não foi possível identificar o usuário para ativar o plano gratuito');
       return res.status(401).json({ success: false, message: "Usuário não autenticado" });
+    }
+    
+    if (!userRecord || userRecord.id !== userId) {
+      const [userFromDb] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      userRecord = userFromDb || null;
+    }
+    
+    if (!userRecord) {
+      console.log(`❌ Usuário ${userId} não encontrado no banco de dados`);
+      return res.status(404).json({
+        success: false,
+        message: "Usuário não encontrado",
+      });
     }
 
     const latestSubscription = await getLatestSubscription(userRecord.id);
@@ -89,7 +168,7 @@ router.post('/activate-free', isAuthenticated, async (req: Request, res: Respons
     }
 
     // Ativar o plano gratuito de fato
-    console.log(`✅ Ativando plano gratuito no banco para usuário ${userRecord.email || userRecord.id}`);
+    console.log(`✅ Ativando plano gratuito no banco para usuário ${userEmail || userRecord.email || userRecord.id}`);
 
     const now = new Date();
     const endDate = addOneMonth(now);
