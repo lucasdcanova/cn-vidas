@@ -501,6 +501,8 @@ authRouter.post('/login', async (req: Request, res: Response, next: NextFunction
       profileImage: refreshedProfileImage,
       phone: user.phone,
       cpf: user.cpf,
+      birthDate: user.birthDate,
+      gender: user.gender,
       city: user.city,
       state: user.state,
       address: user.address,
@@ -585,7 +587,7 @@ authRouter.post('/login-qr', async (req: Request, res: Response) => {
     
     // Configurar cookie httpOnly para segurança
     res.cookie('auth_token', jwtToken, getCookieOptions(req));
-    
+
     res.json({
       id: user.id,
       email: user.email,
@@ -598,6 +600,8 @@ authRouter.post('/login-qr', async (req: Request, res: Response) => {
       profileImage: user.profileImage,
       phone: user.phone,
       cpf: user.cpf,
+      birthDate: user.birthDate,
+      gender: user.gender,
       city: user.city,
       state: user.state,
       address: user.address,
@@ -1072,7 +1076,7 @@ authRouter.post('/refresh-user', async (req: Request, res: Response) => {
         console.log('🔄 URL da imagem de perfil renovada durante refresh');
       }
     }
-    
+
     // Retornar dados do usuário autenticado
     res.json({
       id: user.id,
@@ -1087,6 +1091,8 @@ authRouter.post('/refresh-user', async (req: Request, res: Response) => {
       profileImage: refreshedProfileImage,
       phone: user.phone,
       cpf: user.cpf,
+      birthDate: user.birthDate,
+      gender: user.gender,
       city: user.city,
       state: user.state,
       address: user.address,
@@ -1096,7 +1102,7 @@ authRouter.post('/refresh-user', async (req: Request, res: Response) => {
       complement: user.complement,
       neighborhood: user.neighborhood
     });
-    
+
   } catch (error) {
     console.error('Erro ao fazer refresh dos dados do usuário:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -1172,7 +1178,7 @@ authRouter.get('/user', async (req: Request, res: Response) => {
         console.log('🔄 URL da imagem de perfil renovada na rota /user');
       }
     }
-    
+
     // Retornar dados do usuário autenticado
     res.json({
       id: user.id,
@@ -1187,6 +1193,8 @@ authRouter.get('/user', async (req: Request, res: Response) => {
       profileImage: refreshedProfileImage,
       phone: user.phone,
       cpf: user.cpf,
+      birthDate: user.birthDate,
+      gender: user.gender,
       city: user.city,
       state: user.state,
       address: user.address,
@@ -1196,7 +1204,7 @@ authRouter.get('/user', async (req: Request, res: Response) => {
       complement: user.complement,
       neighborhood: user.neighborhood
     });
-    
+
   } catch (error) {
     console.error('Erro ao verificar autenticação:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
