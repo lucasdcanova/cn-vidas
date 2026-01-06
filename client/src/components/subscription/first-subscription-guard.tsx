@@ -32,9 +32,19 @@ export default function FirstSubscriptionGuard() {
       return;
     }
 
-    // Se tem assinatura ativa, redirecionar
-    if (userSubscription && userSubscription.status === 'active') {
-      console.log("🚫 FirstSubscriptionGuard - Bloqueando acesso: usuário já tem plano ativo");
+    // Verificar se tem assinatura ativa de qualquer forma
+    // (pela query OU pelos campos do usuário)
+    const hasActiveFromQuery = userSubscription && userSubscription.status === 'active';
+    const hasActiveFromUser = user?.subscriptionStatus === 'active' ||
+      (user?.subscriptionPlan && user.subscriptionPlan !== 'free');
+
+    if (hasActiveFromQuery || hasActiveFromUser) {
+      console.log("🚫 FirstSubscriptionGuard - Bloqueando acesso: usuário já tem plano ativo", {
+        hasActiveFromQuery,
+        hasActiveFromUser,
+        subscriptionPlan: user?.subscriptionPlan,
+        subscriptionStatus: user?.subscriptionStatus
+      });
       setCanAccess(false);
       setLocation('/dashboard');
       return;

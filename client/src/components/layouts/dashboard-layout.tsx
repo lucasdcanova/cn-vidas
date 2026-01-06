@@ -40,18 +40,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [recentlyActivated, setRecentlyActivated] = useState(() => {
     return sessionStorage.getItem('subscription-just-activated') === 'true';
   });
-  
+
   // Verificar origem do login (HSJ ou padrão)
   const loginSource = localStorage.getItem('loginSource');
   const isHSJLogin = loginSource === 'hsj';
   const hsjLogoPath = '/cropped-icone_sao_jose-removebg-preview.png';
   const logoToUse = isHSJLogin ? hsjLogoPath : cnvidasLogo;
-  
+
   // Debug location changes
   useEffect(() => {
     console.log("Current location:", location);
   }, [location]);
-  
+
   useEffect(() => {
     if (!user) return;
 
@@ -62,16 +62,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         sessionStorage.removeItem('subscription-just-activated');
         setRecentlyActivated(false);
       }
-      // Não redirecionar enquanto a flag estiver ativa
+      // Não fazer mais nada enquanto a flag estiver ativa
       return;
     }
 
-    // Se veio do onboarding recentemente, não redirecionar de volta
-    const cameFromOnboarding = sessionStorage.getItem('came-from-onboarding');
-    if (cameFromOnboarding) {
-      return;
-    }
-
+    // Verificar se precisa de dados pessoais (apenas para pacientes)
     const needsPersonalData =
       user.role === 'patient' &&
       (
@@ -86,46 +81,35 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       return;
     }
 
-    // Verificar se o usuário já tem assinatura ativa
-    const hasActiveSubscription =
-      user.subscriptionStatus === 'active' ||
-      (user.subscriptionPlan && user.subscriptionPlan !== '');
-
-    // Só redirecionar se ainda não estiver nas páginas de dados
-    if (location !== '/first-subscription' && location !== '/settings' && location !== '/profile') {
-      // Se já tem assinatura ativa, redirecionar para settings (evita loop)
-      // Se não tem assinatura, redirecionar para first-subscription
-      if (hasActiveSubscription) {
-        console.log("🔧 Usuário tem assinatura ativa mas faltam dados pessoais - redirecionando para /settings");
-        toast({
-          title: 'Complete seus dados',
-          description: 'Informe CPF e data de nascimento para continuar usando o CN Vidas.',
-        });
-        window.location.href = '/settings';
-      } else {
-        console.log("🆕 Usuário sem assinatura e sem dados pessoais - redirecionando para /first-subscription");
-        sessionStorage.setItem('redirect-from-dashboard', 'true');
-        window.location.href = '/first-subscription';
-      }
+    // CORREÇÃO: Apenas exibir aviso uma única vez por sessão, sem redirecionar
+    // O redirecionamento automático estava causando loops infinitos
+    const alreadyWarned = sessionStorage.getItem('warned-personal-data');
+    if (!alreadyWarned) {
+      sessionStorage.setItem('warned-personal-data', 'true');
+      toast({
+        title: 'Complete seus dados',
+        description: 'Acesse Configurações para informar CPF e data de nascimento.',
+        duration: 10000,
+      });
     }
-  }, [user, location, toast, recentlyActivated]);
-  
+  }, [user, toast, recentlyActivated]);
+
   // Use o hook para garantir dados frescos do usuário ao montar o componente
   useFreshUserData();
-  
+
   // Detectar se é iOS (iPhone ou iPad)
   useEffect(() => {
     setIsIPadDevice(isIPad());
     setIsIOSDevice(isIOS());
     setIsIPhoneDevice(isIPhone());
   }, []);
-  
+
   // Configurar status bar para iOS
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
       // Mostrar e configurar status bar para o dashboard
       StatusBar.show();
-      
+
       if (isIPadDevice) {
         // No iPad, configurar status bar transparente para glassmorphism
         StatusBar.setBackgroundColor({ color: '#00000000' }); // Totalmente transparente
@@ -138,7 +122,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         StatusBar.setOverlaysWebView({ overlay: false });
       }
     }
-    
+
     // Cleanup - voltar para as cores originais quando sair do dashboard
     return () => {
       if (Capacitor.isNativePlatform()) {
@@ -153,35 +137,35 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // Auto-refresh após completar onboarding
   React.useEffect(() => {
     const justCompletedOnboarding = localStorage.getItem('justCompletedOnboarding');
-    
+
     if (justCompletedOnboarding === 'true' && user?.role === 'doctor') {
       // Remove a flag imediatamente para evitar múltiplos refreshes
       localStorage.removeItem('justCompletedOnboarding');
-      
+
       // Mostrar mensagem informativa
       toast({
         title: 'Atualizando informações...',
         description: 'Seus dados estão sendo carregados. A página será atualizada em instantes.',
         duration: 5000,
       });
-      
+
       // Aguardar 5 segundos e recarregar a página
       const timeoutId = setTimeout(() => {
         window.location.reload();
       }, 5000);
-      
+
       // Cleanup do timeout
       return () => clearTimeout(timeoutId);
     }
   }, [toast, user?.role]);
-  
+
   // Debug: Log user data
   React.useEffect(() => {
     console.log("🔍 DashboardLayout - User data:", user);
     console.log("🔍 DashboardLayout - Subscription Plan:", user?.subscriptionPlan);
     console.log("🔍 DashboardLayout - Subscription Status:", user?.subscriptionStatus);
   }, [user]);
-  
+
   // Buscar o perfil de médico se o usuário for um médico
   const { data: doctorData } = useQuery({
     queryKey: ["/api/doctors/user", user?.id],
@@ -198,7 +182,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         const debugResponse = await apiRequest('GET', '/api/partners/debug-me');
         const debugData = await debugResponse.json();
         console.log('🔍 DashboardLayout - Debug data:', debugData);
-        
+
         // Depois, buscar o parceiro real
         const response = await apiRequest('GET', '/api/partners/me');
         const data = await response.json();
@@ -213,14 +197,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     staleTime: 0, // Sempre buscar dados frescos
     cacheTime: 0  // Não manter cache
   });
-  
+
   // Log do erro se houver
   useEffect(() => {
     if (partnerError) {
       console.error('🔍 DashboardLayout - Partner query error:', partnerError);
     }
   }, [partnerError]);
-  
+
   // Atualizar o objeto do usuário com a imagem de perfil do médico ou parceiro, se disponível
   useEffect(() => {
     if (user) {
@@ -243,14 +227,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       }
     }
   }, [user, doctorData, partnerData]);
-  
+
   const { data: notificationsData } = useQuery({
     queryKey: ["/api/notifications/unread-count"],
     queryFn: getUnreadNotificationsCount,
   });
-  
+
   const unreadCount = notificationsData?.count || 0;
-  
+
   // Determinar se deve mostrar a sidebar - esconder completamente no iOS
   const shouldShowSidebar = !isIOSDevice;
 
@@ -262,39 +246,38 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* Overlay when sidebar is open on mobile - não mostrar para pacientes no iOS */}
       {shouldShowSidebar && sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity duration-300 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
+
       {/* Sidebar for desktop - ocultar para pacientes no iOS */}
       {shouldShowSidebar && (
-        <aside className={`fixed inset-y-0 left-0 z-50 md:relative md:flex md:flex-col md:w-64 glass-sidebar shadow-lg transition-transform transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}>
+        <aside className={`fixed inset-y-0 left-0 z-50 md:relative md:flex md:flex-col md:w-64 glass-sidebar shadow-lg transition-transform transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          }`}>
           <div className="p-5 border-b border-gray-100/50">
             <div className="flex items-center space-x-2">
               {/* Logo */}
-              <img 
-                src={logoToUse} 
-                alt={isHSJLogin ? "Hospital São José" : "CN Vidas"} 
-                className={isHSJLogin ? "h-10 w-auto" : "h-9 w-auto"} 
+              <img
+                src={logoToUse}
+                alt={isHSJLogin ? "Hospital São José" : "CN Vidas"}
+                className={isHSJLogin ? "h-10 w-auto" : "h-9 w-auto"}
               />
-              
-              
+
+
               {/* Close button on mobile */}
-              <button 
-                className="ml-auto md:hidden text-gray-500 hover:text-gray-700 transition-colors" 
+              <button
+                className="ml-auto md:hidden text-gray-500 hover:text-gray-700 transition-colors"
                 onClick={() => setSidebarOpen(false)}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
           </div>
-          
+
           <SidebarNavigation userRole={user?.role} subscriptionPlan={user?.subscriptionPlan} />
-          
+
           <div className="mt-auto p-4 border-t border-gray-100/50">
             <UserProfile user={userWithProfileImage} />
           </div>
@@ -315,8 +298,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <div className="flex items-center">
               {/* Mostrar botão de menu apenas quando houver sidebar */}
               {shouldShowSidebar && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors"
                   onClick={() => setSidebarOpen(true)}
                 >
@@ -324,10 +307,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 </button>
               )}
               <div className={shouldShowSidebar ? "ml-3 flex items-center space-x-2" : "flex items-center space-x-2"}>
-                <img 
-                  src={logoToUse} 
-                  alt={isHSJLogin ? "Hospital São José" : "CN Vidas"} 
-                  className={isHSJLogin ? "h-9 w-auto" : "h-8 w-auto"} 
+                <img
+                  src={logoToUse}
+                  alt={isHSJLogin ? "Hospital São José" : "CN Vidas"}
+                  className={isHSJLogin ? "h-9 w-auto" : "h-8 w-auto"}
                 />
               </div>
             </div>
@@ -336,9 +319,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {user?.role === "doctor" && (
                 <>
                   <Link href="/doctor/financeiro">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className={cn(
                         "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
                         location === "/doctor/financeiro" && "bg-gray-100"
@@ -349,9 +332,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     </Button>
                   </Link>
                   <Link href="/doctor/settings">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className={cn(
                         "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
                         location === "/doctor/settings" && "bg-gray-100"
@@ -364,14 +347,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <div className="w-px h-6 bg-gray-200 mx-1"></div>
                 </>
               )}
-              
+
               {/* Ícones de navegação conforme o tipo de usuário */}
               {/* Endereços - apenas para parceiros */}
               {user?.role === "partner" && (
                 <Link href="/partner/addresses">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className={cn(
                       "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
                       location === "/partner/addresses" ? "bg-gray-100" : ""
@@ -382,12 +365,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   </Button>
                 </Link>
               )}
-              
+
               {/* Configurações - para todos os usuários */}
               <Link href={user?.role === "doctor" ? "/doctor/settings" : "/settings"}>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className={cn(
                     "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
                     location === "/settings" || location === "/doctor/settings" ? "bg-gray-100" : ""
@@ -397,16 +380,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <Settings className="h-5 w-5 text-gray-600" />
                 </Button>
               </Link>
-              
+
               {/* Ícones adicionais apenas para pacientes */}
               {user?.role === "patient" && (
                 <>
                   {/* Botão de Planos - apenas no iPhone */}
                   {isIPhoneDevice && (
                     <Link href="/subscription">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className={cn(
                           "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
                           location === "/subscription" ? "bg-gray-100" : ""
@@ -418,9 +401,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     </Link>
                   )}
                   <Link href="/help">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className={cn(
                         "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
                         location === "/help" ? "bg-gray-100" : ""
@@ -436,15 +419,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <UserProfile user={userWithProfileImage} compact />
             </div>
           </div>
-          
+
           <div className="hidden md:flex items-center justify-between px-6 py-4">
             <div className="flex-1 flex items-center gap-3">
               {/* Logo CNVidas para iPad */}
               {isIPadDevice && (
-                <img 
-                  src={logoToUse} 
-                  alt={isHSJLogin ? "Hospital São José" : "CN Vidas"} 
-                  className={isHSJLogin ? "h-9 w-auto mr-2 drop-shadow-sm" : "h-8 w-auto mr-2 drop-shadow-sm"} 
+                <img
+                  src={logoToUse}
+                  alt={isHSJLogin ? "Hospital São José" : "CN Vidas"}
+                  className={isHSJLogin ? "h-9 w-auto mr-2 drop-shadow-sm" : "h-8 w-auto mr-2 drop-shadow-sm"}
                 />
               )}
               <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
@@ -453,9 +436,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {/* Link para Financeiro - apenas para médicos */}
               {user?.role === "doctor" && (
                 <Link href="/doctor/financeiro">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
                     title="Financeiro"
                   >
@@ -463,13 +446,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   </Button>
                 </Link>
               )}
-              
+
               {/* Link para Endereços - apenas para parceiros */}
               {user?.role === "partner" && (
                 <Link href="/partner/addresses">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
                     title="Endereços"
                   >
@@ -477,31 +460,31 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   </Button>
                 </Link>
               )}
-              
+
               {/* Link para Configurações */}
               <Link href={user?.role === "doctor" ? "/doctor/settings" : "/settings"}>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-all duration-300 ease-out"
                 >
                   <Settings className="h-5 w-5 text-gray-700" />
                 </Button>
               </Link>
-              
+
               {/* Link para Ajuda - apenas para pacientes */}
               {user?.role === "patient" && (
                 <Link href="/help">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
                   >
                     <HelpCircle className="h-5 w-5 text-gray-700" />
                   </Button>
                 </Link>
               )}
-              
+
               {/* Foto do perfil com separador */}
               <div className="flex items-center">
                 <div className="h-8 w-px bg-gray-200 mr-4"></div>
