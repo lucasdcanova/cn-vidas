@@ -54,13 +54,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   
   useEffect(() => {
     if (!user) return;
-    
-    if (recentlyActivated && user.birthDate && user.cpf) {
-      sessionStorage.removeItem('subscription-just-activated');
-      setRecentlyActivated(false);
+
+    // Se acabou de ativar assinatura, manter no dashboard
+    if (recentlyActivated) {
+      if (user.birthDate && user.cpf) {
+        // Dados completos, pode remover a flag
+        sessionStorage.removeItem('subscription-just-activated');
+        setRecentlyActivated(false);
+      }
+      // Não redirecionar enquanto a flag estiver ativa
       return;
     }
-    
+
+    // Se veio do onboarding recentemente, não redirecionar de volta
+    const cameFromOnboarding = sessionStorage.getItem('came-from-onboarding');
+    if (cameFromOnboarding) {
+      return;
+    }
+
     const needsPersonalData =
       user.role === 'patient' &&
       (
@@ -69,13 +80,33 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         !user.cpf ||
         user.cpf.trim() === ''
       );
-    
-    if (!recentlyActivated && needsPersonalData && location !== '/first-subscription') {
-      toast({
-        title: 'Complete seus dados',
-        description: 'Informe CPF e data de nascimento para continuar usando o CN Vidas.',
-      });
-      window.location.href = '/first-subscription';
+
+    // Se não precisa de dados pessoais, não fazer nada
+    if (!needsPersonalData) {
+      return;
+    }
+
+    // Verificar se o usuário já tem assinatura ativa
+    const hasActiveSubscription =
+      user.subscriptionStatus === 'active' ||
+      (user.subscriptionPlan && user.subscriptionPlan !== '');
+
+    // Só redirecionar se ainda não estiver nas páginas de dados
+    if (location !== '/first-subscription' && location !== '/settings' && location !== '/profile') {
+      // Se já tem assinatura ativa, redirecionar para settings (evita loop)
+      // Se não tem assinatura, redirecionar para first-subscription
+      if (hasActiveSubscription) {
+        console.log("🔧 Usuário tem assinatura ativa mas faltam dados pessoais - redirecionando para /settings");
+        toast({
+          title: 'Complete seus dados',
+          description: 'Informe CPF e data de nascimento para continuar usando o CN Vidas.',
+        });
+        window.location.href = '/settings';
+      } else {
+        console.log("🆕 Usuário sem assinatura e sem dados pessoais - redirecionando para /first-subscription");
+        sessionStorage.setItem('redirect-from-dashboard', 'true');
+        window.location.href = '/first-subscription';
+      }
     }
   }, [user, location, toast, recentlyActivated]);
   

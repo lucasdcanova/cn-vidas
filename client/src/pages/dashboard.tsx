@@ -60,34 +60,56 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    // Se está carregando ou teve erro, não fazer nada ainda
-    if (subscriptionLoading || isError) {
+    // Se está carregando, não fazer nada ainda
+    if (subscriptionLoading) {
       return;
     }
 
-    // Verificar se acabou de ativar uma assinatura
+    // Verificar se acabou de ativar uma assinatura (flag persiste por 10 segundos)
     const justActivated = sessionStorage.getItem('subscription-just-activated');
     if (justActivated) {
       console.log("✅ Dashboard - Assinatura recém ativada, permanecendo no dashboard");
-      sessionStorage.removeItem('subscription-just-activated');
+      // Manter a flag por um pouco mais de tempo para evitar race condition
+      setTimeout(() => {
+        sessionStorage.removeItem('subscription-just-activated');
+      }, 5000);
       setIsFirstLogin(false);
       return;
     }
-    
-    // Lógica simplificada: só redirecionar se não tem assinatura E não tem plano
-    if (!userSubscription && !user.subscriptionPlan) {
-      console.log("🆕 Dashboard - Novo usuário sem assinatura e sem plano, redirecionando para first-subscription");
-      console.log("Status do usuário:", user.subscriptionStatus);
-      console.log("Plano do usuário:", user.subscriptionPlan);
+
+    // Verificar se veio do onboarding recentemente (evita loop)
+    const fromOnboarding = sessionStorage.getItem('came-from-onboarding');
+    if (fromOnboarding) {
+      console.log("✅ Dashboard - Veio do onboarding, permanecendo no dashboard");
+      sessionStorage.removeItem('came-from-onboarding');
+      setIsFirstLogin(false);
+      return;
+    }
+
+    // Verificar se tem qualquer indicação de plano ativo
+    const hasSubscription = userSubscription && userSubscription.status === 'active';
+    const hasPlan = user.subscriptionPlan && user.subscriptionPlan !== '';
+    const hasActiveStatus = user.subscriptionStatus === 'active';
+
+    console.log("🔍 Dashboard - Verificando status:", {
+      hasSubscription,
+      hasPlan,
+      hasActiveStatus,
+      userSubscription,
+      subscriptionPlan: user.subscriptionPlan,
+      subscriptionStatus: user.subscriptionStatus
+    });
+
+    // Só redirecionar se REALMENTE não tem nenhuma assinatura ou plano
+    if (!hasSubscription && !hasPlan && !hasActiveStatus) {
+      console.log("🆕 Dashboard - Novo usuário sem assinatura, redirecionando para first-subscription");
+      sessionStorage.setItem('redirect-from-dashboard', 'true');
       setLocation('/first-subscription');
     } else {
       console.log("✅ Dashboard - Usuário tem assinatura ou plano ativo");
-      console.log("userSubscription:", userSubscription);
-      console.log("user.subscriptionStatus:", user.subscriptionStatus);
-      console.log("user.subscriptionPlan:", user.subscriptionPlan);
       setIsFirstLogin(false);
     }
-  }, [user, userSubscription, subscriptionLoading, isError, setLocation]);
+  }, [user, userSubscription, subscriptionLoading, setLocation]);
 
   // Choose dashboard based on user role
   const renderDashboard = () => {
