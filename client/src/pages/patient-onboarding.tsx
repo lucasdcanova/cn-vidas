@@ -17,6 +17,7 @@ import CheckoutModal from "@/components/checkout/checkout-modal-fix";
 import cnvidasLogo from "@/assets/cnvidas-logo-transparent.png";
 import { getPlanName } from "@/components/shared/plan-indicator";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatCPF, validateCPF, unformatCPF } from "@/lib/cpf-validator";
 import { IOSScrollView } from '@/components/shared/IOSScrollView';
 import { isIOS } from '@/utils/platform';
 import { StatusBar } from '@capacitor/status-bar';
@@ -214,7 +215,7 @@ const PatientOnboardingPage: React.FC = () => {
 
   // Função para validar dados pessoais
   const validatePersonalData = () => {
-    if (!personalData.phone || !personalData.birthDate || !personalData.gender) {
+    if (!personalData.phone || !personalData.birthDate || !personalData.gender || !personalData.cpf) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos.",
@@ -222,6 +223,18 @@ const PatientOnboardingPage: React.FC = () => {
       });
       return false;
     }
+
+    // Validar CPF
+    const cleanCpf = unformatCPF(personalData.cpf);
+    if (!validateCPF(cleanCpf)) {
+      toast({
+        title: "CPF inválido",
+        description: "Por favor, informe um CPF válido.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     return true;
   };
 
@@ -610,7 +623,31 @@ const PatientOnboardingPage: React.FC = () => {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Telefone</Label>
+                      <Label htmlFor="cpf">CPF <span className="text-red-500">*</span></Label>
+                      <div className="relative">
+                        <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="cpf"
+                          type="text"
+                          placeholder="000.000.000-00"
+                          className="pl-10"
+                          maxLength={14}
+                          value={personalData.cpf}
+                          onChange={(e) => {
+                            // Aplicar máscara de CPF
+                            const value = e.target.value.replace(/\D/g, '');
+                            const formatted = value
+                              .replace(/(\d{3})(\d)/, '$1.$2')
+                              .replace(/(\d{3})(\d)/, '$1.$2')
+                              .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                            setPersonalData({...personalData, cpf: formatted});
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefone <span className="text-red-500">*</span></Label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -623,9 +660,9 @@ const PatientOnboardingPage: React.FC = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
-                      <Label htmlFor="birthDate">Data de Nascimento</Label>
+                      <Label htmlFor="birthDate">Data de Nascimento <span className="text-red-500">*</span></Label>
                       <div className="relative">
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
@@ -637,10 +674,9 @@ const PatientOnboardingPage: React.FC = () => {
                         />
                       </div>
                     </div>
-                    
-                    
+
                     <div className="space-y-2">
-                      <Label htmlFor="gender">Gênero</Label>
+                      <Label htmlFor="gender">Gênero <span className="text-red-500">*</span></Label>
                       <Select
                         value={personalData.gender}
                         onValueChange={(value) => setPersonalData({...personalData, gender: value})}
