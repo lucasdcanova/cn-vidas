@@ -160,18 +160,46 @@ const PatientOnboardingPage: React.FC = () => {
       setLocation('/dashboard');
       return;
     }
-    
-    // Se já tem assinatura ativa, redirecionar para o dashboard
-    if (userSubscription && userSubscription.status === 'active') {
+
+    // Se ainda está carregando os dados de assinatura, aguardar
+    if (subscriptionLoading) {
+      return;
+    }
+
+    // Verificar se acabou de ativar uma assinatura
+    const justActivated = sessionStorage.getItem('subscription-just-activated');
+    if (justActivated) {
+      // Se acabou de ativar, redirecionar para o dashboard
+      console.log("✅ Onboarding - Assinatura recém ativada, redirecionando para dashboard");
+      sessionStorage.setItem('came-from-onboarding', 'true');
+      setLocation('/dashboard');
+      return;
+    }
+
+    // Se já tem assinatura ativa confirmada pelo endpoint, redirecionar para o dashboard
+    // Mas apenas se NÃO veio do dashboard recentemente (evita loop)
+    const cameFromDashboard = sessionStorage.getItem('redirect-from-dashboard');
+    if (cameFromDashboard) {
+      // Veio do dashboard, ficar aqui para completar o onboarding
+      sessionStorage.removeItem('redirect-from-dashboard');
+      console.log("🔧 Onboarding - Veio do dashboard, permanecendo para completar cadastro");
+      return;
+    }
+
+    // Se tem assinatura ativa E dados pessoais completos, redirecionar
+    const hasCompleteData = user.birthDate && user.cpf;
+    if (userSubscription && userSubscription.status === 'active' && hasCompleteData) {
+      console.log("✅ Onboarding - Usuário já tem plano ativo e dados completos, redirecionando");
       toast({
         title: "Você já possui um plano ativo",
         description: "Redirecionando para o dashboard...",
       });
+      sessionStorage.setItem('came-from-onboarding', 'true');
       setTimeout(() => {
         setLocation('/dashboard');
       }, 1000);
     }
-  }, [user, userSubscription, setLocation, toast]);
+  }, [user, userSubscription, subscriptionLoading, setLocation, toast]);
 
   const isLoading = plansLoading || subscriptionLoading;
 
