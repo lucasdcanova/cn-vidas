@@ -69,18 +69,18 @@ function PaymentForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess:
 
       // Aguardar um pouco para garantir que o webhook processou o evento
       console.log('Setup Intent confirmado:', setupIntent);
-      
+
       if (setupIntent?.id) {
         // Confirmar no backend que o setup intent foi processado
         const confirmResponse = await apiRequest('POST', '/api/subscription/confirm-setup-intent', {
           setupIntentId: setupIntent.id
         });
-        
+
         if (!confirmResponse.ok) {
           console.error('Erro ao confirmar setup intent no backend');
         }
       }
-      
+
       // Dar tempo adicional para garantir processamento
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -144,7 +144,7 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
   const handleSetDefault = async (paymentMethodId: string) => {
     try {
       setIsLoading(true);
-      
+
       const response = await apiRequest('POST', '/api/subscription/update-payment-method', {
         paymentMethodId
       });
@@ -173,7 +173,7 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
   const handleRemove = async (paymentMethodId: string) => {
     try {
       setIsLoading(true);
-      
+
       const response = await apiRequest('DELETE', `/api/subscription/payment-methods/${paymentMethodId}`);
 
       if (!response.ok) {
@@ -206,7 +206,7 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
           <p className="text-sm">Adicione um cartão ou método de pagamento para facilitar suas transações</p>
         </div>
       )}
-      
+
       {paymentMethods.map((method) => (
         <div
           key={method.id}
@@ -303,7 +303,7 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
                   Escolha o tipo de método de pagamento que deseja adicionar
                 </DialogDescription>
               </DialogHeader>
-              
+
               <Tabs defaultValue="card" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="card">
@@ -319,13 +319,13 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
                     Boleto
                   </TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="card" className="mt-4">
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
                       Adicione um cartão de crédito ou débito para pagamentos recorrentes.
                     </p>
-                    <Button 
+                    <Button
                       className="w-full"
                       onClick={() => {
                         setSelectedPaymentType(null);
@@ -336,30 +336,74 @@ export default function PaymentMethods({ paymentMethods, onUpdate }: PaymentMeth
                     </Button>
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="pix" className="mt-4">
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Configure sua chave PIX para receber pagamentos instantâneos.
+                      Pague com PIX para pagamentos instantâneos.
                     </p>
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-700">
-                        ⚠️ Em breve! Estamos trabalhando para adicionar suporte a PIX como método de pagamento salvo.
+                      <div className="flex items-center gap-2 mb-2">
+                        <QrCode className="h-5 w-5 text-green-600" />
+                        <p className="text-sm font-medium text-green-800">Pagamento PIX Disponível</p>
+                      </div>
+                      <p className="text-sm text-green-700 mb-3">
+                        O PIX está disponível como forma de pagamento no momento da assinatura ou consulta.
                       </p>
+                      <ul className="text-xs text-green-600 space-y-1">
+                        <li>• Pagamento confirmado em segundos</li>
+                        <li>• Disponível 24 horas por dia</li>
+                        <li>• Sem taxas adicionais</li>
+                      </ul>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      💡 O PIX é usado para pagamentos únicos. Para assinar ou renovar seu plano com PIX, acesse a página de assinatura.
+                    </p>
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedPaymentType(null);
+                        window.location.href = '/subscribe';
+                      }}
+                    >
+                      Ir para Assinatura
+                    </Button>
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="boleto" className="mt-4">
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Configure boleto bancário para pagamentos únicos.
+                      Pague com boleto bancário.
                     </p>
                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <p className="text-sm text-amber-700">
-                        ⚠️ Em breve! Estamos trabalhando para adicionar suporte a boleto como método de pagamento.
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="h-5 w-5 text-amber-600" />
+                        <p className="text-sm font-medium text-amber-800">Boleto Bancário Disponível</p>
+                      </div>
+                      <p className="text-sm text-amber-700 mb-3">
+                        O boleto bancário está disponível como forma de pagamento no momento da assinatura ou consulta.
                       </p>
+                      <ul className="text-xs text-amber-600 space-y-1">
+                        <li>• Pague em qualquer banco ou lotérica</li>
+                        <li>• Vencimento em 3 dias</li>
+                        <li>• Compensação em até 3 dias úteis</li>
+                      </ul>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      💡 O boleto é usado para pagamentos únicos. Para assinar ou renovar seu plano com boleto, acesse a página de assinatura.
+                    </p>
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedPaymentType(null);
+                        window.location.href = '/subscribe';
+                      }}
+                    >
+                      Ir para Assinatura
+                    </Button>
                   </div>
                 </TabsContent>
               </Tabs>
