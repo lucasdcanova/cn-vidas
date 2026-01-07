@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { X, Cookie } from 'lucide-react';
+import { X } from 'lucide-react';
 import { metaPixel } from '@/services/meta-pixel';
 
 export const CookieConsent: React.FC = () => {
@@ -24,7 +22,7 @@ export const CookieConsent: React.FC = () => {
       marketing: true,
       timestamp: new Date().toISOString()
     };
-    
+
     localStorage.setItem('cookieConsent', JSON.stringify(consentData));
     metaPixel.setMarketingConsent(true);
     setIsVisible(false);
@@ -38,7 +36,7 @@ export const CookieConsent: React.FC = () => {
       marketing: false,
       timestamp: new Date().toISOString()
     };
-    
+
     localStorage.setItem('cookieConsent', JSON.stringify(consentData));
     metaPixel.setMarketingConsent(false);
     setIsVisible(false);
@@ -47,45 +45,37 @@ export const CookieConsent: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto">
-      <Card className="p-4 shadow-lg bg-white/95 backdrop-blur-sm border-gray-200">
-        <div className="flex items-start space-x-3">
-          <Cookie className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="flex-1">
-            <h3 className="font-semibold text-sm text-gray-900 mb-1">
-              Cookies e Privacidade
-            </h3>
-            <p className="text-xs text-gray-600 mb-3">
-              Usamos cookies para melhorar sua experiência, analisar o tráfego do site e personalizar conteúdo. 
-              Ao clicar em "Aceitar todos", você concorda com o uso de todos os cookies.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                onClick={handleAcceptAll}
-                size="sm"
-                className="text-xs"
-              >
-                Aceitar todos
-              </Button>
-              <Button
-                onClick={handleAcceptNecessary}
-                variant="outline"
-                size="sm"
-                className="text-xs"
-              >
-                Apenas necessários
-              </Button>
-            </div>
-          </div>
+    <div
+      className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5 duration-500"
+      style={{ maxWidth: '380px' }}
+    >
+      <div className="bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700/50 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <p className="text-xs text-gray-200 flex-1">
+            Usamos cookies para melhorar sua experiência.{' '}
+            <button
+              onClick={handleAcceptAll}
+              className="text-blue-400 hover:text-blue-300 underline font-medium transition-colors"
+            >
+              Aceitar
+            </button>
+            {' '}ou{' '}
+            <button
+              onClick={handleAcceptNecessary}
+              className="text-gray-400 hover:text-gray-300 underline transition-colors"
+            >
+              recusar
+            </button>
+          </p>
           <button
             onClick={() => setIsVisible(false)}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-200 transition-colors flex-shrink-0"
             aria-label="Fechar"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };
