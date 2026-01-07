@@ -28,38 +28,38 @@ const createSessionSchema = z.object({
 const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
   const authReq = req as AuthenticatedRequest;
   console.log("Verificando autenticação na rota de assinatura...");
-  
+
   // Verificar se o usuário está autenticado por sessão
   if (authReq.isAuthenticated && authReq.isAuthenticated()) {
     console.log("Autenticado via sessão:", authReq.user?.id, authReq.user?.email);
     return next();
   }
-  
+
   // Se não estiver autenticado por sessão, verificar se tem o campo 'user' definido pelo middleware de token
   if (authReq.user) {
     console.log("Autenticado via token:", authReq.user.id, authReq.user.email);
     return next();
   }
-  
+
   // Verificar manualmente se existe um token nos headers
-  const authToken = req.headers['x-auth-token'] as string || 
-                   (req.headers.authorization?.startsWith('Bearer ') 
-                    ? req.headers.authorization.substring(7) 
-                    : null);
-  
+  const authToken = req.headers['x-auth-token'] as string ||
+    (req.headers.authorization?.startsWith('Bearer ')
+      ? req.headers.authorization.substring(7)
+      : null);
+
   if (authToken) {
     console.log("Token encontrado nos headers:", authToken.substring(0, 15) + "...");
-    
+
     try {
       const [sessionID, userId, timestamp] = authToken.split(':');
-      
+
       if (sessionID && userId) {
         // Recuperar o usuário do banco de dados
         const [user] = await db.select().from(users).where(eq(users.id, parseInt(userId)));
-        
+
         if (user) {
           console.log("Usuário recuperado via token nos headers:", user.id, user.email);
-          
+
           // Definir o usuário na requisição
           authReq.user = user;
           return next();
@@ -69,7 +69,7 @@ const isAuthenticated = async (req: Request, res: Response, next: NextFunction) 
       console.error("Erro ao processar token:", error);
     }
   }
-  
+
   // Se chegou aqui, não está autenticado
   res.status(401).json({ message: "Não autorizado" });
 };
@@ -85,26 +85,26 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
     });
 
     if (!validationResult.success) {
-      return res.status(400).json({ 
-        message: "Parâmetros inválidos", 
-        errors: validationResult.error.format() 
+      return res.status(400).json({
+        message: "Parâmetros inválidos",
+        errors: validationResult.error.format()
       });
     }
 
     const { planId, paymentMethod } = validationResult.data;
     const user = authReq.user;
-    
+
     if (!user) {
       return res.status(401).json({ message: "Usuário não autenticado" });
     }
-    
+
     // Buscar o plano de assinatura pelo ID
     const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, planId));
-    
+
     if (!plan) {
       return res.status(404).json({ message: "Plano não encontrado" });
     }
-    
+
     const downgradeResult = await scheduleDowngradeIfNeeded(user.id, plan);
     if (downgradeResult.scheduled) {
       return res.json({
@@ -134,7 +134,7 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
           subscriptionChangedAt: now,
         })
         .where(eq(users.id, user.id));
-      
+
       await db.insert(userSubscriptions).values({
         userId: user.id,
         planId: plan.id,
@@ -146,7 +146,7 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
         createdAt: now,
         updatedAt: now,
       });
-      
+
       return res.json({
         message: "Plano gratuito ativado com sucesso",
         planId: plan.id,
@@ -154,10 +154,10 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
         status: 'active'
       });
     }
-    
+
     // Verificar se o usuário já tem um customer ID no Stripe
     let customerId = user.stripeCustomerId;
-    
+
     // Criar customer no Stripe se ainda não existir
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -167,15 +167,15 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
           userId: user.id.toString()
         }
       });
-      
+
       customerId = customer.id;
-      
+
       // Atualizar o ID do cliente no banco de dados
       await db.update(users)
         .set({ stripeCustomerId: customerId })
         .where(eq(users.id, user.id));
     }
-    
+
     // Configuração básica para Payment Intent
     const baseOptions = {
       amount: plan.price, // Preço em centavos
@@ -188,11 +188,11 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
         userId: user.id.toString()
       }
     };
-    
+
     // Criar Payment Intent baseado no método de pagamento
     let paymentIntent;
     let expiresAt = new Date();
-    
+
     if (paymentMethod === 'pix') {
       try {
         // Criar Payment Intent com PIX
@@ -206,7 +206,7 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
           },
           description: `Assinatura plano ${plan.name}`
         });
-        
+
         return res.json({
           clientSecret: paymentIntent.client_secret,
           paymentMethod: 'pix',
@@ -215,7 +215,7 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
         });
       } catch (pixError: any) {
         console.error("Erro ao criar pagamento PIX:", pixError);
-        
+
         // Se PIX não estiver disponível, usar cartão como fallback
         if (pixError.message?.includes('payment method type "pix" is invalid')) {
           paymentIntent = await stripe.paymentIntents.create({
@@ -223,7 +223,7 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
             payment_method_types: ['card'],
             description: `Assinatura plano ${plan.name} (fallback de PIX)`
           });
-          
+
           return res.json({
             clientSecret: paymentIntent.client_secret,
             paymentMethod: 'card',
@@ -231,19 +231,34 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
             fallback: true
           });
         }
-        
+
         throw pixError;
       }
     } else {
-      // Para cartão e boleto
-      paymentIntent = await stripe.paymentIntents.create({
-        ...baseOptions,
-        payment_method_types: [paymentMethod],
-        description: `Assinatura plano ${plan.name}`
-      });
-      
+      // Para cartão padrão, criar PaymentIntent com múltiplos métodos
+      // para permitir que o usuário escolha no PaymentElement
+      try {
+        paymentIntent = await stripe.paymentIntents.create({
+          ...baseOptions,
+          // Usar automatic_payment_methods para habilitar cartão, PIX e boleto
+          automatic_payment_methods: {
+            enabled: true,
+            allow_redirects: 'always'
+          },
+          description: `Assinatura plano ${plan.name}`
+        });
+      } catch (autoPaymentError: any) {
+        console.log("Fallback para payment_method_types manualmente:", autoPaymentError.message);
+        // Fallback: criar com múltiplos métodos específicos
+        paymentIntent = await stripe.paymentIntents.create({
+          ...baseOptions,
+          payment_method_types: ['card', 'pix', 'boleto'],
+          description: `Assinatura plano ${plan.name}`
+        });
+      }
+
       // NÃO atualizar o status aqui - apenas após o pagamento ser confirmado
-      
+
       return res.json({
         clientSecret: paymentIntent.client_secret,
         paymentMethod,
@@ -252,7 +267,7 @@ router.post("/create-session", isAuthenticated, async (req: Request, res: Respon
     }
   } catch (error) {
     console.error("Erro ao criar sessão de pagamento:", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       message: "Erro ao processar pagamento",
       error: error instanceof Error ? error.message : "Erro desconhecido"
     });
@@ -282,7 +297,7 @@ router.post("/confirm-payment", isAuthenticated, async (req: Request, res: Respo
       // Buscar o plano do metadata
       const planName = paymentIntent.metadata.planName;
       const planId = paymentIntent.metadata.planId;
-      
+
       // Atualizar o status da assinatura
       await db.update(users)
         .set({
@@ -467,9 +482,9 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response) => {
       subscription: userSubscriptions,
       plan: subscriptionPlans
     })
-    .from(userSubscriptions)
-    .leftJoin(subscriptionPlans, eq(userSubscriptions.planId, subscriptionPlans.id))
-    .where(eq(userSubscriptions.id, subscriptionId));
+      .from(userSubscriptions)
+      .leftJoin(subscriptionPlans, eq(userSubscriptions.planId, subscriptionPlans.id))
+      .where(eq(userSubscriptions.id, subscriptionId));
 
     if (!subscription) {
       return res.status(404).json({ message: "Assinatura não encontrada" });
@@ -500,7 +515,7 @@ router.post('/create', isAuthenticated, async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const { planId, paymentMethod } = req.body;
-    
+
     if (!authReq.user) {
       throw new AppError('Usuário não autenticado', 401);
     }
@@ -598,12 +613,12 @@ router.put('/update/:id', isAuthenticated, async (req: Request, res: Response) =
     if (planId || status) {
       const updatedPlanId = planId ? Number(planId) : subscription.planId;
       const updatedStatus = status || subscription.status;
-      
+
       // Buscar o plano atualizado
       const plan = await db.query.subscriptionPlans.findFirst({
         where: eq(subscriptionPlans.id, updatedPlanId)
       });
-      
+
       if (plan) {
         await db.update(users)
           .set({
@@ -612,7 +627,7 @@ router.put('/update/:id', isAuthenticated, async (req: Request, res: Response) =
             updatedAt: new Date()
           })
           .where(eq(users.id, subscription.userId));
-        
+
         console.log(`✅ Plano do usuário sincronizado: ${plan.name} (${updatedStatus})`);
       }
     }
@@ -671,7 +686,7 @@ router.delete('/cancel/:id', isAuthenticated, async (req: Request, res: Response
         updatedAt: new Date()
       })
       .where(eq(users.id, subscription.userId));
-    
+
     console.log(`✅ Status de assinatura atualizado para 'cancelled' para usuário ${subscription.userId}`);
 
     res.json({
