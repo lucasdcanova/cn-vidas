@@ -32,14 +32,14 @@ import UnifiedEmergencyRoom from "@/pages/unified-emergency-room";
 import TelemedicineConsultation from "@/pages/telemedicine-consultation";
 import EmergencyCallPage from "@/pages/emergency-call";
 import Claims from "@/pages/claims";
-import NewClaim from "@/pages/claims/new"; 
+import NewClaim from "@/pages/claims/new";
 import Services from "@/pages/services";
 import Profile from "@/pages/profile";
 import ProfileV2 from "@/pages/profile-v2";
 import Payments from "@/pages/payments";
 import Address from "@/pages/address";
 import Checkout from "@/pages/checkout";
-import Subscribe from "@/pages/subscribe";
+
 import Subscription from "@/pages/subscription";
 import FirstSubscriptionGuard from "@/components/subscription/first-subscription-guard";
 import PaymentSuccess from "@/pages/payment-success";
@@ -122,13 +122,13 @@ class ErrorBoundary extends React.Component<
           <h1>🚨 Algo deu errado</h1>
           <p>Houve um erro no carregamento da aplicação.</p>
           <p>Por favor, recarregue a página.</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            style={{ 
-              padding: '10px 20px', 
-              backgroundColor: '#3b82f6', 
-              color: 'white', 
-              border: 'none', 
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
               borderRadius: '5px',
               cursor: 'pointer'
             }}
@@ -149,13 +149,13 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/auth/hsj" component={HSJAuthPage} />
       <Route path="/auth/hcc" component={HCCAuthPage} />
-      
+
       {/* Verificação de Email e Redefinição de Senha - Acessíveis sem autenticação */}
       <Route path="/verificar-email" component={VerificarEmail} />
       <Route path="/redefinir-senha" component={RedefinirSenha} />
       <Route path="/reenviar-verificacao" component={ReenviarVerificacao} />
       <Route path="/esqueci-senha" component={EsqueciSenha} />
-      
+
       {/* Patient & General Routes */}
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
@@ -181,7 +181,7 @@ function Router() {
       <ProtectedRoute path="/test-qr" component={TestQRPage} />
       <ProtectedRoute path="/help" component={HelpPage} />
       <ProtectedRoute path="/checkout" component={Checkout} />
-      <ProtectedRoute path="/subscribe" component={Subscribe} />
+      <ProtectedRoute path="/subscribe" component={Payments} />{/* Redireciona para payments */}
       <ProtectedRoute path="/subscription" component={Subscription} />
       <ProtectedRoute path="/first-subscription" component={PatientOnboarding} allowedRoles={["patient"]} />
       <ProtectedRoute path="/payment-success" component={PaymentSuccess} />
@@ -203,24 +203,24 @@ function Router() {
       <ProtectedRoute path="/doctor-emergency" component={TelemedicineEmergencyV3} allowedRoles={["doctor", "patient"]} />
       <ProtectedRoute path="/doctor-direct" component={DoctorDirectEmergency} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-direct-emergency" component={DoctorDirectEmergency} allowedRoles={["doctor"]} />
-      
+
       {/* Telemedicine Room com Daily.co - Nova implementação com melhor conexão */}
       <ProtectedRoute path="/telemedicine/:appointmentId" component={DailyTelemedicine} allowedRoles={["doctor", "patient"]} />
-      
+
       {/* Nova implementação reescrita com melhores práticas do Daily.co */}
       <ProtectedRoute path="/consultation/:id" component={TelemedicineConsultation} allowedRoles={["doctor", "patient"]} />
-      
+
       {/* Sala de Emergência Daily.co */}
       <ProtectedRoute path="/emergency-call" component={EmergencyCallPage} allowedRoles={["patient", "doctor"]} />
-      
+
       {/* Sala de Emergência específica do médico */}
       <ProtectedRoute path="/emergency/doctor/:doctorId" component={DoctorEmergencyRoom} allowedRoles={["patient", "doctor"]} />
-      
+
       {/* Nova implementação de emergência */}
       <ProtectedRoute path="/emergency-room" component={PatientEmergencyRoom} allowedRoles={["patient"]} />
       <ProtectedRoute path="/doctor-emergency/:appointmentId" component={DoctorEmergencyRoom} allowedRoles={["doctor"]} />
       <ProtectedRoute path="/doctor-emergency-room/:id" component={DoctorEmergencyRoom} allowedRoles={["doctor"]} />
-      
+
       {/* Partner Routes */}
       <ProtectedRoute path="/partner-onboarding" component={PartnerOnboarding} allowedRoles={["partner"]} />
       <ProtectedRoute path="/partner/dashboard" component={PartnerDashboard} allowedRoles={["partner"]} />
@@ -230,17 +230,17 @@ function Router() {
       <ProtectedRoute path="/partner/collaborators" component={PartnerCollaborators} allowedRoles={["partner"]} />
       <ProtectedRoute path="/partner/corporate-plans" component={CorporatePlansPage} allowedRoles={["partner"]} />
       <ProtectedRoute path="/partner/corporate-employees" component={CorporateEmployees} allowedRoles={["partner"]} />
-      
+
       {/* Corporate invite route - accessible without authentication */}
       <Route path="/corporate-invite/:token" component={CorporateInvitePage} />
-      
+
       {/* Campaign pages - accessible without authentication */}
       <Route path="/campanha/taquari" component={CampaignTaquari} />
       <Route path="/campanha/brasilia" component={CampaignBrasilia} />
-      
+
       {/* Hospital briefing page - accessible without authentication */}
       <Route path="/hospital-briefing" component={HospitalBriefing} />
-      
+
       {/* Admin Routes */}
       <ProtectedRoute path="/admin" component={AdminDashboard} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/dashboard" component={AdminDashboard} allowedRoles={["admin"]} />
@@ -257,10 +257,10 @@ function Router() {
       <ProtectedRoute path="/admin/medical-records" component={AdminMedicalRecords} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/doctors" component={AdminDoctors} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/leads" component={AdminLeads} allowedRoles={["admin"]} />
-      
+
       {/* Test routes */}
       <ProtectedRoute path="/test-headless-daily" component={TestHeadlessDaily} />
-      
+
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
@@ -270,7 +270,7 @@ function Router() {
 function AppContent() {
   // Usar hook para atualizar a cor do tema dinamicamente
   useThemeColor();
-  
+
   // Inicializar push notifications e configurações iOS em apps nativos
   React.useEffect(() => {
     if (isNativeApp()) {
@@ -278,12 +278,12 @@ function AppContent() {
       StatusBarConfig.initialize().catch(error => {
         console.error('Erro ao inicializar StatusBar:', error);
       });
-      
+
       // Manter a configuração antiga também para compatibilidade
       configureIOSStatusBar().catch(error => {
         console.error('Erro ao inicializar configurações iOS:', error);
       });
-      
+
       // Inicializar push notifications
       PushNotificationService.initialize().catch(error => {
         console.error('Erro ao inicializar push notifications:', error);
