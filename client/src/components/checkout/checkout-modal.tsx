@@ -457,11 +457,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     if (checkoutId && !clientSecret && !checkoutUrl) {
       trackCheckoutAbandoned();
     }
-      setClientSecret(null);
-      setPixInfo(null);
-      setBoletoInfo(null);
-      setCheckoutUrl(null);
-      setPaymentMethod('card');
+    setClientSecret(null);
+    setPixInfo(null);
+    setBoletoInfo(null);
+    setCheckoutUrl(null);
+    setPaymentMethod('card');
+    onClose(); // CORREÇÃO: Chamar onClose para fechar o dialog
   };
 
   return (
