@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "../db.js";
 import { campaignLeads, insertCampaignLeadSchema } from "../../shared/schema.js";
-import { requireAdmin } from "../middleware/auth";
+import { requireAuth, requireAdmin } from "../middleware/auth";
 import { desc, eq } from "drizzle-orm";
 
 const router = Router();
@@ -34,19 +34,34 @@ router.post("/", async (req, res) => {
 });
 
 // Listar leads (admin only)
-router.get("/", requireAdmin, async (req, res) => {
+router.get("/", requireAuth, requireAdmin, async (req, res) => {
   try {
+    console.log("[Campaign Leads] Buscando todos os leads...");
+    console.log("[Campaign Leads] Usuário autenticado:", (req as any).user?.email);
+
     const leads = await db
       .select()
       .from(campaignLeads)
       .orderBy(desc(campaignLeads.createdAt));
 
-    res.json({ 
-      success: true, 
-      leads 
+    console.log(`[Campaign Leads] ${leads.length} leads encontrados`);
+
+    res.json({
+      success: true,
+      leads
     });
   } catch (error: any) {
-    console.error("Error fetching campaign leads:", error);
+    console.error("[Campaign Leads] Erro ao buscar leads:", error);
+    console.error("[Campaign Leads] Stack:", error.stack);
+
+    // Verificar se é erro de tabela não existir
+    if (error.message?.includes("relation") && error.message?.includes("does not exist")) {
+      return res.status(500).json({
+        error: "Tabela campaign_leads não existe",
+        details: "A migration para criar a tabela precisa ser executada",
+      });
+    }
+
     res.status(500).json({
       error: "Failed to fetch leads",
       details: error.message,
@@ -55,7 +70,7 @@ router.get("/", requireAdmin, async (req, res) => {
 });
 
 // Buscar leads por campanha (admin only)
-router.get("/campaign/:campaign", requireAdmin, async (req, res) => {
+router.get("/campaign/:campaign", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { campaign } = req.params;
     
