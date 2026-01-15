@@ -10,6 +10,7 @@
     "dev:unified": "NODE_ENV=production tsx watch server/index.ts",
     "migrate": "tsx run-migration-drizzle.ts",
     "migrate:fix-constraints": "node apply-migration.js",
+    "migrate:campaign-leads": "node run-campaign-leads-migration.js",
     "build": "npm run build:render",
     "start": "NODE_ENV=production node dist/server/index.js",
     "clean": "rm -rf dist",
