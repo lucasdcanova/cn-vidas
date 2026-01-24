@@ -747,13 +747,13 @@ const AuthPage: React.FC = () => {
   
   return (
     <AuthLayout activeTab={activeTab}>
-      <div 
+      <div
         ref={scrollContainerRef}
-        className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-4 ${
-          activeTab === 'register' && isKeyboardVisible ? 'py-1' : 
-          isKeyboardVisible ? 'py-2' : 
-          activeTab === 'login' ? 'py-4' : 'py-6'
-        } ${activeTab === 'login' ? '' : 'overflow-y-auto'}`} 
+        className={`flex-1 flex flex-col max-w-xl mx-auto w-full px-5 ${
+          activeTab === 'register' && isKeyboardVisible ? 'py-2' :
+          isKeyboardVisible ? 'py-3' :
+          activeTab === 'login' ? 'py-5' : 'py-5'
+        } ${activeTab === 'login' ? '' : 'overflow-y-auto'}`}
         style={{
           maxHeight: isKeyboardVisible ? '100%' : 'auto',
           paddingBottom: isKeyboardVisible ? '0' : undefined,
@@ -762,18 +762,23 @@ const AuthPage: React.FC = () => {
         }}>
         <Tabs defaultValue="register" value={activeTab} onValueChange={(value) => {
           setActiveTab(value);
-          // Limpar erros ao trocar de aba
           setLoginError(null);
           setRegisterError(null);
         }} className="w-full flex-1 flex flex-col">
-          <TabsList className={`grid w-full grid-cols-2 p-0.5 bg-gray-100/60 backdrop-blur-sm rounded-lg shadow-lg ${activeTab === 'login' ? 'mb-3' : 'mb-4'}`}>
-            <TabsTrigger value="login" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-blue-600" style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
+          <TabsList className={`grid w-full grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200 shadow-sm ${activeTab === 'login' ? 'mb-4' : 'mb-5'}`}>
+            <TabsTrigger
+              value="login"
+              className="rounded-lg py-2.5 text-sm font-semibold text-slate-500 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-teal-700 hover:text-slate-700 transition-all duration-200"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
               Login
             </TabsTrigger>
-            <TabsTrigger value="register" className="rounded-md py-2 text-sm data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-blue-600" style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
+            <TabsTrigger
+              value="register"
+              className="rounded-lg py-2.5 text-sm font-semibold text-slate-500 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-teal-700 hover:text-slate-700 transition-all duration-200"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
@@ -782,39 +787,33 @@ const AuthPage: React.FC = () => {
           </TabsList>
         
         <TabsContent value="login">
-          <div className="relative p-4 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/10 border border-white/60 overflow-hidden">
-            {/* Gradient orbs para efeito de profundidade */}
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-tr from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-            
-            <div className="relative z-10">
-              <div className="mb-3 text-center">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  Bem-vindo de volta
-                </h1>
-                <p className="text-gray-500 mt-0.5 text-xs font-light">
-                  Acesse sua conta para continuar
-                </p>
-              </div>
-              
-              {/* Mensagem de erro do login */}
-              {loginError && (
-                <Alert className="mb-4 border-red-200 bg-red-50/50 backdrop-blur-sm">
-                  <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <AlertDescription className="text-xs text-red-800">
-                    {loginError}
-                  </AlertDescription>
-                </Alert>
-              )}
-            
+          <div className="relative">
+            <div className="mb-5 text-center">
+              <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+                Bem-vindo de volta
+              </h1>
+              <p className="text-slate-500 mt-1 text-sm">
+                Acesse sua conta para continuar
+              </p>
+            </div>
+
+            {/* Mensagem de erro do login */}
+            {loginError && (
+              <Alert className="mb-4 border-red-300 bg-red-50">
+                <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <AlertDescription className="text-sm text-red-700 font-medium">
+                  {loginError}
+                </AlertDescription>
+              </Alert>
+            )}
+
             <Form {...loginForm}>
-              <form 
-                onSubmit={loginForm.handleSubmit(onLoginSubmit)} 
-                className="space-y-3"
+              <form
+                onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+                className="space-y-4"
                 onKeyDown={(e) => {
-                  // Navegar entre campos com Tab ou tecla de próximo do iOS
                   if (e.key === 'Tab' && !e.shiftKey && document.activeElement === emailLoginRef.current) {
                     e.preventDefault();
                     passwordLoginRef.current?.focus();
@@ -826,59 +825,59 @@ const AuthPage: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-xs font-medium mb-1.5 block">E-mail</FormLabel>
+                      <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">E-mail</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-slate-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                               <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                             </svg>
                           </div>
-                          <input 
+                          <input
                             ref={emailLoginRef}
-                            placeholder="seu@email.com" 
-                            type="email" 
+                            placeholder="seu@email.com"
+                            type="email"
                             disabled={isLoggingIn}
-                            className="pl-9 pr-3 py-2.5 rounded-xl h-10 text-xs bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            className="pl-11 pr-4 py-3 rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
                             autoComplete="email"
                             autoCapitalize="off"
                             autoCorrect="off"
                             spellCheck="false"
                             inputMode="email"
                             enterKeyHint="next"
-                            {...field} 
+                            {...field}
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-[10px] mt-1" />
+                      <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={loginForm.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex justify-between items-center mb-1.5">
-                        <FormLabel className="text-gray-700 text-xs font-medium">Senha</FormLabel>
-                        <a href="/esqueci-senha" className="text-[10px] font-medium text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
+                      <div className="flex justify-between items-center mb-2">
+                        <FormLabel className="text-slate-700 text-sm font-semibold">Senha</FormLabel>
+                        <a href="/esqueci-senha" className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors">
                           Esqueceu a senha?
                         </a>
                       </div>
                       <FormControl>
                         <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-slate-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                               <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                           </div>
-                          <input 
+                          <input
                             ref={passwordLoginRef}
-                            placeholder="••••••••" 
+                            placeholder="••••••••"
                             type="password"
                             disabled={isLoggingIn}
-                            className="pl-9 pr-3 py-2.5 rounded-xl h-10 text-xs bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            className="pl-11 pr-4 py-3 rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
                             autoComplete="current-password"
                             enterKeyHint="go"
                             onKeyDown={(e) => {
@@ -887,74 +886,72 @@ const AuthPage: React.FC = () => {
                                 loginForm.handleSubmit(onLoginSubmit)();
                               }
                             }}
-                            {...field} 
+                            {...field}
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-[10px] mt-1" />
+                      <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                     </FormItem>
                   )}
                 />
-                
-                <div className="space-y-1.5 my-2">
+
+                <div className="space-y-2.5 py-1">
                   <label className="flex items-center cursor-pointer group">
                     <div className="relative">
-                      <input 
-                        id="remember-me" 
-                        name="remember-me" 
-                        type="checkbox" 
-                        className="sr-only peer" 
+                      <input
+                        id="remember-me"
+                        name="remember-me"
+                        type="checkbox"
+                        className="sr-only peer"
                       />
-                      <div className="w-3.5 h-3.5 bg-gray-100 rounded peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-200"></div>
-                      <svg className="absolute top-0 left-0 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 p-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="w-5 h-5 bg-slate-100 border-2 border-slate-300 rounded-md peer-checked:bg-teal-600 peer-checked:border-teal-600 transition-all duration-200"></div>
+                      <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <span className="ml-2 text-[11px] text-gray-600 group-hover:text-gray-800 transition-colors">
+                    <span className="ml-3 text-sm text-slate-600 group-hover:text-slate-800 transition-colors font-medium">
                       Lembrar-me
                     </span>
                   </label>
-                  
+
                   {isBiometricAvailable && (
                     <label className="flex items-center cursor-pointer group">
                       <div className="relative">
-                        <input 
-                          id="enable-biometric" 
-                          name="enable-biometric" 
+                        <input
+                          id="enable-biometric"
+                          name="enable-biometric"
                           type="checkbox"
                           checked={enableBiometric}
                           onChange={(e) => setEnableBiometric(e.target.checked)}
-                          className="sr-only peer" 
+                          className="sr-only peer"
                         />
-                        <div className="w-3.5 h-3.5 bg-gray-100 rounded peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 transition-all duration-200"></div>
-                        <svg className="absolute top-0 left-0 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 p-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-5 h-5 bg-slate-100 border-2 border-slate-300 rounded-md peer-checked:bg-teal-600 peer-checked:border-teal-600 transition-all duration-200"></div>
+                        <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <span className="ml-2 text-[11px] text-gray-600 group-hover:text-gray-800 transition-colors">
+                      <span className="ml-3 text-sm text-slate-600 group-hover:text-slate-800 transition-colors font-medium">
                         Habilitar login com {biometryTypeName}
                       </span>
                     </label>
                   )}
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full h-9 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group mt-3"
-                  style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 rounded-xl text-base font-semibold text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg shadow-teal-600/25 hover:shadow-xl hover:shadow-teal-600/30 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 mt-4"
                   disabled={isLoggingIn || isAuthenticating}
                 >
-                  <div className="absolute inset-0 -top-[200%] bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:top-0" />
-                  <span className="relative flex items-center justify-center">
+                  <span className="flex items-center justify-center">
                     {isLoggingIn ? (
                       <>
-                        <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Entrando...
                       </>
                     ) : (
                       <>
                         Entrar
-                        <svg className="ml-2 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
                       </>
@@ -963,105 +960,87 @@ const AuthPage: React.FC = () => {
                 </Button>
               </form>
             </Form>
-            </div>
           </div>
         </TabsContent>
         
         <TabsContent value="register">
-          <div className="relative p-6 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-900/10 border border-white/60 overflow-hidden">
-            {/* Gradient orbs para efeito de profundidade */}
-            <div className="absolute -top-24 -left-24 w-48 h-48 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-            
-            <div className="relative z-10">
-              <div className="mb-4 text-center">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  Crie sua conta
-                </h1>
-                <p className="text-gray-500 mt-1 text-xs font-light">
-                  Preencha os dados para criar seu perfil na CN Vidas
-                </p>
-              </div>
-              
-              {/* Mensagem de erro do registro */}
-              {registerError && (
-                <Alert className="mb-4 border-red-200 bg-red-50/50 backdrop-blur-sm">
-                  <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <AlertDescription className="text-xs text-red-800">
-                    {registerError}
-                  </AlertDescription>
-                </Alert>
-              )}
+          <div className="relative">
+            <div className="mb-5 text-center">
+              <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+                Crie sua conta
+              </h1>
+              <p className="text-slate-500 mt-1 text-sm">
+                Preencha os dados para criar seu perfil
+              </p>
+            </div>
+
+            {/* Mensagem de erro do registro */}
+            {registerError && (
+              <Alert className="mb-4 border-red-300 bg-red-50">
+                <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <AlertDescription className="text-sm text-red-700 font-medium">
+                  {registerError}
+                </AlertDescription>
+              </Alert>
+            )}
             
             <Form {...registerForm}>
-              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-3">
+              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
                 <FormField
                   control={registerForm.control}
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-xs font-medium mb-2 block">Tipo de perfil</FormLabel>
-                      <div className="grid grid-cols-3 gap-2"
+                      <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">Tipo de perfil</FormLabel>
+                      <div className="grid grid-cols-3 gap-3"
                         onFocus={(e) => activeTab === 'register' && scrollToCenter(e.currentTarget)}
                         tabIndex={0}
                       >
-                        <div 
-                          className={`relative flex flex-col items-center p-2.5 border-2 ${
-                            field.value === "patient" 
-                              ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-700" 
-                              : "border-gray-200/50 text-gray-600 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-blue-100/20"
-                          } rounded-xl cursor-pointer shadow-md hover:shadow-lg overflow-hidden group`} 
-                          style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                        <div
+                          className={`relative flex flex-col items-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                            field.value === "patient"
+                              ? "border-teal-500 bg-teal-50 text-teal-700 shadow-md"
+                              : "border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-slate-50"
+                          }`}
                           onClick={() => field.onChange("patient")}
                         >
-                          {field.value === "patient" && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-blue-600/10 animate-pulse" />
-                          )}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mb-1 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                          <span className="text-[10px] font-medium relative z-10">Paciente</span>
+                          <span className="text-xs font-semibold">Paciente</span>
                         </div>
-                        
-                        <div 
-                          className={`relative flex flex-col items-center p-2.5 border-2 ${
-                            field.value === "doctor" 
-                              ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-700" 
-                              : "border-gray-200/50 text-gray-600 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-blue-100/20"
-                          } rounded-xl cursor-pointer shadow-md hover:shadow-lg overflow-hidden group`} 
-                          style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+
+                        <div
+                          className={`relative flex flex-col items-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                            field.value === "doctor"
+                              ? "border-teal-500 bg-teal-50 text-teal-700 shadow-md"
+                              : "border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-slate-50"
+                          }`}
                           onClick={() => field.onChange("doctor")}
                         >
-                          {field.value === "doctor" && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-blue-600/10 animate-pulse" />
-                          )}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mb-1 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                           </svg>
-                          <span className="text-[10px] font-medium relative z-10">Médico</span>
+                          <span className="text-xs font-semibold">Médico</span>
                         </div>
-                        
-                        <div 
-                          className={`relative flex flex-col items-center p-2.5 border-2 ${
-                            field.value === "partner" 
-                              ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100/50 text-blue-700" 
-                              : "border-gray-200/50 text-gray-600 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-blue-100/20"
-                          } rounded-xl cursor-pointer shadow-md hover:shadow-lg overflow-hidden group`} 
-                          style={{ transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+
+                        <div
+                          className={`relative flex flex-col items-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                            field.value === "partner"
+                              ? "border-teal-500 bg-teal-50 text-teal-700 shadow-md"
+                              : "border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-slate-50"
+                          }`}
                           onClick={() => field.onChange("partner")}
                         >
-                          {field.value === "partner" && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-blue-600/10 animate-pulse" />
-                          )}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mb-1 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
-                          <span className="text-[10px] font-medium relative z-10">Empresa</span>
+                          <span className="text-xs font-semibold">Empresa</span>
                         </div>
                       </div>
-                      <FormMessage />
+                      <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                     </FormItem>
                   )}
                 />
@@ -1071,124 +1050,115 @@ const AuthPage: React.FC = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">E-mail</FormLabel>
+                      <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">E-mail</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-slate-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                               <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                             </svg>
                           </div>
-                          <Input 
-                            placeholder="seu@email.com" 
-                            type="email" 
+                          <Input
+                            placeholder="seu@email.com"
+                            type="email"
                             disabled={isRegistering}
-                            className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            className="pl-11 pr-4 py-3 rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
                             onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                            {...field} 
+                            {...field}
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-[10px]" />
+                      <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                     </FormItem>
                   )}
                 />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {registerForm.watch("role") === "patient" ? (
                     <FormField
                       control={registerForm.control}
                       name="cpf"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">CPF</FormLabel>
+                          <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">CPF</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-slate-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                                   <path d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                                 </svg>
                               </div>
-                              <Input 
-                                placeholder="000.000.000-00" 
+                              <Input
+                                placeholder="000.000.000-00"
                                 disabled={isRegistering}
-                                className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                                className="pl-11 pr-4 py-3 rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
                                 onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                                 onChange={(e) => {
-                                // Formata o CPF enquanto o usuário digita
-                                let value = e.target.value.replace(/\D/g, '');
-                                if (value.length <= 11) {
-                                  // Formata conforme o usuário digita
-                                  if (value.length > 9) {
-                                    value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
-                                  } else if (value.length > 6) {
-                                    value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
-                                  } else if (value.length > 3) {
-                                    value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+                                  let value = e.target.value.replace(/\D/g, '');
+                                  if (value.length <= 11) {
+                                    if (value.length > 9) {
+                                      value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+                                    } else if (value.length > 6) {
+                                      value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+                                    } else if (value.length > 3) {
+                                      value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+                                    }
+                                    field.onChange(value);
                                   }
-                                  field.onChange(value);
-                                }
-                              }}
-                              value={field.value || ''}
-                            />
+                                }}
+                                value={field.value || ''}
+                              />
                             </div>
                           </FormControl>
-                          <FormMessage className="text-[10px]" />
+                          <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                         </FormItem>
                       )}
                     />
                   ) : registerForm.watch("role") === "doctor" ? (
                     <div className="space-y-2">
-                      <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">Registro no CRM</FormLabel>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                          <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
+                      <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">Registro no CRM</FormLabel>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24">
+                          <Select
+                            defaultValue={estadoSelecionado}
+                            onValueChange={setEstadoSelecionado}
+                          >
+                            <SelectTrigger className="rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 transition-all duration-200">
+                              <SelectValue placeholder="UF" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {estadosBrasileiros.map((estado) => (
+                                <SelectItem key={estado.value} value={estado.value}>
+                                  {estado.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-24 pl-10">
-                            <Select 
-                              defaultValue={estadoSelecionado}
-                              onValueChange={setEstadoSelecionado}
-                            >
-                              <SelectTrigger className="rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 hover:bg-white/60">
-                                <SelectValue placeholder="UF" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {estadosBrasileiros.map((estado) => (
-                                  <SelectItem key={estado.value} value={estado.value}>
-                                    {estado.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex-1">
-                            <FormField
-                              control={registerForm.control}
-                              name="username"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input 
-                                      placeholder="12345" 
-                                      disabled={isRegistering}
-                                      className="rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
-                                      onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                                      {...field}
-                                      value={field.value?.replace(/CRM[A-Z]{2}/i, '') || ''}
-                                      onChange={(e) => {
-                                        const value = e.target.value.replace(/\D/g, '');
-                                        field.onChange(`CRM${estadoSelecionado}${value}`);
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage className="text-[10px]" />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                        <div className="flex-1">
+                          <FormField
+                            control={registerForm.control}
+                            name="username"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="12345"
+                                    disabled={isRegistering}
+                                    className="rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
+                                    onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                    {...field}
+                                    value={field.value?.replace(/CRM[A-Z]{2}/i, '') || ''}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/\D/g, '');
+                                      field.onChange(`CRM${estadoSelecionado}${value}`);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
+                              </FormItem>
+                            )}
+                          />
                         </div>
                       </div>
                     </div>
@@ -1198,24 +1168,22 @@ const AuthPage: React.FC = () => {
                       name="cnpj"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">CNPJ da Empresa</FormLabel>
+                          <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">CNPJ da Empresa</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-slate-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                                   <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                               </div>
-                              <Input 
-                                placeholder="00.000.000/0000-00" 
+                              <Input
+                                placeholder="00.000.000/0000-00"
                                 disabled={isRegistering}
-                                className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                                className="pl-11 pr-4 py-3 rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
                                 onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
                                 onChange={(e) => {
-                                  // Formatação do CNPJ
                                   let value = e.target.value.replace(/\D/g, '');
                                   if (value.length <= 14) {
-                                    // Formata conforme o usuário digita
                                     if (value.length > 12) {
                                       value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
                                     } else if (value.length > 8) {
@@ -1232,7 +1200,7 @@ const AuthPage: React.FC = () => {
                               />
                             </div>
                           </FormControl>
-                          <FormMessage className="text-[10px]" />
+                          <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                         </FormItem>
                       )}
                     />
@@ -1242,46 +1210,46 @@ const AuthPage: React.FC = () => {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700 text-sm">Nome de usuário</FormLabel>
+                          <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">Nome de usuário</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="seunome123" 
+                            <Input
+                              placeholder="seunome123"
                               disabled={isRegistering}
-                              className="rounded-lg h-10 text-sm backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500 shadow-md"
+                              className="rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
                               onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                              {...field} 
+                              {...field}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                         </FormItem>
                       )}
                     />
                   )}
-                  
+
                   <FormField
                     control={registerForm.control}
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">Senha</FormLabel>
+                        <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">Senha</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                              <svg className="h-5 w-5 text-slate-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                                 <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                               </svg>
                             </div>
-                            <Input 
-                              placeholder="••••••••" 
-                              type="password" 
+                            <Input
+                              placeholder="••••••••"
+                              type="password"
                               disabled={isRegistering}
-                              className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                              className="pl-11 pr-4 py-3 rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
                               onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                              {...field} 
+                              {...field}
                             />
                           </div>
                         </FormControl>
-                        <FormMessage className="text-[10px]" />
+                        <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                       </FormItem>
                     )}
                   />
@@ -1292,34 +1260,34 @@ const AuthPage: React.FC = () => {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 text-xs font-medium mb-1 block">Nome completo</FormLabel>
+                      <FormLabel className="text-slate-700 text-sm font-semibold mb-2 block">Nome completo</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-4 w-4 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-slate-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                               <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                           </div>
-                          <Input 
-                            placeholder="Seu Nome Completo" 
+                          <Input
+                            placeholder="Seu Nome Completo"
                             disabled={isRegistering}
-                            className="pl-10 pr-3 py-2.5 rounded-xl h-11 text-sm bg-gray-50/50 border border-gray-200/50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 w-full transition-all duration-200 hover:bg-white/60"
+                            className="pl-11 pr-4 py-3 rounded-xl h-12 text-base text-slate-800 bg-slate-50 border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/15 focus:bg-white w-full transition-all duration-200 placeholder:text-slate-400"
                             onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                            {...field} 
+                            {...field}
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-[10px]" />
+                      <FormMessage className="text-xs mt-1.5 text-red-600 font-medium" />
                     </FormItem>
                   )}
                 />
-                
+
                 {/* Seção de Aceitação de Termos */}
-                <div className="border-t border-gray-100/50 pt-4 mt-4">
-                  <h3 className="text-xs font-medium text-gray-700 mb-3">
+                <div className="border-t border-slate-200 pt-4 mt-4">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-3">
                     Documentos Legais (Obrigatório)
                   </h3>
-                  
+
                   <FormField
                     control={registerForm.control}
                     name="acceptAllTerms"
@@ -1331,16 +1299,17 @@ const AuthPage: React.FC = () => {
                             onCheckedChange={field.onChange}
                             disabled={isRegistering}
                             onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                            className="mt-0.5 h-5 w-5 border-2 border-slate-300 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600"
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel className="text-xs text-gray-600">
+                          <FormLabel className="text-sm text-slate-600 leading-relaxed">
                             Li e aceito todos os documentos legais:{" "}
                             <Dialog>
                               <DialogTrigger asChild>
                                 <button
                                   type="button"
-                                  className="text-blue-600 hover:underline font-medium text-xs"
+                                  className="text-teal-700 hover:underline font-medium text-xs"
                                 >
                                   Termos de Uso
                                 </button>
@@ -1349,7 +1318,7 @@ const AuthPage: React.FC = () => {
                                 <DialogHeader>
                                   <DialogTitle>Termos de Uso - CN Vidas</DialogTitle>
                                   <DialogDescription>
-                                    Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-blue-600 hover:underline">Central de Documentos</a>
+                                    Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
                                   </DialogDescription>
                                 </DialogHeader>
                                 <ScrollArea className="h-[60vh] w-full">
@@ -1362,7 +1331,7 @@ const AuthPage: React.FC = () => {
                               <DialogTrigger asChild>
                                 <button
                                   type="button"
-                                  className="text-blue-600 hover:underline font-medium text-xs"
+                                  className="text-teal-700 hover:underline font-medium text-xs"
                                 >
                                   Política de Privacidade
                                 </button>
@@ -1371,7 +1340,7 @@ const AuthPage: React.FC = () => {
                                 <DialogHeader>
                                   <DialogTitle>Política de Privacidade - CN Vidas</DialogTitle>
                                   <DialogDescription>
-                                    Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-blue-600 hover:underline">Central de Documentos</a>
+                                    Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
                                   </DialogDescription>
                                 </DialogHeader>
                                 <ScrollArea className="h-[60vh] w-full">
@@ -1386,7 +1355,7 @@ const AuthPage: React.FC = () => {
                                   <DialogTrigger asChild>
                                     <button
                                       type="button"
-                                      className="text-blue-600 hover:underline font-medium text-xs"
+                                      className="text-teal-700 hover:underline font-medium text-xs"
                                     >
                                       Contrato de Adesão dos Planos
                                     </button>
@@ -1412,7 +1381,7 @@ const AuthPage: React.FC = () => {
                                   <DialogTrigger asChild>
                                     <button
                                       type="button"
-                                      className="text-blue-600 hover:underline font-medium text-xs"
+                                      className="text-teal-700 hover:underline font-medium text-xs"
                                     >
                                       Contrato de Parceria
                                     </button>
@@ -1421,7 +1390,7 @@ const AuthPage: React.FC = () => {
                                     <DialogHeader>
                                       <DialogTitle>Contrato de Parceria - CN Vidas</DialogTitle>
                                       <DialogDescription>
-                                        Parceria gratuita e sem exclusividade. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-blue-600 hover:underline">Central de Documentos</a>
+                                        Parceria gratuita e sem exclusividade. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
                                       </DialogDescription>
                                     </DialogHeader>
                                     <ScrollArea className="h-[60vh] w-full">
@@ -1438,7 +1407,7 @@ const AuthPage: React.FC = () => {
                                   <DialogTrigger asChild>
                                     <button
                                       type="button"
-                                      className="text-blue-600 hover:underline font-medium text-xs"
+                                      className="text-teal-700 hover:underline font-medium text-xs"
                                     >
                                       Contrato de Prestação de Serviços Médicos
                                     </button>
@@ -1447,7 +1416,7 @@ const AuthPage: React.FC = () => {
                                     <DialogHeader>
                                       <DialogTitle>Contrato de Prestação de Serviços Médicos</DialogTitle>
                                       <DialogDescription>
-                                        Termos para médicos prestadores de telemedicina. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-blue-600 hover:underline">Central de Documentos</a>
+                                        Termos para médicos prestadores de telemedicina. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
                                       </DialogDescription>
                                     </DialogHeader>
                                     <ScrollArea className="h-[60vh] w-full">
@@ -1465,7 +1434,7 @@ const AuthPage: React.FC = () => {
                                   <DialogTrigger asChild>
                                     <button
                                       type="button"
-                                      className="text-blue-600 hover:underline font-medium text-xs"
+                                      className="text-teal-700 hover:underline font-medium text-xs"
                                     >
                                       Política de Gravação de Teleconsultas
                                     </button>
@@ -1512,14 +1481,12 @@ const AuthPage: React.FC = () => {
                   />
                 </div>
                 
-                <Button 
-                  type="submit" 
-                  className="w-full h-11 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group mt-4"
-                  style={{ transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}
+                <Button
+                  type="submit"
+                  className="w-full h-12 rounded-xl text-base font-semibold text-white bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 shadow-lg shadow-teal-600/25 hover:shadow-xl hover:shadow-teal-600/30 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 mt-5"
                   disabled={isRegistering}
                 >
-                  <div className="absolute inset-0 -top-[200%] bg-gradient-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:top-0" />
-                  <span className="relative flex items-center justify-center">
+                  <span className="flex items-center justify-center">
                     {isRegistering ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -1536,12 +1503,11 @@ const AuthPage: React.FC = () => {
                   </span>
                 </Button>
                 
-                <p className="text-center text-[10px] text-gray-400 mt-3 font-light">
+                <p className="text-center text-xs text-slate-500 mt-4">
                   Ao criar uma conta, você confirma ter lido e aceito todos os documentos legais acima.
                 </p>
               </form>
             </Form>
-            </div>
           </div>
         </TabsContent>
         
