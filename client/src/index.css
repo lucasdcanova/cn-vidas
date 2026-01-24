@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Source+Sans+3:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import './styles/confetti.css';
 @import 'react-image-crop/dist/ReactCrop.css';
@@ -335,6 +336,78 @@ select {
   
   .animate-slide-in-left {
     animation: slide-in-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* Estilos para a página de autenticação - versão com alto contraste */
+.triunfo-auth-v2 {
+  --triunfo-primary: #0d9488;
+  --triunfo-primary-dark: #0f766e;
+  font-family: 'Inter', 'Source Sans 3', sans-serif;
+}
+
+.triunfo-hero-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeSlideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Estilos de alto contraste para inputs na área de auth */
+.triunfo-auth-v2 .auth-form-content input[type="text"],
+.triunfo-auth-v2 .auth-form-content input[type="email"],
+.triunfo-auth-v2 .auth-form-content input[type="tel"],
+.triunfo-auth-v2 .auth-form-content input[type="number"],
+.triunfo-auth-v2 .auth-form-content input[type="password"],
+.triunfo-auth-v2 .auth-form-content input[type="search"],
+.triunfo-auth-v2 .auth-form-content input[type="url"],
+.triunfo-auth-v2 .auth-form-content textarea,
+.triunfo-auth-v2 .auth-form-content select {
+  background-color: #f8fafc !important;
+  border: 2px solid #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+.triunfo-auth-v2 .auth-form-content input::placeholder,
+.triunfo-auth-v2 .auth-form-content textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.triunfo-auth-v2 .auth-form-content input:focus,
+.triunfo-auth-v2 .auth-form-content textarea:focus,
+.triunfo-auth-v2 .auth-form-content select:focus {
+  background-color: #ffffff !important;
+  border-color: #0d9488 !important;
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15) !important;
+  outline: none !important;
+}
+
+/* Estilos legados mantidos para compatibilidade */
+.triunfo-auth {
+  --triunfo-primary: #0d9488;
+  --triunfo-primary-dark: #0f766e;
+  --triunfo-primary-light: #14b8a6;
+  --triunfo-accent: #0891b2;
+  --triunfo-gold: #f59e0b;
+  --triunfo-text-dark: #0b5f55;
+  --triunfo-text-body: #0f6a63;
+  --triunfo-text-muted: #5eead4;
+  font-family: 'Source Sans 3', 'Inter', sans-serif;
+  color: var(--triunfo-text-body);
+}
+
+.triunfo-auth h1,
+.triunfo-auth h2,
+.triunfo-auth h3,
+.triunfo-auth .triunfo-heading {
+  font-family: 'Merriweather', serif;
+  letter-spacing: -0.02em;
+  color: var(--triunfo-text-dark);
+}
+
+@keyframes fadeSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
