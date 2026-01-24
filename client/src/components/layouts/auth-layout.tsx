@@ -33,17 +33,17 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
   const heroLogo = "/assets/triunfo-logo-white.png";
   const hospitalLogo = "/assets/triunfo-hospital.jpg";
 
-  // Configurações para cada estado - altura ajustada
+  // Configurações para cada estado - logo maior
   const getLogoConfig = () => {
     switch (layoutState) {
       case "register-keyboard":
         return { height: '0px', marginTop: '0px', opacity: 0, isHidden: true };
       case "login-no-keyboard":
-        return { height: 'clamp(130px, 20vw, 180px)', marginTop: '24px', opacity: 1, isHidden: false };
+        return { height: 'clamp(140px, 22vw, 200px)', marginTop: '28px', opacity: 1, isHidden: false };
       case "login-keyboard":
-        return { height: '60px', marginTop: '10px', opacity: 1, isHidden: false };
+        return { height: '70px', marginTop: '12px', opacity: 1, isHidden: false };
       default:
-        return { height: 'clamp(120px, 18vw, 160px)', marginTop: '20px', opacity: 1, isHidden: false };
+        return { height: 'clamp(120px, 18vw, 170px)', marginTop: '24px', opacity: 1, isHidden: false };
     }
   };
 
@@ -121,11 +121,11 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
               width="800"
               height="280"
               style={{
-                width: "min(800px, 92vw)",
+                width: "min(720px, 92vw)",
                 height: logoConfig.height,
-                objectFit: "cover",
-                objectPosition: "center center",
-                filter: "drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3))",
+                objectFit: "contain",
+                objectPosition: "center",
+                filter: "drop-shadow(0 10px 28px rgba(0, 0, 0, 0.3))",
                 animationDelay: "0.15s"
               }}
             />
