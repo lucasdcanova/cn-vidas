@@ -266,7 +266,7 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
           {!logoConfig.isHidden && (
             <img
               src={heroLogo}
-              alt="Hospital de Triunfo"
+              alt="Hospital de Caridade Santa Rita de Triunfo"
               className="triunfo-hero-reveal"
               loading="eager"
               fetchPriority="high"
@@ -339,7 +339,7 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
                   <div className="flex items-center justify-center gap-3">
                     <img
                       src={hospitalLogo}
-                      alt="Hospital de Triunfo"
+                      alt="Hospital de Caridade Santa Rita de Triunfo"
                       className="object-contain rounded-lg"
                       style={{
                         height: "clamp(36px, 8vw, 48px)",
@@ -359,20 +359,13 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
                         className="triunfo-title block"
                         style={{
                           color: "#0f766e",
-                          fontSize: "clamp(12px, 3vw, 14px)"
+                          fontSize: "clamp(11px, 2.8vw, 13px)",
+                          lineHeight: "1.3"
                         }}
                       >
-                        Hospital de Triunfo
-                      </span>
-                      <span
-                        className="uppercase font-semibold"
-                        style={{
-                          color: "#5eead4",
-                          fontSize: "clamp(8px, 2vw, 10px)",
-                          letterSpacing: "0.15em"
-                        }}
-                      >
-                        Telemedicina
+                        Hospital de Caridade
+                        <br />
+                        Santa Rita de Triunfo
                       </span>
                     </div>
                   </div>
@@ -393,41 +386,6 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
                 {children}
               </div>
 
-              {/* Footer do card - compacto em mobile */}
-              {!isKeyboardVisible && layoutState !== "register-keyboard" && (
-                <div
-                  className="auth-footer shrink-0 text-center"
-                  style={{
-                    padding: "clamp(8px, 2vw, 14px) 0",
-                    borderTop: "1px solid rgba(13, 148, 136, 0.08)",
-                    background: "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(240, 253, 250, 0.6) 100%)"
-                  }}
-                >
-                  <div className="flex items-center justify-center gap-1.5">
-                    <svg
-                      className="flex-shrink-0"
-                      style={{
-                        color: "#0d9488",
-                        width: "clamp(12px, 3vw, 16px)",
-                        height: "clamp(12px, 3vw, 16px)"
-                      }}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span
-                      className="font-semibold"
-                      style={{
-                        color: "#0d9488",
-                        fontSize: "clamp(9px, 2.5vw, 11px)"
-                      }}
-                    >
-                      Powered by CN Vidas
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
