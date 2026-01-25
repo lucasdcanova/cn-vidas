@@ -326,79 +326,6 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
                 } : {})
               }}
             >
-              {/* Header do card com hospital branding - responsivo */}
-              {!isKeyboardVisible && (
-                <div
-                  className="auth-header-branding shrink-0 text-center"
-                  style={{
-                    padding: "clamp(10px, 2.5vw, 16px) clamp(12px, 3vw, 20px)",
-                    borderBottom: "1px solid rgba(13, 148, 136, 0.1)",
-                    background: "linear-gradient(180deg, rgba(240, 253, 250, 0.9) 0%, rgba(255, 255, 255, 0) 100%)"
-                  }}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <img
-                      src={hospitalLogo}
-                      alt="Hospital de Caridade Santa Rita de Triunfo"
-                      className="object-contain rounded-lg"
-                      style={{
-                        height: "clamp(32px, 7vw, 42px)",
-                        width: "auto",
-                        border: "2px solid rgba(13, 148, 136, 0.15)",
-                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)"
-                      }}
-                      loading="eager"
-                      fetchPriority="high"
-                    />
-                    <div
-                      className="bg-gradient-to-b from-transparent via-teal-300/50 to-transparent"
-                      style={{ height: "clamp(24px, 5vw, 32px)", width: "1px" }}
-                    />
-                    <div className="text-left">
-                      <span
-                        className="triunfo-title block"
-                        style={{
-                          color: "#0f766e",
-                          fontSize: "clamp(10px, 2.5vw, 12px)",
-                          lineHeight: "1.3"
-                        }}
-                      >
-                        Hospital de Caridade
-                        <br />
-                        Santa Rita de Triunfo
-                      </span>
-                    </div>
-                    <div
-                      className="bg-gradient-to-b from-transparent via-teal-300/30 to-transparent"
-                      style={{ height: "clamp(20px, 4vw, 28px)", width: "1px", marginLeft: "clamp(2px, 0.5vw, 4px)" }}
-                    />
-                    <div className="flex flex-col items-center" style={{ opacity: 0.6, marginLeft: "clamp(2px, 0.5vw, 4px)" }}>
-                      <span
-                        style={{
-                          fontSize: "clamp(6px, 1.5vw, 7px)",
-                          color: "#64748b",
-                          letterSpacing: "0.02em",
-                          marginBottom: "1px",
-                          textTransform: "uppercase"
-                        }}
-                      >
-                        powered by
-                      </span>
-                      <img
-                        src="/logo_cn_vidas_transparent.png"
-                        alt="CN Vidas"
-                        style={{
-                          height: "clamp(14px, 3vw, 18px)",
-                          width: "auto",
-                          objectFit: "contain"
-                        }}
-                        loading="eager"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Conteúdo do formulário - scroll otimizado para mobile */}
               <div
                 className={`flex flex-col auth-form-content ${activeTab === 'register' ? 'flex-1 overflow-y-auto min-h-0' : ''}`}
@@ -412,6 +339,103 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
               >
                 {children}
               </div>
+
+              {/* Footer branding - hospital partnership - só aparece quando teclado não está visível */}
+              {!isKeyboardVisible && (
+                <div
+                  className="auth-footer-branding shrink-0"
+                  style={{
+                    padding: "clamp(14px, 3.5vw, 20px) clamp(12px, 3vw, 20px)",
+                    borderTop: "1px solid rgba(13, 148, 136, 0.08)",
+                    background: "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(240, 253, 250, 0.4) 100%)"
+                  }}
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    {/* Texto "Em parceria com" */}
+                    <span
+                      style={{
+                        fontSize: "clamp(9px, 2.2vw, 11px)",
+                        color: "#64748b",
+                        letterSpacing: "0.04em",
+                        textTransform: "uppercase",
+                        fontWeight: 600,
+                        opacity: 0.7
+                      }}
+                    >
+                      Em parceria com
+                    </span>
+
+                    {/* Container dos logos */}
+                    <div className="flex items-center justify-center gap-3 flex-wrap">
+                      {/* Logo Hospital Triunfo */}
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={hospitalLogo}
+                          alt="Hospital de Caridade Santa Rita de Triunfo"
+                          className="object-contain rounded-md"
+                          style={{
+                            height: "clamp(36px, 8vw, 48px)",
+                            width: "auto",
+                            border: "1.5px solid rgba(13, 148, 136, 0.12)",
+                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+                            transition: "all 0.2s ease"
+                          }}
+                          loading="eager"
+                          fetchPriority="high"
+                        />
+                        <div className="text-left">
+                          <span
+                            className="block"
+                            style={{
+                              color: "#0f766e",
+                              fontSize: "clamp(10px, 2.5vw, 12px)",
+                              lineHeight: "1.35",
+                              fontWeight: 600,
+                              letterSpacing: "-0.01em"
+                            }}
+                          >
+                            Hospital de Caridade
+                            <br />
+                            Santa Rita de Triunfo
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Divisor vertical sutil */}
+                      <div
+                        className="bg-gradient-to-b from-transparent via-teal-200/40 to-transparent"
+                        style={{ height: "clamp(28px, 6vw, 36px)", width: "1px" }}
+                      />
+
+                      {/* Logo CN Vidas com "powered by" */}
+                      <div className="flex flex-col items-center gap-1">
+                        <span
+                          style={{
+                            fontSize: "clamp(7px, 1.8vw, 9px)",
+                            color: "#94a3b8",
+                            letterSpacing: "0.03em",
+                            textTransform: "uppercase",
+                            fontWeight: 500
+                          }}
+                        >
+                          powered by
+                        </span>
+                        <img
+                          src="/logo_cn_vidas_transparent.png"
+                          alt="CN Vidas"
+                          style={{
+                            height: "clamp(18px, 4vw, 24px)",
+                            width: "auto",
+                            objectFit: "contain",
+                            filter: "saturate(0.95)"
+                          }}
+                          loading="eager"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
             </div>
           </div>
