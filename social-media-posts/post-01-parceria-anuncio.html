@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post 01 - Anúncio da Parceria | CN Vidas x Hospital de Triunfo</title>
+
+  <!-- Tipografia conforme Design Guidelines -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ===== RESET E BASE ===== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background-color: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    /* ===== CONTAINER PRINCIPAL ===== */
+    .page-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #fff;
+    }
+
+    .page-header h1 {
+      font-family: 'Merriweather', serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+      font-size: 0.95rem;
+      opacity: 0.7;
+    }
+
+    /* ===== FRAME DO POST ===== */
+    .post-frame {
+      position: relative;
+      width: 1080px;
+      height: 1080px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ===== POST CONTAINER ===== */
+    .post-container {
+      width: 100%;
+      height: 100%;
+
+      /* Gradiente principal conforme Design Guidelines */
+      background: linear-gradient(165deg,
+          #18c2b3 0%,
+          #0d9488 55%,
+          #0b6b64 100%);
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 60px;
+    }
+
+    /* ===== TEXTURAS E BRILHOS ===== */
+    .post-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 18% 82%, rgba(255, 255, 255, 0.14) 0%, transparent 62%);
+      pointer-events: none;
+    }
+
+    .post-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.06;
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+
+    /* ===== CONTEÚDO DO POST ===== */
+    .post-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      width: 100%;
+    }
+
+    /* ===== LOGO DO HOSPITAL (PRINCIPAL) ===== */
+    .hospital-logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      /* Container com overflow hidden para fazer o crop */
+      overflow: hidden;
+      /* Altura reduzida em 30% (15% em cima + 15% embaixo) */
+      height: auto;
+    }
+
+    .hospital-logo {
+      width: 840px;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.2));
+      /* Crop de 30% acima e abaixo usando clip-path */
+      clip-path: inset(30% 0 30% 0);
+    }
+
+    .hospital-name {
+      font-family: 'Merriweather', serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: #ffffff;
+      text-align: center;
+      text-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+      letter-spacing: -0.02em;
+    }
+
+    /* ===== DIVISOR ===== */
+    .partnership-badge {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .divider-line {
+      width: 80px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .partnership-text {
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    /* ===== LOGO CN VIDAS (PARCEIRO) ===== */
+    .cnvidas-logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .powered-by {
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .cnvidas-logo {
+      width: 150px;
+      height: auto;
+      /* Filtro para deixar o logo completamente branco */
+      filter: brightness(0) invert(1) drop-shadow(0 4px 20px rgba(0, 0, 0, 0.15));
+    }
+
+    /* ===== TEXTO DE ANÚNCIO ===== */
+    .announcement-text {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .announcement-main {
+      font-family: 'Merriweather', serif;
+      font-weight: 700;
+      font-size: 2.2rem;
+      color: #ffffff;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .announcement-sub {
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 500;
+      font-size: 1.3rem;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.6;
+    }
+
+    /* ===== INSTRUÇÕES ===== */
+    .instructions {
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      color: #fff;
+      max-width: 600px;
+    }
+
+    .instructions h3 {
+      font-family: 'Merriweather', serif;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .instructions ul {
+      list-style: none;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    .instructions li::before {
+      content: '→ ';
+      opacity: 0.6;
+    }
+
+    /* ===== FOOTER ===== */
+    .page-footer {
+      margin-top: 2rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    /* ===== VARIANTES DE TAMANHO ===== */
+    .size-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .size-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .size-btn:hover,
+    .size-btn.active {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .size-btn.active {
+      background: #0d9488;
+      border-color: #0d9488;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page-header">
+    <h1>Post 01 — Anúncio da Parceria</h1>
+    <p>CN Vidas x Hospital de Caridade Santa Rita de Triunfo</p>
+  </div>
+
+  <div class="size-controls">
+    <button class="size-btn active" onclick="setSize(1080, 1080)">Feed 1:1</button>
+    <button class="size-btn" onclick="setSize(1080, 1350)">Feed 4:5</button>
+    <button class="size-btn" onclick="setSize(1080, 1920)">Stories</button>
+  </div>
+
+  <!-- ===== POST PARA SCREENSHOT ===== -->
+  <div class="post-frame" id="postFrame">
+    <div class="post-container">
+      <div class="post-content">
+
+        <!-- Logo do Hospital (Principal) - usando logo branco -->
+        <div class="hospital-logo-container">
+          <img src="./cnvidas-logo-branco.png" alt="Hospital de Caridade Santa Rita" class="hospital-logo">
+        </div>
+
+        <!-- Badge de Parceria -->
+        <div class="partnership-badge">
+          <div class="divider-line"></div>
+          <span class="partnership-text">Em parceria com</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Logo CN Vidas (versão colorida com filtro branco via CSS) -->
+        <div class="cnvidas-logo-container">
+          <img src="./cnvidas-logo-colorido.png" alt="CN Vidas" class="cnvidas-logo">
+        </div>
+
+        <!-- Texto de Anúncio -->
+        <div class="announcement-text">
+          <div class="announcement-main">Algo grande está chegando.</div>
+          <div class="announcement-sub">Uma nova era para a saúde de Triunfo começa em breve.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="instructions">
+    <h3>📸 Como usar:</h3>
+    <ul>
+      <li>Faça um print screen (Cmd+Shift+4 no Mac) selecionando apenas o post</li>
+      <li>Salve a imagem e poste diretamente no Instagram</li>
+      <li>Use os botões acima para alternar entre formatos (Feed 1:1, Feed 4:5, Stories)</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    CN Vidas — Social Media Assets | Janeiro 2026
+  </div>
+
+  <script>
+    function setSize(width, height) {
+      const frame = document.getElementById('postFrame');
+      frame.style.width = width + 'px';
+      frame.style.height = height + 'px';
+
+      // Update active button
+      document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
+
+</body>
+
+</html>
