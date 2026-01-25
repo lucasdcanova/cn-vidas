@@ -769,233 +769,199 @@ const AuthPage: React.FC = () => {
             height: 'auto'
           } : {})
         }}>
-        <Tabs defaultValue="register" value={activeTab} onValueChange={(value) => {
-          setActiveTab(value);
-          setLoginError(null);
-          setRegisterError(null);
-        }} className={`w-full flex flex-col ${activeTab === 'register' ? 'flex-1' : ''}`}>
-          {/* Tabs refinadas com estilo Triunfo - mobile optimized */}
-          <TabsList
-            className="grid w-full grid-cols-2 p-1.5 rounded-2xl border shrink-0 overflow-hidden"
+        <div className={`w-full flex flex-col ${activeTab === 'register' ? 'flex-1' : ''}`}>
+          {/* Tabs customizadas - botões simples para evitar conflitos de estilo */}
+          <div
+            className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl shrink-0 mb-4"
             style={{
-              background: "linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)",
-              borderColor: "rgba(13, 148, 136, 0.15)",
-              marginBottom: "clamp(12px, 3vw, 20px)",
-              gap: "6px"
+              background: "#e2e8f0"
             }}
           >
-            <TabsTrigger
-              value="login"
-              className="rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 overflow-hidden"
-              style={{
-                color: activeTab === 'login' ? '#0f766e' : '#64748b',
-                background: activeTab === 'login' ? '#ffffff' : 'transparent',
-                boxShadow: activeTab === 'login' ? '0 2px 8px rgba(0, 0, 0, 0.08)' : 'none',
-                height: '44px',
-                fontSize: 'clamp(13px, 3.5vw, 14px)',
-                border: activeTab === 'login' ? '1px solid rgba(13, 148, 136, 0.15)' : '1px solid transparent'
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('login');
+                setLoginError(null);
+                setRegisterError(null);
               }}
+              className={`flex items-center justify-center gap-2 h-11 rounded-xl font-semibold text-sm transition-all duration-200 ${activeTab === 'login'
+                  ? 'bg-white text-teal-700 shadow-sm'
+                  : 'bg-transparent text-slate-500'
+                }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
-              <span>Entrar</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="register"
-              className="rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 overflow-hidden"
-              style={{
-                color: activeTab === 'register' ? '#0f766e' : '#64748b',
-                background: activeTab === 'register' ? '#ffffff' : 'transparent',
-                boxShadow: activeTab === 'register' ? '0 2px 8px rgba(0, 0, 0, 0.08)' : 'none',
-                height: '44px',
-                fontSize: 'clamp(13px, 3.5vw, 14px)',
-                border: activeTab === 'register' ? '1px solid rgba(13, 148, 136, 0.15)' : '1px solid transparent'
+              Entrar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('register');
+                setLoginError(null);
+                setRegisterError(null);
               }}
+              className={`flex items-center justify-center gap-2 h-11 rounded-xl font-semibold text-sm transition-all duration-200 ${activeTab === 'register'
+                  ? 'bg-white text-teal-700 shadow-sm'
+                  : 'bg-transparent text-slate-500'
+                }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
-              <span>Cadastrar</span>
-            </TabsTrigger>
-          </TabsList>
+              Cadastrar
+            </button>
+          </div>
 
-        {/* ========== LOGIN TAB ========== */}
-        <TabsContent value="login">
-          <div className="relative">
-            {/* Header do Login - compacto em mobile */}
-            <div className="text-center" style={{ marginBottom: "clamp(12px, 3vw, 20px)" }}>
-              <h1
-                className="triunfo-title"
-                style={{ color: "#042f2e", fontSize: "clamp(20px, 5vw, 26px)" }}
-              >
-                Bem-vindo de volta
-              </h1>
-              <p
-                className="font-medium"
-                style={{ color: "#64748b", lineHeight: "1.5", marginTop: "clamp(4px, 1vw, 8px)", fontSize: "clamp(13px, 3.5vw, 14px)" }}
-              >
-                Acesse sua conta para continuar
-              </p>
-            </div>
-
-            {/* Mensagem de erro do login */}
-            {loginError && (
-              <div
-                className="rounded-xl flex items-start gap-2"
-                style={{
-                  background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  padding: "clamp(10px, 2.5vw, 14px)",
-                  marginBottom: "clamp(12px, 3vw, 18px)"
-                }}
-              >
-                <svg className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-red-700 font-medium leading-snug" style={{ fontSize: "clamp(12px, 3vw, 13px)" }}>
-                  {loginError}
+          {/* ========== LOGIN TAB ========== */}
+          {activeTab === 'login' && (
+            <div className="relative">
+              {/* Header do Login - compacto em mobile */}
+              <div className="text-center" style={{ marginBottom: "clamp(12px, 3vw, 20px)" }}>
+                <h1
+                  className="triunfo-title"
+                  style={{ color: "#042f2e", fontSize: "clamp(20px, 5vw, 26px)" }}
+                >
+                  Bem-vindo de volta
+                </h1>
+                <p
+                  className="font-medium"
+                  style={{ color: "#64748b", lineHeight: "1.5", marginTop: "clamp(4px, 1vw, 8px)", fontSize: "clamp(13px, 3.5vw, 14px)" }}
+                >
+                  Acesse sua conta para continuar
                 </p>
               </div>
-            )}
 
-            <Form {...loginForm}>
-              <form
-                onSubmit={loginForm.handleSubmit(onLoginSubmit)}
-                style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 18px)" }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Tab' && !e.shiftKey && document.activeElement === emailLoginRef.current) {
-                    e.preventDefault();
-                    passwordLoginRef.current?.focus();
-                  }
-                }}
-              >
-                <FormField
-                  control={loginForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        className="font-semibold block"
-                        style={{ color: "#134e4a", fontSize: "clamp(13px, 3.5vw, 14px)", marginBottom: "clamp(4px, 1vw, 8px)" }}
-                      >
-                        E-mail
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <div className={inputIconClass}>
-                            <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                              <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                            </svg>
-                          </div>
-                          <input
-                            ref={emailLoginRef}
-                            placeholder="seu@email.com"
-                            type="email"
-                            disabled={isLoggingIn}
-                            className={inputBaseClass}
-                            style={{ color: "#134e4a" }}
-                            autoComplete="email"
-                            autoCapitalize="off"
-                            autoCorrect="off"
-                            spellCheck="false"
-                            inputMode="email"
-                            enterKeyHint="next"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
-                    </FormItem>
-                  )}
-                />
+              {/* Mensagem de erro do login */}
+              {loginError && (
+                <div
+                  className="rounded-xl flex items-start gap-2"
+                  style={{
+                    background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
+                    border: "1px solid rgba(239, 68, 68, 0.2)",
+                    padding: "clamp(10px, 2.5vw, 14px)",
+                    marginBottom: "clamp(12px, 3vw, 18px)"
+                  }}
+                >
+                  <svg className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-red-700 font-medium leading-snug" style={{ fontSize: "clamp(12px, 3vw, 13px)" }}>
+                    {loginError}
+                  </p>
+                </div>
+              )}
 
-                <FormField
-                  control={loginForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex justify-between items-center" style={{ marginBottom: "clamp(4px, 1vw, 8px)" }}>
+              <Form {...loginForm}>
+                <form
+                  onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+                  style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 18px)" }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Tab' && !e.shiftKey && document.activeElement === emailLoginRef.current) {
+                      e.preventDefault();
+                      passwordLoginRef.current?.focus();
+                    }
+                  }}
+                >
+                  <FormField
+                    control={loginForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
                         <FormLabel
-                          className="font-semibold"
-                          style={{ color: "#134e4a", fontSize: "clamp(13px, 3.5vw, 14px)" }}
+                          className="font-semibold block"
+                          style={{ color: "#134e4a", fontSize: "clamp(13px, 3.5vw, 14px)", marginBottom: "clamp(4px, 1vw, 8px)" }}
                         >
-                          Senha
+                          E-mail
                         </FormLabel>
-                        <a
-                          href="/esqueci-senha"
-                          className="font-semibold transition-colors active:opacity-70"
-                          style={{ color: "#0d9488", fontSize: "clamp(11px, 3vw, 12px)" }}
-                        >
-                          Esqueceu?
-                        </a>
-                      </div>
-                      <FormControl>
-                        <div className="relative">
-                          <div className={inputIconClass}>
-                            <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                              <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
+                        <FormControl>
+                          <div className="relative">
+                            <div className={inputIconClass}>
+                              <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                              </svg>
+                            </div>
+                            <input
+                              ref={emailLoginRef}
+                              placeholder="seu@email.com"
+                              type="email"
+                              disabled={isLoggingIn}
+                              className={inputBaseClass}
+                              style={{ color: "#134e4a" }}
+                              autoComplete="email"
+                              autoCapitalize="off"
+                              autoCorrect="off"
+                              spellCheck="false"
+                              inputMode="email"
+                              enterKeyHint="next"
+                              {...field}
+                            />
                           </div>
-                          <input
-                            ref={passwordLoginRef}
-                            placeholder="••••••••"
-                            type="password"
-                            disabled={isLoggingIn}
-                            className={inputBaseClass}
-                            style={{ color: "#134e4a" }}
-                            autoComplete="current-password"
-                            enterKeyHint="go"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                loginForm.handleSubmit(onLoginSubmit)();
-                              }
-                            }}
-                            {...field}
-                          />
+                        </FormControl>
+                        <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex justify-between items-center" style={{ marginBottom: "clamp(4px, 1vw, 8px)" }}>
+                          <FormLabel
+                            className="font-semibold"
+                            style={{ color: "#134e4a", fontSize: "clamp(13px, 3.5vw, 14px)" }}
+                          >
+                            Senha
+                          </FormLabel>
+                          <a
+                            href="/esqueci-senha"
+                            className="font-semibold transition-colors active:opacity-70"
+                            style={{ color: "#0d9488", fontSize: "clamp(11px, 3vw, 12px)" }}
+                          >
+                            Esqueceu?
+                          </a>
                         </div>
-                      </FormControl>
-                      <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
-                    </FormItem>
-                  )}
-                />
+                        <FormControl>
+                          <div className="relative">
+                            <div className={inputIconClass}>
+                              <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                            </div>
+                            <input
+                              ref={passwordLoginRef}
+                              placeholder="••••••••"
+                              type="password"
+                              disabled={isLoggingIn}
+                              className={inputBaseClass}
+                              style={{ color: "#134e4a" }}
+                              autoComplete="current-password"
+                              enterKeyHint="go"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  loginForm.handleSubmit(onLoginSubmit)();
+                                }
+                              }}
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Checkboxes refinados - touch friendly */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "clamp(8px, 2vw, 12px)", paddingTop: "clamp(4px, 1vw, 8px)" }}>
-                  <label className="flex items-center cursor-pointer group active:opacity-80" style={{ minHeight: "44px" }}>
-                    <div className="relative shrink-0">
-                      <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="sr-only peer"
-                      />
-                      <div
-                        className="w-5 h-5 rounded-md border-2 peer-checked:border-teal-600 peer-checked:bg-teal-600 transition-all duration-200"
-                        style={{ borderColor: "#cbd5e1" }}
-                      ></div>
-                      <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-150" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <span
-                      className="ml-2.5 font-medium"
-                      style={{ color: "#475569", fontSize: "clamp(13px, 3.5vw, 14px)" }}
-                    >
-                      Lembrar-me
-                    </span>
-                  </label>
-
-                  {isBiometricAvailable && (
+                  {/* Checkboxes refinados - touch friendly */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "clamp(8px, 2vw, 12px)", paddingTop: "clamp(4px, 1vw, 8px)" }}>
                     <label className="flex items-center cursor-pointer group active:opacity-80" style={{ minHeight: "44px" }}>
                       <div className="relative shrink-0">
                         <input
-                          id="enable-biometric"
-                          name="enable-biometric"
+                          id="remember-me"
+                          name="remember-me"
                           type="checkbox"
-                          checked={enableBiometric}
-                          onChange={(e) => setEnableBiometric(e.target.checked)}
                           className="sr-only peer"
                         />
                         <div
@@ -1010,470 +976,277 @@ const AuthPage: React.FC = () => {
                         className="ml-2.5 font-medium"
                         style={{ color: "#475569", fontSize: "clamp(13px, 3.5vw, 14px)" }}
                       >
-                        Login com {biometryTypeName}
+                        Lembrar-me
                       </span>
                     </label>
-                  )}
-                </div>
 
-                {/* Botão de Login - mobile optimized */}
-                <Button
-                  type="submit"
-                  className="w-full rounded-xl font-bold transition-all duration-200 active:scale-[0.98]"
-                  style={{
-                    background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
-                    color: "#ffffff",
-                    boxShadow: "0 8px 32px rgba(13, 148, 136, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
-                    height: "clamp(48px, 12vw, 56px)",
-                    marginTop: "clamp(12px, 3vw, 20px)",
-                    fontSize: "clamp(15px, 4vw, 16px)"
-                  }}
-                  disabled={isLoggingIn || isAuthenticating}
-                >
-                  <span className="flex items-center justify-center">
-                    {isLoggingIn ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Entrando...
-                      </>
-                    ) : (
-                      <>
-                        Entrar
-                        <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                      </>
+                    {isBiometricAvailable && (
+                      <label className="flex items-center cursor-pointer group active:opacity-80" style={{ minHeight: "44px" }}>
+                        <div className="relative shrink-0">
+                          <input
+                            id="enable-biometric"
+                            name="enable-biometric"
+                            type="checkbox"
+                            checked={enableBiometric}
+                            onChange={(e) => setEnableBiometric(e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div
+                            className="w-5 h-5 rounded-md border-2 peer-checked:border-teal-600 peer-checked:bg-teal-600 transition-all duration-200"
+                            style={{ borderColor: "#cbd5e1" }}
+                          ></div>
+                          <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-150" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <span
+                          className="ml-2.5 font-medium"
+                          style={{ color: "#475569", fontSize: "clamp(13px, 3.5vw, 14px)" }}
+                        >
+                          Login com {biometryTypeName}
+                        </span>
+                      </label>
                     )}
-                  </span>
-                </Button>
-              </form>
-            </Form>
-          </div>
-        </TabsContent>
+                  </div>
 
-        {/* ========== REGISTER TAB ========== */}
-        <TabsContent value="register">
-          <div className="relative">
-            {/* Header do Cadastro - compacto em mobile */}
-            <div className="text-center" style={{ marginBottom: "clamp(10px, 2.5vw, 16px)" }}>
-              <h1
-                className="triunfo-title"
-                style={{ color: "#042f2e", fontSize: "clamp(18px, 4.5vw, 24px)" }}
-              >
-                Crie sua conta
-              </h1>
-              <p
-                className="font-medium"
-                style={{ color: "#64748b", lineHeight: "1.4", marginTop: "clamp(2px, 0.5vw, 6px)", fontSize: "clamp(12px, 3vw, 13px)" }}
-              >
-                Preencha os dados para criar seu perfil
-              </p>
+                  {/* Botão de Login - mobile optimized */}
+                  <Button
+                    type="submit"
+                    className="w-full rounded-xl font-bold transition-all duration-200 active:scale-[0.98]"
+                    style={{
+                      background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
+                      color: "#ffffff",
+                      boxShadow: "0 8px 32px rgba(13, 148, 136, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
+                      height: "clamp(48px, 12vw, 56px)",
+                      marginTop: "clamp(12px, 3vw, 20px)",
+                      fontSize: "clamp(15px, 4vw, 16px)"
+                    }}
+                    disabled={isLoggingIn || isAuthenticating}
+                  >
+                    <span className="flex items-center justify-center">
+                      {isLoggingIn ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Entrando...
+                        </>
+                      ) : (
+                        <>
+                          Entrar
+                          <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </form>
+              </Form>
             </div>
+          )}
 
-            {/* Mensagem de erro do registro */}
-            {registerError && (
-              <div
-                className="rounded-xl flex items-start gap-2"
-                style={{
-                  background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  padding: "clamp(8px, 2vw, 12px)",
-                  marginBottom: "clamp(10px, 2.5vw, 16px)"
-                }}
-              >
-                <svg className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-red-700 font-medium leading-snug" style={{ fontSize: "clamp(11px, 2.8vw, 12px)" }}>
-                  {registerError}
+          {/* ========== REGISTER TAB ========== */}
+          {activeTab === 'register' && (
+            <div className="relative">
+              {/* Header do Cadastro - compacto em mobile */}
+              <div className="text-center" style={{ marginBottom: "clamp(10px, 2.5vw, 16px)" }}>
+                <h1
+                  className="triunfo-title"
+                  style={{ color: "#042f2e", fontSize: "clamp(18px, 4.5vw, 24px)" }}
+                >
+                  Crie sua conta
+                </h1>
+                <p
+                  className="font-medium"
+                  style={{ color: "#64748b", lineHeight: "1.4", marginTop: "clamp(2px, 0.5vw, 6px)", fontSize: "clamp(12px, 3vw, 13px)" }}
+                >
+                  Preencha os dados para criar seu perfil
                 </p>
               </div>
-            )}
 
-            <Form {...registerForm}>
-              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} style={{ display: "flex", flexDirection: "column", gap: "clamp(10px, 2.5vw, 16px)" }}>
-                {/* Seletor de Tipo de Perfil - mobile optimized */}
-                <FormField
-                  control={registerForm.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        className="font-semibold block"
-                        style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(6px, 1.5vw, 10px)" }}
-                      >
-                        Tipo de perfil
-                      </FormLabel>
-                      <div
-                        className="grid grid-cols-3"
-                        style={{ gap: "clamp(6px, 1.5vw, 10px)" }}
-                        onFocus={(e) => activeTab === 'register' && scrollToCenter(e.currentTarget)}
-                        tabIndex={0}
-                      >
-                        {/* Paciente */}
-                        <div
-                          className="relative flex flex-col items-center rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.97]"
-                          style={{
-                            padding: "clamp(10px, 2.5vw, 14px) clamp(6px, 1.5vw, 10px)",
-                            border: field.value === "patient" ? "2px solid #0d9488" : "2px solid #e2e8f0",
-                            background: field.value === "patient"
-                              ? "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)"
-                              : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                            boxShadow: field.value === "patient"
-                              ? "0 3px 12px rgba(13, 148, 136, 0.18)"
-                              : "0 1px 4px rgba(0, 0, 0, 0.04)",
-                            minHeight: "clamp(70px, 18vw, 90px)"
-                          }}
-                          onClick={() => field.onChange("patient")}
-                        >
-                          <div
-                            className="rounded-lg flex items-center justify-center"
-                            style={{
-                              width: "clamp(32px, 8vw, 40px)",
-                              height: "clamp(32px, 8vw, 40px)",
-                              marginBottom: "clamp(4px, 1vw, 8px)",
-                              background: field.value === "patient"
-                                ? "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)"
-                                : "#f1f5f9"
-                            }}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" style={{ width: "clamp(16px, 4vw, 20px)", height: "clamp(16px, 4vw, 20px)" }} fill="none" viewBox="0 0 24 24" stroke={field.value === "patient" ? "#ffffff" : "#64748b"}>
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          </div>
-                          <span
-                            className="font-semibold"
-                            style={{ color: field.value === "patient" ? "#0f766e" : "#64748b", fontSize: "clamp(10px, 2.5vw, 12px)" }}
-                          >
-                            Paciente
-                          </span>
-                        </div>
+              {/* Mensagem de erro do registro */}
+              {registerError && (
+                <div
+                  className="rounded-xl flex items-start gap-2"
+                  style={{
+                    background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
+                    border: "1px solid rgba(239, 68, 68, 0.2)",
+                    padding: "clamp(8px, 2vw, 12px)",
+                    marginBottom: "clamp(10px, 2.5vw, 16px)"
+                  }}
+                >
+                  <svg className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-red-700 font-medium leading-snug" style={{ fontSize: "clamp(11px, 2.8vw, 12px)" }}>
+                    {registerError}
+                  </p>
+                </div>
+              )}
 
-                        {/* Médico */}
-                        <div
-                          className="relative flex flex-col items-center rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.97]"
-                          style={{
-                            padding: "clamp(10px, 2.5vw, 14px) clamp(6px, 1.5vw, 10px)",
-                            border: field.value === "doctor" ? "2px solid #0d9488" : "2px solid #e2e8f0",
-                            background: field.value === "doctor"
-                              ? "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)"
-                              : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                            boxShadow: field.value === "doctor"
-                              ? "0 3px 12px rgba(13, 148, 136, 0.18)"
-                              : "0 1px 4px rgba(0, 0, 0, 0.04)",
-                            minHeight: "clamp(70px, 18vw, 90px)"
-                          }}
-                          onClick={() => field.onChange("doctor")}
-                        >
-                          <div
-                            className="rounded-lg flex items-center justify-center"
-                            style={{
-                              width: "clamp(32px, 8vw, 40px)",
-                              height: "clamp(32px, 8vw, 40px)",
-                              marginBottom: "clamp(4px, 1vw, 8px)",
-                              background: field.value === "doctor"
-                                ? "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)"
-                                : "#f1f5f9"
-                            }}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" style={{ width: "clamp(16px, 4vw, 20px)", height: "clamp(16px, 4vw, 20px)" }} fill="none" viewBox="0 0 24 24" stroke={field.value === "doctor" ? "#ffffff" : "#64748b"}>
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                            </svg>
-                          </div>
-                          <span
-                            className="font-semibold"
-                            style={{ color: field.value === "doctor" ? "#0f766e" : "#64748b", fontSize: "clamp(10px, 2.5vw, 12px)" }}
-                          >
-                            Médico
-                          </span>
-                        </div>
-
-                        {/* Empresa */}
-                        <div
-                          className="relative flex flex-col items-center rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.97]"
-                          style={{
-                            padding: "clamp(10px, 2.5vw, 14px) clamp(6px, 1.5vw, 10px)",
-                            border: field.value === "partner" ? "2px solid #0d9488" : "2px solid #e2e8f0",
-                            background: field.value === "partner"
-                              ? "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)"
-                              : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
-                            boxShadow: field.value === "partner"
-                              ? "0 3px 12px rgba(13, 148, 136, 0.18)"
-                              : "0 1px 4px rgba(0, 0, 0, 0.04)",
-                            minHeight: "clamp(70px, 18vw, 90px)"
-                          }}
-                          onClick={() => field.onChange("partner")}
-                        >
-                          <div
-                            className="rounded-lg flex items-center justify-center"
-                            style={{
-                              width: "clamp(32px, 8vw, 40px)",
-                              height: "clamp(32px, 8vw, 40px)",
-                              marginBottom: "clamp(4px, 1vw, 8px)",
-                              background: field.value === "partner"
-                                ? "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)"
-                                : "#f1f5f9"
-                            }}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" style={{ width: "clamp(16px, 4vw, 20px)", height: "clamp(16px, 4vw, 20px)" }} fill="none" viewBox="0 0 24 24" stroke={field.value === "partner" ? "#ffffff" : "#64748b"}>
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                          </div>
-                          <span
-                            className="font-semibold"
-                            style={{ color: field.value === "partner" ? "#0f766e" : "#64748b", fontSize: "clamp(10px, 2.5vw, 12px)" }}
-                          >
-                            Empresa
-                          </span>
-                        </div>
-                      </div>
-                      <FormMessage style={{ fontSize: "clamp(10px, 2.5vw, 11px)", marginTop: "clamp(4px, 1vw, 6px)" }} className="text-red-600 font-medium" />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Campo de Email */}
-                <FormField
-                  control={registerForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        className="font-semibold block"
-                        style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(4px, 1vw, 6px)" }}
-                      >
-                        E-mail
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <div className={inputIconClass}>
-                            <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                              <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                            </svg>
-                          </div>
-                          <Input
-                            placeholder="seu@email.com"
-                            type="email"
-                            disabled={isRegistering}
-                            className={inputBaseClass}
-                            style={{ color: "#134e4a" }}
-                            onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Campos condicionais baseados no role - responsive grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: "clamp(10px, 2.5vw, 16px)" }}>
-                  {registerForm.watch("role") === "patient" ? (
-                    <FormField
-                      control={registerForm.control}
-                      name="cpf"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel
-                            className="font-semibold block"
-                            style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(4px, 1vw, 6px)" }}
-                          >
-                            CPF
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <div className={inputIconClass}>
-                                <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                                </svg>
-                              </div>
-                              <Input
-                                placeholder="000.000.000-00"
-                                disabled={isRegistering}
-                                className={inputBaseClass}
-                                style={{ color: "#134e4a" }}
-                                onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                                onChange={(e) => {
-                                  let value = e.target.value.replace(/\D/g, '');
-                                  if (value.length <= 11) {
-                                    if (value.length > 9) {
-                                      value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
-                                    } else if (value.length > 6) {
-                                      value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
-                                    } else if (value.length > 3) {
-                                      value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
-                                    }
-                                    field.onChange(value);
-                                  }
-                                }}
-                                value={field.value || ''}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
-                        </FormItem>
-                      )}
-                    />
-                  ) : registerForm.watch("role") === "doctor" ? (
-                    <div className="space-y-2">
-                      <FormLabel
-                        className="text-sm font-semibold mb-2 block"
-                        style={{ color: "#134e4a" }}
-                      >
-                        Registro no CRM
-                      </FormLabel>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24">
-                          <Select
-                            defaultValue={estadoSelecionado}
-                            onValueChange={setEstadoSelecionado}
-                          >
-                            <SelectTrigger
-                              className="rounded-2xl h-14 text-base border-2 focus:ring-4 focus:ring-teal-500/10 transition-all duration-300"
-                              style={{
-                                color: "#134e4a",
-                                borderColor: "#e2e8f0",
-                                background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)"
-                              }}
-                            >
-                              <SelectValue placeholder="UF" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {estadosBrasileiros.map((estado) => (
-                                <SelectItem key={estado.value} value={estado.value}>
-                                  {estado.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex-1">
-                          <FormField
-                            control={registerForm.control}
-                            name="username"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    placeholder="12345"
-                                    disabled={isRegistering}
-                                    className="rounded-2xl h-14 text-base border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 bg-gradient-to-b from-white to-slate-50/80 transition-all duration-300"
-                                    style={{ color: "#134e4a" }}
-                                    onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                                    {...field}
-                                    value={field.value?.replace(/CRM[A-Z]{2}/i, '') || ''}
-                                    onChange={(e) => {
-                                      const value = e.target.value.replace(/\D/g, '');
-                                      field.onChange(`CRM${estadoSelecionado}${value}`);
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ) : registerForm.watch("role") === "partner" ? (
-                    <FormField
-                      control={registerForm.control}
-                      name="cnpj"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel
-                            className="font-semibold block"
-                            style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(4px, 1vw, 6px)" }}
-                          >
-                            CNPJ da Empresa
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <div className={inputIconClass}>
-                                <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                              </div>
-                              <Input
-                                placeholder="00.000.000/0000-00"
-                                disabled={isRegistering}
-                                className={inputBaseClass}
-                                style={{ color: "#134e4a" }}
-                                onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                                onChange={(e) => {
-                                  let value = e.target.value.replace(/\D/g, '');
-                                  if (value.length <= 14) {
-                                    if (value.length > 12) {
-                                      value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
-                                    } else if (value.length > 8) {
-                                      value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
-                                    } else if (value.length > 5) {
-                                      value = value.replace(/^(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
-                                    } else if (value.length > 2) {
-                                      value = value.replace(/^(\d{2})(\d{0,3})/, '$1.$2');
-                                    }
-                                    field.onChange(value);
-                                  }
-                                }}
-                                value={field.value || ''}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
-                        </FormItem>
-                      )}
-                    />
-                  ) : (
-                    <FormField
-                      control={registerForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel
-                            className="font-semibold block"
-                            style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(4px, 1vw, 6px)" }}
-                          >
-                            Nome de usuário
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="seunome123"
-                              disabled={isRegistering}
-                              className="rounded-2xl h-14 text-base border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 bg-gradient-to-b from-white to-slate-50/80 transition-all duration-300"
-                              style={{ color: "#134e4a" }}
-                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {/* Campo de Senha */}
+              <Form {...registerForm}>
+                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} style={{ display: "flex", flexDirection: "column", gap: "clamp(10px, 2.5vw, 16px)" }}>
+                  {/* Seletor de Tipo de Perfil - mobile optimized */}
                   <FormField
                     control={registerForm.control}
-                    name="password"
+                    name="role"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel
-                          className="text-sm font-semibold mb-2 block"
-                          style={{ color: "#134e4a" }}
+                          className="font-semibold block"
+                          style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(6px, 1.5vw, 10px)" }}
                         >
-                          Senha
+                          Tipo de perfil
+                        </FormLabel>
+                        <div
+                          className="grid grid-cols-3"
+                          style={{ gap: "clamp(6px, 1.5vw, 10px)" }}
+                          onFocus={(e) => activeTab === 'register' && scrollToCenter(e.currentTarget)}
+                          tabIndex={0}
+                        >
+                          {/* Paciente */}
+                          <div
+                            className="relative flex flex-col items-center rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.97]"
+                            style={{
+                              padding: "clamp(10px, 2.5vw, 14px) clamp(6px, 1.5vw, 10px)",
+                              border: field.value === "patient" ? "2px solid #0d9488" : "2px solid #e2e8f0",
+                              background: field.value === "patient"
+                                ? "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)"
+                                : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                              boxShadow: field.value === "patient"
+                                ? "0 3px 12px rgba(13, 148, 136, 0.18)"
+                                : "0 1px 4px rgba(0, 0, 0, 0.04)",
+                              minHeight: "clamp(70px, 18vw, 90px)"
+                            }}
+                            onClick={() => field.onChange("patient")}
+                          >
+                            <div
+                              className="rounded-lg flex items-center justify-center"
+                              style={{
+                                width: "clamp(32px, 8vw, 40px)",
+                                height: "clamp(32px, 8vw, 40px)",
+                                marginBottom: "clamp(4px, 1vw, 8px)",
+                                background: field.value === "patient"
+                                  ? "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)"
+                                  : "#f1f5f9"
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" style={{ width: "clamp(16px, 4vw, 20px)", height: "clamp(16px, 4vw, 20px)" }} fill="none" viewBox="0 0 24 24" stroke={field.value === "patient" ? "#ffffff" : "#64748b"}>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                            <span
+                              className="font-semibold"
+                              style={{ color: field.value === "patient" ? "#0f766e" : "#64748b", fontSize: "clamp(10px, 2.5vw, 12px)" }}
+                            >
+                              Paciente
+                            </span>
+                          </div>
+
+                          {/* Médico */}
+                          <div
+                            className="relative flex flex-col items-center rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.97]"
+                            style={{
+                              padding: "clamp(10px, 2.5vw, 14px) clamp(6px, 1.5vw, 10px)",
+                              border: field.value === "doctor" ? "2px solid #0d9488" : "2px solid #e2e8f0",
+                              background: field.value === "doctor"
+                                ? "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)"
+                                : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                              boxShadow: field.value === "doctor"
+                                ? "0 3px 12px rgba(13, 148, 136, 0.18)"
+                                : "0 1px 4px rgba(0, 0, 0, 0.04)",
+                              minHeight: "clamp(70px, 18vw, 90px)"
+                            }}
+                            onClick={() => field.onChange("doctor")}
+                          >
+                            <div
+                              className="rounded-lg flex items-center justify-center"
+                              style={{
+                                width: "clamp(32px, 8vw, 40px)",
+                                height: "clamp(32px, 8vw, 40px)",
+                                marginBottom: "clamp(4px, 1vw, 8px)",
+                                background: field.value === "doctor"
+                                  ? "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)"
+                                  : "#f1f5f9"
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" style={{ width: "clamp(16px, 4vw, 20px)", height: "clamp(16px, 4vw, 20px)" }} fill="none" viewBox="0 0 24 24" stroke={field.value === "doctor" ? "#ffffff" : "#64748b"}>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                              </svg>
+                            </div>
+                            <span
+                              className="font-semibold"
+                              style={{ color: field.value === "doctor" ? "#0f766e" : "#64748b", fontSize: "clamp(10px, 2.5vw, 12px)" }}
+                            >
+                              Médico
+                            </span>
+                          </div>
+
+                          {/* Empresa */}
+                          <div
+                            className="relative flex flex-col items-center rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.97]"
+                            style={{
+                              padding: "clamp(10px, 2.5vw, 14px) clamp(6px, 1.5vw, 10px)",
+                              border: field.value === "partner" ? "2px solid #0d9488" : "2px solid #e2e8f0",
+                              background: field.value === "partner"
+                                ? "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)"
+                                : "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+                              boxShadow: field.value === "partner"
+                                ? "0 3px 12px rgba(13, 148, 136, 0.18)"
+                                : "0 1px 4px rgba(0, 0, 0, 0.04)",
+                              minHeight: "clamp(70px, 18vw, 90px)"
+                            }}
+                            onClick={() => field.onChange("partner")}
+                          >
+                            <div
+                              className="rounded-lg flex items-center justify-center"
+                              style={{
+                                width: "clamp(32px, 8vw, 40px)",
+                                height: "clamp(32px, 8vw, 40px)",
+                                marginBottom: "clamp(4px, 1vw, 8px)",
+                                background: field.value === "partner"
+                                  ? "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)"
+                                  : "#f1f5f9"
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" style={{ width: "clamp(16px, 4vw, 20px)", height: "clamp(16px, 4vw, 20px)" }} fill="none" viewBox="0 0 24 24" stroke={field.value === "partner" ? "#ffffff" : "#64748b"}>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                            </div>
+                            <span
+                              className="font-semibold"
+                              style={{ color: field.value === "partner" ? "#0f766e" : "#64748b", fontSize: "clamp(10px, 2.5vw, 12px)" }}
+                            >
+                              Empresa
+                            </span>
+                          </div>
+                        </div>
+                        <FormMessage style={{ fontSize: "clamp(10px, 2.5vw, 11px)", marginTop: "clamp(4px, 1vw, 6px)" }} className="text-red-600 font-medium" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Campo de Email */}
+                  <FormField
+                    control={registerForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          className="font-semibold block"
+                          style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(4px, 1vw, 6px)" }}
+                        >
+                          E-mail
                         </FormLabel>
                         <FormControl>
                           <div className="relative">
                             <div className={inputIconClass}>
                               <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                <path d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                               </svg>
                             </div>
                             <Input
-                              placeholder="••••••••"
-                              type="password"
+                              placeholder="seu@email.com"
+                              type="email"
                               disabled={isRegistering}
                               className={inputBaseClass}
                               style={{ color: "#134e4a" }}
@@ -1486,299 +1259,518 @@ const AuthPage: React.FC = () => {
                       </FormItem>
                     )}
                   />
-                </div>
 
-                {/* Campo de Nome Completo */}
-                <FormField
-                  control={registerForm.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel
-                        className="text-sm font-semibold mb-2 block"
-                        style={{ color: "#134e4a" }}
-                      >
-                        Nome completo
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <div className={inputIconClass}>
-                            <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                              <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
+                  {/* Campos condicionais baseados no role - responsive grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: "clamp(10px, 2.5vw, 16px)" }}>
+                    {registerForm.watch("role") === "patient" ? (
+                      <FormField
+                        control={registerForm.control}
+                        name="cpf"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              className="font-semibold block"
+                              style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(4px, 1vw, 6px)" }}
+                            >
+                              CPF
+                            </FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <div className={inputIconClass}>
+                                  <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                                  </svg>
+                                </div>
+                                <Input
+                                  placeholder="000.000.000-00"
+                                  disabled={isRegistering}
+                                  className={inputBaseClass}
+                                  style={{ color: "#134e4a" }}
+                                  onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                  onChange={(e) => {
+                                    let value = e.target.value.replace(/\D/g, '');
+                                    if (value.length <= 11) {
+                                      if (value.length > 9) {
+                                        value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+                                      } else if (value.length > 6) {
+                                        value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+                                      } else if (value.length > 3) {
+                                        value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+                                      }
+                                      field.onChange(value);
+                                    }
+                                  }}
+                                  value={field.value || ''}
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
+                          </FormItem>
+                        )}
+                      />
+                    ) : registerForm.watch("role") === "doctor" ? (
+                      <div className="space-y-2">
+                        <FormLabel
+                          className="text-sm font-semibold mb-2 block"
+                          style={{ color: "#134e4a" }}
+                        >
+                          Registro no CRM
+                        </FormLabel>
+                        <div className="flex items-center gap-2">
+                          <div className="w-24">
+                            <Select
+                              defaultValue={estadoSelecionado}
+                              onValueChange={setEstadoSelecionado}
+                            >
+                              <SelectTrigger
+                                className="rounded-2xl h-14 text-base border-2 focus:ring-4 focus:ring-teal-500/10 transition-all duration-300"
+                                style={{
+                                  color: "#134e4a",
+                                  borderColor: "#e2e8f0",
+                                  background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)"
+                                }}
+                              >
+                                <SelectValue placeholder="UF" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {estadosBrasileiros.map((estado) => (
+                                  <SelectItem key={estado.value} value={estado.value}>
+                                    {estado.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
-                          <Input
-                            placeholder="Seu Nome Completo"
-                            disabled={isRegistering}
-                            className={inputBaseClass}
-                            style={{ color: "#134e4a" }}
-                            onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                            {...field}
-                          />
+                          <div className="flex-1">
+                            <FormField
+                              control={registerForm.control}
+                              name="username"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="12345"
+                                      disabled={isRegistering}
+                                      className="rounded-2xl h-14 text-base border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 bg-gradient-to-b from-white to-slate-50/80 transition-all duration-300"
+                                      style={{ color: "#134e4a" }}
+                                      onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                      {...field}
+                                      value={field.value?.replace(/CRM[A-Z]{2}/i, '') || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value.replace(/\D/g, '');
+                                        field.onChange(`CRM${estadoSelecionado}${value}`);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
                         </div>
-                      </FormControl>
-                      <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
-                    </FormItem>
-                  )}
-                />
+                      </div>
+                    ) : registerForm.watch("role") === "partner" ? (
+                      <FormField
+                        control={registerForm.control}
+                        name="cnpj"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              className="font-semibold block"
+                              style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(4px, 1vw, 6px)" }}
+                            >
+                              CNPJ da Empresa
+                            </FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <div className={inputIconClass}>
+                                  <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                  </svg>
+                                </div>
+                                <Input
+                                  placeholder="00.000.000/0000-00"
+                                  disabled={isRegistering}
+                                  className={inputBaseClass}
+                                  style={{ color: "#134e4a" }}
+                                  onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                  onChange={(e) => {
+                                    let value = e.target.value.replace(/\D/g, '');
+                                    if (value.length <= 14) {
+                                      if (value.length > 12) {
+                                        value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+                                      } else if (value.length > 8) {
+                                        value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
+                                      } else if (value.length > 5) {
+                                        value = value.replace(/^(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
+                                      } else if (value.length > 2) {
+                                        value = value.replace(/^(\d{2})(\d{0,3})/, '$1.$2');
+                                      }
+                                      field.onChange(value);
+                                    }
+                                  }}
+                                  value={field.value || ''}
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
+                          </FormItem>
+                        )}
+                      />
+                    ) : (
+                      <FormField
+                        control={registerForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              className="font-semibold block"
+                              style={{ color: "#134e4a", fontSize: "clamp(12px, 3vw, 13px)", marginBottom: "clamp(4px, 1vw, 6px)" }}
+                            >
+                              Nome de usuário
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="seunome123"
+                                disabled={isRegistering}
+                                className="rounded-2xl h-14 text-base border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 bg-gradient-to-b from-white to-slate-50/80 transition-all duration-300"
+                                style={{ color: "#134e4a" }}
+                                onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
-                {/* Seção de Aceitação de Termos */}
-                <div
-                  className="pt-5 mt-5"
-                  style={{ borderTop: "1px solid rgba(13, 148, 136, 0.1)" }}
-                >
-                  <h3
-                    className="text-sm font-semibold mb-4"
-                    style={{ color: "#134e4a" }}
-                  >
-                    Documentos Legais (Obrigatório)
-                  </h3>
+                    {/* Campo de Senha */}
+                    <FormField
+                      control={registerForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel
+                            className="text-sm font-semibold mb-2 block"
+                            style={{ color: "#134e4a" }}
+                          >
+                            Senha
+                          </FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <div className={inputIconClass}>
+                                <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                              </div>
+                              <Input
+                                placeholder="••••••••"
+                                type="password"
+                                disabled={isRegistering}
+                                className={inputBaseClass}
+                                style={{ color: "#134e4a" }}
+                                onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
+                  {/* Campo de Nome Completo */}
                   <FormField
                     control={registerForm.control}
-                    name="acceptAllTerms"
+                    name="fullName"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormItem>
+                        <FormLabel
+                          className="text-sm font-semibold mb-2 block"
+                          style={{ color: "#134e4a" }}
+                        >
+                          Nome completo
+                        </FormLabel>
                         <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={isRegistering}
-                            onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
-                            className="mt-0.5 h-5 w-5 rounded-md border-2 border-slate-300 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600"
-                          />
+                          <div className="relative">
+                            <div className={inputIconClass}>
+                              <svg className="h-5 w-5" style={{ color: "#0d9488" }} fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                            <Input
+                              placeholder="Seu Nome Completo"
+                              disabled={isRegistering}
+                              className={inputBaseClass}
+                              style={{ color: "#134e4a" }}
+                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel
-                            className="text-sm leading-relaxed"
-                            style={{ color: "#475569" }}
-                          >
-                            Li e aceito todos os documentos legais:{" "}
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <button
-                                  type="button"
-                                  className="font-semibold text-xs hover:underline"
-                                  style={{ color: "#0d9488" }}
-                                >
-                                  Termos de Uso
-                                </button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
-                                <DialogHeader>
-                                  <DialogTitle>Termos de Uso - CN Vidas</DialogTitle>
-                                  <DialogDescription>
-                                    Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <ScrollArea className="h-[60vh] w-full">
-                                  <TermsOfUseContent />
-                                </ScrollArea>
-                              </DialogContent>
-                            </Dialog>
-                            ,{" "}
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <button
-                                  type="button"
-                                  className="font-semibold text-xs hover:underline"
-                                  style={{ color: "#0d9488" }}
-                                >
-                                  Política de Privacidade
-                                </button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
-                                <DialogHeader>
-                                  <DialogTitle>Política de Privacidade - CN Vidas</DialogTitle>
-                                  <DialogDescription>
-                                    Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <ScrollArea className="h-[60vh] w-full">
-                                  <PrivacyPolicyContent />
-                                </ScrollArea>
-                              </DialogContent>
-                            </Dialog>
-                            {registerForm.watch("role") === "patient" && (
-                              <>
-                                ,{" "}
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <button
-                                      type="button"
-                                      className="font-semibold text-xs hover:underline"
-                                      style={{ color: "#0d9488" }}
-                                    >
-                                      Contrato de Adesão dos Planos
-                                    </button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
-                                    <DialogHeader>
-                                      <DialogTitle>Contrato de Adesão - Planos CN Vidas</DialogTitle>
-                                      <DialogDescription>
-                                        <span className="text-red-600 font-semibold">IMPORTANTE:</span> Leia todo o contrato, especialmente as cláusulas sobre carência e coberturas
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <ScrollArea className="h-[60vh] w-full">
-                                      <AdhesionContractContent />
-                                    </ScrollArea>
-                                  </DialogContent>
-                                </Dialog>
-                              </>
-                            )}
-                            {registerForm.watch("role") === "partner" && (
-                              <>
-                                ,{" "}
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <button
-                                      type="button"
-                                      className="font-semibold text-xs hover:underline"
-                                      style={{ color: "#0d9488" }}
-                                    >
-                                      Contrato de Parceria
-                                    </button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
-                                    <DialogHeader>
-                                      <DialogTitle>Contrato de Parceria - CN Vidas</DialogTitle>
-                                      <DialogDescription>
-                                        Parceria gratuita e sem exclusividade. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <ScrollArea className="h-[60vh] w-full">
-                                      <PartnerContractContent />
-                                    </ScrollArea>
-                                  </DialogContent>
-                                </Dialog>
-                              </>
-                            )}
-                            {registerForm.watch("role") === "doctor" && (
-                              <>
-                                ,{" "}
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <button
-                                      type="button"
-                                      className="font-semibold text-xs hover:underline"
-                                      style={{ color: "#0d9488" }}
-                                    >
-                                      Contrato de Prestação de Serviços Médicos
-                                    </button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
-                                    <DialogHeader>
-                                      <DialogTitle>Contrato de Prestação de Serviços Médicos</DialogTitle>
-                                      <DialogDescription>
-                                        Termos para médicos prestadores de telemedicina. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <ScrollArea className="h-[60vh] w-full">
-                                      <DoctorContractContent />
-                                    </ScrollArea>
-                                  </DialogContent>
-                                </Dialog>
-                              </>
-                            )}
-                            {(registerForm.watch("role") === "patient" || registerForm.watch("role") === "doctor") && (
-                              <>
-                                {" "}
-                                e{" "}
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <button
-                                      type="button"
-                                      className="font-semibold text-xs hover:underline"
-                                      style={{ color: "#0d9488" }}
-                                    >
-                                      Política de Gravação de Teleconsultas
-                                    </button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
-                                    <DialogHeader>
-                                      <DialogTitle>Política de Gravação de Teleconsultas</DialogTitle>
-                                    </DialogHeader>
-                                    <ScrollArea className="h-[60vh] w-full">
-                                      <div className="text-sm space-y-4 pr-4">
-                                        <p>
-                                          Ao aceitar esta política, você autoriza que as teleconsultas sejam gravadas automaticamente
-                                          para fins de documentação médica e geração de prontuários com inteligência artificial.
-                                        </p>
-
-                                        <h3 className="font-semibold mt-4">Importante:</h3>
-                                        <ul className="list-disc pl-6 space-y-1">
-                                          <li>As gravações são processadas com total segurança e sigilo médico</li>
-                                          <li>O áudio é transcrito e deletado após o processamento</li>
-                                          <li>Apenas médico e paciente têm acesso ao prontuário gerado</li>
-                                          <li>Você pode desativar esta opção a qualquer momento nas configurações</li>
-                                          <li>A gravação só ocorre quando ambas as partes (médico e paciente) autorizam</li>
-                                        </ul>
-
-                                        <h3 className="font-semibold mt-4">Segurança e Privacidade</h3>
-                                        <ul className="list-disc pl-6 space-y-1">
-                                          <li>Conformidade com a LGPD</li>
-                                          <li>Servidores seguros no Brasil</li>
-                                          <li>Acesso restrito e auditado</li>
-                                          <li>Criptografia de ponta a ponta</li>
-                                          <li>Exclusão automática do áudio após processamento</li>
-                                        </ul>
-                                      </div>
-                                    </ScrollArea>
-                                  </DialogContent>
-                                </Dialog>
-                              </>
-                            )}
-                          </FormLabel>
-                          <FormMessage />
-                        </div>
+                        <FormMessage className="text-xs mt-2 text-red-600 font-medium" />
                       </FormItem>
                     )}
                   />
-                </div>
 
-                {/* Botão de Cadastro - mobile optimized */}
-                <Button
-                  type="submit"
-                  className="w-full rounded-xl font-bold transition-all duration-200 active:scale-[0.98]"
-                  style={{
-                    background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
-                    color: "#ffffff",
-                    boxShadow: "0 8px 32px rgba(13, 148, 136, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
-                    height: "clamp(48px, 12vw, 56px)",
-                    marginTop: "clamp(8px, 2vw, 16px)",
-                    fontSize: "clamp(15px, 4vw, 16px)"
-                  }}
-                  disabled={isRegistering}
-                >
-                  <span className="flex items-center justify-center">
-                    {isRegistering ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Cadastrando...
-                      </>
-                    ) : (
-                      <>
-                        Criar conta
-                        <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </>
-                    )}
-                  </span>
-                </Button>
+                  {/* Seção de Aceitação de Termos */}
+                  <div
+                    className="pt-5 mt-5"
+                    style={{ borderTop: "1px solid rgba(13, 148, 136, 0.1)" }}
+                  >
+                    <h3
+                      className="text-sm font-semibold mb-4"
+                      style={{ color: "#134e4a" }}
+                    >
+                      Documentos Legais (Obrigatório)
+                    </h3>
 
-                <p
-                  className="text-center"
-                  style={{ color: "#94a3b8", marginTop: "clamp(10px, 2.5vw, 16px)", fontSize: "clamp(10px, 2.5vw, 11px)", paddingBottom: "clamp(8px, 2vw, 16px)" }}
-                >
-                  Ao criar uma conta, você confirma ter lido e aceito todos os documentos legais acima.
-                </p>
-              </form>
-            </Form>
-          </div>
-        </TabsContent>
+                    <FormField
+                      control={registerForm.control}
+                      name="acceptAllTerms"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={isRegistering}
+                              onFocus={(e) => activeTab === 'register' && scrollToCenter(e.target)}
+                              className="mt-0.5 h-5 w-5 rounded-md border-2 border-slate-300 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel
+                              className="text-sm leading-relaxed"
+                              style={{ color: "#475569" }}
+                            >
+                              Li e aceito todos os documentos legais:{" "}
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="font-semibold text-xs hover:underline"
+                                    style={{ color: "#0d9488" }}
+                                  >
+                                    Termos de Uso
+                                  </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
+                                  <DialogHeader>
+                                    <DialogTitle>Termos de Uso - CN Vidas</DialogTitle>
+                                    <DialogDescription>
+                                      Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <ScrollArea className="h-[60vh] w-full">
+                                    <TermsOfUseContent />
+                                  </ScrollArea>
+                                </DialogContent>
+                              </Dialog>
+                              ,{" "}
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="font-semibold text-xs hover:underline"
+                                    style={{ color: "#0d9488" }}
+                                  >
+                                    Política de Privacidade
+                                  </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
+                                  <DialogHeader>
+                                    <DialogTitle>Política de Privacidade - CN Vidas</DialogTitle>
+                                    <DialogDescription>
+                                      Documento completo. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <ScrollArea className="h-[60vh] w-full">
+                                    <PrivacyPolicyContent />
+                                  </ScrollArea>
+                                </DialogContent>
+                              </Dialog>
+                              {registerForm.watch("role") === "patient" && (
+                                <>
+                                  ,{" "}
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <button
+                                        type="button"
+                                        className="font-semibold text-xs hover:underline"
+                                        style={{ color: "#0d9488" }}
+                                      >
+                                        Contrato de Adesão dos Planos
+                                      </button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
+                                      <DialogHeader>
+                                        <DialogTitle>Contrato de Adesão - Planos CN Vidas</DialogTitle>
+                                        <DialogDescription>
+                                          <span className="text-red-600 font-semibold">IMPORTANTE:</span> Leia todo o contrato, especialmente as cláusulas sobre carência e coberturas
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <ScrollArea className="h-[60vh] w-full">
+                                        <AdhesionContractContent />
+                                      </ScrollArea>
+                                    </DialogContent>
+                                  </Dialog>
+                                </>
+                              )}
+                              {registerForm.watch("role") === "partner" && (
+                                <>
+                                  ,{" "}
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <button
+                                        type="button"
+                                        className="font-semibold text-xs hover:underline"
+                                        style={{ color: "#0d9488" }}
+                                      >
+                                        Contrato de Parceria
+                                      </button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
+                                      <DialogHeader>
+                                        <DialogTitle>Contrato de Parceria - CN Vidas</DialogTitle>
+                                        <DialogDescription>
+                                          Parceria gratuita e sem exclusividade. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <ScrollArea className="h-[60vh] w-full">
+                                        <PartnerContractContent />
+                                      </ScrollArea>
+                                    </DialogContent>
+                                  </Dialog>
+                                </>
+                              )}
+                              {registerForm.watch("role") === "doctor" && (
+                                <>
+                                  ,{" "}
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <button
+                                        type="button"
+                                        className="font-semibold text-xs hover:underline"
+                                        style={{ color: "#0d9488" }}
+                                      >
+                                        Contrato de Prestação de Serviços Médicos
+                                      </button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
+                                      <DialogHeader>
+                                        <DialogTitle>Contrato de Prestação de Serviços Médicos</DialogTitle>
+                                        <DialogDescription>
+                                          Termos para médicos prestadores de telemedicina. Para consultar posteriormente, acesse <a href="/ajuda?tab=docs" className="text-teal-700 hover:underline">Central de Documentos</a>
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <ScrollArea className="h-[60vh] w-full">
+                                        <DoctorContractContent />
+                                      </ScrollArea>
+                                    </DialogContent>
+                                  </Dialog>
+                                </>
+                              )}
+                              {(registerForm.watch("role") === "patient" || registerForm.watch("role") === "doctor") && (
+                                <>
+                                  {" "}
+                                  e{" "}
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <button
+                                        type="button"
+                                        className="font-semibold text-xs hover:underline"
+                                        style={{ color: "#0d9488" }}
+                                      >
+                                        Política de Gravação de Teleconsultas
+                                      </button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-4xl max-h-[80vh] bg-white">
+                                      <DialogHeader>
+                                        <DialogTitle>Política de Gravação de Teleconsultas</DialogTitle>
+                                      </DialogHeader>
+                                      <ScrollArea className="h-[60vh] w-full">
+                                        <div className="text-sm space-y-4 pr-4">
+                                          <p>
+                                            Ao aceitar esta política, você autoriza que as teleconsultas sejam gravadas automaticamente
+                                            para fins de documentação médica e geração de prontuários com inteligência artificial.
+                                          </p>
 
-        </Tabs>
+                                          <h3 className="font-semibold mt-4">Importante:</h3>
+                                          <ul className="list-disc pl-6 space-y-1">
+                                            <li>As gravações são processadas com total segurança e sigilo médico</li>
+                                            <li>O áudio é transcrito e deletado após o processamento</li>
+                                            <li>Apenas médico e paciente têm acesso ao prontuário gerado</li>
+                                            <li>Você pode desativar esta opção a qualquer momento nas configurações</li>
+                                            <li>A gravação só ocorre quando ambas as partes (médico e paciente) autorizam</li>
+                                          </ul>
+
+                                          <h3 className="font-semibold mt-4">Segurança e Privacidade</h3>
+                                          <ul className="list-disc pl-6 space-y-1">
+                                            <li>Conformidade com a LGPD</li>
+                                            <li>Servidores seguros no Brasil</li>
+                                            <li>Acesso restrito e auditado</li>
+                                            <li>Criptografia de ponta a ponta</li>
+                                            <li>Exclusão automática do áudio após processamento</li>
+                                          </ul>
+                                        </div>
+                                      </ScrollArea>
+                                    </DialogContent>
+                                  </Dialog>
+                                </>
+                              )}
+                            </FormLabel>
+                            <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Botão de Cadastro - mobile optimized */}
+                  <Button
+                    type="submit"
+                    className="w-full rounded-xl font-bold transition-all duration-200 active:scale-[0.98]"
+                    style={{
+                      background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
+                      color: "#ffffff",
+                      boxShadow: "0 8px 32px rgba(13, 148, 136, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
+                      height: "clamp(48px, 12vw, 56px)",
+                      marginTop: "clamp(8px, 2vw, 16px)",
+                      fontSize: "clamp(15px, 4vw, 16px)"
+                    }}
+                    disabled={isRegistering}
+                  >
+                    <span className="flex items-center justify-center">
+                      {isRegistering ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Cadastrando...
+                        </>
+                      ) : (
+                        <>
+                          Criar conta
+                          <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </>
+                      )}
+                    </span>
+                  </Button>
+
+                  <p
+                    className="text-center"
+                    style={{ color: "#94a3b8", marginTop: "clamp(10px, 2.5vw, 16px)", fontSize: "clamp(10px, 2.5vw, 11px)", paddingBottom: "clamp(8px, 2vw, 16px)" }}
+                  >
+                    Ao criar uma conta, você confirma ter lido e aceito todos os documentos legais acima.
+                  </p>
+                </form>
+              </Form>
+            </div>
+          )}
+        </div>
       </div>
     </AuthLayout>
   );
