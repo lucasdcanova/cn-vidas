@@ -31,97 +31,110 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   
-  // Função para verificar a autenticação do usuário
+  // Função para verificar a autenticação do usuário com timeout
   const checkAuth = async (): Promise<UserData | null> => {
-    try {
-      console.log("🔍 Verificando autenticação do usuário...");
-      
-      // No iOS, verificar se não há dados residuais de sessão
-      if (isNativeApp()) {
-        // Se não há token mas há dados de usuário em cache, limpar
-        const hasToken = localStorage.getItem("authToken") || 
-                        (await secureStorage.get<string>('auth_token')).success;
-        const hasCachedUser = queryClient.getQueryData(['/api/user']);
-        
-        if (!hasToken && hasCachedUser) {
-          console.log("⚠️ Detectado cache de usuário sem token no iOS, limpando...");
-          queryClient.setQueryData(['/api/user'], null);
+    // Criar uma promise com timeout para evitar loading infinito
+    const timeoutPromise = new Promise<null>((resolve) => {
+      setTimeout(() => {
+        console.log("⏱️ Timeout na verificação de autenticação (10s)");
+        resolve(null);
+      }, 10000); // 10 segundos de timeout
+    });
+
+    const authCheckPromise = async (): Promise<UserData | null> => {
+      try {
+        console.log("🔍 Verificando autenticação do usuário...");
+
+        // No iOS, verificar se não há dados residuais de sessão
+        if (isNativeApp()) {
+          // Se não há token mas há dados de usuário em cache, limpar
+          const hasToken = localStorage.getItem("authToken") ||
+                          (await secureStorage.get<string>('auth_token')).success;
+          const hasCachedUser = queryClient.getQueryData(['/api/user']);
+
+          if (!hasToken && hasCachedUser) {
+            console.log("⚠️ Detectado cache de usuário sem token no iOS, limpando...");
+            queryClient.setQueryData(['/api/user'], null);
+            return null;
+          }
+        }
+
+        // Verificar cookies disponíveis
+        console.log("🍪 Cookies disponíveis:", document.cookie);
+
+        // Obter token de autenticação do armazenamento seguro se disponível
+        const authTokenResult = await secureStorage.get<string>('auth_token');
+        const authToken = authTokenResult.success ? authTokenResult.data : localStorage.getItem("authToken");
+
+        // Se não há token, não há sessão ativa - redirecionar para /auth imediatamente
+        if (!authToken && !document.cookie.includes('auth_token')) {
+          console.log("❌ Nenhum token de autenticação encontrado");
           return null;
         }
-      }
-      
-      // Verificar cookies disponíveis
-      console.log("🍪 Cookies disponíveis:", document.cookie);
-      
-      // Obter token de autenticação do armazenamento seguro se disponível
-      const authTokenResult = await secureStorage.get<string>('auth_token');
-      const authToken = authTokenResult.success ? authTokenResult.data : localStorage.getItem("authToken");
-      
-      // Se não há token, não há sessão ativa
-      if (!authToken && !document.cookie.includes('auth_token')) {
-        console.log("❌ Nenhum token de autenticação encontrado");
+
+        // Criar headers com token de autenticação se disponível
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0"
+        };
+
+        if (authToken) {
+          headers["Authorization"] = `Bearer ${authToken}`;
+          headers["X-Auth-Token"] = authToken;
+          console.log("🔑 Usando token de autenticação");
+        }
+
+        // Adicionar ID da sessão para facilitar debugging
+        const sessionID = localStorage.getItem("sessionID");
+        if (sessionID) {
+          headers["X-Session-ID"] = sessionID;
+        }
+
+        // Fazer a requisição com todas as configurações necessárias
+        const res = await httpRequest({
+          url: '/api/user',
+          method: 'GET',
+          headers,
+        });
+
+        if (!res.ok) {
+          console.error("❌ Erro na verificação de autenticação:", res.status, res.statusText);
+
+          // Se recebeu 401, limpar dados locais no iOS
+          if (res.status === 401 && isNativeApp()) {
+            console.log("🧹 Limpando dados locais após 401 no iOS");
+            await sessionManager.clearSession();
+          }
+
+          return null;
+        }
+
+        const userData = await res.json();
+        console.log("✅ Usuário autenticado:", userData.email);
+        console.log("🎯 Plano do usuário:", userData.subscriptionPlan);
+        console.log("🎯 Status da assinatura:", userData.subscriptionStatus);
+        return userData;
+      } catch (error) {
+        console.error("❌ Erro ao verificar autenticação:", error);
+
+        // Em caso de erro no iOS, limpar sessão se não há token válido
+        if (isNativeApp()) {
+          const hasValidToken = localStorage.getItem("authToken") ||
+                               (await secureStorage.get<string>('auth_token')).success;
+          if (!hasValidToken) {
+            console.log("🧹 Limpando sessão no iOS após erro sem token válido");
+            await sessionManager.clearSession();
+          }
+        }
+
         return null;
       }
-      
-      // Criar headers com token de autenticação se disponível
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0"
-      };
-      
-      if (authToken) {
-        headers["Authorization"] = `Bearer ${authToken}`;
-        headers["X-Auth-Token"] = authToken;
-        console.log("🔑 Usando token de autenticação");
-      }
-      
-      // Adicionar ID da sessão para facilitar debugging
-      const sessionID = localStorage.getItem("sessionID");
-      if (sessionID) {
-        headers["X-Session-ID"] = sessionID;
-      }
-      
-      // Fazer a requisição com todas as configurações necessárias
-      const res = await httpRequest({
-        url: '/api/user',
-        method: 'GET',
-        headers,
-      });
-      
-      if (!res.ok) {
-        console.error("❌ Erro na verificação de autenticação:", res.status, res.statusText);
-        
-        // Se recebeu 401, limpar dados locais no iOS
-        if (res.status === 401 && isNativeApp()) {
-          console.log("🧹 Limpando dados locais após 401 no iOS");
-          await sessionManager.clearSession();
-        }
-        
-        return null;
-      }
-      
-      const userData = await res.json();
-      console.log("✅ Usuário autenticado:", userData.email);
-      console.log("🎯 Plano do usuário:", userData.subscriptionPlan);
-      console.log("🎯 Status da assinatura:", userData.subscriptionStatus);
-      return userData;
-    } catch (error) {
-      console.error("❌ Erro ao verificar autenticação:", error);
-      
-      // Em caso de erro no iOS, limpar sessão se não há token válido
-      if (isNativeApp()) {
-        const hasValidToken = localStorage.getItem("authToken") || 
-                             (await secureStorage.get<string>('auth_token')).success;
-        if (!hasValidToken) {
-          console.log("🧹 Limpando sessão no iOS após erro sem token válido");
-          await sessionManager.clearSession();
-        }
-      }
-      
-      return null;
-    }
+    };
+
+    // Retornar o que terminar primeiro: a verificação ou o timeout
+    return Promise.race([authCheckPromise(), timeoutPromise]);
   };
 
   // Query para verificar autenticação

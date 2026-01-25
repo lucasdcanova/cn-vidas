@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -267,8 +267,34 @@ function Router() {
 }
 
 function AppContent() {
+  const [initialCheckDone, setInitialCheckDone] = React.useState(false);
+  const [, setLocation] = useLocation();
+
   // Usar hook para atualizar a cor do tema dinamicamente
   useThemeColor();
+
+  // Verificação inicial rápida de autenticação no iOS
+  React.useEffect(() => {
+    if (isNativeApp()) {
+      // Verificar rapidamente se há token
+      const authToken = localStorage.getItem("authToken");
+      const currentPath = window.location.pathname;
+
+      console.log("🔍 Verificação inicial iOS:", { authToken: !!authToken, currentPath });
+
+      // Se não há token e não estamos em uma página pública, redirecionar para /auth
+      const publicPaths = ['/auth', '/auth/hsj', '/auth/hcc', '/verificar-email', '/redefinir-senha',
+                          '/reenviar-verificacao', '/esqueci-senha', '/corporate-invite', '/campanha',
+                          '/hospital-briefing'];
+      const isPublicPath = publicPaths.some(path => currentPath.startsWith(path));
+
+      if (!authToken && !isPublicPath) {
+        console.log("📱 iOS: Sem token, redirecionando para /auth");
+        setLocation('/auth');
+      }
+    }
+    setInitialCheckDone(true);
+  }, [setLocation]);
 
   // Inicializar push notifications e configurações iOS em apps nativos
   React.useEffect(() => {
@@ -289,6 +315,11 @@ function AppContent() {
       });
     }
   }, []);
+
+  // Aguardar verificação inicial no iOS
+  if (isNativeApp() && !initialCheckDone) {
+    return null; // Retornar null brevemente enquanto verifica
+  }
 
   return (
     <>
