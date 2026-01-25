@@ -1759,13 +1759,6 @@ const AuthPage: React.FC = () => {
                       )}
                     </span>
                   </Button>
-
-                  <p
-                    className="text-center"
-                    style={{ color: "#94a3b8", marginTop: "clamp(10px, 2.5vw, 16px)", fontSize: "clamp(10px, 2.5vw, 11px)", paddingBottom: "clamp(8px, 2vw, 16px)" }}
-                  >
-                    Ao criar uma conta, você confirma ter lido e aceito todos os documentos legais acima.
-                  </p>
                 </form>
               </Form>
             </div>
