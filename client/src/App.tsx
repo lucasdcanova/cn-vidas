@@ -267,7 +267,7 @@ function Router() {
 }
 
 function AppContent() {
-  const [initialCheckDone, setInitialCheckDone] = React.useState(false);
+  // const [initialCheckDone, setInitialCheckDone] = React.useState(false);
   const [, setLocation] = useLocation();
 
   // Usar hook para atualizar a cor do tema dinamicamente
@@ -284,8 +284,8 @@ function AppContent() {
 
       // Se não há token e não estamos em uma página pública, redirecionar para /auth
       const publicPaths = ['/auth', '/auth/hsj', '/auth/hcc', '/verificar-email', '/redefinir-senha',
-                          '/reenviar-verificacao', '/esqueci-senha', '/corporate-invite', '/campanha',
-                          '/hospital-briefing'];
+        '/reenviar-verificacao', '/esqueci-senha', '/corporate-invite', '/campanha',
+        '/hospital-briefing'];
       const isPublicPath = publicPaths.some(path => currentPath.startsWith(path));
 
       if (!authToken && !isPublicPath) {
@@ -293,7 +293,7 @@ function AppContent() {
         setLocation('/auth');
       }
     }
-    setInitialCheckDone(true);
+    // setInitialCheckDone(true);
   }, [setLocation]);
 
   // Inicializar push notifications e configurações iOS em apps nativos
@@ -316,10 +316,7 @@ function AppContent() {
     }
   }, []);
 
-  // Aguardar verificação inicial no iOS
-  if (isNativeApp() && !initialCheckDone) {
-    return null; // Retornar null brevemente enquanto verifica
-  }
+  // Bloqueio de renderização removido
 
   return (
     <>
