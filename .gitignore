@@ -1,8 +1,8 @@
 # Dependencies
 node_modules/
-# Exceto módulos necessários para build iOS no Xcode Cloud
-!node_modules/@capacitor/
-!node_modules/@aparajita/
+# NOTA: Exceções para Xcode Cloud comentadas - causavam lentidão extrema no Git
+# !node_modules/@capacitor/
+# !node_modules/@aparajita/
 /.pnp
 .pnp.js
 
