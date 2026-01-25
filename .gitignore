@@ -67,6 +67,18 @@ test-*.cjs
 # Personal/sensitive files
 *_cookies.txt
 
+# Work files in root (PDFs, contracts, logos, etc)
+/*.pdf
+/*.PDF
+/logo*.png
+/logo*.jpg
+/logo*.jpeg
+/contrato*.pdf
+/acordo*.pdf
+
+# Marketing and work directories
+social-media-posts/
+
 # Temporary server files
 server-fixed.js
 server-simple.js
@@ -81,6 +93,20 @@ public/uploads/*
 # Capacitor
 # ios/
 # android/
+
+# iOS build and temporary files
+ios/App/dist/
+ios/App/App/public/assets/*.js
+ios/App/App/public/assets/*.css
+
+# macOS duplicate files (Finder creates these when you duplicate files)
+# Pattern: "filename 2.ext", "filename 3.ext", etc.
+* [0-9].*
+*\ [0-9].*
+
+# Podspec duplicates
+*.podspec\ [0-9]*
+*[0-9].podspec
 
 # Apple Wallet Certificates
 server/wallet/certificates/*.pem
