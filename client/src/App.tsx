@@ -1,4 +1,4 @@
-CONTINUimport * as React from "react";
+import * as React from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
