@@ -776,22 +776,24 @@ const AuthPage: React.FC = () => {
         }} className={`w-full flex flex-col ${activeTab === 'register' ? 'flex-1' : ''}`}>
           {/* Tabs refinadas com estilo Triunfo - mobile optimized */}
           <TabsList
-            className="grid w-full grid-cols-2 p-1 rounded-xl border shadow-sm shrink-0"
+            className="grid w-full grid-cols-2 p-1.5 rounded-2xl border shrink-0 overflow-hidden"
             style={{
-              background: "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
-              borderColor: "rgba(13, 148, 136, 0.12)",
-              marginBottom: "clamp(12px, 3vw, 20px)"
+              background: "linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)",
+              borderColor: "rgba(13, 148, 136, 0.15)",
+              marginBottom: "clamp(12px, 3vw, 20px)",
+              gap: "6px"
             }}
           >
             <TabsTrigger
               value="login"
-              className="rounded-lg font-semibold transition-all duration-200 data-[state=active]:shadow-md flex items-center justify-center gap-1.5"
+              className="rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 overflow-hidden"
               style={{
                 color: activeTab === 'login' ? '#0f766e' : '#64748b',
-                background: activeTab === 'login' ? 'linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%)' : 'transparent',
-                boxShadow: activeTab === 'login' ? '0 2px 8px rgba(13, 148, 136, 0.12)' : 'none',
-                minHeight: '44px',
-                fontSize: 'clamp(13px, 3.5vw, 14px)'
+                background: activeTab === 'login' ? '#ffffff' : 'transparent',
+                boxShadow: activeTab === 'login' ? '0 2px 8px rgba(0, 0, 0, 0.08)' : 'none',
+                height: '44px',
+                fontSize: 'clamp(13px, 3.5vw, 14px)',
+                border: activeTab === 'login' ? '1px solid rgba(13, 148, 136, 0.15)' : '1px solid transparent'
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -801,13 +803,14 @@ const AuthPage: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger
               value="register"
-              className="rounded-lg font-semibold transition-all duration-200 data-[state=active]:shadow-md flex items-center justify-center gap-1.5"
+              className="rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 overflow-hidden"
               style={{
                 color: activeTab === 'register' ? '#0f766e' : '#64748b',
-                background: activeTab === 'register' ? 'linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%)' : 'transparent',
-                boxShadow: activeTab === 'register' ? '0 2px 8px rgba(13, 148, 136, 0.12)' : 'none',
-                minHeight: '44px',
-                fontSize: 'clamp(13px, 3.5vw, 14px)'
+                background: activeTab === 'register' ? '#ffffff' : 'transparent',
+                boxShadow: activeTab === 'register' ? '0 2px 8px rgba(0, 0, 0, 0.08)' : 'none',
+                height: '44px',
+                fontSize: 'clamp(13px, 3.5vw, 14px)',
+                border: activeTab === 'register' ? '1px solid rgba(13, 148, 136, 0.15)' : '1px solid transparent'
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
