@@ -331,18 +331,18 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
                 <div
                   className="auth-header-branding shrink-0 text-center"
                   style={{
-                    padding: "clamp(12px, 3vw, 20px) clamp(16px, 4vw, 24px)",
+                    padding: "clamp(10px, 2.5vw, 16px) clamp(12px, 3vw, 20px)",
                     borderBottom: "1px solid rgba(13, 148, 136, 0.1)",
                     background: "linear-gradient(180deg, rgba(240, 253, 250, 0.9) 0%, rgba(255, 255, 255, 0) 100%)"
                   }}
                 >
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center gap-2">
                     <img
                       src={hospitalLogo}
                       alt="Hospital de Caridade Santa Rita de Triunfo"
                       className="object-contain rounded-lg"
                       style={{
-                        height: "clamp(36px, 8vw, 48px)",
+                        height: "clamp(32px, 7vw, 42px)",
                         width: "auto",
                         border: "2px solid rgba(13, 148, 136, 0.15)",
                         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)"
@@ -351,15 +351,15 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
                       fetchPriority="high"
                     />
                     <div
-                      className="bg-gradient-to-b from-transparent via-teal-300/60 to-transparent"
-                      style={{ height: "clamp(28px, 6vw, 40px)", width: "1px" }}
+                      className="bg-gradient-to-b from-transparent via-teal-300/50 to-transparent"
+                      style={{ height: "clamp(24px, 5vw, 32px)", width: "1px" }}
                     />
                     <div className="text-left">
                       <span
                         className="triunfo-title block"
                         style={{
                           color: "#0f766e",
-                          fontSize: "clamp(11px, 2.8vw, 13px)",
+                          fontSize: "clamp(10px, 2.5vw, 12px)",
                           lineHeight: "1.3"
                         }}
                       >
@@ -367,6 +367,33 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
                         <br />
                         Santa Rita de Triunfo
                       </span>
+                    </div>
+                    <div
+                      className="bg-gradient-to-b from-transparent via-teal-300/30 to-transparent"
+                      style={{ height: "clamp(20px, 4vw, 28px)", width: "1px", marginLeft: "clamp(2px, 0.5vw, 4px)" }}
+                    />
+                    <div className="flex flex-col items-center" style={{ opacity: 0.6, marginLeft: "clamp(2px, 0.5vw, 4px)" }}>
+                      <span
+                        style={{
+                          fontSize: "clamp(6px, 1.5vw, 7px)",
+                          color: "#64748b",
+                          letterSpacing: "0.02em",
+                          marginBottom: "1px",
+                          textTransform: "uppercase"
+                        }}
+                      >
+                        powered by
+                      </span>
+                      <img
+                        src="/logo_cn_vidas_transparent.png"
+                        alt="CN Vidas"
+                        style={{
+                          height: "clamp(14px, 3vw, 18px)",
+                          width: "auto",
+                          objectFit: "contain"
+                        }}
+                        loading="eager"
+                      />
                     </div>
                   </div>
                 </div>
