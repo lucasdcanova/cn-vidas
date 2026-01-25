@@ -94,14 +94,52 @@ yarn lint
 
 ## Desenvolvimento Mobile
 
-### iOS
+### ⚠️ IMPORTANTE: Desenvolvimento SEM Xcode Local
 
-Para fazer push e sincronizar automaticamente com o iOS:
+Este projeto usa **Xcode Cloud** para builds iOS. O Xcode **NÃO está instalado** localmente.
+
+**NUNCA execute estes comandos localmente:**
+- ❌ `npx cap sync ios` (trava sem Xcode instalado)
+- ❌ `npx cap open ios` (requer Xcode)
+- ❌ `npx cap copy ios` (desnecessário)
+- ❌ `./sync-ios.sh` (requer Xcode)
+- ❌ `./push-and-sync.sh` (requer Xcode)
+- ❌ `pod install` (feito automaticamente pelo Xcode Cloud)
+
+### iOS - Workflow com Xcode Cloud
+
+**Fluxo simplificado:**
 ```bash
-./push-and-sync.sh
+# 1. Faça suas mudanças no código
+
+# 2. (Opcional) Build local apenas para testar no navegador
+npm run build
+
+# 3. Commit e push
+git add .
+git commit -m "sua mensagem"
+git push origin main
+
+# 4. O Xcode Cloud faz TUDO automaticamente:
+#    - Clona o repositório
+#    - Executa xcode-cloud-build.sh
+#    - Faz npm install
+#    - Faz npm run build
+#    - Faz npx cap sync ios
+#    - Instala pods (pod install)
+#    - Compila o app
+#    - Envia para TestFlight
 ```
 
-Este script faz o push para o GitHub e, se bem-sucedido, executa a sincronização com o iOS automaticamente.
+**O que o Xcode Cloud faz automaticamente:**
+1. Detecta push para `main`
+2. Executa `xcode-cloud-build.sh`
+3. Instala dependências npm
+4. Faz build do projeto web
+5. Sincroniza Capacitor (`cap sync ios`)
+6. Instala CocoaPods
+7. Compila app iOS
+8. Publica no TestFlight
 
 ### Android
 
@@ -119,15 +157,10 @@ npx cap sync android
 ### Estrutura Mobile
 ```
 /
-├── ios/             # Projeto iOS (Xcode)
+├── ios/             # Projeto iOS (gerenciado pelo Xcode Cloud)
 ├── android/         # Projeto Android (Android Studio)
 └── capacitor.config.ts  # Configuração do Capacitor
 ```
-
-### Desenvolvimento Mobile sem Computador Local
-
-#### iOS - Xcode Cloud
-Já configurado no projeto. Builds automáticos após push.
 
 #### Android - GitHub Actions / CI/CD
 
@@ -170,23 +203,15 @@ O projeto tem workflows configurados para build automático:
 ### Comandos Úteis Mobile
 
 ```bash
-# Verificar status
-npx cap doctor
-
-# Sincronizar ambas plataformas
-npx cap sync
-
-# Apenas copiar assets (mais rápido)
-npx cap copy ios
+# Android apenas (iOS é feito pelo Xcode Cloud)
+npx cap sync android
 npx cap copy android
-
-# Abrir IDEs
-npx cap open ios      # Abre Xcode
 npx cap open android  # Abre Android Studio
 
 # Adicionar plugins
 npm install @capacitor/[plugin-name]
-npx cap sync
+npx cap sync android  # Apenas Android localmente
+# iOS será sincronizado automaticamente no próximo push
 ```
 
 ### Permissões Android Configuradas
@@ -202,12 +227,21 @@ O `AndroidManifest.xml` já inclui:
 
 ### Fluxo de Desenvolvimento Recomendado
 
-1. **Desenvolver no Codespaces**
+**Para desenvolvimento web/geral:**
+1. **Desenvolver localmente ou no Codespaces**
 2. **Testar no navegador** (`npm run dev`)
-3. **Build e sync** (`npm run build && npx cap sync`)
-4. **Push para GitHub**
-5. **Build automático** via Xcode Cloud (iOS) ou GitHub Actions (Android)
-6. **Testar via TestFlight** (iOS) ou Firebase App Distribution (Android)
+3. **Commit e push** (`git add . && git commit && git push`)
+4. **Deploy automático** para homologação (www.homologacao.cnvidas.com.br)
+
+**Para desenvolvimento mobile:**
+1. **Desenvolver e testar** no navegador (`npm run dev`)
+2. **(Opcional) Build local** apenas para validar (`npm run build`)
+3. **Commit e push** para GitHub
+4. **Build automático iOS** via Xcode Cloud → TestFlight
+5. **Build automático Android** via GitHub Actions → Firebase App Distribution
+6. **Testar** no TestFlight (iOS) ou Firebase (Android)
+
+**IMPORTANTE:** Nunca execute comandos `cap sync ios` ou `cap open ios` - eles travam sem Xcode local!
 
 ## Notas de desenvolvimento
 
@@ -219,10 +253,45 @@ O `AndroidManifest.xml` já inclui:
 
 ## Memórias de Desenvolvimento
 
-- sempre sincronizar o ios apos um push
-- lembre dos certificados antes de pedirmos a publicacao na app store
-- lembre de certificados apns para notificacoes antes de mandarmps para apple
-- sempre responda em portugues do brasil
+### Workflow Mobile
+- ❌ **NUNCA** executar `npx cap sync ios` localmente (trava sem Xcode instalado)
+- ✅ O Xcode Cloud sincroniza automaticamente após cada push
+- ✅ Apenas fazer commit e push - o resto é automático
+
+### Certificados e Publicação
+- Lembre dos certificados antes de pedirmos publicação na App Store
+- Lembre de certificados APNs para notificações antes de enviar para Apple
+- Certificados de produção necessários para notificações push funcionarem
+
+### Arquivos a NUNCA Commitar
+- Arquivos duplicados do macOS (sufixo " 2", " 3", " 4")
+- PDFs e contratos na raiz do projeto
+- Logos de trabalho na raiz
+- Diretório `social-media-posts/`
+- Diretório `ios/App/dist/` (gerado automaticamente)
+- Assets compilados em `ios/App/App/public/assets/*.js` e `*.css`
+- O `.gitignore` já está configurado para ignorar estes arquivos
+
+### Geral
+- Sempre responda em português do Brasil
+- Git estava lento devido a arquivos duplicados commitados acidentalmente (resolvido em 25/01/2026)
+
+## Problemas Conhecidos e Soluções
+
+### `npx cap sync ios` trava/demora muito
+**Causa:** Xcode não está instalado localmente (apenas Xcode Cloud)
+**Solução:** Não execute este comando! O Xcode Cloud faz o sync automaticamente após push.
+
+### Git muito lento, operações demorando muito
+**Causa:** Arquivos grandes ou duplicados commitados acidentalmente
+**Solução:**
+- Verificar `git status` e remover arquivos grandes com `git rm`
+- O `.gitignore` foi atualizado para prevenir isso
+- Evitar commitar PDFs, logos grandes, ou diretórios de marketing
+
+### Arquivos duplicados aparecem (sufixo " 2", " 3")
+**Causa:** macOS Finder cria esses arquivos ao duplicar
+**Solução:** O `.gitignore` agora ignora esses padrões automaticamente
 
 ## Deploy
 
@@ -317,10 +386,3 @@ Nova tabela `doctor_digital_certificates`:
 ### Referências
 - [Documentação VIDaaS](https://www.digiforte.com.br/pt/docs/vidaas/vidaas)
 - [API PSC Valid](https://validcertificadora.com.br/pages/psc-integracao-via-api)
-
-
-
-
-## Memórias de Desenvolvimento
-
-- lembre de ver por que os scripts nao estao sendo executados para podermos tirar essa quantidade todas de arquivos do git
