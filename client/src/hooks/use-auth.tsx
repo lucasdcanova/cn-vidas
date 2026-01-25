@@ -30,15 +30,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  
+
   // Função para verificar a autenticação do usuário com timeout
   const checkAuth = async (): Promise<UserData | null> => {
     // Criar uma promise com timeout para evitar loading infinito
     const timeoutPromise = new Promise<null>((resolve) => {
       setTimeout(() => {
-        console.log("⏱️ Timeout na verificação de autenticação (10s)");
+        console.log("⏱️ Timeout na verificação de autenticação (5s)");
         resolve(null);
-      }, 10000); // 10 segundos de timeout
+      }, 5000); // 5 segundos de timeout
     });
 
     const authCheckPromise = async (): Promise<UserData | null> => {
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isNativeApp()) {
           // Se não há token mas há dados de usuário em cache, limpar
           const hasToken = localStorage.getItem("authToken") ||
-                          (await secureStorage.get<string>('auth_token')).success;
+            (await secureStorage.get<string>('auth_token')).success;
           const hasCachedUser = queryClient.getQueryData(['/api/user']);
 
           if (!hasToken && hasCachedUser) {
@@ -121,8 +121,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Em caso de erro no iOS, limpar sessão se não há token válido
         if (isNativeApp()) {
+          console.error("📱 iOS Auth Error:", error);
           const hasValidToken = localStorage.getItem("authToken") ||
-                               (await secureStorage.get<string>('auth_token')).success;
+            (await secureStorage.get<string>('auth_token')).success;
           if (!hasValidToken) {
             console.log("🧹 Limpando sessão no iOS após erro sem token válido");
             await sessionManager.clearSession();
@@ -145,9 +146,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // **CORREÇÃO: Configurações para garantir dados atualizados do usuário**
     staleTime: 0, // Sempre considera os dados como 'stale' (desatualizados)
     cacheTime: 0, // Sem cache - sempre busca dados frescos do servidor
-    refetchOnWindowFocus: true, // Recarregar quando a janela ganha foco
+    refetchOnWindowFocus: (query) => !isNativeApp(), // Evitar loops no iOS
     refetchOnMount: true, // Sempre recarregar ao montar o componente
-    refetchOnReconnect: true, // Recarregar quando reconectar à internet
+    refetchOnReconnect: (query) => !isNativeApp(), // Evitar loops de reconexão no iOS
     refetchInterval: false, // Não fazer polling automático
     networkMode: 'always', // Sempre tentar buscar do servidor
   });
@@ -156,22 +157,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
       console.log("Tentando login com credenciais:", { email: credentials.email });
-      
+
       const response = await apiRequest("POST", "/api/login", credentials);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Falha no login");
       }
-      
+
       const responseData = await response.json();
-      
+
       // Armazenar token de autenticação se disponível
       if (responseData.authToken) {
         console.log("Token de autenticação recebido:", responseData.authToken);
         // Sempre usar localStorage no iOS devido a problemas com SecureStorage
         localStorage.setItem("authToken", responseData.authToken);
-        
+
         // Tentar salvar no armazenamento seguro, mas não falhar se der erro
         try {
           await secureStorage.save('auth_token', responseData.authToken);
@@ -179,13 +180,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.warn("SecureStorage falhou, usando apenas localStorage:", error);
         }
       }
-      
+
       // Armazenar ID da sessão se disponível
       if (responseData.sessionId) {
         console.log("ID da sessão recebido:", responseData.sessionId);
         // Sempre usar localStorage no iOS devido a problemas com SecureStorage
         localStorage.setItem("sessionID", responseData.sessionId);
-        
+
         // Tentar salvar no armazenamento seguro, mas não falhar se der erro
         try {
           await secureStorage.save('session_id', responseData.sessionId);
@@ -193,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.warn("SecureStorage falhou, usando apenas localStorage:", error);
         }
       }
-      
+
       // Armazenar dados do usuário localmente para autenticação alternativa em chamadas de emergência
       try {
         const userData = {
@@ -210,22 +211,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         console.warn("Erro ao armazenar dados do usuário:", e);
       }
-      
+
       return responseData;
     },
     onSuccess: async (userData: UserData & { sessionId?: string, authToken?: string }) => {
       console.log("Login bem-sucedido:", userData);
-      
+
       // Salvar os dados do usuário na cache
       queryClient.setQueryData(["/api/user"], userData);
-      
+
       // Para médicos, invalidar cache do perfil para forçar busca fresca
       if (userData.role === "doctor") {
         console.log("🔄 Invalidando cache do perfil do médico após login...");
         queryClient.invalidateQueries({ queryKey: ['/api/doctors/profile'] });
         queryClient.removeQueries({ queryKey: ['/api/doctors/profile'] });
       }
-      
+
       // Redirecionar com base no papel do usuário
       if (userData.role === "admin") {
         console.log("Usuário é administrador, redirecionando para /admin/users");
@@ -234,7 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Verificar se o médico completou o onboarding
         console.log("🏥 [Login] Usuário é médico, verificando status de onboarding...");
         console.log("📱 [Login] Plataforma:", isNativeApp() ? 'iOS' : 'Web');
-        
+
         // No iOS, se temos problemas para buscar o perfil, vamos direto para telemedicina
         // e deixar o guard verificar
         if (isNativeApp()) {
@@ -243,13 +244,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           window.location.href = "/doctor-telemedicine";
           return;
         }
-        
+
         // Na web, continuar com a verificação normal
         try {
           const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
             method: 'GET'
           });
-          
+
           console.log('📊 [Login] Perfil do médico recebido:', {
             id: doctorProfile.id,
             userId: doctorProfile.userId,
@@ -257,7 +258,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             onboardingCompletedType: typeof doctorProfile.onboardingCompleted,
             profileExists: !!doctorProfile
           });
-          
+
           // IMPORTANTE: Verificação explícita de onboardingCompleted
           if (doctorProfile.onboardingCompleted === true) {
             console.log("✅ [Login] Médico com onboarding completo, redirecionando para /doctor-telemedicine");
@@ -276,14 +277,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             code: error?.code,
             errorObject: JSON.stringify(error)
           });
-          
+
           // Se for 404, redirecionar para onboarding
           if (error?.status === 404) {
             console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /doctor-onboarding");
             window.location.href = "/doctor-onboarding";
             return;
           }
-          
+
           // Em caso de outro erro, ir para telemedicina e deixar o guard decidir
           console.log("🚨 [Login] Erro ao buscar perfil, redirecionando para /doctor-telemedicine");
           window.location.href = "/doctor-telemedicine";
@@ -297,7 +298,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Usuário é paciente, redirecionando para /dashboard");
         window.location.href = "/dashboard";
       }
-      
+
       // Forçar uma verificação de autenticação antes do redirecionamento
       await refetch();
     },
@@ -315,28 +316,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginWithQRCodeMutation = useMutation({
     mutationFn: async ({ token }: { token: string }) => {
       console.log("Tentando login com QR Code:", token);
-      
+
       const response = await apiRequest("POST", "/api/auth/login-qr", { token });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "QR Code inválido ou expirado");
       }
-      
+
       const responseData = await response.json();
-      
+
       // Armazenar token de autenticação se disponível
       if (responseData.authToken) {
         console.log("Token de autenticação recebido:", responseData.authToken);
         localStorage.setItem("authToken", responseData.authToken);
       }
-      
+
       // Armazenar ID da sessão se disponível
       if (responseData.sessionId) {
         console.log("ID da sessão recebido:", responseData.sessionId);
         localStorage.setItem("sessionID", responseData.sessionId);
       }
-      
+
       // Armazenar dados do usuário localmente
       try {
         localStorage.setItem("userData", JSON.stringify({
@@ -350,22 +351,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         console.warn("Erro ao armazenar dados do usuário:", e);
       }
-      
+
       return responseData;
     },
     onSuccess: async (userData: UserData & { sessionId?: string, authToken?: string }) => {
       console.log("Login com QR Code bem-sucedido:", userData);
-      
+
       // Salvar os dados do usuário na cache
       queryClient.setQueryData(["/api/user"], userData);
-      
+
       // Para médicos, invalidar cache do perfil para forçar busca fresca
       if (userData.role === "doctor") {
         console.log("🔄 Invalidando cache do perfil do médico após login com QR Code...");
         queryClient.invalidateQueries({ queryKey: ['/api/doctors/profile'] });
         queryClient.removeQueries({ queryKey: ['/api/doctors/profile'] });
       }
-      
+
       // Redirecionar com base no papel do usuário
       if (userData.role === "admin") {
         console.log("Usuário é administrador, redirecionando para /admin/users");
@@ -374,7 +375,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Verificar se o médico completou o onboarding
         console.log("🏥 [Login] Usuário é médico, verificando status de onboarding...");
         console.log("📱 [Login] Plataforma:", isNativeApp() ? 'iOS' : 'Web');
-        
+
         // No iOS, se temos problemas para buscar o perfil, vamos direto para telemedicina
         // e deixar o guard verificar
         if (isNativeApp()) {
@@ -383,13 +384,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           window.location.href = "/doctor-telemedicine";
           return;
         }
-        
+
         // Na web, continuar com a verificação normal
         try {
           const doctorProfile = await httpRequest<any>('/api/doctors/profile', {
             method: 'GET'
           });
-          
+
           console.log('📊 [Login] Perfil do médico recebido:', {
             id: doctorProfile.id,
             userId: doctorProfile.userId,
@@ -397,7 +398,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             onboardingCompletedType: typeof doctorProfile.onboardingCompleted,
             profileExists: !!doctorProfile
           });
-          
+
           // IMPORTANTE: Verificação explícita de onboardingCompleted
           if (doctorProfile.onboardingCompleted === true) {
             console.log("✅ [Login] Médico com onboarding completo, redirecionando para /doctor-telemedicine");
@@ -416,14 +417,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             code: error?.code,
             errorObject: JSON.stringify(error)
           });
-          
+
           // Se for 404, redirecionar para onboarding
           if (error?.status === 404) {
             console.log("📋 [Login] Perfil de médico não encontrado (404), redirecionando para /doctor-onboarding");
             window.location.href = "/doctor-onboarding";
             return;
           }
-          
+
           // Em caso de outro erro, ir para telemedicina e deixar o guard decidir
           console.log("🚨 [Login] Erro ao buscar perfil, redirecionando para /doctor-telemedicine");
           window.location.href = "/doctor-telemedicine";
@@ -437,7 +438,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Usuário é paciente, redirecionando para /dashboard");
         window.location.href = "/dashboard";
       }
-      
+
       // Forçar uma verificação de autenticação antes do redirecionamento
       await refetch();
     },
@@ -455,16 +456,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       console.log("🚪 Iniciando processo de logout");
-      
+
       try {
         // Obter token de autenticação para enviar no header
         const authToken = localStorage.getItem("authToken");
-        
+
         // Fazer logout no servidor
         if (isNativeApp()) {
           // No iOS, usar CapacitorHttp para garantir que cookies sejam limpos
           const { CapacitorHttp } = await import('@capacitor/core');
-          
+
           try {
             const response = await CapacitorHttp.request({
               url: `${getApiBaseUrl()}/api/auth/logout`,
@@ -474,7 +475,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 'X-Auth-Token': authToken || '',
               }
             });
-            
+
             console.log("✅ Logout no servidor (iOS):", response.status);
           } catch (error) {
             console.log("⚠️ Erro ao fazer logout no servidor (iOS):", error);
@@ -486,19 +487,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               "Content-Type": "application/json",
               "Cache-Control": "no-cache",
             };
-            
+
             if (authToken) {
               headers["Authorization"] = `Bearer ${authToken}`;
               headers["X-Auth-Token"] = authToken;
             }
-            
+
             const response = await fetch("/api/auth/logout", {
               method: "POST",
               credentials: "include",
               headers,
               cache: "no-cache",
             });
-            
+
             console.log("✅ Logout no servidor (Web):", response.status);
           } catch (error) {
             console.log("⚠️ Erro ao fazer logout no servidor (Web):", error);
@@ -507,27 +508,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.log("⚠️ Erro geral ao chamar logout no servidor:", error);
       }
-      
+
       // Usar SessionManager para limpar sessão completamente
       await sessionManager.clearSession();
-      
+
       console.log("✅ Logout concluído");
       return { success: true };
     },
     onSuccess: async () => {
       console.log("✅ Logout bem-sucedido");
-      
+
       // Aguardar um momento extra no iOS
       if (isNativeApp()) {
         await new Promise(resolve => setTimeout(resolve, 200));
       }
-      
+
       // Verificar se o login foi via HSJ
       const loginSource = localStorage.getItem('loginSource');
-      
+
       // Limpar loginSource do localStorage
       localStorage.removeItem('loginSource');
-      
+
       // Redirecionar para página de login apropriada
       if (loginSource === 'hsj') {
         window.location.href = "/auth/hsj";
@@ -546,22 +547,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation({
     mutationFn: async (credentials: RegisterCredentials) => {
       console.log("Tentando registrar com dados:", { email: credentials.email });
-      
+
       const response = await apiRequest("POST", "/api/register", credentials);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Falha no registro");
       }
-      
+
       const userData = await response.json();
-      
+
       // Armazenar o token de autenticação se disponível
       if (userData.authToken) {
         console.log("Token de autenticação recebido no registro:", userData.authToken);
         localStorage.setItem("authToken", userData.authToken);
       }
-      
+
       // Armazenar dados do usuário localmente para autenticação alternativa
       try {
         localStorage.setItem("userData", JSON.stringify({
@@ -575,23 +576,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         console.warn("Erro ao armazenar dados do usuário:", e);
       }
-      
+
       // Save user data to cache
       queryClient.setQueryData(["/api/user"], userData);
-      
+
       return userData;
     },
     onSuccess: async (userData: UserData & { sessionId?: string, authToken?: string }) => {
       console.log("Registro bem-sucedido:", userData);
-      
+
       // Salvar os dados do usuário na cache (login automático)
       queryClient.setQueryData(["/api/user"], userData);
-      
+
       toast({
         title: "Conta criada com sucesso",
         description: `Bem-vindo(a) ao CN Vidas, ${userData.fullName}!`,
       });
-      
+
       // Disparar evento de registro completo para o Meta Pixel
       try {
         metaPixel.trackCompleteRegistration({
@@ -604,7 +605,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error("Erro ao disparar evento do Meta Pixel:", error);
       }
-      
+
       // Redirecionar com base no papel do usuário (login automático)
       if (userData.role === "admin") {
         console.log("Usuário é administrador, redirecionando para /admin/users");
@@ -629,7 +630,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Usuário registrado, redirecionando para /dashboard");
         window.location.href = "/dashboard";
       }
-      
+
       // Forçar uma verificação de autenticação antes do redirecionamento
       await refetch();
     },
