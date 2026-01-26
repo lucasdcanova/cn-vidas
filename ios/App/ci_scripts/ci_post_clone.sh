@@ -4,9 +4,55 @@ set -e
 echo "🔧 Script ci_post_clone iniciado..."
 echo "📍 Diretório de trabalho: $(pwd)"
 
+# Voltar para o diretório raiz do repositório (ci_scripts -> App -> ios -> root)
+cd ../../..
+REPO_ROOT=$(pwd)
+echo "📍 Diretório raiz do repositório: $REPO_ROOT"
+
+# =====================================================
+# PARTE 1: Build do Web App e Capacitor Sync
+# =====================================================
+
+echo "📦 Instalando dependências npm..."
+if [ -f "package-lock.json" ]; then
+    npm ci
+elif [ -f "yarn.lock" ]; then
+    npm install -g yarn
+    yarn install --frozen-lockfile
+else
+    npm install
+fi
+
+echo "🔨 Construindo web app..."
+npm run build
+
+# Verificar se o build foi bem sucedido
+if [ ! -f "dist/client/index.html" ]; then
+    echo "❌ Erro: Build falhou - index.html não foi criado"
+    exit 1
+fi
+echo "✅ Build do web app concluído!"
+
+echo "📱 Sincronizando com Capacitor iOS..."
+npx cap sync ios
+
+# Verificar se a sincronização foi bem sucedida
+if [ ! -f "ios/App/App/public/index.html" ]; then
+    echo "❌ Erro: Sincronização falhou - arquivos não foram copiados para iOS"
+    exit 1
+fi
+echo "✅ Capacitor sync concluído!"
+
+# Verificar arquivos copiados
+echo "📋 Verificando arquivos em ios/App/App/public/assets/:"
+ls -la ios/App/App/public/assets/ | head -20
+
+# =====================================================
+# PARTE 2: CocoaPods
+# =====================================================
+
 # Navegar para o diretório App (que contém o Podfile)
-# O script está em ios/App/ci_scripts, então precisamos voltar um nível
-cd ..
+cd "$REPO_ROOT/ios/App"
 
 echo "📍 Novo diretório: $(pwd)"
 echo "📂 Conteúdo do diretório:"
@@ -16,7 +62,7 @@ ls -la
 if [ ! -f "Podfile" ]; then
     echo "❌ Erro: Podfile não encontrado no diretório atual"
     echo "Tentando encontrar o Podfile..."
-    find ../.. -name "Podfile" -type f 2>/dev/null | head -5
+    find "$REPO_ROOT" -name "Podfile" -type f 2>/dev/null | head -5
     exit 1
 fi
 
@@ -25,11 +71,11 @@ echo "✅ Podfile encontrado!"
 echo "📦 Instalando CocoaPods..."
 pod install || echo "⚠️ Falha ao executar pod install"
 
-# Voltar para o diretório raiz do repositório
-cd ../..
-REPO_ROOT=$(pwd)
-echo "📍 Diretório raiz do repositório: $REPO_ROOT"
+# =====================================================
+# PARTE 3: Copiar arquivos de plugins Capacitor (se necessário)
+# =====================================================
 
+cd "$REPO_ROOT"
 echo "📦 Copiando arquivos dos plugins Capacitor..."
 
 # Criar diretórios necessários
