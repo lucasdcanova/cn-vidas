@@ -12,8 +12,9 @@ export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) =
 
   // Configurar status bar do iOS para combinar com o gradiente teal
   useEffect(() => {
-    // Usa a cor do topo do gradiente (#18c2b3) e texto claro (darkText = false)
-    configureIOSStatusBar('#18c2b3', false);
+    // Usa um tom mais claro para compensar os brilhos radiais do gradiente
+    // Cor base do gradiente (#18c2b3) + brilho branco = tom mais claro
+    configureIOSStatusBar('#2ad4c3', false);
   }, []);
 
   // Determinar o estado do layout baseado em activeTab e isKeyboardVisible
