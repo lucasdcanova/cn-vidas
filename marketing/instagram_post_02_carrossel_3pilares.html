@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post 02 - Carrossel: O que é a CN Vidas? (3 Pilares)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-dark: #0f766e;
+            --primary-light: #14b8a6;
+            --accent: #0891b2;
+            --gold: #f59e0b;
+            --text-dark: #042f2e;
+            --text-body: #134e4a;
+            --bg-white: #ffffff;
+            --bg-light: #f0fdfa;
+            --bg-soft: #ccfbf1;
+            
+            /* Cores específicas dos pilares */
+            --pilar1-color: #0891b2; /* Ciano - Telemedicina */
+            --pilar2-color: #10b981; /* Verde - Descontos */
+            --pilar3-color: #f59e0b; /* Dourado - Seguro */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8f2f7 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-family: 'Merriweather', serif;
+            font-size: 2rem;
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-body);
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .slides-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 30px;
+            justify-items: center;
+        }
+        
+        .slide {
+            width: 340px;
+            height: 340px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+        
+        /* ======== SLIDE 1 - CAPA ======== */
+        .slide-1 {
+            background: linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%);
+        }
+        
+        .slide-1::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+        
+        .slide-1 .content {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .slide-1 .logo {
+            width: 180px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 4px 15px rgba(0,0,0,0.2));
+        }
+        
+        .slide-1 h2 {
+            font-family: 'Merriweather', serif;
+            font-size: 1.6rem;
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            line-height: 1.3;
+        }
+        
+        .slide-1 .parceria {
+            margin-top: 25px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.95);
+        }
+        
+        /* ======== SLIDE 2 - PILAR 1 TELEMEDICINA ======== */
+        .slide-2 {
+            background: linear-gradient(165deg, #22d3ee 0%, #0891b2 60%, #0e7490 100%);
+        }
+        
+        .slide-2::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 85% 15%, rgba(255,255,255,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 15% 85%, rgba(255,255,255,0.1) 0%, transparent 45%);
+        }
+        
+        .pilar-content {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+        }
+        
+        .pilar-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fff;
+            width: fit-content;
+            margin-bottom: 20px;
+        }
+        
+        .pilar-badge .number {
+            background: #fff;
+            color: var(--pilar1-color);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+        
+        .pilar-title {
+            font-family: 'Merriweather', serif;
+            font-size: 1.5rem;
+            color: #fff;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .pilar-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            flex: 1;
+        }
+        
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.95);
+            line-height: 1.4;
+        }
+        
+        .feature-list .check {
+            background: rgba(255,255,255,0.25);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            margin-top: 2px;
+        }
+        
+        /* ======== SLIDE 3 - TELEMEDICINA DETALHES ======== */
+        .slide-3 {
+            background: linear-gradient(165deg, #67e8f9 0%, #06b6d4 60%, #0891b2 100%);
+        }
+        
+        .slide-3::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15) 0%, transparent 40%);
+        }
+        
+        .detail-scenario {
+            background: rgba(0,0,0,0.15);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-scenario .time {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+        
+        .detail-scenario .situation {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .detail-solution {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        
+        .detail-solution h4 {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-solution p {
+            font-size: 1.1rem;
+            color: #fff;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        /* ======== SLIDE 4 - PILAR 2 DESCONTOS ======== */
+        .slide-4 {
+            background: linear-gradient(165deg, #34d399 0%, #10b981 60%, #059669 100%);
+        }
+        
+        .slide-4::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 85% 15%, rgba(255,255,255,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 15% 85%, rgba(255,255,255,0.1) 0%, transparent 45%);
+        }
+        
+        .slide-4 .pilar-badge .number {
+            color: var(--pilar2-color);
+        }
+        
+        .discount-highlight {
+            background: rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .discount-highlight .percentage {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+        }
+        
+        .discount-highlight .label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.9);
+            margin-top: 5px;
+        }
+        
+        /* ======== SLIDE 5 - DESCONTOS DETALHES ======== */
+        .slide-5 {
+            background: linear-gradient(165deg, #6ee7b7 0%, #34d399 60%, #10b981 100%);
+        }
+        
+        .slide-5::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15) 0%, transparent 40%);
+        }
+        
+        .price-comparison {
+            background: rgba(0,0,0,0.12);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        
+        .price-comparison .item-name {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 8px;
+        }
+        
+        .price-comparison .prices {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .price-comparison .old-price {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.6);
+            text-decoration: line-through;
+        }
+        
+        .price-comparison .arrow {
+            font-size: 1.2rem;
+        }
+        
+        .price-comparison .new-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .savings-box {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .savings-box .amount {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .savings-box .label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.85);
+        }
+        
+        /* ======== SLIDE 6 - PILAR 3 SEGURO ======== */
+        .slide-6 {
+            background: linear-gradient(165deg, #fbbf24 0%, #f59e0b 60%, #d97706 100%);
+        }
+        
+        .slide-6::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 85% 15%, rgba(255,255,255,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 15% 85%, rgba(255,255,255,0.1) 0%, transparent 45%);
+        }
+        
+        .slide-6 .pilar-badge .number {
+            color: var(--pilar3-color);
+        }
+        
+        .insurance-amount {
+            background: rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .insurance-amount .currency {
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.9);
+            vertical-align: top;
+        }
+        
+        .insurance-amount .value {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+        }
+        
+        .insurance-amount .label {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.85);
+            margin-top: 5px;
+        }
+        
+        /* ======== SLIDE 7 - SEGURO DETALHES ======== */
+        .slide-7 {
+            background: linear-gradient(165deg, #fcd34d 0%, #fbbf24 60%, #f59e0b 100%);
+        }
+        
+        .slide-7::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15) 0%, transparent 40%);
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .comparison-col {
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        .comparison-col.without {
+            background: rgba(0,0,0,0.15);
+        }
+        
+        .comparison-col.with {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .comparison-col h4 {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .comparison-col ul {
+            list-style: none;
+        }
+        
+        .comparison-col ul li {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* ======== SLIDE 8 - PARCERIA ======== */
+        .slide-8 {
+            background: linear-gradient(165deg, #f0fdfa 0%, #ccfbf1 60%, #99f6e4 100%);
+        }
+        
+        .slide-8 .content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .partnership-badge {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        
+        .slide-8 h3 {
+            font-family: 'Merriweather', serif;
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+        
+        .hospital-logo {
+            width: 150px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .hospital-name {
+            font-size: 1rem;
+            color: var(--text-body);
+            font-weight: 600;
+        }
+        
+        .hospital-location {
+            font-size: 0.85rem;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+        
+        /* ======== SLIDE 9 - PREÇO ======== */
+        .slide-9 {
+            background: linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%);
+        }
+        
+        .slide-9::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 50%);
+        }
+        
+        .slide-9 .content {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .pillars-summary {
+            margin-bottom: 25px;
+        }
+        
+        .pillar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+        }
+        
+        .pillar-item .icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        .pillar-item.p1 .icon { background: var(--pilar1-color); }
+        .pillar-item.p2 .icon { background: var(--pilar2-color); }
+        .pillar-item.p3 .icon { background: var(--pilar3-color); }
+        
+        .pillar-item span {
+            font-size: 0.9rem;
+            color: #fff;
+            text-align: left;
+        }
+        
+        .price-box {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .price-box .from {
+            font-size: 0.8rem;
+            color: var(--text-body);
+        }
+        
+        .price-box .amount {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+        
+        .price-box .period {
+            font-size: 0.9rem;
+            color: var(--text-body);
+        }
+        
+        .family-note {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        /* ======== SLIDE 10 - CTA ======== */
+        .slide-10 {
+            background: linear-gradient(165deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%);
+        }
+        
+        .slide-10::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 60%);
+        }
+        
+        .slide-10 .content {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .cta-title {
+            font-family: 'Merriweather', serif;
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, #ffffff 0%, #e6fff8 100%);
+            color: #0b5f55;
+            padding: 16px 40px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+            margin-bottom: 20px;
+        }
+        
+        .cta-arrow {
+            font-size: 2rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 15px;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .cta-note {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* ======== SLIDE LABELS ======== */
+        .slide-label {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        /* ======== CAPTION SECTION ======== */
+        .caption-section {
+            max-width: 700px;
+            margin: 60px auto 0;
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        
+        .caption-section h3 {
+            font-family: 'Merriweather', serif;
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .caption-text {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 0.95rem;
+            color: var(--text-body);
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+        
+        .hashtags {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-soft);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: var(--primary-dark);
+        }
+        
+        /* Schedule info */
+        .schedule-info {
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            border-radius: 12px;
+            color: #fff;
+        }
+        
+        .schedule-info h4 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .schedule-info p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Post 02 - Carrossel: O que é a CN Vidas?</h1>
+        <p class="subtitle">Campanha Triunfo | Semana 1 - Quinta-feira (04/02) | Carrossel Educativo 3 Pilares</p>
+        
+        <div class="slides-container">
+            <!-- SLIDE 1 - CAPA -->
+            <div class="slide slide-1">
+                <span class="slide-label">1/10</span>
+                <div class="content">
+                    <img src="../public/logo_cn_vidas_transparent.png" alt="CN Vidas" class="logo" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display:none; font-family: 'Merriweather', serif; font-size: 2.5rem; font-weight: 900; color: #fff; margin-bottom: 20px;">CN Vidas</div>
+                    <h2>O que é a<br>CN Vidas?</h2>
+                    <div class="parceria">🏥 Parceria Hospital Santa Rita</div>
+                </div>
+            </div>
+            
+            <!-- SLIDE 2 - PILAR 1 TELEMEDICINA -->
+            <div class="slide slide-2">
+                <span class="slide-label">2/10</span>
+                <div class="pilar-content">
+                    <div class="pilar-badge">
+                        <span class="number">1</span>
+                        PILAR 1
+                    </div>
+                    <div class="pilar-icon">📱</div>
+                    <h3 class="pilar-title">Médico 24 horas<br>no seu celular</h3>
+                    <ul class="feature-list">
+                        <li><span class="check">✓</span> Consultas de emergência</li>
+                        <li><span class="check">✓</span> Especialistas disponíveis</li>
+                        <li><span class="check">✓</span> Sem sair de casa</li>
+                        <li><span class="check">✓</span> Atendimento imediato</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- SLIDE 3 - TELEMEDICINA DETALHES -->
+            <div class="slide slide-3">
+                <span class="slide-label">3/10</span>
+                <div class="pilar-content">
+                    <div class="detail-scenario">
+                        <div class="time">3h da manhã</div>
+                        <div class="situation">Seu filho acordou com febre.</div>
+                    </div>
+                    <div class="detail-solution">
+                        <h4>Com CN Vidas:</h4>
+                        <p>Em 5 minutos você está<br>falando com um<br><strong>médico de verdade</strong></p>
+                    </div>
+                    <div style="margin-top: auto; text-align: center;">
+                        <span style="font-size: 0.85rem; color: rgba(255,255,255,0.8);">Sem fila. Sem desespero. Sem sair de casa.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SLIDE 4 - PILAR 2 DESCONTOS -->
+            <div class="slide slide-4">
+                <span class="slide-label">4/10</span>
+                <div class="pilar-content">
+                    <div class="pilar-badge">
+                        <span class="number">2</span>
+                        PILAR 2
+                    </div>
+                    <div class="discount-highlight">
+                        <div class="percentage">70%</div>
+                        <div class="label">de desconto em saúde</div>
+                    </div>
+                    <ul class="feature-list">
+                        <li><span class="check">✓</span> Consultas presenciais</li>
+                        <li><span class="check">✓</span> Exames laboratoriais</li>
+                        <li><span class="check">✓</span> Procedimentos</li>
+                        <li><span class="check">✓</span> Farmácias parceiras</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- SLIDE 5 - DESCONTOS DETALHES -->
+            <div class="slide slide-5">
+                <span class="slide-label">5/10</span>
+                <div class="pilar-content">
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.8); margin-bottom: 12px;">💰 Economia real:</div>
+                    
+                    <div class="price-comparison">
+                        <div class="item-name">Consulta particular</div>
+                        <div class="prices">
+                            <span class="old-price">R$ 150</span>
+                            <span class="arrow">→</span>
+                            <span class="new-price">R$ 45</span>
+                        </div>
+                    </div>
+                    
+                    <div class="price-comparison">
+                        <div class="item-name">Hemograma completo</div>
+                        <div class="prices">
+                            <span class="old-price">R$ 80</span>
+                            <span class="arrow">→</span>
+                            <span class="new-price">R$ 24</span>
+                        </div>
+                    </div>
+                    
+                    <div class="price-comparison">
+                        <div class="item-name">Ultrassom</div>
+                        <div class="prices">
+                            <span class="old-price">R$ 200</span>
+                            <span class="arrow">→</span>
+                            <span class="new-price">R$ 60</span>
+                        </div>
+                    </div>
+                    
+                    <div class="savings-box">
+                        <div class="amount">R$ 301 economizados</div>
+                        <div class="label">só nesse exemplo!</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SLIDE 6 - PILAR 3 SEGURO -->
+            <div class="slide slide-6">
+                <span class="slide-label">6/10</span>
+                <div class="pilar-content">
+                    <div class="pilar-badge">
+                        <span class="number">3</span>
+                        PILAR 3
+                    </div>
+                    <div class="insurance-amount">
+                        <span class="currency">R$</span>
+                        <span class="value">500</span>
+                        <div class="label">de seguro internação</div>
+                    </div>
+                    <ul class="feature-list">
+                        <li><span class="check">✓</span> Proteção para sua família</li>
+                        <li><span class="check">✓</span> Sem burocracia</li>
+                        <li><span class="check">✓</span> Qualquer hospital</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- SLIDE 7 - SEGURO DETALHES -->
+            <div class="slide slide-7">
+                <span class="slide-label">7/10</span>
+                <div class="pilar-content">
+                    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.85); margin-bottom: 12px;">🏥 Se precisar internar:</div>
+                    
+                    <div class="comparison-grid">
+                        <div class="comparison-col without">
+                            <h4>❌ Sem CN Vidas</h4>
+                            <ul>
+                                <li>😰 Pedir empréstimo</li>
+                                <li>😰 Fazer vaquinha</li>
+                                <li>😰 Passar sufoco</li>
+                            </ul>
+                        </div>
+                        <div class="comparison-col with">
+                            <h4>✅ Com CN Vidas</h4>
+                            <ul>
+                                <li>💪 R$500 garantidos</li>
+                                <li>💪 Sem burocracia</li>
+                                <li>💪 Dignidade</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: auto;">
+                        <span style="font-size: 0.9rem; color: rgba(255,255,255,0.9); font-weight: 600;">Proteção de verdade quando você mais precisa</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SLIDE 8 - PARCERIA -->
+            <div class="slide slide-8">
+                <span class="slide-label">8/10</span>
+                <div class="content">
+                    <div class="partnership-badge">🤝 Parceria Oficial</div>
+                    <h3>Em Triunfo, a CN Vidas<br>é parceira do</h3>
+                    <img src="../public/assets/triunfo-logo-white.png" alt="Hospital Santa Rita" class="hospital-logo"
+                         onerror="this.style.display='none';">
+                    <div class="hospital-name">Hospital de Caridade<br>Santa Rita</div>
+                    <div class="hospital-location">📍 Triunfo/RS</div>
+                </div>
+            </div>
+            
+            <!-- SLIDE 9 - PREÇO -->
+            <div class="slide slide-9">
+                <span class="slide-label">9/10</span>
+                <div class="content">
+                    <div class="pillars-summary">
+                        <div class="pillar-item p1">
+                            <div class="icon">📱</div>
+                            <span>Médico 24h no celular</span>
+                        </div>
+                        <div class="pillar-item p2">
+                            <div class="icon">💰</div>
+                            <span>Até 70% de desconto</span>
+                        </div>
+                        <div class="pillar-item p3">
+                            <div class="icon">🛡️</div>
+                            <span>Seguro de R$500</span>
+                        </div>
+                    </div>
+                    
+                    <div class="price-box">
+                        <div class="from">Tudo isso por apenas</div>
+                        <div class="amount">R$ 89,90</div>
+                        <div class="period">/mês</div>
+                    </div>
+                    
+                    <div class="family-note">👨‍👩‍👧‍👦 Plano familiar: R$ 149,90/mês</div>
+                </div>
+            </div>
+            
+            <!-- SLIDE 10 - CTA -->
+            <div class="slide slide-10">
+                <span class="slide-label">10/10</span>
+                <div class="content">
+                    <h3 class="cta-title">Pronto para cuidar<br>da sua família?</h3>
+                    <a href="#" class="cta-button">Quero conhecer!</a>
+                    <div class="cta-arrow">☝️</div>
+                    <div class="cta-note">Link na bio para saber mais</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CAPTION SECTION -->
+        <div class="caption-section">
+            <h3>📝 Legenda do Post</h3>
+            <div class="caption-text">Você sabe o que é a CN Vidas? 🤔
+
+Chegou em Triunfo a solução completa para a saúde da sua família! 
+
+São 3 pilares que vão mudar sua vida:
+
+📱 PILAR 1: Médico 24 horas no celular
+Seu filho passou mal às 3h da manhã? Em 5 minutos você está falando com um médico de verdade. Sem fila, sem desespero.
+
+💰 PILAR 2: Até 70% de desconto em saúde
+Consultas, exames, procedimentos, farmácias... Tudo com desconto aqui mesmo em Triunfo.
+
+🛡️ PILAR 3: Seguro internação de R$500
+Se precisar internar, tem proteção garantida. Sem depender de vaquinha ou empréstimo.
+
+Tudo isso por apenas R$ 89,90/mês!
+Plano familiar: R$ 149,90/mês
+
+🏥 Parceria oficial com o Hospital de Caridade Santa Rita
+
+➡️ Link na bio para conhecer</div>
+            
+            <div class="hashtags">
+                #CNVidas #Triunfo #TriunfoRS #HospitalSantaRita #Telemedicina #SaúdeDaFamília #Médico24Horas #DescontoEmSaúde #SeguroInternação #Saúde #CuidadoDaFamília #MédicoOnline #ConsultaOnline #SaúdeDigital
+            </div>
+        </div>
+        
+        <div class="schedule-info">
+            <h4>📅 Informações de Publicação</h4>
+            <p><strong>Data:</strong> Quinta-feira, 04 de Fevereiro de 2026</p>
+            <p><strong>Tipo:</strong> Carrossel educativo (10 slides)</p>
+            <p><strong>Objetivo:</strong> Explicar os 3 pilares da CN Vidas de forma clara e visual</p>
+            <p><strong>Referência:</strong> Template 1 - Carrossel Educativo (PLANO_MARKETING_TRIUNFO_FEV2026.md)</p>
+        </div>
+    </div>
+</body>
+</html>
