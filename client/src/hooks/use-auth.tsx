@@ -33,65 +33,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Função para verificar a autenticação do usuário com timeout
   const checkAuth = async (): Promise<UserData | null> => {
-    // Criar uma promise com timeout para evitar loading infinito
-    // Timeout aumentado para 10s no iOS devido ao SecureStorage e Keychain
-    const timeoutMs = isNativeApp() ? 10000 : 5000;
+    console.log("🔍 [checkAuth] Iniciando verificação de autenticação...");
+    console.log("📱 [checkAuth] Plataforma nativa:", isNativeApp());
+
+    // VERIFICAÇÃO RÁPIDA PRIMEIRO: Se não há token no localStorage, retornar null imediatamente
+    // Isso evita esperar por timeout em casos onde claramente não há sessão
+    const localStorageToken = localStorage.getItem("authToken");
+    const hasCookies = document.cookie.includes('auth_token');
+
+    console.log("🔑 [checkAuth] Token no localStorage:", !!localStorageToken);
+    console.log("🍪 [checkAuth] Tem cookies:", hasCookies);
+
+    // No iOS, se não há token no localStorage nem cookies, retornar null imediatamente
+    // NÃO tentar acessar SecureStorage pois pode travar
+    if (isNativeApp() && !localStorageToken && !hasCookies) {
+      console.log("📱 [checkAuth] iOS sem token - retornando null imediatamente");
+      // Limpar qualquer cache residual
+      const hasCachedUser = queryClient.getQueryData(['/api/user']);
+      if (hasCachedUser) {
+        console.log("⚠️ [checkAuth] Limpando cache de usuário órfão");
+        queryClient.setQueryData(['/api/user'], null);
+      }
+      return null;
+    }
+
+    // Se não há token em lugar nenhum, retornar null
+    if (!localStorageToken && !hasCookies) {
+      console.log("❌ [checkAuth] Sem token em localStorage ou cookies");
+      return null;
+    }
+
+    // Timeout reduzido para 5s no iOS para evitar loading muito longo
+    const timeoutMs = isNativeApp() ? 5000 : 5000;
     const timeoutPromise = new Promise<null>((resolve) => {
       setTimeout(() => {
-        console.log(`⏱️ Timeout na verificação de autenticação (${timeoutMs / 1000}s)`);
+        console.log(`⏱️ [checkAuth] Timeout após ${timeoutMs / 1000}s`);
         resolve(null);
       }, timeoutMs);
     });
 
     const authCheckPromise = async (): Promise<UserData | null> => {
       try {
-        console.log("🔍 Verificando autenticação do usuário...");
+        // Usar o token do localStorage (já verificamos que existe)
+        const authToken = localStorageToken;
 
-        // Verificar primeiro o localStorage (mais rápido, especialmente no iOS)
-        const localStorageToken = localStorage.getItem("authToken");
-        const hasCookies = document.cookie.includes('auth_token');
-
-        // No iOS, verificar se há dados de sessão válidos
-        if (isNativeApp()) {
-          // Se não há token no localStorage e não há cookies, verificar cache
-          if (!localStorageToken && !hasCookies) {
-            const hasCachedUser = queryClient.getQueryData(['/api/user']);
-            if (hasCachedUser) {
-              console.log("⚠️ Detectado cache de usuário sem token no iOS, limpando...");
-              queryClient.setQueryData(['/api/user'], null);
-            }
-            console.log("❌ Nenhum token encontrado no iOS (verificação rápida)");
-            return null;
-          }
-        }
-
-        // Verificar cookies disponíveis
-        console.log("🍪 Cookies disponíveis:", document.cookie);
-
-        // Usar o token do localStorage primeiro (mais rápido)
-        let authToken = localStorageToken;
-
-        // Se não há token no localStorage e estamos no iOS, tentar SecureStorage
-        if (!authToken && isNativeApp()) {
-          try {
-            const authTokenResult = await secureStorage.get<string>('auth_token');
-            if (authTokenResult.success && authTokenResult.data) {
-              authToken = authTokenResult.data;
-              // Sincronizar com localStorage para acesso mais rápido no futuro
-              localStorage.setItem("authToken", authToken);
-            }
-          } catch (secureStorageError) {
-            console.warn("Erro ao acessar SecureStorage:", secureStorageError);
-          }
-        }
-
-        // Se não há token, não há sessão ativa
-        if (!authToken && !hasCookies) {
-          console.log("❌ Nenhum token de autenticação encontrado");
-          return null;
-        }
-
-        // Criar headers com token de autenticação se disponível
+        // Criar headers com token de autenticação
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
           "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -102,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (authToken) {
           headers["Authorization"] = `Bearer ${authToken}`;
           headers["X-Auth-Token"] = authToken;
-          console.log("🔑 Usando token de autenticação");
+          console.log("🔑 [checkAuth] Usando token de autenticação");
         }
 
         // Adicionar ID da sessão para facilitar debugging
@@ -111,6 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           headers["X-Session-ID"] = sessionID;
         }
 
+        console.log("🌐 [checkAuth] Fazendo requisição para /api/user...");
+
         // Fazer a requisição com todas as configurações necessárias
         const res = await httpRequest({
           url: '/api/user',
@@ -118,12 +106,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           headers,
         });
 
-        if (!res.ok) {
-          console.error("❌ Erro na verificação de autenticação:", res.status, res.statusText);
+        console.log("📥 [checkAuth] Resposta recebida:", res.status);
 
-          // Se recebeu 401, limpar dados locais no iOS
-          if (res.status === 401 && isNativeApp()) {
-            console.log("🧹 Limpando dados locais após 401 no iOS");
+        if (!res.ok) {
+          console.error("❌ [checkAuth] Erro na verificação:", res.status, res.statusText);
+
+          // Se recebeu 401, limpar dados locais
+          if (res.status === 401) {
+            console.log("🧹 [checkAuth] Limpando dados locais após 401");
             localStorage.removeItem("authToken");
             localStorage.removeItem("sessionID");
             queryClient.setQueryData(['/api/user'], null);
@@ -133,23 +123,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const userData = await res.json();
-        console.log("✅ Usuário autenticado:", userData.email);
-        console.log("🎯 Plano do usuário:", userData.subscriptionPlan);
-        console.log("🎯 Status da assinatura:", userData.subscriptionStatus);
+        console.log("✅ [checkAuth] Usuário autenticado:", userData.email);
+        console.log("🎯 [checkAuth] Plano:", userData.subscriptionPlan);
         return userData;
       } catch (error) {
-        console.error("❌ Erro ao verificar autenticação:", error);
+        console.error("❌ [checkAuth] Erro ao verificar autenticação:", error);
 
-        // Em caso de erro no iOS, limpar sessão se não há token válido
+        // Em caso de erro, não limpar token automaticamente
+        // pode ser problema de rede temporário
         if (isNativeApp()) {
-          console.error("📱 iOS Auth Error:", error);
-          const hasValidToken = localStorage.getItem("authToken");
-          if (!hasValidToken) {
-            console.log("🧹 Limpando sessão no iOS após erro sem token válido");
-            localStorage.removeItem("authToken");
-            localStorage.removeItem("sessionID");
-            queryClient.setQueryData(['/api/user'], null);
-          }
+          console.error("📱 [checkAuth] iOS Auth Error - mantendo token para retry");
         }
 
         return null;
@@ -164,13 +147,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: user, isLoading, error, refetch } = useQuery({
     queryKey: ["/api/user"],
     queryFn: checkAuth,
-    retry: isNativeApp() ? 3 : 1, // Mais retries no iOS para lidar com problemas de rede
-    // **CORREÇÃO: Configurações para garantir dados atualizados do usuário**
-    staleTime: 0, // Sempre considera os dados como 'stale' (desatualizados)
-    cacheTime: 0, // Sem cache - sempre busca dados frescos do servidor
-    refetchOnWindowFocus: (query) => !isNativeApp(), // Evitar loops no iOS
-    refetchOnMount: true, // Sempre recarregar ao montar o componente
-    refetchOnReconnect: (query) => !isNativeApp(), // Evitar loops de reconexão no iOS
+    retry: isNativeApp() ? 1 : 1, // Reduzido para 1 retry no iOS para evitar loading longo
+    retryDelay: 1000, // 1 segundo entre retries
+    // Configurações para garantir dados atualizados do usuário
+    staleTime: 0, // Sempre considera os dados como 'stale'
+    gcTime: 0, // Sem cache (gcTime é o novo nome de cacheTime no React Query v5)
+    refetchOnWindowFocus: false, // Desabilitado no iOS para evitar loops
+    refetchOnMount: 'always', // Sempre recarregar ao montar
+    refetchOnReconnect: false, // Desabilitado para evitar loops
     refetchInterval: false, // Não fazer polling automático
     networkMode: 'always', // Sempre tentar buscar do servidor
   });
