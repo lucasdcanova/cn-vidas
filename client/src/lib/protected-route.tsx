@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { RouteComponentProps } from "wouter";
 import { CNVidasLoader } from "@/components/ui/cnvidas-loader";
+import { isNativeApp } from "@/utils/platform";
 
 type ProtectedRouteProps = {
   path: string;
@@ -22,16 +23,25 @@ export function ProtectedRoute({
   const [checkingSubscription, setCheckingSubscription] = useState(false);
   const [showSlowLoading, setShowSlowLoading] = useState(false);
 
+  // Debug: Log do estado atual
+  useEffect(() => {
+    console.log(`🛡️ [ProtectedRoute:${path}] isLoading=${isLoading}, user=${user ? user.email : 'null'}`);
+  }, [isLoading, user, path]);
+
   useEffect(() => {
     let timer: any;
     if (isLoading || checkingSubscription) {
-      // Se carregar por mais de 8 segundos, mostrar opções
-      timer = setTimeout(() => setShowSlowLoading(true), 8000);
+      // No iOS, mostrar opções de recuperação mais cedo (3s) para evitar frustração
+      const timeoutMs = isNativeApp() ? 3000 : 8000;
+      timer = setTimeout(() => {
+        console.log(`⚠️ [ProtectedRoute:${path}] Slow loading detectado após ${timeoutMs / 1000}s`);
+        setShowSlowLoading(true);
+      }, timeoutMs);
     } else {
       setShowSlowLoading(false);
     }
     return () => clearTimeout(timer);
-  }, [isLoading, checkingSubscription]);
+  }, [isLoading, checkingSubscription, path]);
 
   // Verificar se o caminho atual já é first-subscription para evitar loop
   const isFirstSubscriptionPath = path === "/first-subscription";
@@ -42,6 +52,46 @@ export function ProtectedRoute({
     // Sempre permitir acesso - o dashboard gerenciará os redirecionamentos de assinatura
     setNeedsSubscription(false);
   }, [user]);
+
+  // CORREÇÃO iOS: Verificação síncrona de token ANTES de considerar isLoading
+  // Isso evita loading infinito quando claramente não há sessão
+  const hasLocalToken = !!localStorage.getItem("authToken");
+  const hasCookieToken = document.cookie.includes('auth_token');
+  const hasAnyToken = hasLocalToken || hasCookieToken;
+
+  // Log detalhado para debug
+  useEffect(() => {
+    console.log(`🛡️ [ProtectedRoute:${path}] Estado:`, {
+      isLoading,
+      hasUser: !!user,
+      userEmail: user?.email || 'N/A',
+      hasLocalToken,
+      hasCookieToken,
+      isNative: isNativeApp(),
+    });
+  }, [isLoading, user, path, hasLocalToken, hasCookieToken]);
+
+  // Se NÃO há nenhum token e NÃO há usuário, redirecionar imediatamente para /auth
+  // Isso evita o loading infinito no iOS quando não há sessão
+  if (!hasAnyToken && !user && !isLoading) {
+    console.log(`🚫 [ProtectedRoute:${path}] Sem token e sem usuário - redirecionando para /auth`);
+    return (
+      <Route path={path}>
+        <Redirect to="/auth" />
+      </Route>
+    );
+  }
+
+  // No iOS nativo, se não há token, redirecionar imediatamente sem esperar isLoading
+  // Isso é mais agressivo mas evita travamentos
+  if (isNativeApp() && !hasAnyToken) {
+    console.log(`📱 [ProtectedRoute:${path}] iOS sem token - redirecionando imediatamente para /auth`);
+    return (
+      <Route path={path}>
+        <Redirect to="/auth" />
+      </Route>
+    );
+  }
 
   if (isLoading || checkingSubscription) {
     if (showSlowLoading) {
@@ -64,11 +114,11 @@ export function ProtectedRoute({
                 onClick={() => {
                   localStorage.clear();
                   sessionStorage.clear();
-                  window.location.reload();
+                  window.location.href = '/auth';
                 }}
                 className="w-full py-3 px-4 bg-white text-red-600 border border-red-200 rounded-xl font-medium active:bg-red-50 transition-colors"
               >
-                Reiniciar App (Limpar Cache)
+                Ir para Login
               </button>
             </div>
           </div>
@@ -84,6 +134,7 @@ export function ProtectedRoute({
   }
 
   if (!user) {
+    console.log(`🔒 [ProtectedRoute:${path}] Sem usuário após loading - redirecionando para /auth`);
     return (
       <Route path={path}>
         <Redirect to="/auth" />
