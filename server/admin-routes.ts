@@ -6,6 +6,9 @@ import { AuthenticatedRequest } from './types';
 import fs from 'fs';
 import path from 'path';
 import { storage } from './storage';
+import { db } from './db';
+import { eq, desc, and } from 'drizzle-orm';
+import { userSubscriptions, subscriptionPlans, users } from '../shared/schema';
 
 const router = Router();
 
@@ -901,39 +904,112 @@ router.put('/subscription-plans/:id', async (req, res) => {
 router.patch('/users/:id/subscription', async (req, res) => {
   try {
     const { id } = req.params;
-    const { subscriptionPlan, subscriptionStatus } = req.body;
-    
-    
+    const { subscriptionPlan: planName, subscriptionStatus } = req.body;
+
+    const userId = parseInt(id);
+    const now = new Date();
+
     // Verificar se o usuário existe
-    const user = await storage.getUserById(parseInt(id));
+    const user = await storage.getUserById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     if (user.role !== 'patient') {
       return res.status(400).json({ error: 'Subscription can only be updated for patients' });
     }
-    
-    // Atualizar o plano
-    const updateData: any = {
-      subscriptionPlan: subscriptionPlan || 'free',
-      subscriptionStatus: subscriptionStatus || 'active'
-    };
-    
-    if (subscriptionPlan !== 'free') {
-      updateData.subscriptionStartDate = new Date();
-    } else {
-      updateData.subscriptionStatus = 'inactive';
-      updateData.subscriptionEndDate = new Date();
+
+    // Buscar o plano no banco de dados
+    const [subscriptionPlanRecord] = await db
+      .select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.name, planName || 'free'))
+      .limit(1);
+
+    if (!subscriptionPlanRecord) {
+      return res.status(400).json({ error: `Plano '${planName}' não encontrado` });
     }
-    
-    await storage.updateUser(parseInt(id), updateData);
-    
-    res.json({ 
+
+    // Calcular data de fim
+    const endDate = new Date(now);
+    if (planName === 'free') {
+      endDate.setMonth(endDate.getMonth() + 1); // 1 mês para plano gratuito
+    } else {
+      endDate.setFullYear(endDate.getFullYear() + 100); // 100 anos = praticamente ilimitado
+    }
+
+    // Verificar se já existe uma assinatura ativa para este usuário
+    const [existingSubscription] = await db
+      .select()
+      .from(userSubscriptions)
+      .where(eq(userSubscriptions.userId, userId))
+      .orderBy(desc(userSubscriptions.createdAt))
+      .limit(1);
+
+    const finalStatus = planName === 'free' ? 'inactive' : (subscriptionStatus || 'active');
+
+    if (existingSubscription) {
+      // Atualizar assinatura existente
+      console.log(`🔄 PATCH: Atualizando assinatura existente (ID: ${existingSubscription.id}) para plano ${planName}`);
+      await db
+        .update(userSubscriptions)
+        .set({
+          planId: subscriptionPlanRecord.id,
+          status: finalStatus === 'inactive' ? 'cancelled' : 'active',
+          startDate: now,
+          endDate: endDate,
+          price: 0,
+          paymentMethod: 'admin_update',
+          updatedAt: now,
+          cancelAtPeriodEnd: false,
+          scheduledPlanId: null,
+          scheduledPlanApplied: false,
+        })
+        .where(eq(userSubscriptions.id, existingSubscription.id));
+    } else {
+      // Criar nova assinatura
+      console.log(`➕ PATCH: Criando nova assinatura para usuário ${userId} com plano ${planName}`);
+      await db
+        .insert(userSubscriptions)
+        .values({
+          userId: userId,
+          planId: subscriptionPlanRecord.id,
+          status: finalStatus === 'inactive' ? 'cancelled' : 'active',
+          startDate: now,
+          endDate: endDate,
+          price: 0,
+          paymentMethod: 'admin_update',
+          createdAt: now,
+          updatedAt: now,
+          cancelAtPeriodEnd: false,
+          scheduledPlanApplied: false,
+        });
+    }
+
+    // Atualizar também a tabela users para manter sincronizado
+    const updateData: any = {
+      subscriptionPlan: planName || 'free',
+      subscriptionStatus: finalStatus,
+      subscriptionPlanId: subscriptionPlanRecord.id,
+      subscriptionStartDate: now,
+    };
+
+    if (planName === 'free') {
+      updateData.subscriptionEndDate = endDate;
+    } else {
+      updateData.subscriptionEndDate = endDate;
+    }
+
+    await storage.updateUser(userId, updateData);
+
+    console.log(`✅ PATCH: Plano ${planName} atualizado com sucesso para usuário ${userId} (${user.email})`);
+
+    res.json({
       message: 'Subscription updated successfully',
       userId: id,
-      subscriptionPlan,
-      subscriptionStatus: updateData.subscriptionStatus
+      subscriptionPlan: planName,
+      subscriptionStatus: finalStatus,
+      planId: subscriptionPlanRecord.id
     });
   } catch (error) {
     console.error('Error updating subscription:', error);
@@ -1324,48 +1400,119 @@ router.post('/users/:id/premium-access', async (req: AuthenticatedRequest, res: 
   try {
     const { id } = req.params;
     const { plan, reason } = req.body;
-    
+
     if (!plan || !reason) {
       return res.status(400).json({ error: 'Plan and reason are required' });
     }
-    
+
     const user = await storage.getUserById(parseInt(id));
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     if (user.role !== 'patient') {
       return res.status(400).json({ error: 'Premium access can only be granted to patients' });
     }
-    
-    // Atualizar o plano do usuário
-    await storage.updateUser(parseInt(id), {
+
+    const userId = parseInt(id);
+    const now = new Date();
+
+    // Buscar o plano no banco de dados
+    const [subscriptionPlan] = await db
+      .select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.name, plan))
+      .limit(1);
+
+    if (!subscriptionPlan) {
+      return res.status(400).json({ error: `Plano '${plan}' não encontrado` });
+    }
+
+    // Calcular data de fim (1 ano para plano gratuito concedido por admin)
+    const endDate = new Date(now);
+    endDate.setFullYear(endDate.getFullYear() + 100); // 100 anos = praticamente ilimitado
+
+    // Verificar se já existe uma assinatura ativa para este usuário
+    const [existingSubscription] = await db
+      .select()
+      .from(userSubscriptions)
+      .where(eq(userSubscriptions.userId, userId))
+      .orderBy(desc(userSubscriptions.createdAt))
+      .limit(1);
+
+    if (existingSubscription) {
+      // Atualizar assinatura existente
+      console.log(`🔄 Atualizando assinatura existente (ID: ${existingSubscription.id}) para plano ${plan}`);
+      await db
+        .update(userSubscriptions)
+        .set({
+          planId: subscriptionPlan.id,
+          status: 'active',
+          startDate: now,
+          endDate: endDate,
+          price: 0, // Gratuito
+          paymentMethod: 'admin_grant',
+          updatedAt: now,
+          cancelAtPeriodEnd: false,
+          scheduledPlanId: null,
+          scheduledPlanApplied: false,
+        })
+        .where(eq(userSubscriptions.id, existingSubscription.id));
+    } else {
+      // Criar nova assinatura
+      console.log(`➕ Criando nova assinatura para usuário ${userId} com plano ${plan}`);
+      await db
+        .insert(userSubscriptions)
+        .values({
+          userId: userId,
+          planId: subscriptionPlan.id,
+          status: 'active',
+          startDate: now,
+          endDate: endDate,
+          price: 0, // Gratuito
+          paymentMethod: 'admin_grant',
+          createdAt: now,
+          updatedAt: now,
+          cancelAtPeriodEnd: false,
+          scheduledPlanApplied: false,
+        });
+    }
+
+    // Atualizar também a tabela users para manter sincronizado
+    await storage.updateUser(userId, {
       subscriptionPlan: plan,
       subscriptionStatus: 'active',
-      subscriptionStartDate: new Date(),
-      subscriptionEndDate: null, // Gratuito por tempo indeterminado
+      subscriptionStartDate: now,
+      subscriptionEndDate: endDate,
+      subscriptionPlanId: subscriptionPlan.id,
     });
-    
+
+    console.log(`✅ Plano ${plan} concedido com sucesso ao usuário ${userId} (${user.email})`);
+
     // Registrar no audit log
     await storage.createAuditLog({
       userId: req.user?.id,
       action: 'grant_premium_access',
-      details: { 
-        targetUserId: parseInt(id), 
-        plan, 
+      details: {
+        targetUserId: userId,
+        plan,
+        planId: subscriptionPlan.id,
         reason,
-        grantedBy: req.user?.email 
+        grantedBy: req.user?.email,
+        previousPlan: user.subscriptionPlan,
+        method: existingSubscription ? 'update' : 'create'
       },
       ip: req.ip || 'unknown',
       userAgent: req.headers['user-agent'] || 'unknown',
-      timestamp: new Date()
+      timestamp: now
     });
-    
-    res.json({ 
-      message: 'Premium access granted successfully', 
+
+    res.json({
+      message: 'Premium access granted successfully',
       userId: id,
-      plan: plan 
+      plan: plan,
+      planId: subscriptionPlan.id
     });
   } catch (error) {
     console.error('Error granting premium access:', error);
