@@ -267,11 +267,21 @@ function Router() {
 }
 
 function AppContent() {
-  // const [initialCheckDone, setInitialCheckDone] = React.useState(false);
   const [, setLocation] = useLocation();
+  const [appReady, setAppReady] = React.useState(false);
 
   // Usar hook para atualizar a cor do tema dinamicamente
   useThemeColor();
+
+  // Marcar app como pronto após montagem inicial
+  React.useEffect(() => {
+    console.log("📱 [AppContent] Componente montado");
+    // Usar requestAnimationFrame para garantir que o DOM está pronto
+    requestAnimationFrame(() => {
+      setAppReady(true);
+      console.log("✅ [AppContent] App marcado como pronto");
+    });
+  }, []);
 
   // Verificação inicial rápida de autenticação no iOS
   React.useEffect(() => {
@@ -280,7 +290,7 @@ function AppContent() {
       const authToken = localStorage.getItem("authToken");
       const currentPath = window.location.pathname;
 
-      console.log("🔍 Verificação inicial iOS:", { authToken: !!authToken, currentPath });
+      console.log("🔍 [AppContent] Verificação inicial iOS:", { authToken: !!authToken, currentPath });
 
       // Se não há token e não estamos em uma página pública, redirecionar para /auth
       const publicPaths = ['/auth', '/auth/hsj', '/auth/hcc', '/verificar-email', '/redefinir-senha',
@@ -289,45 +299,59 @@ function AppContent() {
       const isPublicPath = publicPaths.some(path => currentPath.startsWith(path));
 
       if (!authToken && !isPublicPath) {
-        console.log("📱 iOS: Sem token, redirecionando para /auth");
+        console.log("📱 [AppContent] iOS: Sem token, redirecionando para /auth");
         setLocation('/auth');
       }
     }
-    // setInitialCheckDone(true);
   }, [setLocation]);
 
   // Inicializar push notifications e configurações iOS em apps nativos
+  // IMPORTANTE: Executar após o app estar pronto para não bloquear a renderização
   React.useEffect(() => {
-    if (isNativeApp()) {
+    if (!appReady || !isNativeApp()) return;
+
+    // Usar setTimeout para não bloquear a thread principal
+    const initTimer = setTimeout(async () => {
+      console.log("🔧 [AppContent] Iniciando configurações iOS em background...");
+
       // Helper para adicionar timeout às inicializações
       const withTimeout = <T,>(promise: Promise<T>, name: string, timeoutMs = 3000): Promise<T | void> => {
         const timeoutPromise = new Promise<void>((resolve) => {
           setTimeout(() => {
-            console.warn(`⏱️ Timeout ao inicializar ${name} (${timeoutMs}ms)`);
+            console.warn(`⏱️ [AppContent] Timeout ao inicializar ${name} (${timeoutMs}ms)`);
             resolve();
           }, timeoutMs);
         });
         return Promise.race([promise, timeoutPromise]);
       };
 
-      // Inicializar configurações do StatusBar com timeout
-      withTimeout(StatusBarConfig.initialize(), 'StatusBar').catch(error => {
-        console.error('Erro ao inicializar StatusBar:', error);
-      });
+      try {
+        // Inicializar configurações do StatusBar com timeout
+        await withTimeout(StatusBarConfig.initialize(), 'StatusBar');
+        console.log("✅ [AppContent] StatusBar inicializado");
+      } catch (error) {
+        console.error('❌ [AppContent] Erro ao inicializar StatusBar:', error);
+      }
 
-      // Manter a configuração antiga também para compatibilidade
-      withTimeout(configureIOSStatusBar(), 'configurações iOS').catch(error => {
-        console.error('Erro ao inicializar configurações iOS:', error);
-      });
+      try {
+        // Manter a configuração antiga também para compatibilidade
+        await withTimeout(configureIOSStatusBar(), 'configurações iOS');
+        console.log("✅ [AppContent] Configurações iOS inicializadas");
+      } catch (error) {
+        console.error('❌ [AppContent] Erro ao inicializar configurações iOS:', error);
+      }
 
-      // Inicializar push notifications com timeout maior (pode demorar mais)
-      withTimeout(PushNotificationService.initialize(), 'push notifications', 5000).catch(error => {
-        console.error('Erro ao inicializar push notifications:', error);
-      });
-    }
-  }, []);
+      try {
+        // Inicializar push notifications com timeout maior (pode demorar mais)
+        await withTimeout(PushNotificationService.initialize(), 'push notifications', 5000);
+        console.log("✅ [AppContent] Push notifications inicializadas");
+      } catch (error) {
+        console.error('❌ [AppContent] Erro ao inicializar push notifications:', error);
+      }
+    }, 500); // Delay de 500ms para permitir que a UI renderize primeiro
 
-  // Bloqueio de renderização removido
+    return () => clearTimeout(initTimer);
+  }, [appReady]);
 
   return (
     <>
