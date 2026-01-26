@@ -94,52 +94,41 @@ yarn lint
 
 ## Desenvolvimento Mobile
 
-### ⚠️ IMPORTANTE: Desenvolvimento SEM Xcode Local
+### iOS - Desenvolvimento Local + Xcode Cloud
 
-Este projeto usa **Xcode Cloud** para builds iOS. O Xcode **NÃO está instalado** localmente.
+O Xcode está instalado localmente. Use os comandos de sync antes de commitar.
 
-**NUNCA execute estes comandos localmente:**
-- ❌ `npx cap sync ios` (trava sem Xcode instalado)
-- ❌ `npx cap open ios` (requer Xcode)
-- ❌ `npx cap copy ios` (desnecessário)
-- ❌ `./sync-ios.sh` (requer Xcode)
-- ❌ `./push-and-sync.sh` (requer Xcode)
-- ❌ `pod install` (feito automaticamente pelo Xcode Cloud)
-
-### iOS - Workflow com Xcode Cloud
-
-**Fluxo simplificado:**
+**Fluxo de desenvolvimento iOS:**
 ```bash
 # 1. Faça suas mudanças no código
 
-# 2. (Opcional) Build local apenas para testar no navegador
+# 2. Build do projeto web
 npm run build
 
-# 3. Commit e push
+# 3. Sincronizar com iOS (OBRIGATÓRIO antes de commitar)
+npx cap sync ios
+
+# 4. Commit e push
 git add .
 git commit -m "sua mensagem"
 git push origin main
 
-# 4. O Xcode Cloud faz TUDO automaticamente:
-#    - Clona o repositório
-#    - Executa xcode-cloud-build.sh
-#    - Faz npm install
-#    - Faz npm run build
-#    - Faz npx cap sync ios
-#    - Instala pods (pod install)
-#    - Compila o app
-#    - Envia para TestFlight
+# 5. O Xcode Cloud compila e envia para TestFlight automaticamente
+```
+
+**Comandos iOS disponíveis:**
+```bash
+npx cap sync ios      # Sincroniza web assets e plugins com iOS
+npx cap copy ios      # Copia apenas web assets (sem plugins)
+npx cap open ios      # Abre projeto no Xcode
+pod install           # Instala dependências CocoaPods (rodar em ios/App/)
 ```
 
 **O que o Xcode Cloud faz automaticamente:**
 1. Detecta push para `main`
-2. Executa `xcode-cloud-build.sh`
-3. Instala dependências npm
-4. Faz build do projeto web
-5. Sincroniza Capacitor (`cap sync ios`)
-6. Instala CocoaPods
-7. Compila app iOS
-8. Publica no TestFlight
+2. Executa `ci_post_clone.sh` (build + cap sync + pod install)
+3. Compila app iOS
+4. Publica no TestFlight
 
 ### Android
 
@@ -203,15 +192,19 @@ O projeto tem workflows configurados para build automático:
 ### Comandos Úteis Mobile
 
 ```bash
-# Android apenas (iOS é feito pelo Xcode Cloud)
+# iOS
+npx cap sync ios      # Sincroniza web assets e plugins
+npx cap copy ios      # Copia apenas web assets
+npx cap open ios      # Abre no Xcode
+
+# Android
 npx cap sync android
 npx cap copy android
 npx cap open android  # Abre Android Studio
 
-# Adicionar plugins
+# Adicionar plugins (sincronizar ambas plataformas)
 npm install @capacitor/[plugin-name]
-npx cap sync android  # Apenas Android localmente
-# iOS será sincronizado automaticamente no próximo push
+npx cap sync ios && npx cap sync android
 ```
 
 ### Permissões Android Configuradas
@@ -235,13 +228,12 @@ O `AndroidManifest.xml` já inclui:
 
 **Para desenvolvimento mobile:**
 1. **Desenvolver e testar** no navegador (`npm run dev`)
-2. **(Opcional) Build local** apenas para validar (`npm run build`)
-3. **Commit e push** para GitHub
-4. **Build automático iOS** via Xcode Cloud → TestFlight
-5. **Build automático Android** via GitHub Actions → Firebase App Distribution
-6. **Testar** no TestFlight (iOS) ou Firebase (Android)
-
-**IMPORTANTE:** Nunca execute comandos `cap sync ios` ou `cap open ios` - eles travam sem Xcode local!
+2. **Build do projeto web** (`npm run build`)
+3. **Sincronizar com iOS** (`npx cap sync ios`) - OBRIGATÓRIO antes de commitar
+4. **Commit e push** para GitHub
+5. **Build automático iOS** via Xcode Cloud → TestFlight
+6. **Build automático Android** via GitHub Actions → Firebase App Distribution
+7. **Testar** no TestFlight (iOS) ou Firebase (Android)
 
 ## Notas de desenvolvimento
 
@@ -254,9 +246,9 @@ O `AndroidManifest.xml` já inclui:
 ## Memórias de Desenvolvimento
 
 ### Workflow Mobile
-- ❌ **NUNCA** executar `npx cap sync ios` localmente (trava sem Xcode instalado)
-- ✅ O Xcode Cloud sincroniza automaticamente após cada push
-- ✅ Apenas fazer commit e push - o resto é automático
+- ✅ Executar `npx cap sync ios` localmente antes de commitar (Xcode instalado)
+- ✅ Build web (`npm run build`) antes de sync
+- ✅ Xcode Cloud compila e publica no TestFlight automaticamente após push
 
 ### Certificados e Publicação
 - Lembre dos certificados antes de pedirmos publicação na App Store
@@ -277,10 +269,6 @@ O `AndroidManifest.xml` já inclui:
 - Git estava lento devido a arquivos duplicados commitados acidentalmente (resolvido em 25/01/2026)
 
 ## Problemas Conhecidos e Soluções
-
-### `npx cap sync ios` trava/demora muito
-**Causa:** Xcode não está instalado localmente (apenas Xcode Cloud)
-**Solução:** Não execute este comando! O Xcode Cloud faz o sync automaticamente após push.
 
 ### Git muito lento, operações demorando muito
 **Causa:** Arquivos grandes ou duplicados commitados acidentalmente
