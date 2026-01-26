@@ -273,6 +273,35 @@ function AppContent() {
   // Usar hook para atualizar a cor do tema dinamicamente
   useThemeColor();
 
+  // CORREÇÃO iOS: Verificação SÍNCRONA e IMEDIATA de token
+  // Executado antes de qualquer outra coisa para evitar loading infinito
+  React.useLayoutEffect(() => {
+    if (!isNativeApp()) return;
+
+    const authToken = localStorage.getItem("authToken");
+    const currentPath = window.location.pathname;
+
+    console.log("🚀 [AppContent] Verificação IMEDIATA iOS:", {
+      hasToken: !!authToken,
+      currentPath,
+      timestamp: new Date().toISOString()
+    });
+
+    // Lista de paths públicos que não precisam de autenticação
+    const publicPaths = ['/auth', '/verificar-email', '/redefinir-senha',
+      '/reenviar-verificacao', '/esqueci-senha', '/corporate-invite', '/campanha',
+      '/hospital-briefing'];
+    const isPublicPath = publicPaths.some(path => currentPath.startsWith(path));
+
+    if (!authToken && !isPublicPath) {
+      console.log("🔄 [AppContent] iOS: SEM TOKEN - Redirecionando AGORA para /auth via window.location");
+      // Usar window.location.href para garantir redirecionamento imediato
+      // antes mesmo do React Query ou router inicializar
+      window.location.href = '/auth';
+      return;
+    }
+  }, []); // Executar apenas uma vez na montagem
+
   // Marcar app como pronto após montagem inicial
   React.useEffect(() => {
     console.log("📱 [AppContent] Componente montado");
@@ -283,23 +312,21 @@ function AppContent() {
     });
   }, []);
 
-  // Verificação inicial rápida de autenticação no iOS
+  // Verificação adicional após montagem (backup para router)
   React.useEffect(() => {
     if (isNativeApp()) {
-      // Verificar rapidamente se há token
       const authToken = localStorage.getItem("authToken");
       const currentPath = window.location.pathname;
 
-      console.log("🔍 [AppContent] Verificação inicial iOS:", { authToken: !!authToken, currentPath });
+      console.log("🔍 [AppContent] Verificação secundária iOS:", { authToken: !!authToken, currentPath });
 
-      // Se não há token e não estamos em uma página pública, redirecionar para /auth
       const publicPaths = ['/auth', '/auth/hsj', '/auth/hcc', '/verificar-email', '/redefinir-senha',
         '/reenviar-verificacao', '/esqueci-senha', '/corporate-invite', '/campanha',
         '/hospital-briefing'];
       const isPublicPath = publicPaths.some(path => currentPath.startsWith(path));
 
       if (!authToken && !isPublicPath) {
-        console.log("📱 [AppContent] iOS: Sem token, redirecionando para /auth");
+        console.log("📱 [AppContent] iOS: Sem token (backup), usando setLocation para /auth");
         setLocation('/auth');
       }
     }
