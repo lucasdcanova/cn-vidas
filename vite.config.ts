@@ -26,9 +26,14 @@ export default defineConfig({
     // Otimizações de build
     rollupOptions: {
       output: {
+        // Nomes fixos para evitar erros de cache no iOS (404 em arquivos antigos)
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]',
         manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-toast', '@radix-ui/react-tabs'],
+          'vendor': ['react', 'react-dom', 'react-router-dom', 'wouter', '@tanstack/react-query'],
+          'ui': ['@radix-ui/react-dialog', '@radix-ui/react-toast', '@radix-ui/react-tabs', 'lucide-react'],
+          'native': ['@capacitor/core', '@capacitor/app', '@capacitor/preferences', '@capacitor/status-bar']
         }
       }
     },
