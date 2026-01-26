@@ -150,14 +150,20 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
         url: fullUrl,
         method,
         headers: Object.keys(authHeaders),
-        dataKeys: requestData ? Object.keys(requestData) : 'sem data',
-        dataValues: requestData ? JSON.stringify(requestData).substring(0, 200) : 'sem data'
+        dataKeys: requestData ? Object.keys(requestData) : 'sem data'
       });
-      
+
       // Adicionar timeout para evitar requisições travadas no iOS
-      const timeoutMs = 15000; // 15 segundos
+      // Timeout menor para requisições de autenticação (/api/user)
+      const isAuthRequest = url.includes('/api/user') || url.includes('/api/login');
+      const timeoutMs = isAuthRequest ? 8000 : 15000; // 8s para auth, 15s para outras
+      console.log(`[Native HTTP] Timeout configurado: ${timeoutMs}ms (auth: ${isAuthRequest})`);
+
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error(`Timeout após ${timeoutMs / 1000}s`)), timeoutMs);
+        setTimeout(() => {
+          console.error(`[Native HTTP] ⏱️ Timeout após ${timeoutMs / 1000}s para ${url}`);
+          reject(new Error(`Timeout após ${timeoutMs / 1000}s`));
+        }, timeoutMs);
       });
 
       const response = await Promise.race([
