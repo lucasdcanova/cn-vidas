@@ -10,6 +10,33 @@ REPO_ROOT=$(pwd)
 echo "📍 Diretório raiz do repositório: $REPO_ROOT"
 
 # =====================================================
+# PARTE 0: Instalar Node.js via Homebrew
+# =====================================================
+
+echo "🍺 Instalando Node.js via Homebrew..."
+
+# Verificar se Homebrew está instalado
+if ! command -v brew &> /dev/null; then
+    echo "📦 Instalando Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Adicionar Homebrew ao PATH (para Apple Silicon e Intel)
+    if [ -f "/opt/homebrew/bin/brew" ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -f "/usr/local/bin/brew" ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+fi
+
+# Instalar Node.js
+echo "📦 Instalando Node.js..."
+brew install node
+
+# Verificar instalação
+echo "✅ Node.js instalado: $(node --version)"
+echo "✅ npm instalado: $(npm --version)"
+
+# =====================================================
 # PARTE 1: Build do Web App e Capacitor Sync
 # =====================================================
 
