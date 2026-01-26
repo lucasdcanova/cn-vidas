@@ -34,15 +34,29 @@ class SecureStorageService {
     }
   }
 
-  // Recuperar dados sensíveis
+  // Recuperar dados sensíveis com timeout para evitar travamentos no iOS
   async get<T = any>(key: string): Promise<SecureStorageResult<T>> {
     try {
       const prefixedKey = this.prefix + key;
       let value: string | null = null;
 
       if (this.isNative) {
-        const result = await SecureStorage.get({ key: prefixedKey });
-        value = result.value;
+        // Adicionar timeout de 2 segundos para evitar travamentos no iOS
+        const timeoutPromise = new Promise<{ value: string | null }>((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout ao acessar SecureStorage')), 2000);
+        });
+        
+        try {
+          const result = await Promise.race([
+            SecureStorage.get({ key: prefixedKey }),
+            timeoutPromise
+          ]);
+          value = result.value;
+        } catch (timeoutError: any) {
+          console.warn('SecureStorage timeout, usando localStorage como fallback:', timeoutError.message);
+          // Fallback para localStorage se SecureStorage demorar
+          value = localStorage.getItem(prefixedKey) || localStorage.getItem(key);
+        }
       } else {
         // Fallback para localStorage em ambiente web
         value = localStorage.getItem(prefixedKey);

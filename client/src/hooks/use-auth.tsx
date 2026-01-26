@@ -45,16 +45,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         console.log("🔍 Verificando autenticação do usuário...");
 
-        // No iOS, verificar se não há dados residuais de sessão
-        if (isNativeApp()) {
-          // Se não há token mas há dados de usuário em cache, limpar
-          const hasToken = localStorage.getItem("authToken") ||
-            (await secureStorage.get<string>('auth_token')).success;
-          const hasCachedUser = queryClient.getQueryData(['/api/user']);
+        // Verificar primeiro o localStorage (mais rápido, especialmente no iOS)
+        const localStorageToken = localStorage.getItem("authToken");
+        const hasCookies = document.cookie.includes('auth_token');
 
-          if (!hasToken && hasCachedUser) {
-            console.log("⚠️ Detectado cache de usuário sem token no iOS, limpando...");
-            queryClient.setQueryData(['/api/user'], null);
+        // No iOS, verificar se há dados de sessão válidos
+        if (isNativeApp()) {
+          // Se não há token no localStorage e não há cookies, verificar cache
+          if (!localStorageToken && !hasCookies) {
+            const hasCachedUser = queryClient.getQueryData(['/api/user']);
+            if (hasCachedUser) {
+              console.log("⚠️ Detectado cache de usuário sem token no iOS, limpando...");
+              queryClient.setQueryData(['/api/user'], null);
+            }
+            console.log("❌ Nenhum token encontrado no iOS (verificação rápida)");
             return null;
           }
         }
@@ -62,12 +66,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Verificar cookies disponíveis
         console.log("🍪 Cookies disponíveis:", document.cookie);
 
-        // Obter token de autenticação do armazenamento seguro se disponível
-        const authTokenResult = await secureStorage.get<string>('auth_token');
-        const authToken = authTokenResult.success ? authTokenResult.data : localStorage.getItem("authToken");
+        // Usar o token do localStorage primeiro (mais rápido)
+        let authToken = localStorageToken;
 
-        // Se não há token, não há sessão ativa - redirecionar para /auth imediatamente
-        if (!authToken && !document.cookie.includes('auth_token')) {
+        // Se não há token no localStorage e estamos no iOS, tentar SecureStorage
+        if (!authToken && isNativeApp()) {
+          try {
+            const authTokenResult = await secureStorage.get<string>('auth_token');
+            if (authTokenResult.success && authTokenResult.data) {
+              authToken = authTokenResult.data;
+              // Sincronizar com localStorage para acesso mais rápido no futuro
+              localStorage.setItem("authToken", authToken);
+            }
+          } catch (secureStorageError) {
+            console.warn("Erro ao acessar SecureStorage:", secureStorageError);
+          }
+        }
+
+        // Se não há token, não há sessão ativa
+        if (!authToken && !hasCookies) {
           console.log("❌ Nenhum token de autenticação encontrado");
           return null;
         }
@@ -105,7 +122,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Se recebeu 401, limpar dados locais no iOS
           if (res.status === 401 && isNativeApp()) {
             console.log("🧹 Limpando dados locais após 401 no iOS");
-            await sessionManager.clearSession();
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("sessionID");
+            queryClient.setQueryData(['/api/user'], null);
           }
 
           return null;
@@ -122,11 +141,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Em caso de erro no iOS, limpar sessão se não há token válido
         if (isNativeApp()) {
           console.error("📱 iOS Auth Error:", error);
-          const hasValidToken = localStorage.getItem("authToken") ||
-            (await secureStorage.get<string>('auth_token')).success;
+          const hasValidToken = localStorage.getItem("authToken");
           if (!hasValidToken) {
             console.log("🧹 Limpando sessão no iOS após erro sem token válido");
-            await sessionManager.clearSession();
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("sessionID");
+            queryClient.setQueryData(['/api/user'], null);
           }
         }
 
