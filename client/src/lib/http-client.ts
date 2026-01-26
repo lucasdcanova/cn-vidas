@@ -154,12 +154,21 @@ async function httpRequestInternal(options: HttpOptions): Promise<Response> {
         dataValues: requestData ? JSON.stringify(requestData).substring(0, 200) : 'sem data'
       });
       
-      const response = await Http.request({
-        url: fullUrl,
-        method,
-        headers: authHeaders,
-        data: requestData,
+      // Adicionar timeout para evitar requisições travadas no iOS
+      const timeoutMs = 15000; // 15 segundos
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`Timeout após ${timeoutMs / 1000}s`)), timeoutMs);
       });
+
+      const response = await Promise.race([
+        Http.request({
+          url: fullUrl,
+          method,
+          headers: authHeaders,
+          data: requestData,
+        }),
+        timeoutPromise
+      ]);
       
       console.log(`[Native HTTP] Response status: ${response.status}`);
       
