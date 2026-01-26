@@ -41,9 +41,10 @@ class SecureStorageService {
       let value: string | null = null;
 
       if (this.isNative) {
-        // Adicionar timeout de 2 segundos para evitar travamentos no iOS
+        // Adicionar timeout de 5 segundos para evitar travamentos no iOS
+        // (aumentado de 2s para 5s pois o Keychain pode ser lento no primeiro acesso)
         const timeoutPromise = new Promise<{ value: string | null }>((_, reject) => {
-          setTimeout(() => reject(new Error('Timeout ao acessar SecureStorage')), 2000);
+          setTimeout(() => reject(new Error('Timeout ao acessar SecureStorage')), 5000);
         });
         
         try {

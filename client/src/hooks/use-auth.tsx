@@ -34,11 +34,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Função para verificar a autenticação do usuário com timeout
   const checkAuth = async (): Promise<UserData | null> => {
     // Criar uma promise com timeout para evitar loading infinito
+    // Timeout aumentado para 10s no iOS devido ao SecureStorage e Keychain
+    const timeoutMs = isNativeApp() ? 10000 : 5000;
     const timeoutPromise = new Promise<null>((resolve) => {
       setTimeout(() => {
-        console.log("⏱️ Timeout na verificação de autenticação (5s)");
+        console.log(`⏱️ Timeout na verificação de autenticação (${timeoutMs / 1000}s)`);
         resolve(null);
-      }, 5000); // 5 segundos de timeout
+      }, timeoutMs);
     });
 
     const authCheckPromise = async (): Promise<UserData | null> => {
@@ -162,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: user, isLoading, error, refetch } = useQuery({
     queryKey: ["/api/user"],
     queryFn: checkAuth,
-    retry: 1,
+    retry: isNativeApp() ? 3 : 1, // Mais retries no iOS para lidar com problemas de rede
     // **CORREÇÃO: Configurações para garantir dados atualizados do usuário**
     staleTime: 0, // Sempre considera os dados como 'stale' (desatualizados)
     cacheTime: 0, // Sem cache - sempre busca dados frescos do servidor

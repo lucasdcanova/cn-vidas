@@ -299,18 +299,29 @@ function AppContent() {
   // Inicializar push notifications e configurações iOS em apps nativos
   React.useEffect(() => {
     if (isNativeApp()) {
-      // Inicializar configurações do StatusBar com a nova classe
-      StatusBarConfig.initialize().catch(error => {
+      // Helper para adicionar timeout às inicializações
+      const withTimeout = <T,>(promise: Promise<T>, name: string, timeoutMs = 3000): Promise<T | void> => {
+        const timeoutPromise = new Promise<void>((resolve) => {
+          setTimeout(() => {
+            console.warn(`⏱️ Timeout ao inicializar ${name} (${timeoutMs}ms)`);
+            resolve();
+          }, timeoutMs);
+        });
+        return Promise.race([promise, timeoutPromise]);
+      };
+
+      // Inicializar configurações do StatusBar com timeout
+      withTimeout(StatusBarConfig.initialize(), 'StatusBar').catch(error => {
         console.error('Erro ao inicializar StatusBar:', error);
       });
 
       // Manter a configuração antiga também para compatibilidade
-      configureIOSStatusBar().catch(error => {
+      withTimeout(configureIOSStatusBar(), 'configurações iOS').catch(error => {
         console.error('Erro ao inicializar configurações iOS:', error);
       });
 
-      // Inicializar push notifications
-      PushNotificationService.initialize().catch(error => {
+      // Inicializar push notifications com timeout maior (pode demorar mais)
+      withTimeout(PushNotificationService.initialize(), 'push notifications', 5000).catch(error => {
         console.error('Erro ao inicializar push notifications:', error);
       });
     }
@@ -321,6 +332,7 @@ function AppContent() {
   return (
     <>
       <IOSSessionGuard />
+      <IOSAppLifecycle />
       <Router />
     </>
   );
