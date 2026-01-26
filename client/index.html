@@ -1,137 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#eff6ff" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="CN Vidas" />
-    <meta name="application-name" content="CN Vidas" />
-    <meta name="msapplication-TileColor" content="#eff6ff" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    
-    <!-- Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    
-    <!-- iOS Icons -->
-    <link rel="apple-touch-icon" href="/icon-180x180.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/icon-152x152.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/icon-180x180.png" />
-    <link rel="apple-touch-icon" sizes="167x167" href="/icon-167x167.png" />
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    
-    <!-- Splash screens iOS -->
-    <link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
-    
-    <title>CN Vidas - Telemedicina</title>
-    <meta name="description" content="Sistema completo de telemedicina com consultas online, agendamentos e prontuário eletrônico" />
-    
-    <!-- Preconnect hints para recursos críticos -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://js.stripe.com">
-    <link rel="dns-prefetch" href="https://download.agora.io">
-    <link rel="dns-prefetch" href="https://www.clarity.ms">
-    <link rel="dns-prefetch" href="https://connect.facebook.net">
-    
-    <!-- Meta Pixel Code -->
-    <script>
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#eff6ff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="CN Vidas" />
+  <meta name="application-name" content="CN Vidas" />
+  <meta name="msapplication-TileColor" content="#eff6ff" />
+  <meta name="msapplication-tap-highlight" content="no" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- iOS Icons -->
+  <link rel="apple-touch-icon" href="/icon-180x180.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="/icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180x180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="/icon-167x167.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+
+  <!-- Splash screens iOS -->
+  <link rel="apple-touch-startup-image" href="/splash-640x1136.png"
+    media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
+  <link rel="apple-touch-startup-image" href="/splash-750x1334.png"
+    media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+  <link rel="apple-touch-startup-image" href="/splash-1242x2208.png"
+    media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
+  <link rel="apple-touch-startup-image" href="/splash-1125x2436.png"
+    media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+
+  <title>CN Vidas - Telemedicina</title>
+  <meta name="description"
+    content="Sistema completo de telemedicina com consultas online, agendamentos e prontuário eletrônico" />
+
+  <!-- Preconnect hints para recursos críticos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://js.stripe.com">
+  <link rel="dns-prefetch" href="https://download.agora.io">
+  <link rel="dns-prefetch" href="https://www.clarity.ms">
+  <link rel="dns-prefetch" href="https://connect.facebook.net">
+
+  <!-- Meta Pixel Code -->
+  <script>
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () {
+        n.callMethod ?
+        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+      };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+      n.queue = []; t = b.createElement(e); t.async = !0;
+      t.src = v; s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s)
+    }(window, document, 'script',
       'https://connect.facebook.net/en_US/fbevents.js');
-      
-      // Inicializar o Pixel
-      fbq('init', '705945712421082');
-      fbq('track', 'PageView');
-    </script>
-    <!-- End Meta Pixel Code -->
-    
-    <!-- Preload das fontes críticas -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Material Icons com display swap para evitar FOIT -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet">
-    
-    <!-- CSS crítico inline para evitar FOUC -->
-    <style>
-      /* Reset e estilos críticos */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+
+    // Inicializar o Pixel
+    fbq('init', '705945712421082');
+    fbq('track', 'PageView');
+  </script>
+  <!-- End Meta Pixel Code -->
+
+  <!-- Preload das fontes críticas -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Material Icons com display swap para evitar FOIT -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet">
+
+  <!-- CSS crítico inline para evitar FOUC -->
+  <style>
+    /* Reset e estilos críticos */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #eff6ff;
+      overflow-x: hidden;
+    }
+
+    /* Skeleton loading para evitar layout shift */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+    }
+
+    @keyframes skeleton-loading {
+      0% {
+        background-position: 200% 0;
       }
-      
-      body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        background-color: #eff6ff;
-        overflow-x: hidden;
+
+      100% {
+        background-position: -200% 0;
       }
-      
-      /* Skeleton loading para evitar layout shift */
-      .skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: skeleton-loading 1.5s infinite;
+    }
+
+    /* Previne flash de conteúdo não estilizado */
+    #root:empty {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #root:empty::after {
+      content: '';
+      width: 80px;
+      height: 80px;
+      border: 3px solid #eff6ff;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
-      
-      @keyframes skeleton-loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
+    }
+  </style>
+
+  <!-- Agora.io será carregado via lazy loading apenas quando necessário -->
+
+  <!-- Error handler comentado temporariamente -->
+  <!-- <script src="/src/error-handler.js" type="module"></script> -->
+</head>
+
+<body>
+  <!-- Meta Pixel noscript fallback -->
+  <noscript>
+    <img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=705945712421082&ev=PageView&noscript=1" />
+  </noscript>
+
+  <!-- iOS Auth Check: Executado ANTES do React para evitar loading infinito -->
+  <script>
+    (function () {
+      try {
+        console.log('🔐 [HTML] Verificação de auth iniciando...');
+
+        // Detectar se é iOS nativo (Capacitor)
+        var isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        var isIOSUserAgent = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        var isNative = isCapacitor || (isIOSUserAgent && window.webkit && window.webkit.messageHandlers);
+
+        console.log('🔐 [HTML] isNative:', isNative, 'isCapacitor:', isCapacitor, 'isIOSUserAgent:', isIOSUserAgent);
+
+        // Se não é nativo, deixar o React lidar
+        if (!isNative) {
+          console.log('🔐 [HTML] Não é nativo, deixando React lidar');
+          return;
+        }
+
+        // Verificar token no localStorage
+        var authToken = localStorage.getItem('authToken');
+        var currentPath = window.location.pathname;
+
+        console.log('🔐 [HTML] Estado:', { hasToken: !!authToken, path: currentPath });
+
+        // Paths públicos que não precisam de autenticação
+        var publicPaths = ['/auth', '/verificar-email', '/redefinir-senha',
+          '/reenviar-verificacao', '/esqueci-senha', '/corporate-invite', '/campanha',
+          '/hospital-briefing'];
+
+        var isPublicPath = publicPaths.some(function (p) {
+          return currentPath.indexOf(p) === 0;
+        });
+
+        // Se NÃO tem token E NÃO está em path público, redirecionar IMEDIATAMENTE
+        if (!authToken && !isPublicPath) {
+          console.log('🔐 [HTML] SEM TOKEN! Redirecionando para /auth AGORA');
+          window.location.replace('/auth');
+          return;
+        }
+
+        console.log('🔐 [HTML] Tudo OK, deixando React carregar');
+      } catch (e) {
+        console.error('🔐 [HTML] Erro na verificação:', e);
       }
-      
-      /* Previne flash de conteúdo não estilizado */
-      #root:empty {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      #root:empty::after {
-        content: '';
-        width: 80px;
-        height: 80px;
-        border: 3px solid #eff6ff;
-        border-top-color: #3b82f6;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-      
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    </style>
-    
-    <!-- Agora.io será carregado via lazy loading apenas quando necessário -->
-    
-    <!-- Error handler comentado temporariamente -->
-    <!-- <script src="/src/error-handler.js" type="module"></script> -->
-  </head>
-  <body>
-    <!-- Meta Pixel noscript fallback -->
-    <noscript>
-      <img height="1" width="1" style="display:none"
-           src="https://www.facebook.com/tr?id=705945712421082&ev=PageView&noscript=1"/>
-    </noscript>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    })();
+  </script>
+
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
