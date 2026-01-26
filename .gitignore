@@ -96,8 +96,6 @@ public/uploads/*
 
 # iOS build and temporary files
 ios/App/dist/
-ios/App/App/public/assets/*.js
-ios/App/App/public/assets/*.css
 
 # macOS duplicate files (Finder creates these when you duplicate files)
 # Pattern: "filename 2.ext", "filename 3.ext", etc.
