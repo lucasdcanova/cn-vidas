@@ -10,9 +10,10 @@ interface AuthLayoutProps {
 export const AuthLayout = ({ children, activeTab = "login" }: AuthLayoutProps) => {
   const { isKeyboardVisible } = useIOSKeyboard();
 
-  // Configurar status bar do iOS
+  // Configurar status bar do iOS para combinar com o gradiente teal
   useEffect(() => {
-    configureIOSStatusBar('#0b5f55');
+    // Usa a cor do topo do gradiente (#18c2b3) e texto claro (darkText = false)
+    configureIOSStatusBar('#18c2b3', false);
   }, []);
 
   // Determinar o estado do layout baseado em activeTab e isKeyboardVisible
