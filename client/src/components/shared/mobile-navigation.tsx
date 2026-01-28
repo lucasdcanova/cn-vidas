@@ -26,8 +26,9 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({ userRole = "
     return location === path;
   };
 
-  const activeClass = "text-primary"; 
-  const inactiveClass = "text-gray-500";
+  // Classes adaptadas para fundo teal
+  const activeClass = "text-white font-semibold";
+  const inactiveClass = "text-white/70";
 
   // Classes condicionais para iOS (iPhone e iPad)
   const navigationClasses = isIOSDevice

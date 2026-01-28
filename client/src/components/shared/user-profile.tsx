@@ -10,9 +10,11 @@ import { useLocation } from "wouter";
 interface UserProfileProps {
   user: UserData | null;
   compact?: boolean;
+  headerTeal?: boolean;
+  sidebarTeal?: boolean;
 }
 
-export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false }) => {
+export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false, headerTeal = false, sidebarTeal = false }) => {
   const { logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
   const [imageError, setImageError] = useState(false);
@@ -103,20 +105,22 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
   
   if (compact) {
     return (
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="ml-2 rounded-full glass-card-subtle hover:bg-white/70 hover:scale-110 p-0 h-9 w-9 transition-all duration-300 ease-out cursor-pointer"
+      <Button
+        variant="ghost"
+        size="icon"
+        className={`ml-2 rounded-full hover:scale-110 p-0 h-9 w-9 transition-all duration-300 ease-out cursor-pointer ${
+          headerTeal ? "hover:bg-white/20" : "glass-card-subtle hover:bg-white/70"
+        }`}
         onClick={() => setLocation('/profile')}
       >
         <div className="relative h-full w-full">
           {user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" && (
             <div className={`absolute -inset-0.5 rounded-full bg-gradient-to-r ${planColors.gradient} opacity-90 blur-[1px] transition-all duration-300`}></div>
           )}
-          <Avatar className={`relative h-full w-full ${user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" ? "" : "ring-2 ring-white/40"} shadow-sm transition-all duration-300`}>
+          <Avatar className={`relative h-full w-full ${user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" ? "" : "ring-2 ring-white/50"} shadow-sm transition-all duration-300`}>
             {profileImageUrl && !imageError ? (
-              <AvatarImage 
-                src={profileImageUrl} 
+              <AvatarImage
+                src={profileImageUrl}
                 alt={user.fullName || "Avatar"}
                 onError={() => {
                   console.error('🖼️ UserProfile - Failed to load image:', profileImageUrl);
@@ -139,15 +143,17 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
   }
 
   return (
-    <div className="flex items-center p-2 rounded-lg hover:bg-white/30 transition-all duration-200">
+    <div className={`flex items-center p-2 rounded-lg transition-all duration-200 ${
+      sidebarTeal ? "hover:bg-white/15" : "hover:bg-white/30"
+    }`}>
       <div className="flex-shrink-0 relative">
         {user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" && (
           <div className={`absolute -inset-1 rounded-full bg-gradient-to-r ${planColors.gradient} opacity-80 blur-[1px]`}></div>
         )}
-        <Avatar className={`relative h-10 w-10 ${user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" ? "" : "ring-2 ring-white/30"} shadow-md`}>
+        <Avatar className={`relative h-10 w-10 ${user.subscriptionPlan && user.subscriptionPlan !== "free" && user.role === "patient" ? "" : "ring-2 ring-white/40"} shadow-md`}>
           {profileImageUrl && !imageError ? (
-            <AvatarImage 
-              src={profileImageUrl} 
+            <AvatarImage
+              src={profileImageUrl}
               alt={user.fullName || "Avatar"}
               onError={() => {
                 console.error('🖼️ UserProfile - Failed to load image:', profileImageUrl);
@@ -166,10 +172,14 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
         )}
       </div>
       <div className="ml-3 flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-800 truncate">{user.fullName || user.username}</p>
+        <p className={`text-sm font-semibold truncate ${sidebarTeal ? "text-white" : "text-gray-800"}`}>{user.fullName || user.username}</p>
         <div className="flex items-center mt-0.5 gap-1.5">
           {user.role !== "patient" && (
-            <span className={`text-xs px-2 py-0.5 rounded-full backdrop-blur-sm ${getRoleBadgeColor()}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-full backdrop-blur-sm ${
+              sidebarTeal
+                ? "bg-white/20 text-white/90 border border-white/30"
+                : getRoleBadgeColor()
+            }`}>
               {getRoleLabel()}
             </span>
           )}
@@ -178,8 +188,12 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user, compact = false 
           )}
         </div>
       </div>
-      <button 
-        className="ml-2 p-1.5 text-gray-500 hover:text-primary rounded-full hover:bg-white/50 transition-all duration-200"
+      <button
+        className={`ml-2 p-1.5 rounded-full transition-all duration-200 ${
+          sidebarTeal
+            ? "text-white/70 hover:text-white hover:bg-white/20"
+            : "text-gray-500 hover:text-primary hover:bg-white/50"
+        }`}
         onClick={handleLogout}
         title="Sair"
       >

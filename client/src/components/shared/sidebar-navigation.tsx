@@ -28,19 +28,27 @@ import { isNativeApp } from "@/utils/platform";
 interface SidebarNavigationProps {
   userRole?: string;
   subscriptionPlan?: string;
+  sidebarTeal?: boolean;
 }
 
-export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole = "patient", subscriptionPlan }) => {
+export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ userRole = "patient", subscriptionPlan, sidebarTeal = false }) => {
   const [location] = useLocation();
-  
+
   const isLinkActive = (path: string) => {
     return location === path;
   };
 
-  const sectionTitleClass = "text-xs font-semibold text-primary/70 uppercase tracking-wider mb-3 mt-6 px-4";
+  // Classes adaptadas para fundo teal
+  const sectionTitleClass = sidebarTeal
+    ? "text-xs font-semibold text-white/70 uppercase tracking-wider mb-3 mt-6 px-4"
+    : "text-xs font-semibold text-primary/70 uppercase tracking-wider mb-3 mt-6 px-4";
   const linkBaseClass = "flex items-center px-4 py-2.5 text-sm font-medium rounded-lg my-1 transition-all duration-300 ease-out transform-gpu";
-  const linkActiveClass = "bg-white/50 text-primary shadow-sm backdrop-blur-sm border border-white/20 scale-[1.02]";
-  const linkInactiveClass = "text-gray-600 hover:bg-white/30 hover:text-primary/90 hover:scale-[1.01] active:scale-[0.99]";
+  const linkActiveClass = sidebarTeal
+    ? "bg-white/25 text-white shadow-sm backdrop-blur-sm border border-white/30 scale-[1.02]"
+    : "bg-white/50 text-primary shadow-sm backdrop-blur-sm border border-white/20 scale-[1.02]";
+  const linkInactiveClass = sidebarTeal
+    ? "text-white/90 hover:bg-white/15 hover:text-white hover:scale-[1.01] active:scale-[0.99]"
+    : "text-gray-600 hover:bg-white/30 hover:text-primary/90 hover:scale-[1.01] active:scale-[0.99]";
 
   return (
     <nav className="flex-1 overflow-y-auto py-6 px-3">
