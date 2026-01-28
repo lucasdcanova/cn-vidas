@@ -8,7 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { UserProfile } from "@/components/shared/user-profile";
 import { PlanIndicator } from "@/components/shared/plan-indicator";
 import { cn } from "@/lib/utils";
-import cnvidasLogo from "@/assets/cnvidas-logo-transparent.png";
+// Logos brancas para header/sidebar teal
+const cnvidasLogoWhite = "/assets/triunfo-logo-white.png";
+const triunfoLogoWhite = "/assets/triunfo-logo-white.png";
 import SidebarNavigation from "@/components/shared/sidebar-navigation";
 import MobileNavigation from "@/components/shared/mobile-navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -45,7 +47,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const loginSource = localStorage.getItem('loginSource');
   const isHSJLogin = loginSource === 'hsj';
   const hsjLogoPath = '/cropped-icone_sao_jose-removebg-preview.png';
-  const logoToUse = isHSJLogin ? hsjLogoPath : cnvidasLogo;
+  // Usar logo branca do Hospital de Triunfo para o header teal
+  const logoToUse = isHSJLogin ? hsjLogoPath : triunfoLogoWhite;
 
   // Debug location changes
   useEffect(() => {
@@ -104,31 +107,31 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     setIsIPhoneDevice(isIPhone());
   }, []);
 
-  // Configurar status bar para iOS
+  // Configurar status bar para iOS - agora com fundo teal
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
       // Mostrar e configurar status bar para o dashboard
       StatusBar.show();
 
       if (isIPadDevice) {
-        // No iPad, configurar status bar transparente para glassmorphism
-        StatusBar.setBackgroundColor({ color: '#00000000' }); // Totalmente transparente
-        StatusBar.setStyle({ style: Style.Light }); // Texto escuro
+        // No iPad, configurar status bar com cor teal para combinar com o header
+        StatusBar.setBackgroundColor({ color: '#18c2b3' }); // Teal claro do gradiente
+        StatusBar.setStyle({ style: Style.Dark }); // Texto branco
         StatusBar.setOverlaysWebView({ overlay: true }); // Permitir conteúdo sob a status bar
       } else {
-        // Outros dispositivos mantêm comportamento normal
-        StatusBar.setBackgroundColor({ color: '#ffffff' });
-        StatusBar.setStyle({ style: Style.Light });
+        // iPhone e outros - também usa teal
+        StatusBar.setBackgroundColor({ color: '#18c2b3' });
+        StatusBar.setStyle({ style: Style.Dark }); // Texto branco
         StatusBar.setOverlaysWebView({ overlay: false });
       }
     }
 
-    // Cleanup - voltar para as cores originais quando sair do dashboard
+    // Cleanup - voltar para as cores do auth quando sair do dashboard
     return () => {
       if (Capacitor.isNativePlatform()) {
-        // Voltar para a cor azul clara da página de auth
-        StatusBar.setBackgroundColor({ color: '#eff6ff' });
-        StatusBar.setStyle({ style: Style.Light });
+        // Voltar para a cor teal da página de auth
+        StatusBar.setBackgroundColor({ color: '#2ad4c3' });
+        StatusBar.setStyle({ style: Style.Dark });
         StatusBar.setOverlaysWebView({ overlay: false });
       }
     };
@@ -256,19 +259,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {shouldShowSidebar && (
         <aside className={`fixed inset-y-0 left-0 z-50 md:relative md:flex md:flex-col md:w-64 glass-sidebar shadow-lg transition-transform transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }`}>
-          <div className="p-5 border-b border-gray-100/50">
+          <div className="p-5 border-b border-white/20">
             <div className="flex items-center space-x-2">
-              {/* Logo */}
+              {/* Logo branca do Hospital de Triunfo */}
               <img
                 src={logoToUse}
-                alt={isHSJLogin ? "Hospital São José" : "CN Vidas"}
-                className={isHSJLogin ? "h-10 w-auto" : "h-9 w-auto"}
+                alt={isHSJLogin ? "Hospital São José" : "Hospital de Triunfo"}
+                className="h-12 w-auto drop-shadow-md"
+                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
               />
 
 
               {/* Close button on mobile */}
               <button
-                className="ml-auto md:hidden text-gray-500 hover:text-gray-700 transition-colors"
+                className="ml-auto md:hidden text-white/80 hover:text-white transition-colors"
                 onClick={() => setSidebarOpen(false)}
               >
                 <X className="h-5 w-5" />
@@ -276,10 +280,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </div>
           </div>
 
-          <SidebarNavigation userRole={user?.role} subscriptionPlan={user?.subscriptionPlan} />
+          <SidebarNavigation userRole={user?.role} subscriptionPlan={user?.subscriptionPlan} sidebarTeal />
 
-          <div className="mt-auto p-4 border-t border-gray-100/50">
-            <UserProfile user={userWithProfileImage} />
+          <div className="mt-auto p-4 border-t border-white/20">
+            <UserProfile user={userWithProfileImage} sidebarTeal />
           </div>
         </aside>
       )}
@@ -289,18 +293,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         "flex flex-col flex-1 overflow-hidden relative z-10",
         !shouldShowSidebar && "w-full" // Ensure full width when no sidebar
       )}>
-        {/* Top navbar */}
+        {/* Top navbar - teal gradient matching auth page */}
         <header className={cn(
-          "sticky top-0 z-10 shadow-sm",
-          isIPadDevice ? "header-glassmorphism-ipad" : "bg-white border-b border-gray-100"
-        )}>
+          "sticky top-0 z-10 shadow-lg",
+          isIPadDevice ? "header-glassmorphism-ipad" : "header-teal-gradient"
+        )}
+        style={{
+          background: isIPadDevice ? undefined : 'linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%)'
+        }}>
           <div className="md:hidden flex items-center justify-between p-4">
             <div className="flex items-center">
               {/* Mostrar botão de menu apenas quando houver sidebar */}
               {shouldShowSidebar && (
                 <button
                   type="button"
-                  className="text-gray-600 hover:text-gray-800 focus:outline-none transition-colors"
+                  className="text-white/90 hover:text-white focus:outline-none transition-colors"
                   onClick={() => setSidebarOpen(true)}
                 >
                   <Menu className="h-5 w-5" />
@@ -309,8 +316,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <div className={shouldShowSidebar ? "ml-3 flex items-center space-x-2" : "flex items-center space-x-2"}>
                 <img
                   src={logoToUse}
-                  alt={isHSJLogin ? "Hospital São José" : "CN Vidas"}
-                  className={isHSJLogin ? "h-9 w-auto" : "h-8 w-auto"}
+                  alt={isHSJLogin ? "Hospital São José" : "Hospital de Triunfo"}
+                  className="h-10 w-auto drop-shadow-md"
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
                 />
               </div>
             </div>
@@ -323,12 +331,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       variant="ghost"
                       size="icon"
                       className={cn(
-                        "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
-                        location === "/doctor/financeiro" && "bg-gray-100"
+                        "rounded-full hover:bg-white/20 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                        location === "/doctor/financeiro" && "bg-white/20"
                       )}
                       title="Financeiro"
                     >
-                      <DollarSign className="h-5 w-5 text-gray-600" />
+                      <DollarSign className="h-5 w-5 text-white" />
                     </Button>
                   </Link>
                   <Link href="/doctor/settings">
@@ -336,15 +344,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       variant="ghost"
                       size="icon"
                       className={cn(
-                        "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
-                        location === "/doctor/settings" && "bg-gray-100"
+                        "rounded-full hover:bg-white/20 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                        location === "/doctor/settings" && "bg-white/20"
                       )}
                       title="Configurações"
                     >
-                      <Settings className="h-5 w-5 text-gray-600" />
+                      <Settings className="h-5 w-5 text-white" />
                     </Button>
                   </Link>
-                  <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                  <div className="w-px h-6 bg-white/30 mx-1"></div>
                 </>
               )}
 
@@ -356,12 +364,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
-                      location === "/partner/addresses" ? "bg-gray-100" : ""
+                      "rounded-full hover:bg-white/20 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                      location === "/partner/addresses" ? "bg-white/20" : ""
                     )}
                     title="Endereços"
                   >
-                    <MapPin className="h-5 w-5 text-gray-600" />
+                    <MapPin className="h-5 w-5 text-white" />
                   </Button>
                 </Link>
               )}
@@ -372,12 +380,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
-                    location === "/settings" || location === "/doctor/settings" ? "bg-gray-100" : ""
+                    "rounded-full hover:bg-white/20 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                    location === "/settings" || location === "/doctor/settings" ? "bg-white/20" : ""
                   )}
                   title="Configurações"
                 >
-                  <Settings className="h-5 w-5 text-gray-600" />
+                  <Settings className="h-5 w-5 text-white" />
                 </Button>
               </Link>
 
@@ -391,12 +399,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                         variant="ghost"
                         size="icon"
                         className={cn(
-                          "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
-                          location === "/subscription" ? "bg-gray-100" : ""
+                          "rounded-full hover:bg-white/20 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                          location === "/subscription" ? "bg-white/20" : ""
                         )}
                         title="Planos"
                       >
-                        <CreditCard className="h-5 w-5 text-gray-600" />
+                        <CreditCard className="h-5 w-5 text-white" />
                       </Button>
                     </Link>
                   )}
@@ -405,32 +413,33 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                       variant="ghost"
                       size="icon"
                       className={cn(
-                        "rounded-full hover:bg-gray-100 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
-                        location === "/help" ? "bg-gray-100" : ""
+                        "rounded-full hover:bg-white/20 hover:scale-110 transition-transform duration-150 ease-out h-9 w-9",
+                        location === "/help" ? "bg-white/20" : ""
                       )}
                       title="Fale Conosco"
                     >
-                      <HelpCircle className="h-5 w-5 text-gray-600" />
+                      <HelpCircle className="h-5 w-5 text-white" />
                     </Button>
                   </Link>
-                  <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                  <div className="w-px h-6 bg-white/30 mx-1"></div>
                 </>
               )}
-              <UserProfile user={userWithProfileImage} compact />
+              <UserProfile user={userWithProfileImage} compact headerTeal />
             </div>
           </div>
 
           <div className="hidden md:flex items-center justify-between px-6 py-4">
             <div className="flex-1 flex items-center gap-3">
-              {/* Logo CNVidas para iPad */}
+              {/* Logo para iPad e desktop */}
               {isIPadDevice && (
                 <img
                   src={logoToUse}
-                  alt={isHSJLogin ? "Hospital São José" : "CN Vidas"}
-                  className={isHSJLogin ? "h-9 w-auto mr-2 drop-shadow-sm" : "h-8 w-auto mr-2 drop-shadow-sm"}
+                  alt={isHSJLogin ? "Hospital São José" : "Hospital de Triunfo"}
+                  className="h-10 w-auto mr-2 drop-shadow-md"
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
                 />
               )}
-              <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
+              <h1 className="text-2xl font-semibold text-white drop-shadow-sm">{title}</h1>
             </div>
             <div className="flex items-center ml-4 space-x-3">
               {/* Link para Financeiro - apenas para médicos */}
@@ -439,10 +448,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
+                    className="rounded-full hover:bg-white/20 hover:scale-105 transition-transform duration-150 ease-out"
                     title="Financeiro"
                   >
-                    <DollarSign className="h-5 w-5 text-gray-700" />
+                    <DollarSign className="h-5 w-5 text-white" />
                   </Button>
                 </Link>
               )}
@@ -453,10 +462,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
+                    className="rounded-full hover:bg-white/20 hover:scale-105 transition-transform duration-150 ease-out"
                     title="Endereços"
                   >
-                    <MapPin className="h-5 w-5 text-gray-700" />
+                    <MapPin className="h-5 w-5 text-white" />
                   </Button>
                 </Link>
               )}
@@ -466,9 +475,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-all duration-300 ease-out"
+                  className="rounded-full hover:bg-white/20 hover:scale-105 transition-all duration-300 ease-out"
                 >
-                  <Settings className="h-5 w-5 text-gray-700" />
+                  <Settings className="h-5 w-5 text-white" />
                 </Button>
               </Link>
 
@@ -478,17 +487,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-full glass-card-subtle hover:bg-white/80 hover:scale-105 transition-transform duration-150 ease-out"
+                    className="rounded-full hover:bg-white/20 hover:scale-105 transition-transform duration-150 ease-out"
                   >
-                    <HelpCircle className="h-5 w-5 text-gray-700" />
+                    <HelpCircle className="h-5 w-5 text-white" />
                   </Button>
                 </Link>
               )}
 
               {/* Foto do perfil com separador */}
               <div className="flex items-center">
-                <div className="h-8 w-px bg-gray-200 mr-4"></div>
-                <UserProfile user={userWithProfileImage} compact />
+                <div className="h-8 w-px bg-white/30 mr-4"></div>
+                <UserProfile user={userWithProfileImage} compact headerTeal />
               </div>
             </div>
           </div>

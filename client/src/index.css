@@ -735,7 +735,7 @@ select {
   }
   
   /* Glassmorphism enhancements */
-  .glass-card, .glass-nav, .glass-sidebar, .glass-morphism {
+  .glass-card, .glass-morphism {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.85);
@@ -743,10 +743,22 @@ select {
     box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
-  .glass-card:hover, .glass-nav:hover, .glass-sidebar:hover {
+
+  .glass-card:hover {
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Teal navigation and sidebar - matching auth page gradient */
+  .glass-nav, .glass-sidebar {
+    background: linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%);
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-nav:hover, .glass-sidebar:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
   }
   
   /* Auth page specific glassmorphism */
@@ -982,13 +994,7 @@ select {
     border-radius: var(--radius);
   }
 
-  .glass-nav {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-  }
+  /* glass-nav now uses teal gradient - defined above */
 
   /* Altura fixa para o menu móvel inferior */
   .mobile-nav-bottom {
@@ -1012,23 +1018,27 @@ select {
     }
   }
 
-  /* Estilos para iOS (iPhone e iPad) - Barra flutuante com glassmorphism agressivo */
+  /* Estilos para iOS (iPhone e iPad) - Barra flutuante teal */
   .glass-nav-ios {
-    background: rgba(255, 255, 255, 1); /* Branco sólido */
-    /* backdrop-filter removido para eliminar glassmorphism */
-    /* -webkit-backdrop-filter removido para eliminar glassmorphism */
-    border: 1px solid rgba(229, 231, 235, 1); /* Borda cinza clara */
-    box-shadow: 
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background: linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%);
+    border: none;
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.25),
+      0 4px 12px rgba(0, 0, 0, 0.15);
     border-radius: 24px;
     overflow: hidden;
     position: relative;
   }
-  
-  /* Efeito de brilho removido - sem glassmorphism */
+
+  /* Efeito de brilho sutil no topo */
   .glass-nav-ios::before {
-    display: none; /* Desabilita o overlay de gradiente */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   }
 
   /* Posicionamento da barra flutuante no iOS */
@@ -1076,16 +1086,16 @@ select {
 
   /* A barra do iPad permanece sempre clara, sem adaptação ao dark mode */
   
-  /* Header glassmorphism para iPad - consistência com a barra bottom */
+  /* Header glassmorphism para iPad - consistência com o tema teal */
   .header-glassmorphism-ipad {
-    background: rgba(255, 255, 255, 0.60) !important; /* Mesma opacidade da barra bottom */
-    backdrop-filter: blur(20px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.7) !important;
+    background: linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
     border-top: none !important;
-    box-shadow: 
-      0 4px 20px rgba(0, 0, 0, 0.08),
-      0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.20),
+      0 4px 12px rgba(0, 0, 0, 0.10) !important;
     will-change: transform;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
@@ -1095,10 +1105,17 @@ select {
     /* Adicionar padding-top para status bar no iPad */
     padding-top: env(safe-area-inset-top, 20px);
   }
-  
-  /* Forçar remoção do background branco no header iPad */
+
+  /* Forçar gradiente teal no header iPad */
   .header-glassmorphism-ipad.bg-white {
-    background: rgba(255, 255, 255, 0.60) !important;
+    background: linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%) !important;
+  }
+
+  /* Classe para header teal no desktop/web */
+  .header-teal-gradient {
+    background: linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%);
+    border-bottom: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
   
   /* Status bar overlay removido para evitar linha duplicada no topo */
@@ -1194,13 +1211,7 @@ select {
     }
   }
 
-  .glass-sidebar {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-right: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
-  }
+  /* glass-sidebar now uses teal gradient - defined above */
 
   /* Gradient backgrounds */
   .bg-gradient-blue-green {
