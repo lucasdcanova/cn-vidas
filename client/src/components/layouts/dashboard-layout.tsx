@@ -8,9 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { UserProfile } from "@/components/shared/user-profile";
 import { PlanIndicator } from "@/components/shared/plan-indicator";
 import { cn } from "@/lib/utils";
-// Logos brancas para header/sidebar teal
-const cnvidasLogoWhite = "/assets/triunfo-logo-white.png";
-const triunfoLogoWhite = "/assets/triunfo-logo-white.png";
+// Logo quadrado branco HCSR para header/sidebar teal
+const hcsrLogoSquare = "/assets/hcsr-logo-white.png";
 import SidebarNavigation from "@/components/shared/sidebar-navigation";
 import MobileNavigation from "@/components/shared/mobile-navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -47,8 +46,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const loginSource = localStorage.getItem('loginSource');
   const isHSJLogin = loginSource === 'hsj';
   const hsjLogoPath = '/cropped-icone_sao_jose-removebg-preview.png';
-  // Usar logo branca do Hospital de Triunfo para o header teal
-  const logoToUse = isHSJLogin ? hsjLogoPath : triunfoLogoWhite;
+  // Usar logo quadrado branco HCSR para o header teal
+  const logoToUse = isHSJLogin ? hsjLogoPath : hcsrLogoSquare;
 
   // Debug location changes
   useEffect(() => {
@@ -261,12 +260,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           }`}>
           <div className="p-5 border-b border-white/20">
             <div className="flex items-center space-x-2">
-              {/* Logo branca do Hospital de Triunfo */}
+              {/* Logo quadrado branco HCSR */}
               <img
                 src={logoToUse}
-                alt={isHSJLogin ? "Hospital São José" : "Hospital de Triunfo"}
-                className="h-12 w-auto drop-shadow-md"
-                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                alt={isHSJLogin ? "Hospital São José" : "HCSR"}
+                className="h-11 w-auto"
+                style={{
+                  filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.25))',
+                  maxWidth: isHSJLogin ? 'auto' : '150px'
+                }}
               />
 
 
@@ -316,9 +318,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <div className={shouldShowSidebar ? "ml-3 flex items-center space-x-2" : "flex items-center space-x-2"}>
                 <img
                   src={logoToUse}
-                  alt={isHSJLogin ? "Hospital São José" : "Hospital de Triunfo"}
-                  className="h-10 w-auto drop-shadow-md"
-                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                  alt={isHSJLogin ? "Hospital São José" : "HCSR"}
+                  className="h-9 w-auto"
+                  style={{
+                    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.25))',
+                    maxWidth: isHSJLogin ? 'auto' : '120px'
+                  }}
                 />
               </div>
             </div>
@@ -429,16 +434,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </div>
 
           <div className="hidden md:flex items-center justify-between px-6 py-4">
-            <div className="flex-1 flex items-center gap-3">
-              {/* Logo para iPad e desktop */}
-              {isIPadDevice && (
-                <img
-                  src={logoToUse}
-                  alt={isHSJLogin ? "Hospital São José" : "Hospital de Triunfo"}
-                  className="h-10 w-auto mr-2 drop-shadow-md"
-                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
-                />
-              )}
+            <div className="flex-1 flex items-center gap-4">
+              {/* Logo quadrado HCSR para desktop/iPad */}
+              <img
+                src={logoToUse}
+                alt={isHSJLogin ? "Hospital São José" : "HCSR"}
+                className="h-10 w-auto"
+                style={{
+                  filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.25))',
+                  maxWidth: isHSJLogin ? 'auto' : '140px'
+                }}
+              />
               <h1 className="text-2xl font-semibold text-white drop-shadow-sm">{title}</h1>
             </div>
             <div className="flex items-center ml-4 space-x-3">
