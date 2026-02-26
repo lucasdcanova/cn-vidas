@@ -9,7 +9,7 @@ import { UserProfile } from "@/components/shared/user-profile";
 import { PlanIndicator } from "@/components/shared/plan-indicator";
 import { cn } from "@/lib/utils";
 // Logo quadrado branco HCSR para header/sidebar teal
-const hcsrLogoSquare = "/assets/triunfo-logo-white.png"; // Usando triunfo-logo-white.png pois é o asset atualizado do HCSR
+const hcsrLogoSquare = "/Logo hospital triunfo quadrado sem fundo.png";
 import SidebarNavigation from "@/components/shared/sidebar-navigation";
 import MobileNavigation from "@/components/shared/mobile-navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -113,17 +113,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       // Mostrar e configurar status bar para o dashboard
       StatusBar.show();
 
-      if (isIPadDevice) {
-        // No iPad, configurar status bar com cor teal para combinar com o header
-        StatusBar.setBackgroundColor({ color: '#18c2b3' }); // Teal claro do gradiente
-        StatusBar.setStyle({ style: Style.Dark }); // Texto branco
-        StatusBar.setOverlaysWebView({ overlay: true }); // Permitir conteúdo sob a status bar
-      } else {
-        // iPhone e outros - também usa teal
-        StatusBar.setBackgroundColor({ color: '#18c2b3' });
-        StatusBar.setStyle({ style: Style.Dark }); // Texto branco
-        StatusBar.setOverlaysWebView({ overlay: false });
-      }
+      // Em todos os dispositivos iOS, setar overlay como true permite que
+      // a webview extenda e fique embaixo da status bar para manter as cores 100% iguais
+      StatusBar.setBackgroundColor({ color: '#18c2b3' });
+      StatusBar.setStyle({ style: Style.Dark });
+      StatusBar.setOverlaysWebView({ overlay: true });
     }
 
     // Cleanup - voltar para as cores do auth quando sair do dashboard
@@ -259,7 +253,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {shouldShowSidebar && (
         <aside className={`fixed inset-y-0 left-0 z-50 md:relative md:flex md:flex-col md:w-64 glass-sidebar shadow-lg transition-transform transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }`}>
-          <div className="p-5 border-b border-white/20">
+          <div className="p-5 border-b border-white/20" style={{ paddingTop: 'calc(1.25rem + env(safe-area-inset-top))' }}>
             <div className="flex items-center space-x-2">
               {/* Logo quadrado branco HCSR */}
               <img
@@ -308,7 +302,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           isIPadDevice ? "header-glassmorphism-ipad" : "header-teal-gradient"
         )}
           style={{
-            background: isIPadDevice ? undefined : 'linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%)'
+            background: isIPadDevice ? undefined : 'linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%)',
+            paddingTop: 'env(safe-area-inset-top)'
           }}>
           <div className="md:hidden flex items-center justify-between p-4">
             <div className="flex items-center">
