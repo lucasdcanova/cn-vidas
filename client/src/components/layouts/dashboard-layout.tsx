@@ -9,7 +9,7 @@ import { UserProfile } from "@/components/shared/user-profile";
 import { PlanIndicator } from "@/components/shared/plan-indicator";
 import { cn } from "@/lib/utils";
 // Logo quadrado branco HCSR para header/sidebar teal
-const hcsrLogoSquare = "/assets/hcsr-logo-white.png";
+const hcsrLogoSquare = "/assets/triunfo-logo-white.png"; // Usando triunfo-logo-white.png pois é o asset atualizado do HCSR
 import SidebarNavigation from "@/components/shared/sidebar-navigation";
 import MobileNavigation from "@/components/shared/mobile-navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -45,9 +45,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // Verificar origem do login (HSJ ou padrão)
   const loginSource = localStorage.getItem('loginSource');
   const isHSJLogin = loginSource === 'hsj';
-  const hsjLogoPath = '/cropped-icone_sao_jose-removebg-preview.png';
+  // CORREÇÃO: Usando o caminho da imagem que realmente existe
+  const hsjLogoPath = '/images/partners/hospital-sao-jose-logo.png';
   // Usar logo quadrado branco HCSR para o header teal
-  const logoToUse = isHSJLogin ? hsjLogoPath : hcsrLogoSquare;
+  const [logoToUse, setLogoToUse] = useState(isHSJLogin ? hsjLogoPath : hcsrLogoSquare);
 
   // Debug location changes
   useEffect(() => {
@@ -269,6 +270,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.25))',
                   maxWidth: isHSJLogin ? 'auto' : '150px'
                 }}
+                onError={(e) => {
+                  // Fallback se a imagem não for encontrada
+                  if (logoToUse !== "/assets/hcsr-logo-white.png") {
+                    setLogoToUse("/assets/hcsr-logo-white.png");
+                  }
+                }}
               />
 
 
@@ -300,9 +307,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           "sticky top-0 z-10 shadow-lg",
           isIPadDevice ? "header-glassmorphism-ipad" : "header-teal-gradient"
         )}
-        style={{
-          background: isIPadDevice ? undefined : 'linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%)'
-        }}>
+          style={{
+            background: isIPadDevice ? undefined : 'linear-gradient(165deg, #18c2b3 0%, #0d9488 55%, #0b6b64 100%)'
+          }}>
           <div className="md:hidden flex items-center justify-between p-4">
             <div className="flex items-center">
               {/* Mostrar botão de menu apenas quando houver sidebar */}
@@ -323,6 +330,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   style={{
                     filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.25))',
                     maxWidth: isHSJLogin ? 'auto' : '120px'
+                  }}
+                  onError={(e) => {
+                    // Fallback se a imagem não for encontrada
+                    if (logoToUse !== "/assets/hcsr-logo-white.png") {
+                      setLogoToUse("/assets/hcsr-logo-white.png");
+                    }
                   }}
                 />
               </div>
@@ -443,6 +456,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 style={{
                   filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.25))',
                   maxWidth: isHSJLogin ? 'auto' : '140px'
+                }}
+                onError={(e) => {
+                  // Fallback se a imagem não for encontrada
+                  if (logoToUse !== "/assets/hcsr-logo-white.png") {
+                    setLogoToUse("/assets/hcsr-logo-white.png");
+                  }
                 }}
               />
               <h1 className="text-2xl font-semibold text-white drop-shadow-sm">{title}</h1>
