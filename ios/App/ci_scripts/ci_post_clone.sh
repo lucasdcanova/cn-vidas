@@ -50,8 +50,8 @@ else
     npm install
 fi
 
-echo "🔨 Construindo web app..."
-npm run build
+echo "🔨 Construindo web app (somente client, sem Prisma/server)..."
+npm run build:mobile
 
 # Verificar se o build foi bem sucedido
 if [ ! -f "dist/client/index.html" ]; then

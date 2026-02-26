@@ -17,6 +17,7 @@
     "build:server": "tsc --project tsconfig.production.json --noEmitOnError false || echo 'Build completed with warnings'",
     "build:client": "vite build",
     "build:render": "npm run clean && prisma generate && npm run build:server && npm run build:client",
+    "build:mobile": "npm run clean && npm run build:client",
     "postbuild": "mkdir -p dist/server/uploads && cp -r shared dist/",
     "test": "jest",
     "lint": "eslint . --ext .ts",
