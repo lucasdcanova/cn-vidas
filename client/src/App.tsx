@@ -95,6 +95,7 @@ import { ProcessingWaitPage } from "@/pages/processing-wait";
 import { CampaignTaquari } from "@/pages/CampaignTaquari";
 import { CampaignBrasilia } from "@/pages/CampaignBrasilia";
 import HospitalBriefing from "@/pages/hospital-briefing";
+import PrivacyPolicyPage from "@/pages/privacy-policy";
 
 // Componente de erro boundary
 class ErrorBoundary extends React.Component<
@@ -240,6 +241,9 @@ function Router() {
       {/* Hospital briefing page - accessible without authentication */}
       <Route path="/hospital-briefing" component={HospitalBriefing} />
 
+      {/* Legal pages - accessible without authentication */}
+      <Route path="/politica-de-privacidade" component={PrivacyPolicyPage} />
+
       {/* Admin Routes */}
       <ProtectedRoute path="/admin" component={AdminDashboard} allowedRoles={["admin"]} />
       <ProtectedRoute path="/admin/dashboard" component={AdminDashboard} allowedRoles={["admin"]} />
@@ -290,7 +294,7 @@ function AppContent() {
     // Lista de paths públicos que não precisam de autenticação
     const publicPaths = ['/auth', '/verificar-email', '/redefinir-senha',
       '/reenviar-verificacao', '/esqueci-senha', '/corporate-invite', '/campanha',
-      '/hospital-briefing'];
+      '/hospital-briefing', '/politica-de-privacidade'];
     const isPublicPath = publicPaths.some(path => currentPath.startsWith(path));
 
     if (!authToken && !isPublicPath) {
@@ -322,7 +326,7 @@ function AppContent() {
 
       const publicPaths = ['/auth', '/auth/hsj', '/auth/hcc', '/verificar-email', '/redefinir-senha',
         '/reenviar-verificacao', '/esqueci-senha', '/corporate-invite', '/campanha',
-        '/hospital-briefing'];
+        '/hospital-briefing', '/politica-de-privacidade'];
       const isPublicPath = publicPaths.some(path => currentPath.startsWith(path));
 
       if (!authToken && !isPublicPath) {
