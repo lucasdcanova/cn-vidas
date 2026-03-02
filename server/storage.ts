@@ -73,12 +73,12 @@ export interface IStorage {
   deleteUser(id: number, options?: { force?: boolean }): Promise<boolean>;
   getUsersByRole(role: "patient" | "partner" | "admin" | "doctor"): Promise<User[]>;
   updateUserPassword(id: number, password: string): Promise<User>;
-  
+
   // Password reset
   savePasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void>;
   getUserByResetToken(token: string): Promise<User | undefined>;
   clearPasswordResetToken(userId: number): Promise<void>;
-  
+
   // Email verification
   saveVerificationToken(userId: number, token: string): Promise<void>;
   getUserByVerificationToken(token: string): Promise<User | undefined>;
@@ -87,30 +87,30 @@ export interface IStorage {
   getEmailVerificationByToken(token: string): Promise<EmailVerification | undefined>;
   deleteEmailVerification(id: number): Promise<void>;
   deleteEmailVerificationsByUserId(userId: number): Promise<void>;
-  
+
   // Password reset
   createPasswordReset(reset: { userId: number, token: string, expiresAt: Date }): Promise<void>;
   getPasswordResetByToken(token: string): Promise<PasswordReset | undefined>;
   deletePasswordReset(id: number): Promise<void>;
   deletePasswordResetsByUserId(userId: number): Promise<void>;
-  
+
   // QR Code authentication
   generateQrToken(userId: number): Promise<{ token: string, expiresAt: Date }>;
   getUserByQrToken(token: string): Promise<User | undefined>;
   logQrAuthentication(logData: Omit<InsertQrAuthLog, 'qrTokenId'> & { token: string }): Promise<QrAuthLog>;
-  getQrAuthLogs(limit?: number, offset?: number): Promise<(QrAuthLog & { 
-    scannerName: string, 
-    tokenUserName: string 
+  getQrAuthLogs(limit?: number, offset?: number): Promise<(QrAuthLog & {
+    scannerName: string,
+    tokenUserName: string
   })[]>;
-  
+
   // Availability slot methods
   getDoctorAvailabilitySlots(doctorId: number): Promise<AvailabilitySlot[]>;
   saveDoctorAvailabilitySlots(slots: InsertAvailabilitySlot[]): Promise<AvailabilitySlot[]>;
-  
+
   // Stripe integration
   updateStripeCustomerId(userId: number, customerId: string): Promise<User>;
   updateUserStripeInfo(userId: number, data: { customerId: string, subscriptionId: string }): Promise<User>;
-  
+
   // Partner methods
   getPartner(id: number): Promise<Partner | undefined>;
   getPartnerByUserId(userId: number): Promise<Partner | undefined>;
@@ -118,7 +118,7 @@ export interface IStorage {
   updatePartner(id: number, data: Partial<InsertPartner>): Promise<Partner>;
   getAllPartners(): Promise<Partner[]>;
   deletePartner(id: number): Promise<void>;
-  
+
   // Partner Address methods
   getPartnerAddresses(partnerId: number): Promise<PartnerAddress[]>;
   getPartnerAddress(id: number): Promise<PartnerAddress | undefined>;
@@ -126,7 +126,7 @@ export interface IStorage {
   updatePartnerAddress(id: number, data: Partial<InsertPartnerAddress>): Promise<PartnerAddress>;
   deletePartnerAddress(id: number): Promise<void>;
   setPartnerAddressPrimary(partnerId: number, addressId: number): Promise<void>;
-  
+
   // Doctor methods
   getDoctor(id: number): Promise<Doctor | undefined>;
   getDoctorByUserId(userId: number): Promise<Doctor | undefined>;
@@ -136,7 +136,7 @@ export interface IStorage {
   getAvailableDoctors(): Promise<Doctor[]>;
   toggleDoctorAvailability(id: number, available: boolean): Promise<Doctor>;
   getDoctorAppointments(doctorId: number, startDate: Date, endDate: Date): Promise<Appointment[]>;
-  
+
   // Partner Service methods
   getPartnerService(id: number): Promise<PartnerService | undefined>;
   getPartnerServicesByPartnerId(partnerId: number): Promise<PartnerService[]>;
@@ -144,15 +144,15 @@ export interface IStorage {
   updatePartnerService(id: number, data: Partial<InsertPartnerService>): Promise<PartnerService>;
   deletePartnerService(id: number): Promise<void>;
   getFeaturedServices(limit?: number): Promise<PartnerService[]>;
-  
+
   // Aliases for admin routes compatibility
   getService(id: number): Promise<PartnerService | undefined>;
   updateService(id: number, data: Partial<InsertPartnerService>): Promise<PartnerService>;
   getAllServices(): Promise<PartnerService[]>;
-  
+
   // Services with location filtering
   getServicesWithLocationFilter(userCity?: string, maxDistance?: number): Promise<PartnerService[]>;
-  
+
   // Appointment methods
   getAppointment(id: number): Promise<Appointment | null>;
   getAppointmentById(id: number): Promise<Appointment | null>;
@@ -163,7 +163,7 @@ export interface IStorage {
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
   updateAppointment(id: number, data: Partial<InsertAppointment>): Promise<Appointment>;
   getLatestEmergencyConsultation(): Promise<Appointment | undefined>;
-  
+
   // Claim methods
   getClaim(id: number): Promise<Claim | undefined>;
   getUserClaims(userId: number): Promise<Claim[]>;
@@ -172,14 +172,14 @@ export interface IStorage {
   createClaim(claim: InsertClaim, documents: string[]): Promise<Claim>;
   updateClaim(id: number, data: Partial<Claim>): Promise<Claim>;
   deleteClaim(id: number): Promise<boolean>;
-  
+
   // Notification methods
   getNotifications(userId: number): Promise<Notification[]>;
   getUnreadNotificationsCount(userId: number): Promise<number>;
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(id: number): Promise<void>;
   markAllNotificationsAsRead(userId: number): Promise<void>;
-  
+
   // User Settings
   getUserSettings(userId: number): Promise<UserSettings | undefined>;
   saveUserSettings(userId: number, settings: Partial<{ notifications: any, privacy: any }>): Promise<UserSettings>;
@@ -196,17 +196,17 @@ export interface IStorage {
   getRecentAppointments(limit: number): Promise<Appointment[]>;
   getAllPartnerServices(): Promise<PartnerService[]>;
   getAllAppointments(): Promise<Appointment[]>;
-  
+
   // Doctor Finance methods
-  updateDoctorPaymentInfo(doctorId: number, paymentInfo: { 
+  updateDoctorPaymentInfo(doctorId: number, paymentInfo: {
     pixKeyType?: string,
-    pixKey?: string, 
-    bankName?: string, 
-    accountType?: string 
+    pixKey?: string,
+    bankName?: string,
+    accountType?: string
   }): Promise<Doctor>;
-  
+
   getDoctorPayments(doctorId: number, startDate?: Date, endDate?: Date): Promise<DoctorPayment[]>;
-  
+
   calculateDoctorEarnings(doctorId: number, startDate?: Date, endDate?: Date): Promise<{
     total: number;
     pending: number;
@@ -252,7 +252,7 @@ export interface IStorage {
     limit?: number,
     offset?: number
   ): Promise<any[]>;
-  
+
   // Partner Analytics
   getPartnerAnalytics(partnerId: number, period?: string): Promise<any>;
 }
@@ -294,7 +294,7 @@ export class DatabaseStorage implements IStorage {
     if (!qrToken) {
       throw new Error('QR token not found');
     }
-    
+
     console.log('📝 Criando log de autenticação QR:', {
       qrTokenId: qrToken.id,
       scannerUserId: logDataWithoutToken.scannerUserId,
@@ -302,50 +302,50 @@ export class DatabaseStorage implements IStorage {
       ipAddress: logDataWithoutToken.ipAddress,
       success: logDataWithoutToken.success
     });
-    
+
     const [log] = await this.db.insert(qrAuthLogs).values({
       ...logDataWithoutToken,
       qrTokenId: qrToken.id
     }).returning();
-    
+
     console.log('✅ Log de autenticação QR criado:', log);
     return log;
   }
 
   async getQrAuthLogs(limit?: number, offset?: number): Promise<(QrAuthLog & { scannerName: string, tokenUserName: string })[]> {
     console.log('🔍 Buscando logs de autenticação QR no banco de dados...');
-    
+
     // Buscar logs primeiro sem joins complexos
     const logs = await this.db.select()
       .from(qrAuthLogs)
       .orderBy(desc(qrAuthLogs.scannedAt))
       .limit(limit || 50)
       .offset(offset || 0);
-    
+
     // Buscar nomes dos usuários separadamente
     const logsWithNames = await Promise.all(logs.map(async (log) => {
       let scannerName = 'Sistema';
       let tokenUserName = 'Usuário Desconhecido';
-      
+
       if (log.scannerUserId) {
         const scanner = await this.getUser(log.scannerUserId);
         if (scanner) scannerName = scanner.fullName || 'Sistema';
       }
-      
+
       if (log.tokenUserId) {
         const tokenUser = await this.getUser(log.tokenUserId);
         if (tokenUser) tokenUserName = tokenUser.fullName || 'Usuário Desconhecido';
       }
-      
+
       return {
         ...log,
         scannerName,
         tokenUserName
       };
     }));
-    
+
     console.log(`📊 ${logsWithNames.length} logs encontrados no banco de dados`);
-    
+
     return logsWithNames;
   }
 
@@ -359,14 +359,14 @@ export class DatabaseStorage implements IStorage {
     if (slots.length === 0) {
       return [];
     }
-    
+
     const doctorId = slots[0].doctorId;
-    
+
     // Delete existing slots for this doctor in a transaction
     await this.db.transaction(async (tx) => {
       await tx.delete(availabilitySlots).where(eq(availabilitySlots.doctorId, doctorId));
     });
-    
+
     // Insert new slots
     const result = await this.db.insert(availabilitySlots).values(slots).returning();
     return Array.isArray(result) ? result : [result];
@@ -435,7 +435,7 @@ export class DatabaseStorage implements IStorage {
       }
       return acc;
     }, {} as any);
-    
+
     const [user] = await this.db.update(users)
       .set(cleanData)
       .where(eq(users.id, id))
@@ -446,7 +446,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUserDependencies(id: number): Promise<string[]> {
     const dependencies: string[] = [];
-    
+
     try {
       // Verificar appointments
       const appointmentsResult = await this.db.execute(
@@ -456,7 +456,7 @@ export class DatabaseStorage implements IStorage {
       if (appointmentsCount > 0) {
         dependencies.push(`appointments (${appointmentsCount})`);
       }
-      
+
       // Verificar medical records
       const medicalRecordsResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM medical_records WHERE patient_id = ${id} OR doctor_id = ${id}`
@@ -465,7 +465,7 @@ export class DatabaseStorage implements IStorage {
       if (medicalRecordsCount > 0) {
         dependencies.push(`medical records (${medicalRecordsCount})`);
       }
-      
+
       // Verificar claims
       const claimsResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM claims WHERE user_id = ${id}`
@@ -474,7 +474,7 @@ export class DatabaseStorage implements IStorage {
       if (claimsCount > 0) {
         dependencies.push(`claims (${claimsCount})`);
       }
-      
+
       // Verificar subscriptions
       const subscriptionsResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM user_subscriptions WHERE user_id = ${id}`
@@ -483,7 +483,7 @@ export class DatabaseStorage implements IStorage {
       if (subscriptionsCount > 0) {
         dependencies.push(`subscriptions (${subscriptionsCount})`);
       }
-      
+
       // Verificar dependents
       const dependentsResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM dependents WHERE user_id = ${id}`
@@ -492,7 +492,7 @@ export class DatabaseStorage implements IStorage {
       if (dependentsCount > 0) {
         dependencies.push(`dependents (${dependentsCount})`);
       }
-      
+
       // Verificar se é médico
       const doctorResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM doctors WHERE user_id = ${id}`
@@ -500,7 +500,7 @@ export class DatabaseStorage implements IStorage {
       const doctorCount = Number(doctorResult.rows[0]?.count || 0);
       if (doctorCount > 0) {
         dependencies.push(`doctor profile`);
-        
+
         // Verificar appointments como médico
         const doctorAppointmentsResult = await this.db.execute(
           sql`SELECT COUNT(*) as count FROM appointments WHERE doctor_id = (SELECT id FROM doctors WHERE user_id = ${id})`
@@ -510,11 +510,11 @@ export class DatabaseStorage implements IStorage {
           dependencies.push(`appointments as doctor (${doctorAppointmentsCount})`);
         }
       }
-      
+
     } catch (error) {
       console.error('Error checking user dependencies:', error);
     }
-    
+
     return dependencies;
   }
 
@@ -522,30 +522,30 @@ export class DatabaseStorage implements IStorage {
     try {
       const forceDelete = options?.force ?? false;
       console.log(`🗑️ Tentando excluir usuário ID: ${id} (force: ${forceDelete})`);
-      
+
       // Verificar se o usuário existe primeiro
       const existingUser = await this.getUser(id);
       if (!existingUser) {
         console.log(`❌ Usuário ID ${id} não encontrado`);
         return false;
       }
-      
+
       console.log(`✅ Usuário encontrado: ${existingUser.fullName} (${existingUser.email})`);
-      
+
       // Verificar se o usuário tem histórico importante (consultas realizadas ou pagamentos)
       const appointmentsResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM appointments WHERE user_id = ${id} AND status IN ('completed', 'in_progress')`
       );
-      
+
       const paymentsResult = await this.db.execute(
         sql`SELECT COUNT(*) as count FROM user_subscriptions WHERE user_id = ${id}`
       );
-      
+
       const appointmentHistoryCount = Number(appointmentsResult.rows[0]?.count || 0);
       const paymentHistoryCount = Number(paymentsResult.rows[0]?.count || 0);
       const hasImportantHistory = appointmentHistoryCount > 0 || paymentHistoryCount > 0;
       const historyDetails = { appointments: appointmentHistoryCount, payments: paymentHistoryCount };
-      
+
       if (hasImportantHistory && !forceDelete) {
         console.log(`❌ Usuário ID ${id} tem histórico importante e não pode ser excluído (consultas: ${appointmentHistoryCount}, pagamentos: ${paymentHistoryCount})`);
         const error = new Error('User has important history and cannot be deleted');
@@ -556,7 +556,7 @@ export class DatabaseStorage implements IStorage {
       if (hasImportantHistory && forceDelete) {
         console.warn(`⚠️ Forçando exclusão do usuário ID ${id} com histórico importante`, historyDetails);
       }
-      
+
       // Excluir registros básicos relacionados
       await this.db.transaction(async (tx) => {
         try {
@@ -565,13 +565,13 @@ export class DatabaseStorage implements IStorage {
             console.log(`🩺 Excluindo registro de médico para usuário ID ${id}`);
             await tx.delete(doctors).where(eq(doctors.userId, id));
           }
-          
+
           // Se for parceiro, excluir registro de parceiro primeiro
           if (existingUser.role === 'partner') {
             console.log(`🏢 Excluindo registro de parceiro para usuário ID ${id}`);
             await tx.delete(partners).where(eq(partners.userId, id));
           }
-          
+
           // Excluir logs de autenticação por QR Code
           console.log(`🪪 Excluindo QR auth logs para usuário ID ${id}`);
           await tx.delete(qrAuthLogs)
@@ -581,37 +581,37 @@ export class DatabaseStorage implements IStorage {
                 eq(qrAuthLogs.tokenUserId, id)
               )
             );
-          
+
           // Excluir tokens de QR code
           console.log(`🔐 Excluindo QR tokens para usuário ID ${id}`);
           await tx.delete(qrTokens)
             .where(eq(qrTokens.userId, id));
-          
+
           // Excluir appointments pendentes/canceladas
           console.log(`📅 Excluindo appointments para usuário ID ${id}`);
           await tx.delete(appointments)
             .where(eq(appointments.userId, id));
-            
+
           // Excluir medical records vazios
           console.log(`📋 Excluindo medical records para usuário ID ${id}`);
           await tx.delete(medicalRecords)
             .where(eq(medicalRecords.patientId, id));
-            
+
           // Excluir dependents
           console.log(`👥 Excluindo dependents para usuário ID ${id}`);
           await tx.delete(dependents)
             .where(eq(dependents.userId, id));
-            
+
           // Excluir notificações
           console.log(`🔔 Excluindo notificações para usuário ID ${id}`);
           await tx.delete(notifications)
             .where(eq(notifications.userId, id));
-            
+
           // Excluir tokens de reset de senha
           console.log(`🔑 Excluindo tokens de reset de senha para usuário ID ${id}`);
           await tx.delete(passwordResets)
             .where(eq(passwordResets.userId, id));
-            
+
           // Excluir tokens de verificação de email
           console.log(`📧 Excluindo tokens de verificação de email para usuário ID ${id}`);
           await tx.delete(emailVerifications)
@@ -621,13 +621,13 @@ export class DatabaseStorage implements IStorage {
           throw txError;
         }
       });
-      
+
       // Excluir o usuário
       console.log(`👤 Excluindo usuário ID ${id} da tabela users`);
       const [user] = await this.db.delete(users)
         .where(eq(users.id, id))
         .returning();
-      
+
       if (user) {
         console.log(`✅ Usuário ID ${id} excluído com sucesso`);
         return true;
@@ -737,7 +737,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserStripeInfo(userId: number, data: { customerId: string, subscriptionId: string }): Promise<User> {
     const [user] = await this.db.update(users)
-      .set({ 
+      .set({
         stripeCustomerId: data.customerId,
         stripeSubscriptionId: data.subscriptionId,
         updatedAt: new Date()
@@ -749,7 +749,7 @@ export class DatabaseStorage implements IStorage {
 
   // Partner methods
   async getPartner(id: number): Promise<Partner | undefined> {
-    const result = await safeQuery(() => 
+    const result = await safeQuery(() =>
       this.db.select().from(partners).where(eq(partners.id, id))
     );
     return result[0] as Partner;
@@ -758,10 +758,10 @@ export class DatabaseStorage implements IStorage {
   async getPartnerByUserId(userId: number): Promise<Partner | undefined> {
     try {
       console.log('🔍 [Storage] getPartnerByUserId - Buscando parceiro para userId:', userId);
-      
+
       const result = await this.db.select().from(partners).where(eq(partners.userId, userId));
       console.log('📊 [Storage] getPartnerByUserId - Resultado da query:', result.length, 'parceiros encontrados');
-      
+
       if (result.length > 0) {
         console.log('✅ [Storage] getPartnerByUserId - Parceiro encontrado:', {
           id: result[0].id,
@@ -771,7 +771,7 @@ export class DatabaseStorage implements IStorage {
       } else {
         console.log('❌ [Storage] getPartnerByUserId - Nenhum parceiro encontrado para userId:', userId);
       }
-      
+
       return result[0] as Partner | undefined;
     } catch (error) {
       console.error('❌ [Storage] getPartnerByUserId - Erro ao buscar parceiro:', error);
@@ -806,7 +806,7 @@ export class DatabaseStorage implements IStorage {
       .from(partnerAddresses)
       .where(eq(partnerAddresses.partnerId, partnerId))
       .orderBy(desc(partnerAddresses.isPrimary), asc(partnerAddresses.name));
-    
+
     // Mapear campos do inglês para português para manter compatibilidade com o frontend
     return addresses.map(addr => ({
       id: addr.id,
@@ -833,9 +833,9 @@ export class DatabaseStorage implements IStorage {
     const [address] = await this.db.select()
       .from(partnerAddresses)
       .where(eq(partnerAddresses.id, id));
-    
+
     if (!address) return undefined;
-    
+
     // Mapear campos do inglês para português
     return {
       id: address.id,
@@ -865,11 +865,11 @@ export class DatabaseStorage implements IStorage {
         .set({ isPrimary: false })
         .where(eq(partnerAddresses.partnerId, addressData.partnerId));
     }
-    
+
     const [address] = await this.db.insert(partnerAddresses)
       .values(addressData)
       .returning();
-    
+
     // Mapear campos do inglês para português
     return {
       id: address.id,
@@ -898,7 +898,7 @@ export class DatabaseStorage implements IStorage {
       const [existingAddress] = await this.db.select()
         .from(partnerAddresses)
         .where(eq(partnerAddresses.id, id));
-      
+
       if (existingAddress) {
         await this.db.update(partnerAddresses)
           .set({ isPrimary: false })
@@ -908,12 +908,12 @@ export class DatabaseStorage implements IStorage {
           ));
       }
     }
-    
+
     const [address] = await this.db.update(partnerAddresses)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(partnerAddresses.id, id))
       .returning();
-    
+
     // Mapear campos do inglês para português
     return {
       id: address.id,
@@ -945,7 +945,7 @@ export class DatabaseStorage implements IStorage {
     await this.db.update(partnerAddresses)
       .set({ isPrimary: false })
       .where(eq(partnerAddresses.partnerId, partnerId));
-    
+
     // Depois, marcar o específico como principal
     await this.db.update(partnerAddresses)
       .set({ isPrimary: true, updatedAt: new Date() })
@@ -978,7 +978,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(partnerAddresses, eq(partnerServiceAddresses.addressId, partnerAddresses.id))
       .where(eq(partnerServiceAddresses.serviceId, serviceId))
       .orderBy(desc(partnerAddresses.isPrimary), asc(partnerAddresses.name));
-    
+
     // Mapear campos do inglês para português
     return result.map(addr => ({
       id: addr.id,
@@ -1007,14 +1007,14 @@ export class DatabaseStorage implements IStorage {
       // Primeiro, remover todas as relações existentes
       await tx.delete(partnerServiceAddresses)
         .where(eq(partnerServiceAddresses.serviceId, serviceId));
-      
+
       // Depois, inserir as novas relações
       if (addressIds.length > 0) {
         const relations = addressIds.map(addressId => ({
           serviceId,
           addressId
         }));
-        
+
         await tx.insert(partnerServiceAddresses).values(relations);
       }
     });
@@ -1055,11 +1055,11 @@ export class DatabaseStorage implements IStorage {
       updatedAt: doctors.updatedAt,
       name: users.fullName
     })
-    .from(doctors)
-    .leftJoin(users, eq(doctors.userId, users.id))
-    .where(eq(doctors.userId, userId))
-    .limit(1);
-    
+      .from(doctors)
+      .leftJoin(users, eq(doctors.userId, users.id))
+      .where(eq(doctors.userId, userId))
+      .limit(1);
+
     return result[0] as Doctor | undefined;
   }
 
@@ -1076,7 +1076,7 @@ export class DatabaseStorage implements IStorage {
       }
       return acc;
     }, {} as any);
-    
+
     const [doctor] = await this.db.update(doctors)
       .set({ ...cleanData, updatedAt: new Date() })
       .where(eq(doctors.id, id))
@@ -1103,9 +1103,9 @@ export class DatabaseStorage implements IStorage {
       username: users.username,
       email: users.email
     })
-    .from(doctors)
-    .leftJoin(users, eq(doctors.userId, users.id));
-    
+      .from(doctors)
+      .leftJoin(users, eq(doctors.userId, users.id));
+
     return result as Doctor[];
   }
 
@@ -1128,15 +1128,15 @@ export class DatabaseStorage implements IStorage {
       username: users.username,
       email: users.email
     })
-    .from(doctors)
-    .leftJoin(users, eq(doctors.userId, users.id))
-    .where(eq(doctors.availableForEmergency, true));
-    
+      .from(doctors)
+      .leftJoin(users, eq(doctors.userId, users.id))
+      .where(eq(doctors.availableForEmergency, true));
+
     console.log(`🔍 getAvailableDoctors: Encontrados ${result.length} médicos disponíveis para emergência`);
     result.forEach(doc => {
       console.log(`  - Dr. ${doc.name} (ID: ${doc.id}, userId: ${doc.userId}) - availableForEmergency: ${doc.availableForEmergency}`);
     });
-    
+
     return result as Doctor[];
   }
 
@@ -1169,14 +1169,14 @@ export class DatabaseStorage implements IStorage {
   async getPartnerServicesByPartnerId(partnerId: number): Promise<PartnerService[]> {
     try {
       console.log('🔍 [Storage] getPartnerServicesByPartnerId - Buscando serviços para partnerId:', partnerId);
-      
+
       const results = await this.db
         .select()
         .from(partnerServices)
         .where(eq(partnerServices.partnerId, partnerId));
-      
+
       console.log('📊 [Storage] getPartnerServicesByPartnerId - Encontrados', results.length, 'serviços');
-      
+
       return results as PartnerService[];
     } catch (error) {
       console.error('❌ [Storage] getPartnerServicesByPartnerId - Erro ao buscar serviços:', error);
@@ -1213,11 +1213,11 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(partners.userId, users.id))
       .where(eq(partnerServices.isFeatured, true))
       .limit(limit);
-    
+
     return results.map(result => {
       // Ensure serviceImage URL is properly formatted
       const serviceImage = result.service.serviceImage || null;
-      
+
       return {
         ...result.service,
         serviceImage,
@@ -1236,7 +1236,7 @@ export class DatabaseStorage implements IStorage {
     const [appointment] = await this.db.select().from(appointments).where(eq(appointments.id, id));
     return appointment as Appointment || null;
   }
-  
+
   // Alias para compatibilidade
   async getAppointmentById(id: number): Promise<Appointment | null> {
     return this.getAppointment(id);
@@ -1264,23 +1264,23 @@ export class DatabaseStorage implements IStorage {
 
   async getUpcomingAppointmentsWithDoctorInfo(userId: number): Promise<any[]> {
     const now = new Date();
-    
+
     // Primeiro, buscar todas as consultas do usuário para debug
     const allUserAppointments = await this.db.select({
       id: appointments.id,
       status: appointments.status,
       date: appointments.date
     })
-    .from(appointments)
-    .where(eq(appointments.userId, userId));
-    
+      .from(appointments)
+      .where(eq(appointments.userId, userId));
+
     console.log(`Total de consultas encontradas para usuário ${userId}: ${allUserAppointments.length}`);
-    
+
     // Logar detalhes de cada consulta
     allUserAppointments.forEach(apt => {
       console.log(`Consulta ID: ${apt.id}, Status: ${apt.status}, Date: ${apt.date.toISOString()}`);
     });
-    
+
     // Agora buscar com os filtros aplicados
     const result = await this.db.select({
       // Dados do appointment
@@ -1304,20 +1304,20 @@ export class DatabaseStorage implements IStorage {
       consultationFee: doctors.consultationFee,
       availableForEmergency: doctors.availableForEmergency
     })
-    .from(appointments)
-    .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
-    .leftJoin(users, eq(doctors.userId, users.id))
-    .where(
-      and(
-        eq(appointments.userId, userId),
-        gte(appointments.date, now),
-        ne(appointments.status, 'cancelled')
+      .from(appointments)
+      .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
+      .leftJoin(users, eq(doctors.userId, users.id))
+      .where(
+        and(
+          eq(appointments.userId, userId),
+          gte(appointments.date, now),
+          ne(appointments.status, 'cancelled')
+        )
       )
-    )
-    .orderBy(asc(appointments.date));
-    
+      .orderBy(asc(appointments.date));
+
     console.log(`Consultas após filtrar canceladas: ${result.length}`);
-    
+
     return result;
   }
 
@@ -1463,21 +1463,21 @@ export class DatabaseStorage implements IStorage {
     if (existingSettings) {
       // Merge existing settings with new settings to avoid overwriting fields
       const mergedSettings: any = {};
-      
+
       if (settings.notifications) {
         mergedSettings.notifications = {
           ...(existingSettings.notifications as any || {}),
           ...settings.notifications
         };
       }
-      
+
       if (settings.privacy) {
         mergedSettings.privacy = {
           ...(existingSettings.privacy as any || {}),
           ...settings.privacy
         };
       }
-      
+
       const [updated] = await this.db.update(userSettings)
         .set({ ...mergedSettings, updatedAt: new Date() })
         .where(eq(userSettings.userId, userId))
@@ -1557,11 +1557,11 @@ export class DatabaseStorage implements IStorage {
       .from(partnerServices)
       .leftJoin(partners, eq(partnerServices.partnerId, partners.id))
       .leftJoin(users, eq(partners.userId, users.id));
-    
+
     return results.map(result => {
       // Ensure serviceImage URL is properly formatted
       const serviceImage = result.service.serviceImage || null;
-      
+
       return {
         ...result.service,
         serviceImage,
@@ -1580,11 +1580,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Doctor Finance methods
-  async updateDoctorPaymentInfo(doctorId: number, paymentInfo: { 
+  async updateDoctorPaymentInfo(doctorId: number, paymentInfo: {
     pixKeyType?: string,
-    pixKey?: string, 
-    bankName?: string, 
-    accountType?: string 
+    pixKey?: string,
+    bankName?: string,
+    accountType?: string
   }): Promise<Doctor> {
     const [doctor] = await this.db.update(doctors)
       .set({ ...paymentInfo, updatedAt: new Date() })
@@ -1618,8 +1618,8 @@ export class DatabaseStorage implements IStorage {
       paid: sql<number>`sum(case when ${doctorPayments.status} = 'paid' then ${doctorPayments.amount} else 0 end)`,
       paymentCount: sql<number>`count(*)`
     })
-    .from(doctorPayments)
-    .where(and(...conditions));
+      .from(doctorPayments)
+      .where(and(...conditions));
     return {
       total: result.total || 0,
       pending: result.pending || 0,
@@ -1656,9 +1656,9 @@ export class DatabaseStorage implements IStorage {
       patientName: users.fullName,
       patientEmail: users.email
     })
-    .from(appointments)
-    .leftJoin(users, eq(appointments.userId, users.id))
-    .where(eq(appointments.id, id));
+      .from(appointments)
+      .leftJoin(users, eq(appointments.userId, users.id))
+      .where(eq(appointments.id, id));
     return appointment as Appointment & { patientName?: string | null, patientEmail?: string | null };
   }
 
@@ -1841,7 +1841,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllServices(): Promise<any[]> {
-    const result = await safeQuery(() => 
+    const result = await safeQuery(() =>
       this.db.select().from(partnerServices).orderBy(desc(partnerServices.createdAt))
     );
     return result;
@@ -1863,11 +1863,11 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(partnerServices)
         .where(eq(partnerServices.isActive, true));
-      
+
       // Buscar parceiros relacionados
       const partnerIds = [...new Set(services.map(s => s.partnerId).filter(Boolean))] as number[];
       const partnersMap = new Map();
-      
+
       if (partnerIds.length > 0) {
         const partnersData = await this.db
           .select({
@@ -1889,6 +1889,7 @@ export class DatabaseStorage implements IStorage {
             state: partners.state,
             phone: partners.phone,
             cnpj: partners.cnpj,
+            profileImage: partners.profileImage,
             nationwideService: partners.nationwideService,
             status: partners.status,
             createdAt: partners.createdAt,
@@ -1896,15 +1897,15 @@ export class DatabaseStorage implements IStorage {
           })
           .from(partners)
           .where(inArray(partners.id, partnerIds));
-        
+
         partnersData.forEach(partner => {
           partnersMap.set(partner.id, partner);
         });
       }
-      
+
       // Buscar endereços para cada parceiro
       const addressesByPartner = new Map<number, PartnerAddress[]>();
-      
+
       for (const partnerId of partnerIds) {
         try {
           const addresses = await this.getPartnerAddresses(partnerId);
@@ -1914,18 +1915,18 @@ export class DatabaseStorage implements IStorage {
           addressesByPartner.set(partnerId, []);
         }
       }
-      
+
       const enrichedServices = services.map((service) => {
         const partner = partnersMap.get(service.partnerId);
         const partnerAddresses = partner ? addressesByPartner.get(partner.id) || [] : [];
         const primaryAddress = partnerAddresses.find(addr => addr.isPrimary) || partnerAddresses[0];
-        
+
         return {
           ...service,
           serviceImage: service.serviceImage || null,
           partner: partner ? {
             ...partner,
-            profileImage: null,
+            profileImage: partner.profileImage || null,
             phone: partner.phone || null,
             name: partner.businessName || partner.tradingName || null,
             city: primaryAddress?.city || partner.city || null,
@@ -1953,9 +1954,9 @@ export class DatabaseStorage implements IStorage {
             if (!service.partner?.city) {
               return false;
             }
-            
+
             const distance = getDistanceBetweenCities(userCity, service.partner.city);
-            
+
             if (distance !== null && distance <= maxDistance) {
               service.distance = distance;
               return true;
@@ -1965,18 +1966,18 @@ export class DatabaseStorage implements IStorage {
 
           // Verificar se algum endereço ativo está dentro do raio
           let minDistance: number | null = null;
-          
+
           for (const address of service.partner.addresses) {
             // Considerar apenas endereços ativos
             if (!address.isActive) continue;
-            
+
             const distance = getDistanceBetweenCities(userCity, address.city);
-            
+
             if (distance !== null) {
               if (minDistance === null || distance < minDistance) {
                 minDistance = distance;
               }
-              
+
               // Se encontrou um endereço dentro do raio, incluir o serviço
               if (distance <= maxDistance) {
                 service.distance = distance;
@@ -1986,16 +1987,16 @@ export class DatabaseStorage implements IStorage {
               }
             }
           }
-          
+
           return false;
         } catch (filterError) {
           console.error(`[getServicesWithLocationFilter] Erro ao filtrar serviço:`, filterError);
           return false;
         }
       });
-      
+
       return filteredServices;
-      
+
     } catch (error) {
       console.error('[getServicesWithLocationFilter] Erro geral na função:', error);
       // Retornar erro mais específico
@@ -2007,7 +2008,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // ==================== PRONTUÁRIOS MÉDICOS ====================
-  
+
   // Criar prontuário para novo paciente
   async createMedicalRecord(patientId: number): Promise<MedicalRecord> {
     // Criar prontuário vazio para o paciente
@@ -2017,67 +2018,67 @@ export class DatabaseStorage implements IStorage {
       content: {}, // Conteúdo vazio inicial
       status: 'draft'
     }).returning();
-    
+
     return record;
   }
-  
+
   // Buscar prontuário por ID do paciente
   async getMedicalRecordByPatientId(patientId: number): Promise<MedicalRecord | null> {
     const [record] = await this.db.select()
       .from(medicalRecords)
       .where(eq(medicalRecords.patientId, patientId))
       .limit(1);
-    
+
     return record || null;
   }
-  
+
   // Buscar prontuário por ID
   async getMedicalRecord(recordId: number): Promise<MedicalRecord | null> {
     const [record] = await this.db.select()
       .from(medicalRecords)
       .where(eq(medicalRecords.id, recordId))
       .limit(1);
-    
+
     return record || null;
   }
-  
+
   // Registrar acesso ao prontuário
   async logMedicalRecordAccess(data: InsertMedicalRecordAccess): Promise<void> {
     // Temporarily disabled - table doesn't exist
     // await this.db.insert(medicalRecordAccess).values(data);
     console.log('Medical record access log (disabled):', data);
   }
-  
+
   // Adicionar entrada no prontuário
   async addMedicalRecordEntry(data: InsertMedicalRecordEntry): Promise<MedicalRecordEntry> {
     const [entry] = await this.db.insert(medicalRecordEntries).values(data).returning();
-    
+
     // Atualizar timestamp de atualização
     await this.db.update(medicalRecords)
       .set({
         updatedAt: new Date()
       })
       .where(eq(medicalRecords.id, data.recordId));
-    
+
     return entry;
   }
-  
+
   // Buscar entradas do prontuário
   async getMedicalRecordEntries(recordId: number): Promise<MedicalRecordEntry[]> {
     return await this.db.select({
       entry: medicalRecordEntries,
       author: users
     })
-    .from(medicalRecordEntries)
-    .leftJoin(users, eq(medicalRecordEntries.authorId, users.id))
-    .where(eq(medicalRecordEntries.recordId, recordId))
-    .orderBy(desc(medicalRecordEntries.createdAt))
-    .then(results => results.map(r => ({
-      ...r.entry,
-      author: r.author
-    })));
+      .from(medicalRecordEntries)
+      .leftJoin(users, eq(medicalRecordEntries.authorId, users.id))
+      .where(eq(medicalRecordEntries.recordId, recordId))
+      .orderBy(desc(medicalRecordEntries.createdAt))
+      .then(results => results.map(r => ({
+        ...r.entry,
+        author: r.author
+      })));
   }
-  
+
   // Buscar pacientes do médico (que já tiveram consulta ou têm consulta marcada)
   async getDoctorPatients(doctorId: number): Promise<User[]> {
     try {
@@ -2086,9 +2087,9 @@ export class DatabaseStorage implements IStorage {
         console.log(`Médico não encontrado para user ID: ${doctorId}`);
         return [];
       }
-      
+
       console.log(`Buscando pacientes para médico Doctor ID: ${doctor.id}, User ID: ${doctorId}`);
-      
+
       // Buscar todas as consultas do médico (excluindo canceladas)
       const validAppointments = await this.db
         .select()
@@ -2099,12 +2100,12 @@ export class DatabaseStorage implements IStorage {
             ne(appointments.status, 'cancelled')
           )
         );
-      
+
       console.log(`Encontradas ${validAppointments.length} consultas válidas`);
-      
+
       // Agrupar manualmente por userId
       const patientMap = new Map<number, { userId: number; lastAppointmentDate: Date; totalAppointments: number }>();
-      
+
       for (const apt of validAppointments) {
         const existing = patientMap.get(apt.userId);
         if (existing) {
@@ -2120,19 +2121,19 @@ export class DatabaseStorage implements IStorage {
           });
         }
       }
-      
+
       const patientData = Array.from(patientMap.values());
-      
+
       console.log(`Encontrados ${patientData.length} pacientes com consultas não canceladas`);
-      
+
       if (patientData.length === 0) return [];
-      
+
       // Buscar dados completos dos pacientes
       const patients = await this.db.select()
         .from(users)
         .where(inArray(users.id, patientData.map(p => p.userId)))
         .orderBy(asc(users.fullName));
-      
+
       // Adicionar informações de consulta aos pacientes
       return patients.map(patient => {
         const appointmentInfo = patientData.find(p => p.userId === patient.id);
@@ -2147,12 +2148,12 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
-  
+
   // Verificar se médico pode acessar prontuário
   async canDoctorAccessMedicalRecord(doctorUserId: number, patientId: number): Promise<boolean> {
     const doctor = await this.getDoctorByUserId(doctorUserId);
     if (!doctor) return false;
-    
+
     // Verificar se há consultas entre médico e paciente (excluindo canceladas)
     const appointment = await this.db.select()
       .from(appointments)
@@ -2164,39 +2165,39 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .limit(1);
-    
+
     return appointment.length > 0;
   }
-  
+
   // Buscar prontuários (para admin)
   async searchMedicalRecords(query: string): Promise<Array<MedicalRecord & { patient: User }>> {
     const searchPattern = `%${query}%`;
-    
+
     return await this.db.select({
       record: medicalRecords,
       patient: users
     })
-    .from(medicalRecords)
-    .innerJoin(users, eq(medicalRecords.patientId, users.id))
-    .where(
-      or(
-        sql`LOWER(${users.fullName}) LIKE LOWER(${searchPattern})`,
-        sql`LOWER(${users.username}) LIKE LOWER(${searchPattern})`
+      .from(medicalRecords)
+      .innerJoin(users, eq(medicalRecords.patientId, users.id))
+      .where(
+        or(
+          sql`LOWER(${users.fullName}) LIKE LOWER(${searchPattern})`,
+          sql`LOWER(${users.username}) LIKE LOWER(${searchPattern})`
+        )
       )
-    )
-    .limit(50)
-    .then(results => results.map(r => ({
-      ...r.record,
-      patient: r.patient
-    })));
+      .limit(50)
+      .then(results => results.map(r => ({
+        ...r.record,
+        patient: r.patient
+      })));
   }
-  
+
   // Buscar histórico de acesso
   async getMedicalRecordAccessHistory(recordId: number): Promise<MedicalRecordAccess[]> {
     // Temporarily disabled - table doesn't exist
     console.log('Medical record access history request (disabled) for record:', recordId);
     return [];
-    
+
     // Original code commented out:
     // return await this.db.select({
     //   access: medicalRecordAccess,
@@ -2265,7 +2266,7 @@ export class DatabaseStorage implements IStorage {
         AND deleted_at IS NULL
         LIMIT 1
       `, [url]);
-      
+
       if (result.rows.length === 0) {
         // Tentar buscar pela chave S3 (parte depois do bucket)
         const urlParts = url.split('.amazonaws.com/');
@@ -2277,12 +2278,12 @@ export class DatabaseStorage implements IStorage {
             AND deleted_at IS NULL
             LIMIT 1
           `, [`%${keyPart}%`]);
-          
+
           return keyResult.rows[0] || null;
         }
         return null;
       }
-      
+
       return result.rows[0];
     } catch (error) {
       console.error('Erro ao buscar secure file por URL:', error);
@@ -2292,7 +2293,7 @@ export class DatabaseStorage implements IStorage {
 
   async softDeleteSecureFile(id: number): Promise<void> {
     console.log('Soft deleting secure file:', id);
-    
+
     try {
       await this.db.query(`
         UPDATE secure_files 
@@ -2306,7 +2307,7 @@ export class DatabaseStorage implements IStorage {
 
   async createLGPDRequest(request: any): Promise<void> {
     console.log('Creating LGPD request:', request);
-    
+
     try {
       await this.db.query(`
         INSERT INTO lgpd_requests (user_id, request_type, status)
@@ -2323,7 +2324,7 @@ export class DatabaseStorage implements IStorage {
       // Get date range based on period
       const endDate = new Date();
       const startDate = new Date();
-      
+
       switch (period) {
         case 'week':
           startDate.setDate(startDate.getDate() - 7);
@@ -2345,9 +2346,9 @@ export class DatabaseStorage implements IStorage {
           status: partnerCollaborators.status,
           department: partnerCollaborators.department
         })
-        .from(partnerCollaborators)
-        .where(eq(partnerCollaborators.partnerId, partnerId))
-        .groupBy(partnerCollaborators.status, partnerCollaborators.department)
+          .from(partnerCollaborators)
+          .where(eq(partnerCollaborators.partnerId, partnerId))
+          .groupBy(partnerCollaborators.status, partnerCollaborators.department)
       );
 
       const totalCollaborators = collaboratorsData.reduce((sum, row) => sum + row.total, 0);
@@ -2362,7 +2363,7 @@ export class DatabaseStorage implements IStorage {
           departmentMap.set(row.department, (departmentMap.get(row.department) || 0) + row.total);
         }
       });
-      
+
       const collaboratorsByDepartment = Array.from(departmentMap.entries())
         .map(([department, count]) => ({ department, count }))
         .sort((a, b) => b.count - a.count)
@@ -2375,14 +2376,14 @@ export class DatabaseStorage implements IStorage {
           isEmergency: appointments.isEmergency,
           date: appointments.date
         })
-        .from(appointments)
-        .innerJoin(partnerCollaborators, eq(appointments.userId, partnerCollaborators.userId))
-        .where(and(
-          eq(partnerCollaborators.partnerId, partnerId),
-          gte(appointments.date, startDate),
-          lte(appointments.date, endDate),
-          ne(appointments.status, 'cancelled')
-        ))
+          .from(appointments)
+          .innerJoin(partnerCollaborators, eq(appointments.userId, partnerCollaborators.userId))
+          .where(and(
+            eq(partnerCollaborators.partnerId, partnerId),
+            gte(appointments.date, startDate),
+            lte(appointments.date, endDate),
+            ne(appointments.status, 'cancelled')
+          ))
       );
 
       const totalConsultations = consultationsData.length;
@@ -2397,15 +2398,15 @@ export class DatabaseStorage implements IStorage {
         db.select({
           avgRating: sql<number>`COALESCE(AVG(rating), 0)`
         })
-        .from(appointments)
-        .innerJoin(partnerCollaborators, eq(appointments.userId, partnerCollaborators.userId))
-        .where(and(
-          eq(partnerCollaborators.partnerId, partnerId),
-          gte(appointments.date, startDate),
-          lte(appointments.date, endDate),
-          ne(appointments.status, 'cancelled'),
-          sql`rating IS NOT NULL`
-        ))
+          .from(appointments)
+          .innerJoin(partnerCollaborators, eq(appointments.userId, partnerCollaborators.userId))
+          .where(and(
+            eq(partnerCollaborators.partnerId, partnerId),
+            gte(appointments.date, startDate),
+            lte(appointments.date, endDate),
+            ne(appointments.status, 'cancelled'),
+            sql`rating IS NOT NULL`
+          ))
       );
 
       const satisfactionRate = ratingsData[0]?.avgRating ? (ratingsData[0].avgRating / 5) * 100 : 0;
@@ -2417,13 +2418,13 @@ export class DatabaseStorage implements IStorage {
           type: claims.type,
           createdAt: claims.createdAt
         })
-        .from(claims)
-        .innerJoin(partnerCollaborators, eq(claims.userId, partnerCollaborators.userId))
-        .where(and(
-          eq(partnerCollaborators.partnerId, partnerId),
-          gte(claims.createdAt, startDate),
-          lte(claims.createdAt, endDate)
-        ))
+          .from(claims)
+          .innerJoin(partnerCollaborators, eq(claims.userId, partnerCollaborators.userId))
+          .where(and(
+            eq(partnerCollaborators.partnerId, partnerId),
+            gte(claims.createdAt, startDate),
+            lte(claims.createdAt, endDate)
+          ))
       );
 
       const totalAttestations = attestationsData.length;
@@ -2459,18 +2460,18 @@ export class DatabaseStorage implements IStorage {
         db.select({
           count: count()
         })
-        .from(partnerCollaborators)
-        .innerJoin(appointments, eq(partnerCollaborators.userId, appointments.userId))
-        .where(and(
-          eq(partnerCollaborators.partnerId, partnerId),
-          eq(partnerCollaborators.status, 'active'),
-          gte(appointments.date, startDate),
-          lte(appointments.date, endDate)
-        ))
-        .groupBy(partnerCollaborators.userId)
+          .from(partnerCollaborators)
+          .innerJoin(appointments, eq(partnerCollaborators.userId, appointments.userId))
+          .where(and(
+            eq(partnerCollaborators.partnerId, partnerId),
+            eq(partnerCollaborators.status, 'active'),
+            gte(appointments.date, startDate),
+            lte(appointments.date, endDate)
+          ))
+          .groupBy(partnerCollaborators.userId)
       );
 
-      const subscriptionUtilization = activeCollaborators > 0 
+      const subscriptionUtilization = activeCollaborators > 0
         ? Math.round((activeUsers.length / activeCollaborators) * 100)
         : 0;
 
@@ -2480,17 +2481,17 @@ export class DatabaseStorage implements IStorage {
         const date = new Date();
         date.setDate(date.getDate() - i);
         const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-        
+
         // TODO: Implementar rastreamento real de logins
         // Por enquanto, retorna 0 para logins até implementarmos o tracking
         const logins = 0;
-        
+
         // Get actual consultations for this day
         const dayConsultations = consultationsData.filter(row => {
           const consultDate = new Date(row.date);
           return consultDate.toDateString() === date.toDateString();
         }).length;
-        
+
         activityData.push({
           date: dateStr,
           logins,
