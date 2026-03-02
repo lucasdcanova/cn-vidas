@@ -19,9 +19,14 @@
 
 #import <WebKit/WebKit.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 @interface CDVWebViewProcessPoolFactory : NSObject
 @property (nonatomic, retain) WKProcessPool* sharedPool;
 
 +(instancetype) sharedFactory;
 -(WKProcessPool*) sharedProcessPool;
 @end
+
+#pragma clang diagnostic pop
