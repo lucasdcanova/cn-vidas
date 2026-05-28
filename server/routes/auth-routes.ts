@@ -676,7 +676,7 @@ authRouter.post('/logout', async (req: Request, res: Response) => {
     if (authToken) {
       try {
         // Decodificar o token para obter informações do usuário
-        const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+        const jwtSecret = process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET env var required in production') })();
         const decoded: any = jwt.verify(authToken, jwtSecret);
         
         if (decoded && decoded.userId) {

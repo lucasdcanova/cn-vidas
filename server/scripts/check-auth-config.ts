@@ -39,7 +39,7 @@ if (!envStatus.DATABASE_URL) {
 }
 
 console.log('\n=== Valores Padrão (se não configurados) ===\n');
-console.log(`JWT_SECRET padrão no código: ${!envStatus.JWT_SECRET ? 'REDACTED_JWT_FALLBACK_PLACEHOLDER' : 'N/A - usando valor do .env'}`);
+console.log(`JWT_SECRET padrão no código: ${!envStatus.JWT_SECRET ? (() => { throw new Error('JWT_SECRET env var required in production') })() : 'N/A - usando valor do .env'}`);
 
 console.log('\n=== Teste de Conexão ao Banco ===\n');
 

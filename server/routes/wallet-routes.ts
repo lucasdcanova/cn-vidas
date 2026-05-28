@@ -238,7 +238,7 @@ router.get('/download-pass', async (req: AuthenticatedRequest, res) => {
     // Verificar autenticação via token na query string ou middleware normal
     if (!req.user && req.query.token) {
       try {
-        const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+        const jwtSecret = process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET env var required in production') })();
         const decoded: any = jwt.verify(req.query.token as string, jwtSecret);
         
         if (decoded && decoded.userId) {

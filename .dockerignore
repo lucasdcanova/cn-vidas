@@ -1,0 +1,143 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .dockerignore for CN Vidas (parallel to .gitignore)
+#
+# Even though the project currently deploys on Render (no Dockerfile yet),
+# this file keeps any future container build slim and prevents accidental
+# inclusion of secrets, build artifacts and developer cruft into an image.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# CI / GitHub
+.github
+
+# Local dev / OS
+.DS_Store
+**/.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+.history/
+
+# Dependencies — installed inside the image
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs (the image builds them fresh)
+dist
+build
+.next
+.cache
+coverage
+*.tsbuildinfo
+
+# Environment files — must be injected at runtime
+.env
+.env.*
+!.env.example
+
+# Secrets — never bake into an image
+*.key
+*.pem
+*.p8
+*.p12
+*.pfx
+*.cer
+*.crt
+*.jks
+*.keystore
+AuthKey_*.p8
+*.mobileprovision
+*.provisionprofile
+*.certsigningrequest
+serviceAccount*.json
+google-services.json
+GoogleService-Info.plist
+*-base64.txt
+*_base64.txt
+wallet-env-template.txt
+**/*cookies*.txt
+**/*credentials*.json
+
+# Database dumps
+*.dump
+*.dump.sql
+*.bak.sql
+*.sql.gz
+*.bak
+
+# Logs
+*.log
+server-*.log
+patient-test-results.log
+
+# Test artifacts (not needed at runtime)
+test-report-*.json
+test-results-*.json
+jest-results.json
+coverage/
+
+# Mobile project (server image doesn't need it)
+ios/
+android/
+capacitor.config.ts
+capacitor.assets.config.json
+
+# Apple / Google service files
+ci_scripts/
+ios-assets/
+
+# Screenshots and dev attachments
+attached_assets/
+temp-screenshots/
+screenshots/
+/Captura*.png
+/Captura*.PNG
+/Screenshot*.png
+/Untitled*.png
+
+# Throwaway / debug scratch files
+/temp-*
+/scratch-*
+/debug-*
+
+# Vendored AI / agent caches
+.agent/
+.agents/
+.cline/
+.codex/
+.commandcode/
+.cursor/
+.factory/
+.gemini/
+.goose/
+.kilocode/
+.kiro/
+.neovate/
+.opencode/
+.openhands/
+.pi/
+.qoder/
+.roo/
+.trae/
+.windsurf/
+.zencoder/
+.claude/
+
+# Misc developer notes and docs not needed in runtime image
+*.md
+!README.md
+docs/
+
+# Replit
+.replit
+.rebuild-trigger
+
+# Render
+.render/
+render-debug.log
