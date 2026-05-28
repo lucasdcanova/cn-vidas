@@ -132,3 +132,141 @@ AuthKey_*.p8
 xcresult_*
 data*.bin
 build*_result.json
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Diligence hardening (added 2026-05-28)
+# Block patterns that have historically slipped into the repo. Keep this block
+# at the bottom so it overrides anything above.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# OS / editor cruft
+**/.DS_Store
+**/Thumbs.db
+**/desktop.ini
+.history/
+.vscode-test/
+
+# Any env file anywhere (not just root)
+**/.env
+**/.env.*
+!**/.env.example
+
+# Private keys, certificates, tokens (any path)
+**/*.key
+**/*.pem
+**/*.p8
+**/*.p12
+**/*.pfx
+**/*.cer
+**/*.crt
+**/*.jks
+**/*.keystore
+**/AuthKey_*.p8
+**/*.certsigningrequest
+**/*.mobileprovision
+**/*.provisionprofile
+**/serviceAccount*.json
+**/google-services.json
+**/GoogleService-Info.plist
+!server/wallet/certificates/README.md
+!server/wallet/assets/README.md
+
+# Base64-encoded secrets / cert exports
+**/*-base64.txt
+**/*_base64.txt
+**/logo_base64.txt
+**/wallet-env-template.txt
+
+# Cookies, session dumps, credential dumps
+**/*cookies*.txt
+**/*credentials*.json
+**/cookies.json
+**/auth-key-*
+
+# Database dumps and SQL dumps that should never be in git
+**/*.dump
+**/*.dump.sql
+**/dump-*.sql
+**/*.bak.sql
+**/*.sql.gz
+package.json.bak
+*.bak
+
+# Logs (any path)
+**/*.log
+**/logs/
+**/server-*.log
+**/patient-test-results.log
+**/test-results.log
+
+# Test reports and result files
+test-report-*.json
+test-results-*.json
+**/jest-results.json
+
+# Raw screenshots and dev attachments at the repo root
+/Captura*.png
+/Captura*.PNG
+/Screenshot*.png
+/Screenshot*.PNG
+/Untitled*.png
+/Untitled*.jpg
+/screenshot-*.png
+/temp-screenshots/
+/screenshots/raw/
+
+# Throwaway / debug scratch files at the root
+/temp-*.tsx
+/temp-*.ts
+/temp-*.js
+/scratch-*
+/debug-*.js
+/debug-*.cjs
+/debug-*.mjs
+
+# Capacitor / iOS build outputs
+ios/App/build/
+ios/App/DerivedData/
+ios/App/App/public/
+ios/Pods/
+ios/App/Pods/build/
+ios/App/.xcode.env.local
+
+# Android build outputs
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/key.properties
+android/app/release/
+android/app/debug/
+android/app/*.apk
+android/app/*.aab
+**/*.apk
+**/*.aab
+
+# Render / deploy artifacts
+.render/
+render-debug.log
+
+# Vendored AI / agent config caches (keep dotfile of the agent you actually use)
+.agent/
+.agents/
+.cline/
+.codex/
+.commandcode/
+.factory/
+.gemini/
+.goose/
+.kilocode/
+.kiro/
+.neovate/
+.opencode/
+.openhands/
+.pi/
+.qoder/
+.roo/
+.trae/
+.windsurf/
+.zencoder/
+

@@ -59,7 +59,7 @@ export interface AuthRequest extends Request {
 
 // Obter segredo JWT
 const getJwtSecret = () => {
-  return process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+  return process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET env var required in production') })();
 };
 
 // Função para extrair token de diferentes fontes
