@@ -80,7 +80,7 @@ router.post('/activate-free', async (req: Request, res: Response) => {
 
       if (authToken) {
         try {
-          const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+          const jwtSecret = process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET env var required in production') })();
           const decoded: any = jwt.verify(authToken, jwtSecret);
           if (decoded && decoded.userId) {
             userId = decoded.userId;
@@ -96,7 +96,7 @@ router.post('/activate-free', async (req: Request, res: Response) => {
     // Método 3: Cookie auth_token
     if (!userId && req.cookies?.auth_token) {
       try {
-        const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+        const jwtSecret = process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET env var required in production') })();
         const decoded: any = jwt.verify(req.cookies.auth_token, jwtSecret);
         if (decoded && decoded.userId) {
           userId = decoded.userId;

@@ -122,7 +122,7 @@ import { APNsService } from "./services/apns-service";
         console.log('🔍 Token encontrado nos headers:', authToken.substring(0, 20) + '...');
       }
       try {
-        const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+        const jwtSecret = process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET env var required in production') })();
         if (req.url.includes('/api/subscription/current') || req.url.includes('/api/doctors/profile')) {
           console.log('🔍 Usando segredo JWT:', jwtSecret.substring(0, 10) + '...');
         }
@@ -195,7 +195,7 @@ import { APNsService } from "./services/apns-service";
         console.log('🔍 Verificando cookie auth_token:', req.cookies.auth_token.substring(0, 20) + '...');
       }
       try {
-        const jwtSecret = process.env.JWT_SECRET || 'REDACTED_JWT_FALLBACK_PLACEHOLDER';
+        const jwtSecret = process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET env var required in production') })();
         const decoded: any = jwt.verify(req.cookies.auth_token, jwtSecret);
         
         if (req.url.includes('/api/subscription/current')) {
