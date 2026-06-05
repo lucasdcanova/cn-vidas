@@ -88,7 +88,7 @@
     "apn": "^2.2.0",
     "autoprefixer": "^10.4.17",
     "aws-sdk": "^2.1692.0",
-    "axios": "^1.10.0",
+    "axios": "^1.16.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^2.2.0",
